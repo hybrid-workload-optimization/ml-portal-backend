@@ -2,12 +2,18 @@ package kr.co.strato.adapter.k8s.common.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 
 import java.util.Map;
 
 /**
  * 리소스 리스트 검색 정보
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ResourceListSearchInfo {
 
     @ApiModelProperty(value="kubeConfigId", example="4", required=true)
@@ -32,73 +38,5 @@ public class ResourceListSearchInfo {
     private String name;
 
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getKubeConfigId() {
-        return kubeConfigId;
-    }
-
-    public void setKubeConfigId(Integer kubeConfigId) {
-        this.kubeConfigId = kubeConfigId;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getNodeName() {
-        return nodeName;
-    }
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
-    }
-
-    public String getStorageClass() {
-        return storageClass;
-    }
-
-    public void setStorageClass(String storageClass) {
-        this.storageClass = storageClass;
-    }
-
-    public String getOwnerResourceType() {
-        return ownerResourceType;
-    }
-
-    public void setOwnerResourceType(String ownerResourceType) {
-        this.ownerResourceType = ownerResourceType;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public String getOwnerUid() {
-        return ownerUid;
-    }
-
-    public void setOwnerUid(String ownerUid) {
-        this.ownerUid = ownerUid;
-    }
-
-    public Map<String, String> getSelector() {
-        return selector;
-    }
-
-    public void setSelector(Map<String, String> selector) {
-        this.selector = selector;
-    }
 }
