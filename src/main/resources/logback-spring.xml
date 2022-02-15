@@ -7,6 +7,9 @@
             </layout>
         </appender>
     </springProfile>
+
+    <logger name="org.hibernate.type" level="trace" />
+
     <root level="DEBUG">
         <springProfile name="console-logging">
             <appender-ref ref="CONSOLE" />
