@@ -17,14 +17,14 @@ public interface InNamespaceProxy {
     @GetMapping("/inNamespace/{resourceType}/detailStr")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
-            @RequestParam("clusterId") Integer clusterId,
+            @RequestParam("kubeConfigId") Integer kubeConfigId,
             @RequestParam("namespace") String namespace,
             @RequestParam("name") String name);
 
     @GetMapping("/inNamespace/{resourceType}/yaml")
     public String getResourceYaml(
             @PathVariable("resourceType") String resourceType,
-            @RequestParam("clusterId") Integer clusterId,
+            @RequestParam("kubeConfigId") Integer kubeConfigId,
             @RequestParam("namespace") String namespace,
             @RequestParam("name") String name);
 

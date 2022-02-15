@@ -6,18 +6,18 @@ import io.swagger.annotations.ApiModelProperty;
  * 클러스터 리소스 정보
  */
 public class ClusterResourceInfo {
-    @ApiModelProperty(value="Cluster ID", example="4", required=true)
-    private Integer clusterId;
+    @ApiModelProperty(value="kubeConfigId", example="4", required=true)
+    private Integer kubeConfigId;
 
     @ApiModelProperty(value="리소스 이름", example="name01", required=true)
     private String name;
 
-    public Integer getClusterId() {
-        return clusterId;
+    public Integer getKubeConfigId() {
+        return kubeConfigId;
     }
 
-    public void setClusterId(Integer clusterId) {
-        this.clusterId = clusterId;
+    public void setKubeConfigId(Integer kubeConfigId) {
+        this.kubeConfigId = kubeConfigId;
     }
 
     public String getName() {

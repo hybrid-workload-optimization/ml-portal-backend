@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public class ResourceListSearchInfo {
 
-    @ApiModelProperty(value="Cluster ID", example="4", required=true)
-    private Integer clusterId;
+    @ApiModelProperty(value="kubeConfigId", example="4", required=true)
+    private Integer kubeConfigId;
     @ApiModelProperty(value="Namespace", example="default", required=false)
     private String namespace;
     //PersistentVolume
@@ -40,12 +40,12 @@ public class ResourceListSearchInfo {
         this.name = name;
     }
 
-    public Integer getClusterId() {
-        return clusterId;
+    public Integer getKubeConfigId() {
+        return kubeConfigId;
     }
 
-    public void setClusterId(Integer clusterId) {
-        this.clusterId = clusterId;
+    public void setKubeConfigId(Integer kubeConfigId) {
+        this.kubeConfigId = kubeConfigId;
     }
 
     public String getNamespace() {

@@ -17,13 +17,13 @@ public interface NonNamespaceProxy {
     @GetMapping("/nonNamespace/{resourceType}/detailStr")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
-            @RequestParam("clusterId") Integer clusterId,
+            @RequestParam("kubeConfigId") Integer kubeConfigId,
             @RequestParam("name") String name);
 
     @GetMapping("/nonNamespace/{resourceType}/yaml")
     public String getResourceYaml(
             @PathVariable("resourceType") String resourceType,
-            @RequestParam("clusterId") Integer clusterId,
+            @RequestParam("kubeConfigId") Integer kubeConfigId,
             @RequestParam("name") String name);
 
     @DeleteMapping("/nonNamespace/{resourceType}")
