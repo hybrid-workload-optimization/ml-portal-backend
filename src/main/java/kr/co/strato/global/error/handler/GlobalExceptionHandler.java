@@ -39,6 +39,13 @@ public class GlobalExceptionHandler {
         return getResponse(errorType);
     }
 
+    @ExceptionHandler(InternalServerException.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseWrapper handleInternalServerException(InternalServerException e){
+        BasicErrorType errorType = e.getErrorType();
+        return getResponse(errorType);
+    }
+
     @ExceptionHandler(AuthFailException.class)
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     ResponseWrapper handleAuthFailException(AuthFailException e){
