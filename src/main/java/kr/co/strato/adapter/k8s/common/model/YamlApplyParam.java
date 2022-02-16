@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class YamlApplyParam {
-    private Integer clusterId;
+    private Integer kubeConfigId;
     private String yaml;
 
 }
