@@ -2,6 +2,7 @@ package kr.co.strato.adapter.k8s.common.proxy;
 
 import kr.co.strato.adapter.k8s.common.model.ClusterResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
+import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
