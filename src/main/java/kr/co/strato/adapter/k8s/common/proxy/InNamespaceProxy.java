@@ -31,5 +31,5 @@ public interface InNamespaceProxy {
     @DeleteMapping("/inNamespace/{resourceType}")
     public boolean deleteResource(
             @PathVariable("resourceType") String resourceType,
-            @RequestBody ClusterResourceInfo resInfo);
+            @RequestBody WorkloadResourceInfo resInfo);
 }
