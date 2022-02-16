@@ -3,20 +3,20 @@ package kr.co.strato.adapter.k8s.common.model;
 public enum ResourceType {
     node,
     namespace,
-    persistentvolume,
-    storageclass,
+    persistentVolume,
+    storageClass,
     deployment,
-    statefulset,
+    statefulSet,
     pod,
-    cronjob,
+    cronJob,
     job,
-    replicaset,
-    daemonset,
+    replicaSet,
+    daemonSet,
     service,
     ingress,
     endpoints,
     pvc,
-    configmap,
+    configMap,
     secret;
 
     public String get(){
