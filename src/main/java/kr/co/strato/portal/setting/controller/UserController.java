@@ -33,6 +33,7 @@ public class UserController {
 	
 	//수정
 	@PatchMapping("/users")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Long> patchUser(){
 		
 		return new ResponseWrapper<>(0L);
@@ -40,6 +41,7 @@ public class UserController {
 	
 	//삭제
 	@DeleteMapping("/users/{userId}")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Long> deleteUser(){
 		
 		return new ResponseWrapper<>(0L);
@@ -47,6 +49,7 @@ public class UserController {
 	
 	//목록
 	@GetMapping("/users")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<List<UserDto>> getUserList(){
 		
 		return null;
@@ -54,6 +57,7 @@ public class UserController {
 	
 	//상세
 	@GetMapping("/users/{userId}")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<List<UserDto>> getUserDetail(){
 		
 		return null;
