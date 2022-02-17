@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import kr.co.strato.domain.user.model.UserRole;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +32,6 @@ public class PortalUserDto {
 	
 	private String contact;
 	
-	private UserRole userRole; 
+	private UserRoleEntity userRole; 
 
 }
