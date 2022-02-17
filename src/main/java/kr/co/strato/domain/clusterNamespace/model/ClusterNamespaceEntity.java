@@ -26,7 +26,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Table(name = "namespace")
-public class ClusterNamespace {
+public class ClusterNamespaceEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "namespace_idx")

@@ -8,7 +8,7 @@ import kr.co.strato.domain.clusterNode.model.ClusterNode;
 import kr.co.strato.domain.clusterNode.repository.ClusterNodeRepository;
 
 @Service
-public class ClusterNamespaceService {
+public class ClusterNamespaceDomainService {
 
 
 }
