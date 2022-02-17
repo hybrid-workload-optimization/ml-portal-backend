@@ -5,7 +5,7 @@ import org.mapstruct.factory.Mappers;
 
 
 @Mapper
-public interface UserDtoMapper {
+public interface PortalUserDtoMapper {
 	
-	UserDtoMapper INSTANCE = Mappers.getMapper(UserDtoMapper.class);
+	PortalUserDtoMapper INSTANCE = Mappers.getMapper(PortalUserDtoMapper.class);
 }

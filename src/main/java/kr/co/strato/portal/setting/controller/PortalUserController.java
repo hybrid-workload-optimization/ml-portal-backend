@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.setting.model.UserDto;
-import kr.co.strato.portal.setting.service.UserService;
+import kr.co.strato.portal.setting.model.PortalUserDto;
+import kr.co.strato.portal.setting.service.PortalUserService;
 
 @RestController
 @RequestMapping("/api/v1/user-manage")
-public class UserController {
+public class PortalUserController {
 	
 	@Autowired
-	UserService userService;
+	PortalUserService userService;
 	
 	//등록
 	@PostMapping("/users")
@@ -50,7 +50,7 @@ public class UserController {
 	//목록
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<UserDto>> getUserList(){
+	public ResponseWrapper<List<PortalUserDto>> getUserList(){
 		
 		return null;
 	}
@@ -58,7 +58,7 @@ public class UserController {
 	//상세
 	@GetMapping("/users/{userId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<UserDto>> getUserDetail(){
+	public ResponseWrapper<List<PortalUserDto>> getUserDetail(){
 		
 		return null;
 	}

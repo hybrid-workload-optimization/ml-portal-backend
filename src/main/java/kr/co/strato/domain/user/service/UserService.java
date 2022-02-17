@@ -19,11 +19,11 @@ public class UserService {
 	 * @param user
 	 * @return
 	 */
-	public Long register(User user) {
+	public String register(User user) {
 		
 		userRepository.save(user);
 		
-		return user.getId();
+		return user.getUserId();
 	}
 	
 	
@@ -32,10 +32,10 @@ public class UserService {
 	 * @param user
 	 * @return
 	 */
-	public Long remove(User user) {
+	public String remove(User user) {
 		userRepository.delete(user);
 		
-		return user.getId();
+		return user.getUserId();
 	}
 	
 	

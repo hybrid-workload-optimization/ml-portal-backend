@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.PortalUserDto;
 
 @Service
-public class UserService {
+public class PortalUserService {
 	
 	//등록
 	public Long registUser() {
@@ -28,13 +28,13 @@ public class UserService {
 	}
 	
 	//목록
-	public List<UserDto> getAllUserList(){
+	public List<PortalUserDto> getAllUserList(){
 		
 		return null;
 	}
 	
 	//상세
-	public UserDto getUserInfo() {
+	public PortalUserDto getUserInfo() {
 		
 		return null;
 	}

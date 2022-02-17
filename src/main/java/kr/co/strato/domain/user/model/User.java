@@ -1,6 +1,8 @@
 package kr.co.strato.domain.user.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +15,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class User {
-
-	private Long id;
 	
+	@Id
+	@Column(name = "user_id")
+	private String userId;
+	
+	@Column(name = "user_name")
 	private String userName;
 	
 	private String email;
@@ -24,5 +29,6 @@ public class User {
 	
 	private String contact;
 	
-	private UserRole userRole; 
+	@Column(name = "user_role_idx")
+	private Long userRoleIdx; 
 }

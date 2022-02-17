@@ -6,8 +6,11 @@
         </layout>
     </appender>
 
-    <logger name="org.hibernate.type" level="trace" />
-
+    <logger name="org.hibernate.type" additivity="false">
+		<level value="debug"/>
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	
     <root level="DEBUG">
         <appender-ref ref="CONSOLE" />
     </root>

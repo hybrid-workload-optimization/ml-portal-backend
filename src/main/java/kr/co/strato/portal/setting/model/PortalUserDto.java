@@ -17,7 +17,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 @Builder
-public class UserDto {
+public class PortalUserDto {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
