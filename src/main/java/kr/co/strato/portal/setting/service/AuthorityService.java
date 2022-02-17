@@ -7,16 +7,16 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
-import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.AuthorityDto;
 
 @Service
-public class UserRoleService {
+public class AuthorityService {
 	
 	@Autowired
 	private UserRoleDomainService userRoleService;
 	
 	// 권한 전체 조회 (for front-end)
-	public List<UserRoleDto> getListUserRoleDto() {
+	public List<AuthorityDto> getListUserRoleDto() {
 		return userRoleService.getListUserRoleDto(null);
 	}
 	

@@ -13,22 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.setting.model.UserRoleDto;
-import kr.co.strato.portal.setting.service.UserRoleService;
+import kr.co.strato.portal.setting.model.AuthorityDto;
+import kr.co.strato.portal.setting.service.AuthorityService;
 
 @RestController
-@RequestMapping("/api/v1/user-role")
-public class UserRoleController {
+@RequestMapping("/api/v1/user-auth")
+public class AuthorityController {
 	
 	@Autowired
-	private UserRoleService portalUserRoleService;
+	private AuthorityService authorityService;
 	
 	//목록
 	@GetMapping("/roles")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<UserRoleDto>> getListUserRole(){
+	public ResponseWrapper<List<AuthorityDto>> getListUserRole(){
 		
-		List<UserRoleDto> userList = portalUserRoleService.getListUserRoleDto();
+		List<AuthorityDto> userList = authorityService.getListUserRoleDto();
 		
 		return new ResponseWrapper<>(userList);
 	}
@@ -36,7 +36,7 @@ public class UserRoleController {
 	//상세
 	@GetMapping("/roles/{roleId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<UserRoleEntity> getUserRole(@PathVariable(name = "roleId") Long roleId, @RequestBody UserRoleDto param){
+	public ResponseWrapper<UserRoleEntity> getUserRole(@PathVariable(name = "roleId") Long roleId, @RequestBody AuthorityDto param){
 		System.out.println("####roleId :: " + roleId);
 		System.out.println("####param :: " + param.toString());
 		return new ResponseWrapper<>(null);

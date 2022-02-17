@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Data
-public class UserRoleDto {
+public class AuthorityDto {
 	private Long userRoleIdx;
 	private String userRoleName;
 }

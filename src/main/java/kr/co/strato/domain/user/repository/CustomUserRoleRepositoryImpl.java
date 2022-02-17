@@ -12,7 +12,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.AuthorityDto;
 
 import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
 import static kr.co.strato.domain.user.model.QUserRoleMenuEntity.userRoleMenuEntity;
@@ -30,7 +30,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 	
 	
 	@Override
-	public List<UserRoleDto> getListUserRoleToDto(UserRoleDto params) {
+	public List<AuthorityDto> getListUserRoleToDto(AuthorityDto params) {
 		BooleanBuilder builder = new BooleanBuilder();
 		if ( ObjectUtils.isNotEmpty(params) ) {
 			if ( params.getUserRoleIdx() > 0 ){
@@ -43,7 +43,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 		}
 		
 		return jpaQueryFactory
-				.select(Projections.fields(UserRoleDto.class, 
+				.select(Projections.fields(AuthorityDto.class, 
 								userRoleEntity.userRoleIdx
 							,	userRoleEntity.userRoleName
 						))
