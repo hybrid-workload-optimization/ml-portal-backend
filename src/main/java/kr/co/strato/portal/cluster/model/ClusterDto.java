@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PortalClusterDto {
+public class ClusterDto {
 	
 	@NotNull(message = "cluster name is required")
 	private String clusterName;

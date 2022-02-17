@@ -6,9 +6,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class JpaApplication {
+public class PaasPortalApplication {
     public static void main(String[] args) {
-        SpringApplication.run(JpaApplication.class, args);
+        SpringApplication.run(PaasPortalApplication.class, args);
     }
 
 }

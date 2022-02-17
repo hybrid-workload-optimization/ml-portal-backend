@@ -7,18 +7,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.PortalClusterDto;
-import kr.co.strato.portal.cluster.service.PortalClusterService;
+import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.service.ClusterService;
 
 @RestController
-public class PortalClusterController {
+public class ClusterController {
 
 	@Autowired
-	PortalClusterService clusterService;
+	ClusterService clusterService;
 	
 	@GetMapping("/api/v1/clusters")
-    public ResponseWrapper<Page<PortalClusterDto>> getCluterList(PageRequest pageRequest){
-        Page<PortalClusterDto> results = clusterService.getClusterList(pageRequest.of());
+    public ResponseWrapper<Page<ClusterDto>> getCluterList(PageRequest pageRequest){
+        Page<ClusterDto> results = clusterService.getClusterList(pageRequest.of());
         return new ResponseWrapper<>(results);
     }
 	

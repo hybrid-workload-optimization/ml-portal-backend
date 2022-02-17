@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,16 +15,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Cluster {
+@Table(name = "cluster")
+public class ClusterEntity {
 	
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cluster_idx")
+    @Column(name = "cluster_idx", unique = true)
     private Long clusterIdx;
 	
 	@Column(name = "cluster_name")
 	private String clusterName;
 	
+	@Column
 	private String provider;
 	
 	@Column(name = "provider_version")
@@ -32,8 +35,10 @@ public class Cluster {
 	@Column(name = "kube_config")
 	private String kubeConfig;
 	
+	@Column
 	private String description;
 	
+	@Column
 	private String status;
 	
 	@Column(name = "create_user_id")

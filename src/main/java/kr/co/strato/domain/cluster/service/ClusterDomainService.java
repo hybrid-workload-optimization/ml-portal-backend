@@ -1,5 +1,6 @@
 package kr.co.strato.domain.cluster.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,33 +8,33 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.domain.cluster.model.Cluster;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class ClusterService {
+public class ClusterDomainService {
 
 	@Autowired
 	ClusterRepository clusterRepository;
 	
 	
-	public Long register(Cluster cluster) {
+	public Long register(ClusterEntity cluster) {
 		clusterRepository.save(cluster);
 		
 		return cluster.getClusterIdx();
 	}
 	
-	public void update(Cluster cluster) {
+	public void update(ClusterEntity cluster) {
 		clusterRepository.save(cluster);
 	}
 	
-	public void delete(Cluster cluster) {
+	public void delete(ClusterEntity cluster) {
 		clusterRepository.delete(cluster);
 	}
 	
-	public Cluster get(Long clusterIdx) {
-		Optional<Cluster> cluster = clusterRepository.findById(clusterIdx);
+	public ClusterEntity get(Long clusterIdx) {
+		Optional<ClusterEntity> cluster = clusterRepository.findById(clusterIdx);
 		if (cluster.isPresent()) {
 			return cluster.get();
 		} else {
@@ -41,7 +42,7 @@ public class ClusterService {
 		}
 	}
 	
-	public Page<Cluster> getList(Pageable pageable) {
+	public Page<ClusterEntity> getList(Pageable pageable) {
 		return clusterRepository.findAll(pageable);
 	}
 }

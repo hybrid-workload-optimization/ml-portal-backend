@@ -6,12 +6,17 @@
         </layout>
     </appender>
 
+	<logger name="org.springframework.boot" additivity="false">
+		<level value="info"/>
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+
     <logger name="org.hibernate.type" additivity="false">
-		<level value="debug"/>
+		<level value="info"/>
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 	
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE" />
     </root>
 </configuration>
