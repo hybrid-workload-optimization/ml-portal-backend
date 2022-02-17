@@ -12,6 +12,6 @@ import java.util.List;
 public interface CommonProxy {
 
     @PostMapping("/apply")
-    public List<HasMetadata> apply(@RequestBody YamlApplyParam param);
+    public String apply(@RequestBody YamlApplyParam param);
 
 }
