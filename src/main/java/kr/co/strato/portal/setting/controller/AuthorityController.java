@@ -3,6 +3,7 @@ package kr.co.strato.portal.setting.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,9 +27,8 @@ public class AuthorityController {
 	//목록
 	@GetMapping("/roles")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<AuthorityDto>> getListUserRole(){
-		
-		List<AuthorityDto> userList = authorityService.getListUserRoleDto();
+	public ResponseWrapper<Page<AuthorityDto>> getListUserRole(@RequestBody AuthorityDto param){
+		Page<AuthorityDto> userList = authorityService.getListUserRoleDto(param, param.of());
 		
 		return new ResponseWrapper<>(userList);
 	}
@@ -37,8 +37,6 @@ public class AuthorityController {
 	@GetMapping("/roles/{roleId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<UserRoleEntity> getUserRole(@PathVariable(name = "roleId") Long roleId, @RequestBody AuthorityDto param){
-		System.out.println("####roleId :: " + roleId);
-		System.out.println("####param :: " + param.toString());
 		return new ResponseWrapper<>(null);
 	}
 	
