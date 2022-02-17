@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProfile name="console-logging">
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <layout class="ch.qos.logback.classic.PatternLayout">
-                <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] | %-5level %logger{36} - %msg%n</Pattern>
-            </layout>
-        </appender>
-    </springProfile>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] | %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
 
     <logger name="org.hibernate.type" level="trace" />
 
     <root level="DEBUG">
-        <springProfile name="console-logging">
-            <appender-ref ref="CONSOLE" />
-        </springProfile>
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>
