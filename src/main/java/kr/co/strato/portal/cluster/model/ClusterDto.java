@@ -22,4 +22,6 @@ public class ClusterDto {
 	
 	private String description;
 	
+	private Long clusterId;
+	
 }

@@ -1,6 +1,5 @@
 package kr.co.strato.domain.cluster.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,18 +18,21 @@ public class ClusterDomainService {
 	ClusterRepository clusterRepository;
 	
 	
-	public Long register(ClusterEntity cluster) {
-		clusterRepository.save(cluster);
-		
-		return cluster.getClusterIdx();
+	public void register(ClusterEntity clusterEntity) {
+		clusterRepository.save(clusterEntity);
 	}
 	
-	public void update(ClusterEntity cluster) {
-		clusterRepository.save(cluster);
+	public void update(ClusterEntity clusterEntity) {
+		Optional<ClusterEntity> cluster = clusterRepository.findById(clusterEntity.getClusterIdx());
+		if (cluster.isPresent()) {
+			clusterRepository.save(clusterEntity);
+		} else {
+			throw new NotFoundResourceException("cluster_idx : " + clusterEntity.getClusterIdx());
+		}
 	}
 	
-	public void delete(ClusterEntity cluster) {
-		clusterRepository.delete(cluster);
+	public void delete(ClusterEntity clusterEntity) {
+		clusterRepository.delete(clusterEntity);
 	}
 	
 	public ClusterEntity get(Long clusterIdx) {
