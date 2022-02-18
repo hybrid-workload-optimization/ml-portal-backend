@@ -11,7 +11,7 @@ import java.util.List;
 @FeignClient(value="Common", url = "${service.kubernetes-interface.url}")
 public interface CommonProxy {
 
-    @PostMapping("/apply")
+    @PostMapping("/common/apply")
     public String apply(@RequestBody YamlApplyParam param);
 
 }
