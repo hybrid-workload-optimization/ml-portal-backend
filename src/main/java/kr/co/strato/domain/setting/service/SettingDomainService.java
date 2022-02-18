@@ -1,6 +1,7 @@
 package kr.co.strato.domain.setting.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.repository.SettingRepository;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
 public class SettingDomainService {
@@ -17,7 +19,12 @@ public class SettingDomainService {
 	
 	//엔티티 조회(default) by id
 	public SettingEntity getSetting(Long id) {
-		return settingRepository.findById(id).get();
+		Optional<SettingEntity> setting = settingRepository.findById(id);
+		if (setting.isPresent()) {
+			return setting.get();
+		} else {
+			throw new NotFoundResourceException("setting_idx : " + id);
+		}
 	}
 	
 	//엔티티 조회 by entity

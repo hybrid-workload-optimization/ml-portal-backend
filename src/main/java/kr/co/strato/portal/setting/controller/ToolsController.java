@@ -1,10 +1,12 @@
 package kr.co.strato.portal.setting.controller;
 
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,22 +17,31 @@ import kr.co.strato.portal.setting.model.GeneralDto;
 import kr.co.strato.portal.setting.service.ToolsService;
 
 @RestController
-@RequestMapping("/api/v1/tools")
+@RequestMapping("/api/v1/setting-tool")
 public class ToolsController {
 	
 	@Autowired
 	private ToolsService toolsService;
 	
-	@GetMapping("/{type}")
+	@GetMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getTools(@PathVariable(name = "type") String type){
-		return new ResponseWrapper<>(null);
+	public ResponseWrapper<GeneralDto> getTools(@RequestBody GeneralDto params){
+//		HashMap<String, Object> rtMap = new HashMap<>();
+		GeneralDto tools = toolsService.getTools(params);
+		return new ResponseWrapper<>(tools);
 	}
 	
-	@PatchMapping("/{type}")
+	@PostMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> patchTools(@PathVariable(name = "type") String type, @RequestBody GeneralDto params){
-		Long l = toolsService.patchTools(type, params);
-		return new ResponseWrapper<>(null);
+	public ResponseWrapper<Long> postTools(@RequestBody GeneralDto params){
+		Long l = toolsService.postTools(params);
+		return new ResponseWrapper<>(l);
+	}
+	
+	@PatchMapping("/tools")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<Long> patchTools(@RequestBody GeneralDto params){
+		Long l = toolsService.patchTools(params);
+		return new ResponseWrapper<>(l);
 	}
 }

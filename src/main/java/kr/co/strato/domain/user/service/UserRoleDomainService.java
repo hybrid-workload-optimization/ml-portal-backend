@@ -15,7 +15,4 @@ public class UserRoleDomainService {
 	@Autowired
 	private UserRoleRepository userRoleRepository;
 	
-	public Page<AuthorityDto> getListUserRoleDto(AuthorityDto params, Pageable pageable) {
-		return userRoleRepository.getListUserRoleToDto(params, pageable);
-	}
 }

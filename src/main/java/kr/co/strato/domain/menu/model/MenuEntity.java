@@ -1,24 +1,20 @@
 package kr.co.strato.domain.menu.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import kr.co.strato.domain.user.model.UserRoleEntity;
-import kr.co.strato.domain.user.model.UserRoleMenuEntity;
-import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Data
-@Setter
-@ToString
+
 @Entity
 @Table(name = "menu")
+@Getter
+@Setter
+@ToString
 public class MenuEntity {
 	
 	@Id
