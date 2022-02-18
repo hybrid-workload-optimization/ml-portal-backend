@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 public class ClusterController {
 
@@ -54,38 +57,39 @@ public class ClusterController {
 	
 	@PostMapping("/api/v1/clusters")
     public ResponseWrapper<Long> registerCluster(@RequestBody ClusterDto clusterDto){
-        Long clusterId = null;
+        Long result = null;
         
         try {
-			clusterService.registerCluster(clusterDto);
+        	result = clusterService.registerCluster(clusterDto);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
 		}
         
-        return new ResponseWrapper<>(clusterId);
+        return new ResponseWrapper<>(result);
     }
 
-	@PutMapping("/api/v1/clusters")
-    public ResponseWrapper<Long> updateCluster(@RequestBody ClusterDto clusterDto){
-        Long clusterId = null;
+	@PutMapping("/api/v1/clusters/{clusterIdx}")
+    public ResponseWrapper<Long> updateCluster(@PathVariable(required = true) Long clusterIdx, @RequestBody ClusterDto clusterDto){
+        Long result = null;
         
         try {
-			clusterService.updateCluster(clusterDto);
+        	result = clusterService.updateCluster(clusterIdx, clusterDto);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
 		}
         
-        return new ResponseWrapper<>(clusterId);
+        return new ResponseWrapper<>(result);
     }
 	
 	@DeleteMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<ClusterDto> deleteCluster(@PathVariable Long clusterIdx){
-		ClusterDto result = null;
-        
+    public ResponseWrapper<ClusterDto> deleteCluster(@PathVariable(required = true) Long clusterIdx){
+		
         try {
         	clusterService.deleteCluster(clusterIdx);
 		} catch (Exception e) {
@@ -94,6 +98,6 @@ public class ClusterController {
 			//@TODO : work_history 등록 필요
 		}
         
-        return new ResponseWrapper<>(result);
+        return new ResponseWrapper<>(null);
     }
 }

@@ -3,9 +3,6 @@ package kr.co.strato.adapter.k8s.cluster.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,21 +13,19 @@ public class ClusterAdapterService {
 	@Autowired
 	ClusterAdapterClient clusterAdapterClient;
 	
-	public ClusterAdapterDto registerCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
-		String response = clusterAdapterClient.postCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents());
-			
-		ObjectMapper mapper = new ObjectMapper();
-		ClusterAdapterDto result = mapper.readValue(response, new TypeReference<ClusterAdapterDto>(){});
-            
-		return result;
+	public String registerCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
+		String response = null;
+		
+		response = clusterAdapterClient.postCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents());
+		log.debug("[Register Cluster] response : {}", response);
+		
+		return response;
 	}
 	
-	public ClusterAdapterDto updateCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
+	public String updateCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
 		String response = clusterAdapterClient.putCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents(), clusterAdapterDto.getKubeConfigId());
+		log.debug("[Update Cluster] response : {}", response);
 		
-		ObjectMapper mapper = new ObjectMapper();
-		ClusterAdapterDto result = mapper.readValue(response, new TypeReference<ClusterAdapterDto>(){});
-            
-		return result;
+		return response;
 	}
 }

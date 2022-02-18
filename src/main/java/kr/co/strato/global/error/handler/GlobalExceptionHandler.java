@@ -1,10 +1,5 @@
 package kr.co.strato.global.error.handler;
 
-import kr.co.strato.global.error.exception.*;
-import kr.co.strato.global.error.type.AuthErrorType;
-import kr.co.strato.global.error.type.BasicErrorType;
-import kr.co.strato.global.model.ResponseType;
-import kr.co.strato.global.model.ResponseWrapper;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -13,10 +8,31 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import kr.co.strato.global.error.exception.AlreadyExistResourceException;
+import kr.co.strato.global.error.exception.AuthFailException;
+import kr.co.strato.global.error.exception.BadRequestException;
+import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.global.error.exception.NotFoundUserException;
+import kr.co.strato.global.error.exception.PermissionDenyException;
+import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.error.type.AuthErrorType;
+import kr.co.strato.global.error.type.BasicErrorType;
+import kr.co.strato.global.model.ResponseType;
+import kr.co.strato.global.model.ResponseWrapper;
+
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
+	
+	@ExceptionHandler(PortalException.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseWrapper handlePortalException(PortalException e){
+        BasicErrorType errorType = e.getErrorType();
+        return getResponse(errorType);
+    }
+	
     @ExceptionHandler(NotFoundResourceException.class)
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     ResponseWrapper handleNotFoundException(NotFoundResourceException e){

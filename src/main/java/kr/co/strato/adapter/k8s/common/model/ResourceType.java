@@ -1,7 +1,8 @@
 package kr.co.strato.adapter.k8s.common.model;
 
 public enum ResourceType {
-    node,
+    cluster,
+	node,
     namespace,
     persistentVolume,
     storageClass,
