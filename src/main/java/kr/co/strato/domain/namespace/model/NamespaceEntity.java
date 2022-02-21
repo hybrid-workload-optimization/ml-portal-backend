@@ -4,17 +4,22 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -22,6 +27,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @Table(name = "namespace")
 public class NamespaceEntity {
 	@Id
@@ -40,17 +46,12 @@ public class NamespaceEntity {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 	
-//	@ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "cluster_idx")
-//	private Long clusterIdx;
-	@Column(name = "cluster_idx")
-	private Long clusterIdx;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "cluster_idx")
+	private ClusterEntity clusterIdx;
 	
 	@Lob
 	private String annotation;
 	@Lob
 	private String label;
-	@Lob
-	private String condition;
-	
 }

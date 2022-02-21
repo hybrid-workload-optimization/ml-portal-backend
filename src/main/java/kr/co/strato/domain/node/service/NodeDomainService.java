@@ -27,6 +27,14 @@ public class NodeDomainService {
 		return nodeRepository.findAll(pageable);
 	}
 	
+	public Page<NodeEntity> findByName(String name,Pageable pageable) {
+		return nodeRepository.findByName(name,pageable);
+	}
+	
+	public Page<NodeEntity> findByClusterIdx(Long clusterIdx,Pageable pageable) {
+		return nodeRepository.findByClusterIdx(clusterIdx,pageable);
+	}
+	
 	public void delete(NodeEntity nodeEntity) {
 		nodeRepository.delete(nodeEntity);
 	}

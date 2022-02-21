@@ -35,8 +35,8 @@ public class ClusterNodeService {
 	private NodeDomainService 	nodeDomainService;
 	
 	
-	public Page<ClusterNodeDto> getClusterNodeList(Pageable pageable) {
-		Page<NodeEntity> clusterNodePage = nodeDomainService.getList(pageable);
+	public Page<ClusterNodeDto> getClusterNodeList(String name,Pageable pageable) {
+		Page<NodeEntity> clusterNodePage = nodeDomainService.findByName(name,pageable);
 		List<ClusterNodeDto> clusterList = clusterNodePage.getContent().stream().map(c -> ClusterNodeDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
 		
 		Page<ClusterNodeDto> page = new PageImpl<>(clusterList, pageable, clusterNodePage.getTotalElements());
@@ -44,14 +44,14 @@ public class ClusterNodeService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public List<Node> getClusterNodeList(Integer kubeConfigId) {
-		List<Node> nodeList = nodeAdapterService.getNodeList(kubeConfigId);
+	public List<Node> getClusterNodeList(Integer clusterId) {
+		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
 		
-		synClusterNodeSave(nodeList,kubeConfigId);
+		synClusterNodeSave(nodeList,clusterId);
 		return nodeList;
 	}
 
-	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Integer kubeConfigId) {
+	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Integer clusterId) {
 		List<Long> ids = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
 		for (Node n : clusterNodes) {
@@ -89,7 +89,7 @@ public class ClusterNodeService {
 				String role = mapper.writeValueAsString(roles);
 
 				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(kubeConfigId));
+				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
 
 				NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
 						.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
@@ -112,9 +112,9 @@ public class ClusterNodeService {
 		return ids;
 	}
 	
-	public void deleteClusterNode(Integer kubeConfigId, NodeEntity nodeEntity) throws Exception {
+	public void deleteClusterNode(Integer clusterId, NodeEntity nodeEntity) throws Exception {
 		nodeDomainService.delete(nodeEntity);
-		nodeAdapterService.deleteNode(kubeConfigId, nodeEntity.getName());
+		nodeAdapterService.deleteNode(clusterId, nodeEntity.getName());
 //		return nodeAdapterService.deleteNode(kubeConfigId, name);
 	}
 	
@@ -126,7 +126,7 @@ public class ClusterNodeService {
     }
 	
 	
-	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Integer kubeConfigId) {
+	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Integer clusterId) {
 		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),
 				yamlApplyParam.getYaml());
 		List<Long> ids = new ArrayList<>();
@@ -167,7 +167,7 @@ public class ClusterNodeService {
 				String role = mapper.writeValueAsString(roles);
 
 				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(kubeConfigId));
+				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
 
 				NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
 						.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)

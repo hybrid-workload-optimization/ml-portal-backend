@@ -54,8 +54,8 @@ public class ClusterNodeController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterNodes")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterNodeDto>> getClusterNodeList(PageRequest pageRequest){
-        Page<ClusterNodeDto> results = nodeService.getClusterNodeList(pageRequest.of());
+    public ResponseWrapper<Page<ClusterNodeDto>> getClusterNodeList(String name,PageRequest pageRequest){
+        Page<ClusterNodeDto> results = nodeService.getClusterNodeList(name,pageRequest.of());
         return new ResponseWrapper<>(results);
     }
 
