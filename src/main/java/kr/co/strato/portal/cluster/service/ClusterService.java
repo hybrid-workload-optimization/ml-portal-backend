@@ -128,4 +128,15 @@ public class ClusterService {
 		clusterDomainService.delete(clusterEntity);
 	}
 
+	/**
+	 * Cluster 중복 확인(By CusterName)
+	 * 
+	 * @param name
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean isClusterDuplication(String name) throws Exception {
+		return clusterDomainService.isClusterDuplication(name);
+	}
+
 }

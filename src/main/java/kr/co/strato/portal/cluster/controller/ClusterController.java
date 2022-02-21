@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.error.exception.PortalException;
@@ -32,7 +33,8 @@ public class ClusterController {
         try {
         	results = clusterService.getClusterList(pageRequest.of());
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
 		}
@@ -47,7 +49,8 @@ public class ClusterController {
         try {
         	result = clusterService.getCluster(clusterIdx);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
 		}
@@ -93,6 +96,22 @@ public class ClusterController {
 				
         try {
         	clusterService.deleteCluster(clusterIdx);
+		} catch (Exception e) {
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			//@TODO : work_history 등록 필요
+		}
+        
+        return new ResponseWrapper<>(result);
+    }
+	
+	@GetMapping("/api/v1/clusters/duplication")
+    public ResponseWrapper<Boolean> isClusterDuplication(@RequestParam(required = true) String name){
+		boolean result = false;
+        
+        try {
+        	result = clusterService.isClusterDuplication(name);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

@@ -47,4 +47,13 @@ public class ClusterDomainService {
 	public Page<ClusterEntity> getList(Pageable pageable) {
 		return clusterRepository.findAll(pageable);
 	}
+
+	public boolean isClusterDuplication(String name) {
+		Optional<ClusterEntity> cluster = clusterRepository.findByClusterName(name);
+		if (cluster.isPresent()) {
+			return true;
+		}
+		
+		return false;
+	}
 }
