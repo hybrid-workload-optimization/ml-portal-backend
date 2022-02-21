@@ -121,4 +121,39 @@ public class ClusterController {
         
         return new ResponseWrapper<>(result);
     }
+	
+	@PostMapping("/api/v1/clusters/connection")
+    public ResponseWrapper<Boolean> isClusterConnection(@RequestBody(required = true) String configContents){
+		boolean result = false;
+        
+        try {
+        	result = clusterService.isClusterConnection(configContents);
+		} catch (Exception e) {
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			//@TODO : work_history 등록 필요
+		}
+        
+        return new ResponseWrapper<>(result);
+    }
+	
+	/*
+	@GetMapping("/api/v1/clusters/{clusterIdx}/nodes")
+    public ResponseWrapper<Boolean> getClusterNodeList(@PathVariable(required = true) Long clusterIdx){
+		Page<ClusterDto> results = null;
+        
+        try {
+        	results = clusterService.getClusterList(pageRequest.of());
+		} catch (Exception e) {
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			//@TODO : work_history 등록 필요
+		}
+        
+        return new ResponseWrapper<>(results);
+    }
+    */
+	
 }

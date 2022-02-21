@@ -139,4 +139,15 @@ public class ClusterService {
 		return clusterDomainService.isClusterDuplication(name);
 	}
 
+	/**
+	 * Cluster 연결 테스트
+	 * 
+	 * @param configContents
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean isClusterConnection(String configContents) throws Exception {
+		return clusterAdapterService.isClusterConnection(Base64.getEncoder().encodeToString(configContents.getBytes()));
+	}
+
 }
