@@ -41,7 +41,7 @@ public class ClusterController {
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<ClusterDto> registerCluster(@PathVariable Long clusterIdx){
+    public ResponseWrapper<ClusterDto> registerCluster(@PathVariable(required = true) Long clusterIdx){
 		ClusterDto result = null;
         
         try {
@@ -88,16 +88,18 @@ public class ClusterController {
     }
 	
 	@DeleteMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<ClusterDto> deleteCluster(@PathVariable(required = true) Long clusterIdx){
-		
+    public ResponseWrapper<Boolean> deleteCluster(@PathVariable(required = true) Long clusterIdx){
+		boolean result = true;
+				
         try {
         	clusterService.deleteCluster(clusterIdx);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error has occured", e);
+			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
 		}
         
-        return new ResponseWrapper<>(null);
+        return new ResponseWrapper<>(result);
     }
 }

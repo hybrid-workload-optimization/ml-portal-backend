@@ -22,9 +22,16 @@ public class ClusterAdapterService {
 		return response;
 	}
 	
-	public String updateCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
-		String response = clusterAdapterClient.putCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents(), clusterAdapterDto.getKubeConfigId());
+	public boolean updateCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
+		boolean response = clusterAdapterClient.putCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents(), clusterAdapterDto.getKubeConfigId());
 		log.debug("[Update Cluster] response : {}", response);
+		
+		return response;
+	}
+	
+	public boolean deleteCluster(Long kubeConfigId) throws Exception {
+		boolean response = clusterAdapterClient.deleteCluster(kubeConfigId);
+		log.debug("[Delete Cluster] response : {}", response);
 		
 		return response;
 	}

@@ -30,6 +30,13 @@ public class ClusterService {
 	@Autowired
 	ClusterAdapterService clusterAdapterService;
 	
+	/**
+	 * Cluster 목록 조회
+	 * 
+	 * @param pageable
+	 * @return
+	 * @throws Exception
+	 */
 	public Page<ClusterDto> getClusterList(Pageable pageable) throws Exception {
 		Page<ClusterEntity> clusterPage = clusterDomainService.getList(pageable);
 		List<ClusterDto> clusterList = clusterPage.getContent().stream().map(c -> ClusterDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
@@ -63,6 +70,14 @@ public class ClusterService {
 		return clusterEntity.getClusterIdx();
 	}
 
+	/**
+	 * Cluster 수정
+	 * 
+	 * @param clusterIdx
+	 * @param clusterDto
+	 * @return
+	 * @throws Exception
+	 */
 	public Long updateCluster(Long clusterIdx, ClusterDto clusterDto) throws Exception {
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
@@ -70,8 +85,8 @@ public class ClusterService {
 				.kubeConfigId(clusterDto.getClusterId())
 				.build();
 		
-		String isUpdated = clusterAdapterService.updateCluster(clusterAdapterDto);
-		if (!StringUtils.equals(isUpdated, "true")) {
+		boolean isUpdated = clusterAdapterService.updateCluster(clusterAdapterDto);
+		if (!isUpdated) {
 			throw new PortalException("Cluster modification failed");
 		}
 		
@@ -83,16 +98,32 @@ public class ClusterService {
 		return clusterEntity.getClusterIdx();
 	}
 
+	/**
+	 * Cluster 상세 조회
+	 * 
+	 * @param clusterIdx
+	 * @return
+	 * @throws Exception
+	 */
 	public ClusterDto getCluster(Long clusterIdx) throws Exception {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		return ClusterDtoMapper.INSTANCE.toDto(clusterEntity);
 	}
 
+	/**
+	 * Cluster 삭제
+	 * 
+	 * @param clusterIdx
+	 * @throws Exception
+	 */
 	public void deleteCluster(Long clusterIdx) throws Exception {
-		ClusterEntity clusterEntity = ClusterEntity.builder()
-				.clusterIdx(clusterIdx)
-				.build();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		boolean isDeleted = clusterAdapterService.deleteCluster(clusterEntity.getClusterId());
+		if (!isDeleted) {
+			throw new PortalException("Cluster deletion failed");
+		}
 		
 		clusterDomainService.delete(clusterEntity);
 	}
