@@ -112,10 +112,18 @@ public class ClusterNodeService {
 		return ids;
 	}
 	
-	public boolean deleteClusterNode(Integer kubeConfigId,  String name) {
-		return nodeAdapterService.deleteNode(kubeConfigId, name);
+	public void deleteClusterNode(Integer kubeConfigId, NodeEntity nodeEntity) throws Exception {
+		nodeDomainService.delete(nodeEntity);
+		nodeAdapterService.deleteNode(kubeConfigId, nodeEntity.getName());
+//		return nodeAdapterService.deleteNode(kubeConfigId, name);
 	}
 	
+    public ClusterNodeDto getClusterNodeDetail(Long id){
+    	NodeEntity nodeEntity = nodeDomainService.getDetail(id); 
+
+    	ClusterNodeDto clusterNodeDto = ClusterNodeDtoMapper.INSTANCE.toDto(nodeEntity);
+        return clusterNodeDto;
+    }
 	
 	
 	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Integer kubeConfigId) {
