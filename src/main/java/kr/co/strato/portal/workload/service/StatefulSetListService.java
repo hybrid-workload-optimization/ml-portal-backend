@@ -26,15 +26,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class StatefulSetManageService {
+public class StatefulSetListService {
     @Autowired
     private StatefulSetDomainService statefulSetDomainService;
 
     @Autowired
     private StatefulSetAdapterService statefulSetAdapterService;
 
-    @Autowired
-    private NamespaceDomainService namespaceDomainService;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -44,31 +42,16 @@ public class StatefulSetManageService {
 
         List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterId, yaml);
 
-        ObjectMapper mapper = new ObjectMapper();
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
-                //k8s Object -> Entity
-                String name = s.getMetadata().getName();
                 String namespace = s.getMetadata().getNamespace();
-                String uid = s.getMetadata().getUid();
-                String image = s.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
-                String label = mapper.writeValueAsString(s.getMetadata().getLabels());
-                String annotations = mapper.writeValueAsString(s.getMetadata().getAnnotations());
-                String createAt = s.getMetadata().getCreationTimestamp();
-
-                StatefulSetEntity statefulSet = StatefulSetEntity.builder()
-                        .statefulSetName(name)
-                        .statefulSetUid(uid)
-                        .image(image)
-                        .label(label)
-                        .annotation(annotations)
-                        .createdAt(DateUtil.strToLocalDateTime(createAt))
-                        .build();
-
-                //save
-                Long id = statefulSetDomainService.registerStatefulSet(statefulSet, clusterId, namespace);
+                StatefulSetEntity statefulSet = toEntity(s);
+                Long id = statefulSetDomainService.register(statefulSet, clusterId.longValue(), namespace);
 
                 return id;
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage(), e);
+                throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("statefulSet register error");
@@ -78,11 +61,43 @@ public class StatefulSetManageService {
         return ids;
     }
 
-    public Page<StatefulSetDto.ResListDto> getStatefulSetList(Pageable pageable, StatefulSetDto.SearchParam searchParam){
-        Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSetList(pageable, searchParam.getProjectId(), searchParam.getClsuterId(), searchParam.getNamespaceId());
-        List<StatefulSetDto.ResListDto> dtoList = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
-        Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtoList, pageable, statefulSets.getTotalElements());
+    public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
+        Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClsuterId(), searchParam.getNamespaceId());
+        //TODO Pod 카운트 조회 후 DTO에 추가
+        List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
+        Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
 
         return pages;
+    }
+
+
+
+    /**
+     * k8s statefulSet model -> statefulSet entity
+     * @param s
+     * @return
+     * @throws JsonProcessingException
+     */
+    private StatefulSetEntity toEntity(StatefulSet s) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String name = s.getMetadata().getName();
+        String namespace = s.getMetadata().getNamespace();
+        String uid = s.getMetadata().getUid();
+        String image = s.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
+        String label = mapper.writeValueAsString(s.getMetadata().getLabels());
+        String annotations = mapper.writeValueAsString(s.getMetadata().getAnnotations());
+        String createAt = s.getMetadata().getCreationTimestamp();
+
+        StatefulSetEntity statefulSet = StatefulSetEntity.builder()
+                .statefulSetName(name)
+                .statefulSetUid(uid)
+                .image(image)
+                .label(label)
+                .annotation(annotations)
+                .createdAt(DateUtil.strToLocalDateTime(createAt))
+                .build();
+
+        return statefulSet;
     }
 }

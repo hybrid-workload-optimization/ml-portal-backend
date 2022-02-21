@@ -57,6 +57,7 @@ public class PageRequest {
             property = "id";
         }
         size = (size == 0) ? DEFAULT_SIZE : size;
+        page = page <= 0 ? 1 : page;
 
 
         return org.springframework.data.domain.PageRequest.of(page - 1, size, direction, property);
