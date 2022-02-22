@@ -8,6 +8,13 @@ public class ResponseWrapper<T> implements Serializable {
     private String detail;
     private T result;
 
+    public ResponseWrapper(){
+        CommonType type = CommonType.OK;
+        this.code = type.getCode();
+        this.message = type.getMessage();
+        this.detail = type.getDetail();
+    }
+
     public ResponseWrapper(T result){
         CommonType type = CommonType.OK;
         this.code = type.getCode();
