@@ -9,4 +9,10 @@ public class Base64Util {
 
         return decodedText;
     }
+
+    public static String encode(String text){
+        String encodedText = Base64.getEncoder().encodeToString(text.getBytes());
+
+        return encodedText;
+    }
 }
