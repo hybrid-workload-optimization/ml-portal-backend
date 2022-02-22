@@ -11,6 +11,7 @@ import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.workload.model.StatefulSetDto;
@@ -40,7 +41,7 @@ public class StatefulSetListService {
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
         Integer clusterId = reqCreateDto.getClusterId();
-        String yaml = reqCreateDto.getYaml();
+        String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
         List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterId, yaml);
 
@@ -66,7 +67,6 @@ public class StatefulSetListService {
 
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
         Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClsuterId(), searchParam.getNamespaceId());
-        //TODO Pod 카운트 조회 후 DTO에 추가
         List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
         Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
 
