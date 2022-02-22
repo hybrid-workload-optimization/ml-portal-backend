@@ -2,17 +2,18 @@ package kr.co.strato.portal.setting.service;
 
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.adapter.k8s.kubespray.service.KubesprayAdapterService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
-import kr.co.strato.portal.setting.model.GeneralDto;
-import kr.co.strato.portal.setting.model.GeneralDtoMapper;
+import kr.co.strato.portal.setting.model.ToolsDto;
+import kr.co.strato.portal.setting.model.ToolsDtoMapper;
 
 @Service
 public class ToolsService {
@@ -20,19 +21,26 @@ public class ToolsService {
 	@Autowired
 	private SettingDomainService settingDomainService;
 	
+	@Autowired
+	private KubesprayAdapterService kubesprayAdapterService;
+	
 	/** 
 	 * tools 조회
 	 * @param rtMap 
-	 * @param GeneralDto dto
-	 * @return GeneralDto dto
+	 * @param ToolsDto dto
+	 * @return ToolsDto dto
 	 */
-	public GeneralDto getTools(GeneralDto dto) {
+	public ToolsDto getTools(ToolsDto dto) {
 		// DTO TO ENTITY
-		SettingEntity param = GeneralDtoMapper.INSTANCE.toEntity(dto);
+		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntity(dto);
 		// GET REAL ENTITY (BY PARAM ENTITY)
 		SettingEntity entity = settingDomainService.getSetting(param);
 		// REAL ENTITY TO DTO
-		GeneralDto returnDto = GeneralDtoMapper.INSTANCE.toDto(entity);
+		ToolsDto returnDto = ToolsDtoMapper.INSTANCE.toDto(entity);
+		
+		// GET kubespray version (api call)
+		List<String> kubesprayVersions = kubesprayAdapterService.getVersion();
+		returnDto.setKubesprayVersions(kubesprayVersions);
 		
 		return returnDto;
 	}
@@ -42,9 +50,9 @@ public class ToolsService {
 	 * @param GeneralDto dto
 	 * @return GeneralDto dto
 	 */
-	public Long postTools(GeneralDto dto) {
+	public Long postTools(ToolsDto dto) {
 		// DTO TO ENTITY
-		SettingEntity param = GeneralDtoMapper.INSTANCE.toEntity(dto);
+		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntity(dto);
 		// GET REAL ENTITY (BY PARAM ENTITY)
 		SettingEntity entity = settingDomainService.getSetting(param);
 		
@@ -58,9 +66,9 @@ public class ToolsService {
 	 * @param GeneralDto dto
 	 * @return Long id
 	 */
-	public Long patchTools(GeneralDto dto) {
+	public Long patchTools(ToolsDto dto) {
 		// DTO TO ENTITY
-		SettingEntity param = GeneralDtoMapper.INSTANCE.toEntity(dto);
+		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntity(dto);
 		// GET REAL ENTITY (BY PARAM ENTITY)
 		SettingEntity entity = settingDomainService.getSetting(param);
 		

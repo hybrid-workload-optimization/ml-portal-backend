@@ -1,7 +1,5 @@
 package kr.co.strato.portal.setting.controller;
 
-import java.util.HashMap;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.setting.model.GeneralDto;
+import kr.co.strato.portal.setting.model.ToolsDto;
 import kr.co.strato.portal.setting.service.ToolsService;
 
 @RestController
@@ -25,22 +23,21 @@ public class ToolsController {
 	
 	@GetMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<GeneralDto> getTools(@RequestBody GeneralDto params){
-//		HashMap<String, Object> rtMap = new HashMap<>();
-		GeneralDto tools = toolsService.getTools(params);
+	public ResponseWrapper<ToolsDto> getTools(@RequestBody ToolsDto params){
+		ToolsDto tools = toolsService.getTools(params);
 		return new ResponseWrapper<>(tools);
 	}
 	
 	@PostMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Long> postTools(@RequestBody GeneralDto params){
+	public ResponseWrapper<Long> postTools(@RequestBody ToolsDto params){
 		Long l = toolsService.postTools(params);
 		return new ResponseWrapper<>(l);
 	}
 	
 	@PatchMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Long> patchTools(@RequestBody GeneralDto params){
+	public ResponseWrapper<Long> patchTools(@RequestBody ToolsDto params){
 		Long l = toolsService.patchTools(params);
 		return new ResponseWrapper<>(l);
 	}
