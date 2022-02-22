@@ -63,7 +63,7 @@ public class GeneralController {
 		return result;
 	}
 	
-	// 수정
+	// 삭제
 	@DeleteMapping("/general-settings/{idx}")
 	public ResponseWrapper<GeneralDto> put(@PathVariable(name = "idx") Long idx) {
 		generalService.delete(idx);
