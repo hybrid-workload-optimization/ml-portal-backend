@@ -3,6 +3,7 @@ package kr.co.strato.portal.setting.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +59,14 @@ public class GeneralController {
 	public ResponseWrapper<GeneralDto> put(@PathVariable(name = "idx") Long idx, @RequestBody GeneralDto generalDto) {
 		generalDto.setIdx(idx);
 		generalService.save(generalDto);
+		ResponseWrapper<GeneralDto> result = new ResponseWrapper<GeneralDto>(CommonType.OK);
+		return result;
+	}
+	
+	// 수정
+	@DeleteMapping("/general-settings/{idx}")
+	public ResponseWrapper<GeneralDto> put(@PathVariable(name = "idx") Long idx) {
+		generalService.delete(idx);
 		ResponseWrapper<GeneralDto> result = new ResponseWrapper<GeneralDto>(CommonType.OK);
 		return result;
 	}

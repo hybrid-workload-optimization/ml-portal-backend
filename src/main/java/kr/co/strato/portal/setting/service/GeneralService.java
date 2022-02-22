@@ -32,4 +32,8 @@ public class GeneralService {
 		SettingEntity entity = GeneralDtoMapper.INSTANCE.toEntity(dto);
 		settingDomainService.saveSetting(entity);
 	}
+	
+	public void delete(Long idx){
+		settingDomainService.deleteSettingByIdx(idx);
+	}
 }
