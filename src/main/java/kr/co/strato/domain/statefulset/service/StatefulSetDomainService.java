@@ -34,15 +34,22 @@ public class StatefulSetDomainService {
         return statefulSet.getId();
     }
 
-    public StatefulSetEntity get(Long id){
-        StatefulSetEntity statefulSet = statefulSetRepository.findById(id)
-                .orElseThrow(() -> new NotFoundResourceException("statefulSet id:"+id));
+    public Long update(StatefulSetEntity statefulSet, Long statefulSetId, Long clusterId, String namespaceName) {
+        statefulSet.setId(statefulSetId);
+        addNamespace(statefulSet, clusterId, namespaceName);
+        statefulSetRepository.save(statefulSet);
+        return statefulSet.getId();
+    }
+
+    public StatefulSetEntity get(Long resourceId){
+        StatefulSetEntity statefulSet = statefulSetRepository.findById(resourceId)
+                .orElseThrow(() -> new NotFoundResourceException("statefulSet id:"+resourceId));
 
         return statefulSet;
     }
 
-    public boolean delete(Long id){
-        Optional<StatefulSetEntity> opt = statefulSetRepository.findById(id);
+    public boolean delete(Long resourceId){
+        Optional<StatefulSetEntity> opt = statefulSetRepository.findById(resourceId);
         if(opt.isPresent()){
             StatefulSetEntity entity = opt.get();
             statefulSetRepository.delete(entity);
@@ -54,10 +61,18 @@ public class StatefulSetDomainService {
         return statefulSetRepository.getStatefulSetList(pageable, projectId, clusterId, namespaceId);
     }
 
+    public ClusterEntity getCluster(Long statefulSetId){
+        StatefulSetEntity entity = get(statefulSetId);
+        ClusterEntity cluster =  entity.getNamespace().getClusterIdx();
+
+        return cluster;
+    }
+
+
     private void addNamespace(StatefulSetEntity statefulSet, Long clusterId, String namespaceName){
         Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
 
-        if(!optCluster.isPresent()){
+        if(optCluster.isPresent()){
             ClusterEntity cluster = optCluster.get();
             List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
 

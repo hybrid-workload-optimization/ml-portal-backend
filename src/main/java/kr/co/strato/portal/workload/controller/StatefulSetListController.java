@@ -18,7 +18,7 @@ public class StatefulSetListController {
     @Autowired
     private StatefulSetListService statefulSetListService;
 
-    @PostMapping("api/v1/statefulset-manage/statefulsets")
+    @PostMapping("api/v1/statefulset-list/statefulsets")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseWrapper<List<Long>> createStatefulSet(@Valid @RequestBody StatefulSetDto.ReqCreateDto reqCreateDto){
         List<Long> results = statefulSetListService.createStatefulSet(reqCreateDto);
@@ -26,7 +26,7 @@ public class StatefulSetListController {
         return new ResponseWrapper<>(results);
     }
 
-    @GetMapping("api/v1/statefulset-manage/statefulsets")
+    @GetMapping("api/v1/statefulset-list/statefulsets")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Page<StatefulSetDto.ResListDto>> getStatefulSetList(PageRequest pageRequest, StatefulSetDto.SearchParam searchParam){
         Page<StatefulSetDto.ResListDto> results = statefulSetListService.getStatefulSets(pageRequest.of(), searchParam);

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
@@ -34,7 +37,6 @@ public class StatefulSetListService {
     private StatefulSetAdapterService statefulSetAdapterService;
 
 
-
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
         Integer clusterId = reqCreateDto.getClusterId();
@@ -44,9 +46,10 @@ public class StatefulSetListService {
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
-                String namespace = s.getMetadata().getNamespace();
+                String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity statefulSet = toEntity(s);
-                Long id = statefulSetDomainService.register(statefulSet, clusterId.longValue(), namespace);
+
+                Long id = statefulSetDomainService.register(statefulSet, clusterId.longValue(), namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {

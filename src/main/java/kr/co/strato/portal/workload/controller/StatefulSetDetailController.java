@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 public class StatefulSetDetailController {
     @Autowired
     private StatefulSetDetailService statefulSetDetailService;
 
 
-    @DeleteMapping("api/v1/statefulset-manage/statefulsets/{id}")
+    @DeleteMapping("api/v1/statefulset-detail/statefulsets/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Boolean> deleteStatefulSet(@PathVariable Integer id){
         boolean isDeleted = statefulSetDetailService.deleteStatefulSet(id);
@@ -23,10 +24,10 @@ public class StatefulSetDetailController {
         return new ResponseWrapper<>(isDeleted);
     }
 
-    @PatchMapping("api/v1/statefulset-manage/statefulsets/{id}")
+    @PatchMapping("api/v1/statefulset-detail/statefulsets/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<Long>> updateStatefulSet(@PathVariable Integer id, @RequestBody StatefulSetDetailDto.ReqUpdateDto reqUpdateDto){
-
+    public ResponseWrapper<List<Long>> updateStatefulSet(@PathVariable Long id, @RequestBody StatefulSetDetailDto.ReqUpdateDto reqUpdateDto){
+        statefulSetDetailService.updateStatefulSet(id, reqUpdateDto);
         return null;
     }
 }

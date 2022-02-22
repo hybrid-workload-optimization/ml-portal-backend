@@ -53,6 +53,27 @@ public class StatefulSetAdapterService {
         }
     }
 
+    public List<StatefulSet> update(Integer clusterId, String yaml){
+        YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
+        try{
+            String results = commonProxy.apply(param);
+//            System.out.println(results);
+
+            //json -> fabric8 k8s 오브젝트 파싱
+            ObjectMapper mapper = new ObjectMapper();
+            List<StatefulSet> statefulsets = mapper.readValue(results, new TypeReference<List<StatefulSet>>(){});
+
+            return statefulsets;
+
+        }catch (JsonProcessingException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - statefulSet 업데이트 에러");
+        }
+    }
+
     /**
      * k8s 스테이트풀셋 삭제
      * @param clusterId
