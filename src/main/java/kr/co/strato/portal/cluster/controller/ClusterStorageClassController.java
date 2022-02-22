@@ -14,26 +14,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterDto;
-import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
-import kr.co.strato.portal.cluster.service.ClusterNamespaceService;
+import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
+import kr.co.strato.portal.cluster.service.ClusterStorageClassService;
 import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
 @RestController
-public class ClusterNamespaceController {
+public class ClusterStorageClassController {
 
 	@Autowired
-	private ClusterNamespaceService namespaceService;
+	private ClusterStorageClassService storageClassService;
 
 	
 	/**
@@ -41,13 +40,13 @@ public class ClusterNamespaceController {
 	 * @return
 	 * k8s data 호출 및 db저장
 	 */
-	@GetMapping("/api/v1/cluster/clusterNamespaceListSet")
+	@GetMapping("/api/v1/cluster/clusterStorageClassListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Namespace> getClusterNamespaceListSet(@RequestParam Integer kubeConfigId) {
+	public List<StorageClass> getClusterStorageClassListSet(@RequestParam Integer kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
-		return namespaceService.getClusterNamespaceListSet(kubeConfigId);
+		return storageClassService.getClusterStorageClassListSet(kubeConfigId);
 	}
 	
 	
@@ -56,30 +55,30 @@ public class ClusterNamespaceController {
 	 * @return
 	 * page List
 	 */
-	@GetMapping("/api/v1/cluster/clusterNamespaces")
+	@GetMapping("/api/v1/cluster/clusterStorageClasss")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterNamespaceDto>> getClusterNamespaceList(String name,PageRequest pageRequest){
-        Page<ClusterNamespaceDto> results = namespaceService.getClusterNamespaceList(name,pageRequest.of());
+    public ResponseWrapper<Page<ClusterStorageClassDto>> getClusterStorageClassList(String name,PageRequest pageRequest){
+        Page<ClusterStorageClassDto> results = storageClassService.getClusterStorageClassList(name,pageRequest.of());
         return new ResponseWrapper<>(results);
     }
 
 
 	
-	@GetMapping("/api/v1/cluster/clusterNamespacesYaml")
+	@GetMapping("/api/v1/cluster/clusterStorageClasssYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getClusterNamespaceDetail(@RequestParam Integer kubeConfigId,String name) {
-		String resBody = namespaceService.getClusterNamespaceYaml(kubeConfigId,name);
+	public ResponseWrapper<String> getClusterStorageClassDetail(@RequestParam Integer kubeConfigId,String name) {
+		String resBody = storageClassService.getClusterStorageClassYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);
 	}
 	
-	@PostMapping("/api/v1/cluster/registerClusterNamespace")
+	@PostMapping("/api/v1/cluster/registerClusterStorageClass")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = namespaceService.registerClusterNamespace(yamlApplyParam,kubeConfigId);
+			 ids = storageClassService.registerClusterStorageClass(yamlApplyParam,kubeConfigId);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
@@ -89,11 +88,11 @@ public class ClusterNamespaceController {
 		return new ResponseWrapper<>(ids);
 	}
 
-	@DeleteMapping("/api/v1/cluster/deletClusterNamespace")
+	@DeleteMapping("/api/v1/cluster/deletClusterStorageClass")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterNamespace(@RequestParam Integer kubeConfigId, 	@RequestParam NamespaceEntity namespaceEntity) {
+	public ResponseWrapper<Boolean> deleteClusterStorageClass(@RequestParam Integer kubeConfigId, 	@RequestParam StorageClassEntity storageClassEntity) {
 		try {
-			namespaceService.deleteClusterNamespace(kubeConfigId, namespaceEntity);
+			storageClassService.deleteClusterStorageClass(kubeConfigId, storageClassEntity);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
@@ -103,8 +102,8 @@ public class ClusterNamespaceController {
 		return new ResponseWrapper<>(null);
 	}
 	
-	@PutMapping("/api/v1/clusters/updateClusterNamespace/{id}")
-    public ResponseWrapper<Long> updateClusterNamespace(@PathVariable(required = true) Long id, @RequestBody ClusterNamespaceDto clusterNamespaceDto){
+	@PutMapping("/api/v1/clusters/updateClusterStorageClass/{id}")
+    public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody ClusterStorageClassDto clusterStorageClassDto){
         Long result = null;
         try {
         	//        	
@@ -118,10 +117,10 @@ public class ClusterNamespaceController {
     }
 	
 	
-	@GetMapping("/api/v1/cluster/clusterNamespaces/{id:.+}")
+	@GetMapping("/api/v1/cluster/clusterStorageClasss/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterNamespaceDto> getClusterNamespaceDetail(@PathVariable("id") Long id) {
-		ClusterNamespaceDto resBody = namespaceService.getClusterNamespaceDetail(id);
+	public ResponseWrapper<ClusterStorageClassDto> getClusterStorageClassDetail(@PathVariable("id") Long id) {
+		ClusterStorageClassDto resBody = storageClassService.getClusterStorageClassDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}

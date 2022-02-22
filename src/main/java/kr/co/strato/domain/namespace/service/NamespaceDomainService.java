@@ -37,9 +37,9 @@ public class NamespaceDomainService {
 	}
 	
 	public NamespaceEntity getDetail(Long id) {
-		Optional<NamespaceEntity> node = namespaceRepository.findById(id);
-		if (node.isPresent()) {
-			return node.get();
+		Optional<NamespaceEntity> namespace = namespaceRepository.findById(id);
+		if (namespace.isPresent()) {
+			return namespace.get();
 		} else {
 			throw new NotFoundResourceException(id.toString());
 		}
@@ -47,6 +47,15 @@ public class NamespaceDomainService {
 	
 	public List<NamespaceEntity> findByNameAndClusterIdx(String name,ClusterEntity clusterEntity) {
 		return namespaceRepository.findByNameAndClusterIdx(name,clusterEntity);
+	}
+	
+	public void update(NamespaceEntity namespaceEntity) {
+		Optional<NamespaceEntity> namespace = namespaceRepository.findById(namespaceEntity.getId());
+		if (namespace.isPresent()) {
+			namespaceRepository.save(namespaceEntity);
+		} else {
+			throw new NotFoundResourceException("namespace_id : " + namespaceEntity.getId());
+		}
 	}
 	
 }
