@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,15 +54,19 @@ public class PersistentVolumeEntity {
 	@Column(name = "reclaim_policy")
 	private String reclaimPolicy;
 	
-	@Column(name = "storage_class_idx")
-	private String storageClassIdx;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "storage_class_idx")
+	private StorageClassEntity storageClassIdx;
+	
 	
 	private String type;
 	private String path;
 	
 	@Column(name = "resource_name")
 	private String resourceName;
-	private String size;
+	
+	private int size;
 
 	@Lob
 	private String annotation;
@@ -70,7 +75,6 @@ public class PersistentVolumeEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
-	//private Long clusterIdx;
 	private ClusterEntity clusterIdx;
 	
 }

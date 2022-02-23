@@ -40,6 +40,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation group: 'io.fabric8', name: 'kubernetes-client', version: '5.11.2'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation group: 'org.springframework', name: 'spring-websocket', version: '5.2.19.RELEASE'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 

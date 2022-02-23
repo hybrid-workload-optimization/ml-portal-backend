@@ -4,12 +4,16 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,35 +26,34 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "namespace")
+@Table(name = "storage_class")
 public class StorageClassEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "namespace_idx")
+	@Column(name = "storage_class_idx")
 	private Long id;
 
-	@Column(name = "namespace_name")
+	@Column(name = "storage_class_name")
 	private String name;
 
-	@Column(name = "namespace_uid")
+	@Column(name = "storage_class_uid")
 	private String uid;
-	
-	private String status;
 	
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 	
-//	@ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "cluster_idx")
-//	private Long clusterIdx;
-	@Column(name = "cluster_idx")
-	private Long clusterIdx;
+	private String provider;
+	
+	private String type;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "cluster_idx")
+	private ClusterEntity clusterIdx;
 	
 	@Lob
 	private String annotation;
 	@Lob
 	private String label;
-	@Lob
-	private String condition;
+
 	
 }

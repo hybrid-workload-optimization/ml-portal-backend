@@ -46,7 +46,7 @@ public class ToolsService {
 	}
 	
 	/** 
-	 * tools 생성(일단 엔티티 조회한 뒤, 데이터 없으면 생성. 있으면 patch 처리)
+	 * tools 생성
 	 * @param GeneralDto dto
 	 * @return GeneralDto dto
 	 */
