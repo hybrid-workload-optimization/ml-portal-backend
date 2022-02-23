@@ -97,5 +97,12 @@ public class ClusterNodeController {
 		return new ResponseWrapper<>(resBody);
 	}
 	
+	@GetMapping("/api/v1/cluster/clusterNodesYaml")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> getNodeYaml(@RequestParam Integer kubeConfigId,String name) {
+		String resBody = nodeService.getNodeYaml(kubeConfigId,name);
+
+		return new ResponseWrapper<>(resBody);
+	}
 	
 }
