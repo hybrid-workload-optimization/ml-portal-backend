@@ -86,7 +86,9 @@ public class ClusterNamespaceService {
     }
    
 	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam, Integer kubeConfigId) {
-		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlApplyParam.getYaml());
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);
 		List<Long> ids = new ArrayList<>();
 		for (Namespace n : clusterNamespaces) {
 			try {

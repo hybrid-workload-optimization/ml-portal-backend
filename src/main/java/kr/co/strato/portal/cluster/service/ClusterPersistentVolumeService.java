@@ -83,8 +83,11 @@ public class ClusterPersistentVolumeService {
     
 	
 	public List<Long> registerClusterPersistentVolume(YamlApplyParam yamlApplyParam, Integer clusterId) {
-		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.registerPersistentVolume(yamlApplyParam.getKubeConfigId(),	yamlApplyParam.getYaml());
-		List<Long> ids = synClusterPersistentVolumeSave(persistentVolumeList,clusterId);
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.registerPersistentVolume(yamlApplyParam.getKubeConfigId(),	yamlDecode);
+		
+		//yamlApplyParam.getKubeConfigId() -> clusterId 임시저장
+		List<Long> ids = synClusterPersistentVolumeSave(persistentVolumeList,yamlApplyParam.getKubeConfigId());
 		return ids;
 	}
 	
@@ -198,8 +201,11 @@ public class ClusterPersistentVolumeService {
 		
 		ClusterEntity clusterEntity = new ClusterEntity();
 		clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+		StorageClassEntity storageClassEntity = new StorageClassEntity();
+		if(storageClassName!=null) {
+			storageClassEntity = persistentVolumeDomainService.getStorageClassId(storageClassName);
+		}
 		
-		StorageClassEntity storageClassEntity = persistentVolumeDomainService.getStorageClassId(storageClassName);
 
 		PersistentVolumeEntity clusterPersistentVolume = PersistentVolumeEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))

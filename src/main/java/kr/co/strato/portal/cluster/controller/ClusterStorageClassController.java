@@ -106,7 +106,7 @@ public class ClusterStorageClassController {
     public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	//        	
+        	storageClassService.updateClusterStorageClass(id, yamlApplyParam);      	
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

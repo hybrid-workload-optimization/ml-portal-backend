@@ -91,7 +91,9 @@ public class ClusterStorageClassService {
     
 	
 	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Integer clusterId) {
-		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlApplyParam.getYaml());
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
 		for (StorageClass sc : storageClassList) {
