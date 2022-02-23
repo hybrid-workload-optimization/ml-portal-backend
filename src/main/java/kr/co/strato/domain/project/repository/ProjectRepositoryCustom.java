@@ -10,5 +10,5 @@ public interface ProjectRepositoryCustom {
 
 	public List<ProjectDto> getProjectList(Pageable pageable, ProjectDto param);
 	
-	public ProjectDto getProjectDetail(Long projectId);
+	public ProjectDto getProjectDetail(Long projectIdx);
 }

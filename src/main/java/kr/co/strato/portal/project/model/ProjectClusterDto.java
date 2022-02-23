@@ -13,4 +13,10 @@ public class ProjectClusterDto {
 
 	private Long clusterIdx;
 	private Long projectIdx;
+	
+	private String provider;
+	private String providerVersion;
+	private String clusterName;
+	private String description;
+	private String createdAt;
 }

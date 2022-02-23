@@ -1,57 +1,55 @@
 package kr.co.strato.domain.project.repository;
 
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
+import static kr.co.strato.domain.user.model.QUser.user;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
-import javax.persistence.EntityManager;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import kr.co.strato.domain.project.model.ProjectEntity;
-import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @Repository
 public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 	
-	public ProjectUserRepositoryCustomImpl(EntityManager entityManager) {
-		this.queryFactory = new JPAQueryFactory(entityManager);
-	}
-	
 	@Override
-	public List<ProjectUserDto> getProjectByUserId(String userId) {
+	public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
 		
-		/*List<ProjectUserDto> result = queryFactory
-				.select(Projections.fields(ProjectUserDto.class, projectUserEntity.projectIdx.as("projectIdx")
-						))
-				  //.select(projectUserEntity)
+		List<ProjectUserDto> result = queryFactory
+				.select(Projections.fields(
+						ProjectUserDto.class,
+						projectUserEntity.id.as("userId"), 
+						projectUserEntity.projectIdx, 
+						user.userName,
+						user.email, 
+						user.organization,
+						projectUserEntity.projectUserRole,
+						ExpressionUtils.as(
+								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectUserEntity.createdAt, "%Y-%m-%d %H:%i"),
+								"createdAt"
+						),
+						ExpressionUtils.as(
+								Expressions.numberTemplate(Integer.class, "DATEDIFF(DATE_FORMAT(NOW(), '%Y-%m-%d'), DATE_FORMAT({0}, '%Y-%m-%d'))", projectUserEntity.createdAt),
+								"addDayCount"
+						)
+				  ))
 				  .from(projectUserEntity)
-				  //.leftJoin(projectEntity.id, projectUserEntity)
-				  //.where(condition(userId, projectUserEntity.id::eq))
-				  //.leftJoin(projectUserEntity).on(projectEntity.id.eq(projectUserEntity.id))
-	              .fetch();*/
+				  .join(user).on(projectUserEntity.id.eq(user.userId))
+				  .where(projectUserEntity.projectIdx.eq(projectIdx))
+				  .fetch();
 		
-		return null;
-	}
-	
-	private <T> BooleanExpression condition(T value, Function<T, BooleanExpression> function) {
-		return Optional.ofNullable(value).map(function).orElse(null);
+		return result;
 	}
 }
