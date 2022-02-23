@@ -3,7 +3,7 @@ package kr.co.strato.domain.project.repository;
 import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
 import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
-import static kr.co.strato.domain.user.model.QUser.user;
+import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
 
 import java.util.List;
 
@@ -58,9 +58,9 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
 	                              "userCount"),
 						  ExpressionUtils.as(
-								  JPAExpressions.select(user.userName)
-	                                            .from(user)
-	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
+								  JPAExpressions.select(userEntity.userName)
+	                                            .from(userEntity)
+	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.id))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
 	                              "projectUserName"),
 						  ExpressionUtils.as(
@@ -101,15 +101,15 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
 	                              "userCount"),
 						  ExpressionUtils.as(
-								  JPAExpressions.select(user.userName)
-	                                            .from(user)
-	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
+								  JPAExpressions.select(userEntity.userName)
+	                                            .from(userEntity)
+	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.id))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
 	                              "projectUserName"),
 						  ExpressionUtils.as(
-								  JPAExpressions.select(user.email)
-	                                            .from(user)
-	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
+								  JPAExpressions.select(userEntity.email)
+	                                            .from(userEntity)
+	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.id))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
 	                              "projectUserEmail"),
 						  

@@ -1,15 +1,17 @@
 package kr.co.strato.domain.user.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import kr.co.strato.domain.user.model.User;
+import kr.co.strato.domain.user.model.UserEntity;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, String> {
 	
-	User findByEmail(String email);
+	UserEntity findByEmail(String email);
 	
-	List<User> findByUserName(String userName);
+	Page<UserEntity> findByUserName(String userName, Pageable pageable);
+	
+	UserEntity findByUserId(String userId);
 	
 }
