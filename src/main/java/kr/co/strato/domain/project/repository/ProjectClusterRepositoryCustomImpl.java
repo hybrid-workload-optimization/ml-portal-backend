@@ -1,0 +1,50 @@
+package kr.co.strato.domain.project.repository;
+
+import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
+import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import kr.co.strato.portal.project.model.ProjectClusterDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Repository
+public class ProjectClusterRepositoryCustomImpl implements ProjectClusterRepositoryCustom {
+
+	private final JPAQueryFactory queryFactory;
+	
+	@Override
+	public List<ProjectClusterDto> getProjectClusterList(Long projectIdx) {
+		
+		List<ProjectClusterDto> result = queryFactory
+				.select(Projections.fields(
+						ProjectClusterDto.class,
+						projectClusterEntity.clusterIdx, 
+						projectClusterEntity.projectIdx, 
+						clusterEntity.provider,
+						clusterEntity.providerVersion, 
+						clusterEntity.clusterName,
+						clusterEntity.description,
+						ExpressionUtils.as(
+								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", clusterEntity.createdAt, "%Y-%m-%d %H:%i"),
+								"createdAt"
+						)
+				  ))
+				  .from(projectClusterEntity)
+				  .join(clusterEntity).on(projectClusterEntity.clusterIdx.eq(clusterEntity.clusterIdx))
+				  .where(projectClusterEntity.projectIdx.eq(projectIdx))
+				  .fetch();
+		
+		return result;
+	}
+}

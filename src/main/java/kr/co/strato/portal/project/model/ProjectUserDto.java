@@ -20,4 +20,9 @@ public class ProjectUserDto {
 	private String createUserName;
 	private String createdAt;
 	private String projectUserRole;
+	
+	private String userName;
+	private String email;
+	private String organization;
+	private int addDayCount;
 }

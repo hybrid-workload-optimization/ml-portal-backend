@@ -22,10 +22,9 @@ public class ProjectDto {
 	private String updatedAt;
 	private String deletedYn;
 	
-	private int page;
-	private int size;
 	private String userId;
 	private Long clusterCount;
 	private Long userCount;
 	private String projectUserName;
+	private String projectUserEmail;
 }

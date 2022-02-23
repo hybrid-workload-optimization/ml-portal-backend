@@ -75,17 +75,17 @@ public class ClusterPersistentVolumeController {
 	@PostMapping("/api/v1/cluster/registerClusterPersistentVolume")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
-		List<Long> ids = null;
+		List<Long> results = null;
 		
 		try {
-			 ids = persistentVolumeService.registerClusterPersistentVolume(yamlApplyParam,kubeConfigId);
+			results = persistentVolumeService.registerClusterPersistentVolume(yamlApplyParam,kubeConfigId);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
 		} finally {
 		}
 		
-		return new ResponseWrapper<>(ids);
+		return new ResponseWrapper<>(results);
 	}
 
 	@DeleteMapping("/api/v1/cluster/deletClusterPersistentVolume")
@@ -103,10 +103,11 @@ public class ClusterPersistentVolumeController {
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterPersistentVolume/{id}")
-    public ResponseWrapper<Long> updateClusterPersistentVolume(@PathVariable(required = true) Long id, @RequestBody ClusterPersistentVolumeDto clusterPersistentVolumeDto){
+	@ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Long> updateClusterPersistentVolume(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	//        	
+        	persistentVolumeService.updateClusterPersistentVolume(id,yamlApplyParam);        	
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

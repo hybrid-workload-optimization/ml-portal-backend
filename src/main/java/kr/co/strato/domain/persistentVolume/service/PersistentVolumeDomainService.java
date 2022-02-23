@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.repository.PersistentVolumeRepository;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -41,15 +42,12 @@ public class PersistentVolumeDomainService {
 		return persistentVolumeEntity.getId();
 	}
 	
-	public void update(PersistentVolumeEntity persistentVolumeEntity) {
-		Optional<PersistentVolumeEntity> persistentVolume = persistentVolumeRepository.findById(persistentVolumeEntity.getId());
-		if (persistentVolume.isPresent()) {
-			persistentVolumeRepository.save(persistentVolumeEntity);
-		} else {
-			throw new NotFoundResourceException("persistentVolume_id : " + persistentVolumeEntity.getId());
-		}
-	}
 	
+	public Long update(PersistentVolumeEntity persistentVolumeEntity,Long persistentVolumeId, Long clusterId) {
+		persistentVolumeRepository.save(persistentVolumeEntity);
+		return persistentVolumeEntity.getId();
+	}
+
 	public void delete(PersistentVolumeEntity persistentVolumeEntity) {
 		persistentVolumeRepository.delete(persistentVolumeEntity);
 	}
@@ -63,5 +61,12 @@ public class PersistentVolumeDomainService {
         }
     }
 	
+    public ClusterEntity getCluster(Long id){
+    	PersistentVolumeEntity entity = getDetail(id);
+        ClusterEntity cluster =  entity.getClusterIdx();
+
+        return cluster;
+    }
+
 	
 }

@@ -104,10 +104,11 @@ public class ClusterNamespaceController {
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterNamespace/{id}")
-    public ResponseWrapper<Long> updateClusterNamespace(@PathVariable(required = true) Long id, @RequestBody ClusterNamespaceDto clusterNamespaceDto){
+	@ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Long> updateClusterNamespace(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	//        	
+        	namespaceService.updateClusterNamespace(id,yamlApplyParam);        	   	
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

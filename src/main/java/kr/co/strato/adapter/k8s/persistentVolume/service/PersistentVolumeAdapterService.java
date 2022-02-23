@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ClusterResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -60,17 +61,38 @@ public class PersistentVolumeAdapterService {
             String results = commonProxy.apply(param);
             //json -> fabric8 k8s 오브젝트 파싱
             ObjectMapper mapper = new ObjectMapper();
-            List<PersistentVolume> clusterPersistentVolumes = mapper.readValue(results, new TypeReference<List<PersistentVolume>>(){});
+            List<PersistentVolume> persistentVolumes = mapper.readValue(results, new TypeReference<List<PersistentVolume>>(){});
 
-            return clusterPersistentVolumes;
+            return persistentVolumes;
 
         }catch (JsonProcessingException e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("json 파싱 에러");
         }catch (Exception e){
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - ㅔersistentVolume 생성 에러");
         }
-        return null;
+    }
+    
+    
+    public List<PersistentVolume> updatePersistentVolume(Integer clusterId, String yaml){
+        YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
+        try{
+            String results = commonProxy.apply(param);
+
+            //json -> fabric8 k8s 오브젝트 파싱
+            ObjectMapper mapper = new ObjectMapper();
+            List<PersistentVolume> persistentVolumes = mapper.readValue(results, new TypeReference<List<PersistentVolume>>(){});
+
+            return persistentVolumes;
+
+        }catch (JsonProcessingException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - PersistentVolume 업데이트 에러");
+        }
     }
 
     public boolean deletePersistentVolume(Integer kubeConfigId, String name){

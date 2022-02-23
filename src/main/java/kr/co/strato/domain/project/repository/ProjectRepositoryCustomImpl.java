@@ -63,7 +63,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
 	                              "projectUserName"),
-						  
 						  ExpressionUtils.as(
 								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})",projectEntity.updatedAt, "%Y-%m-%d"),
 								  "updatedAt")
@@ -72,14 +71,55 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .where(projectEntity.id.in(
 						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.id.eq(param.getUserId()), builder))
 				  )
-				  //.fetchResults();
 				  .fetch();
 		
-		//return new PageImpl<>(result.getResults(), pageable, result.getTotal());
 		return result;
 	}
 	
-	/*private <T> BooleanExpression condition(T value, Function<T, BooleanExpression> function) {
-		return Optional.ofNullable(value).map(function).orElse(null);
-	}*/
+	@Override
+	public ProjectDto getProjectDetail(Long projectIdx) {
+		
+		BooleanBuilder builder = new BooleanBuilder();
+	    if(projectIdx != null) {
+	    	builder.and(projectEntity.id.eq(projectIdx));
+	    }
+		
+		ProjectDto result = queryFactory
+				  .select(Projections.fields(
+						  ProjectDto.class,
+						  projectEntity.id, 
+						  projectEntity.projectName,
+						  projectEntity.description, 
+						  ExpressionUtils.as(
+								  JPAExpressions.select(projectClusterEntity.clusterIdx.count())
+	                                            .from(projectClusterEntity)
+	                                            .where(projectClusterEntity.projectIdx.eq(projectEntity.id)),
+	                              "clusterCount"),
+						  ExpressionUtils.as(
+								  JPAExpressions.select(projectUserEntity.id.count())
+	                                            .from(projectUserEntity)
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
+	                              "userCount"),
+						  ExpressionUtils.as(
+								  JPAExpressions.select(user.userName)
+	                                            .from(user)
+	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
+	                              "projectUserName"),
+						  ExpressionUtils.as(
+								  JPAExpressions.select(user.email)
+	                                            .from(user)
+	                                            .join(projectUserEntity).on(user.userId.eq(projectUserEntity.id))
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
+	                              "projectUserEmail"),
+						  
+						  projectEntity.updatedAt
+				  ))
+				  .from(projectEntity)
+				  .where(projectEntity.id.eq(projectIdx)
+				  )
+				  .fetchOne();
+		
+		return result;
+	}
 }
