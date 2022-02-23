@@ -22,8 +22,18 @@ public class ProjectUserDomainService {
      * @param userId
      * @return
      */
-    public List<ProjectUserDto> getProjectByUserId(String userId) {
+    /*public List<ProjectUserDto> getProjectByUserId(String userId) {
     	
     	return projectUserRepository.getProjectByUserId(userId);
+    }*/
+	
+	/**
+     * Project의 User 리스트 조회
+     * @param userId
+     * @return
+     */
+    public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+    	
+    	return projectUserRepository.getProjectUserList(projectIdx);
     }
 }

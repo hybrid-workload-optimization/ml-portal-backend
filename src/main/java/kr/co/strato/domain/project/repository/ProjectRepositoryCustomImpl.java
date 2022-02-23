@@ -77,11 +77,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}
 	
 	@Override
-	public ProjectDto getProjectDetail(Long projectId) {
+	public ProjectDto getProjectDetail(Long projectIdx) {
 		
 		BooleanBuilder builder = new BooleanBuilder();
-	    if(projectId != null) {
-	    	builder.and(projectEntity.id.eq(projectId));
+	    if(projectIdx != null) {
+	    	builder.and(projectEntity.id.eq(projectIdx));
 	    }
 		
 		ProjectDto result = queryFactory
@@ -116,7 +116,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 						  projectEntity.updatedAt
 				  ))
 				  .from(projectEntity)
-				  .where(projectEntity.id.eq(projectId)
+				  .where(projectEntity.id.eq(projectIdx)
 				  )
 				  .fetchOne();
 		

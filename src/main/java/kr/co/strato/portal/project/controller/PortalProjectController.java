@@ -1,10 +1,13 @@
 package kr.co.strato.portal.project.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 
 @RestController
@@ -44,12 +49,54 @@ public class PortalProjectController {
      * @param projectId
      * @return
      */
-    @GetMapping("/api/v1/project/projects/{projectId}")
+    @GetMapping("/api/v1/project/projects/{projectIdx}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<ProjectDto> getProjectList(@PathVariable("projectId") Long projectId) {
+    public ResponseWrapper<ProjectDto> getProjectList(@PathVariable("projectIdx") Long projectIdx) {
         
-    	ProjectDto response = portalProjectService.getProjectDetail(projectId);
+    	ProjectDto response = portalProjectService.getProjectDetail(projectIdx);
         
         return new ResponseWrapper<ProjectDto>(response);
+    }
+    
+    /**
+     * Project의 Cluster 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    @GetMapping("/api/v1/project/cluster/{projectIdx}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<ProjectClusterDto>> getProjectClusterList(@PathVariable("projectIdx") Long projectIdx) {
+        
+    	List<ProjectClusterDto> response = portalProjectService.getProjectClusterList(projectIdx);
+        
+        return new ResponseWrapper<List<ProjectClusterDto>> (response);
+    }
+    
+    /**
+     * Project의 User 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    @GetMapping("/api/v1/project/user/{projectIdx}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<ProjectUserDto>> getProjectUserList(@PathVariable("projectIdx") Long projectIdx) {
+        
+    	List<ProjectUserDto> response = portalProjectService.getProjectUserList(projectIdx);
+        
+        return new ResponseWrapper<List<ProjectUserDto>> (response);
+    }
+    
+    /**
+     * Project 생성
+     * @param 
+     * @return
+     */
+    @PostMapping("/api/v1/project/projects")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseWrapper<Long> createProject(@RequestBody ProjectDto param) {
+        
+    	Long response = portalProjectService.createProject(param);
+        
+        return new ResponseWrapper<Long> (response);
     }
 }

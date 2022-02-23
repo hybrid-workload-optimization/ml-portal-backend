@@ -22,6 +22,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
@@ -50,72 +51,10 @@ public class ClusterNodeService {
 		synClusterNodeSave(nodeList,clusterId);
 		return nodeList;
 	}
-
-	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Integer clusterId) {
-		List<Long> ids = new ArrayList<>();
-		ObjectMapper mapper = new ObjectMapper();
-		for (Node n : clusterNodes) {
-			try {
-				List<NodeCondition> conditions = n.getStatus().getConditions();
-				// k8s Object -> Entity
-				String name = n.getMetadata().getName();
-				String uid = n.getMetadata().getUid();
-
-				String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-						.map(addr -> addr.getAddress()).findFirst().orElse(null);
-
-				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
-						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
-
-				String createdAt = n.getMetadata().getCreationTimestamp();
-
-				String k8sVersion = n.getApiVersion();
-
-				String podCapacity = n.getStatus().getCapacity().get("pods").getAmount().replaceAll("[^0-9]", "");
-				float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
-				float memoryCapacity = Float.parseFloat(n.getStatus().getCapacity().get("memory").getAmount().replaceAll("[^0-9]", ""));
-				String image = n.getStatus().getNodeInfo().getOsImage();
-				String kernelVersion = n.getStatus().getNodeInfo().getKernelVersion();
-				String architecture = n.getStatus().getNodeInfo().getArchitecture();
-				String kubeletVersion = n.getStatus().getNodeInfo().getKubeletVersion();
-
-				String annotations = mapper.writeValueAsString(n.getMetadata().getAnnotations());
-				String label = mapper.writeValueAsString(n.getMetadata().getLabels());
-				String condition = mapper.writeValueAsString(conditions);
-
-				List<String> roles = new ArrayList<>();
-				n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
-						.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
-				String role = mapper.writeValueAsString(roles);
-
-				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
-
-				NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
-						.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
-						.createdAt(DateUtil.strToLocalDateTime(createdAt))
-						.podCidr(podCapacity).osImage(image)
-						.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
-						.clusterIdx(clusterEntity)
-						.annotation(annotations).label(label).condition(condition).role(role)
-						.build();
-
-				// save
-				Long id = nodeDomainService.register(clusterNode);
-				ids.add(id);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-				throw new InternalServerException("parsing error");
-			}
-		}
-
-		return ids;
-	}
 	
 	public void deleteClusterNode(Integer clusterId, NodeEntity nodeEntity) throws Exception {
 		nodeDomainService.delete(nodeEntity);
 		nodeAdapterService.deleteNode(clusterId, nodeEntity.getName());
-//		return nodeAdapterService.deleteNode(kubeConfigId, name);
 	}
 	
     public ClusterNodeDto getClusterNodeDetail(Long id){
@@ -127,57 +66,20 @@ public class ClusterNodeService {
 	
 	
 	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Integer clusterId) {
-		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),
-				yamlApplyParam.getYaml());
-		List<Long> ids = new ArrayList<>();
+		String decodeYaml = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),decodeYaml);
+		List<Long> ids = synClusterNodeSave(clusterNodes,clusterId);
+		return ids;
+	}
+	
 
-		ObjectMapper mapper = new ObjectMapper();
+	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Integer clusterId) {
+		List<Long> ids = new ArrayList<>();
 		for (Node n : clusterNodes) {
 			try {
-				List<NodeCondition> conditions = n.getStatus().getConditions();
-				// k8s Object -> Entity
-				String name = n.getMetadata().getName();
-				String uid = n.getMetadata().getUid();
-
-				String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-						.map(addr -> addr.getAddress()).findFirst().orElse(null);
-
-				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
-						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
-
-				String createdAt = n.getMetadata().getCreationTimestamp();
-
-				String k8sVersion = n.getApiVersion();
-
-				String podCapacity = n.getStatus().getCapacity().get("pods").getAmount().replaceAll("[^0-9]", "");
-				float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
-				float memoryCapacity = Float.parseFloat(n.getStatus().getCapacity().get("memory").getAmount().replaceAll("[^0-9]", ""));
-				String image = n.getStatus().getNodeInfo().getOsImage();
-				String kernelVersion = n.getStatus().getNodeInfo().getKernelVersion();
-				String architecture = n.getStatus().getNodeInfo().getArchitecture();
-				String kubeletVersion = n.getStatus().getNodeInfo().getKubeletVersion();
-
-				String annotations = mapper.writeValueAsString(n.getMetadata().getAnnotations());
-				String label = mapper.writeValueAsString(n.getMetadata().getLabels());
-				String condition = mapper.writeValueAsString(conditions);
-
-				List<String> roles = new ArrayList<>();
-				n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
-						.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
-				String role = mapper.writeValueAsString(roles);
-
-				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
-
-				NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
-						.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
-						.createdAt(DateUtil.strToLocalDateTime(createdAt))
-						.podCidr(podCapacity).osImage(image)
-						.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
-						.clusterIdx(clusterEntity)
-						.annotation(annotations).label(label).condition(condition).role(role)
-						.build();
-
+				NodeEntity clusterNode = toEntity(n,clusterId);
+				
 				// save
 				Long id = nodeDomainService.register(clusterNode);
 				ids.add(id);
@@ -189,5 +91,59 @@ public class ClusterNodeService {
 
 		return ids;
 	}
+	
+	private NodeEntity toEntity(Node n, Integer clusterId) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+     // k8s Object -> Entity
+        List<NodeCondition> conditions = n.getStatus().getConditions();
+		// k8s Object -> Entity
+		String name = n.getMetadata().getName();
+		String uid = n.getMetadata().getUid();
 
+		String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
+				.map(addr -> addr.getAddress()).findFirst().orElse(null);
+
+		boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+				.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+
+		String createdAt = n.getMetadata().getCreationTimestamp();
+
+		String k8sVersion = n.getApiVersion();
+
+		String podCapacity = n.getStatus().getCapacity().get("pods").getAmount().replaceAll("[^0-9]", "");
+		float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
+		float memoryCapacity = Float.parseFloat(n.getStatus().getCapacity().get("memory").getAmount().replaceAll("[^0-9]", ""));
+		String image = n.getStatus().getNodeInfo().getOsImage();
+		String kernelVersion = n.getStatus().getNodeInfo().getKernelVersion();
+		String architecture = n.getStatus().getNodeInfo().getArchitecture();
+		String kubeletVersion = n.getStatus().getNodeInfo().getKubeletVersion();
+
+		String annotations = mapper.writeValueAsString(n.getMetadata().getAnnotations());
+		String label = mapper.writeValueAsString(n.getMetadata().getLabels());
+		String condition = mapper.writeValueAsString(conditions);
+
+		List<String> roles = new ArrayList<>();
+		n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
+				.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
+		String role = mapper.writeValueAsString(roles);
+
+		ClusterEntity clusterEntity = new ClusterEntity();
+		clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+
+		NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
+				.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
+				.createdAt(DateUtil.strToLocalDateTime(createdAt))
+				.podCidr(podCapacity).osImage(image)
+				.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
+				.clusterIdx(clusterEntity)
+				.annotation(annotations).label(label).condition(condition).role(role)
+				.build();
+
+        return clusterNode;
+    }
+    public String getNodeYaml(Integer kubeConfigId,String name){
+     	String namespaceYaml = nodeAdapterService.getNodeYaml(kubeConfigId,name); 
+         return namespaceYaml;
+     }
+    
 }

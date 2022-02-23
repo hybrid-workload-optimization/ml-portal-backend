@@ -103,10 +103,10 @@ public class ClusterStorageClassController {
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterStorageClass/{id}")
-    public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody ClusterStorageClassDto clusterStorageClassDto){
+    public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	//        	
+        	storageClassService.updateClusterStorageClass(id, yamlApplyParam);      	
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

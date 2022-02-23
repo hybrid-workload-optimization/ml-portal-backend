@@ -21,11 +21,14 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class ClusterStorageClassService {
 
 	@Autowired
@@ -52,28 +55,9 @@ public class ClusterStorageClassService {
 
 	public List<Long> synClusterStorageClassSave(List<StorageClass> storageClassList, Integer clusterId) {
 		List<Long> ids = new ArrayList<>();
-		ObjectMapper mapper = new ObjectMapper();
 		for (StorageClass sc : storageClassList) {
 			try {
-				// k8s Object -> Entity
-				String name = sc.getMetadata().getName();
-				String uid = sc.getMetadata().getUid();
-				String createdAt = sc.getMetadata().getCreationTimestamp();
-				String provider = sc.getProvisioner();
-				String type = sc.getParameters().get("type");
-				
-				String annotations = mapper.writeValueAsString(sc.getMetadata().getAnnotations());
-				String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
-				
-				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
-				
-				StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
-						.createdAt(DateUtil.strToLocalDateTime(createdAt))
-						.provider(provider).type(type)
-						.clusterIdx(clusterEntity)
-						.annotation(annotations).label(label)
-						.build();
+				StorageClassEntity clusterStorageClass = toEntity(sc,clusterId);
 
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);
@@ -107,32 +91,15 @@ public class ClusterStorageClassService {
     
 	
 	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Integer clusterId) {
-		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(),
-				yamlApplyParam.getYaml());
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
-		ObjectMapper mapper = new ObjectMapper();
 		for (StorageClass sc : storageClassList) {
 			try {
 				// k8s Object -> Entity
-				String name = sc.getMetadata().getName();
-				String uid = sc.getMetadata().getUid();
-				String createdAt = sc.getMetadata().getCreationTimestamp();
-				String provider = sc.getProvisioner();
-				String type = sc.getParameters().get("type");
-				
-				String annotations = mapper.writeValueAsString(sc.getMetadata().getAnnotations());
-				String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
-				
-				ClusterEntity clusterEntity = new ClusterEntity();
-				clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
-				
-				StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
-						.createdAt(DateUtil.strToLocalDateTime(createdAt))
-						.provider(provider).type(type)
-						.clusterIdx(clusterEntity)
-						.annotation(annotations).label(label)
-						.build();
+				StorageClassEntity clusterStorageClass = toEntity(sc,clusterId);
 
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);
@@ -145,5 +112,57 @@ public class ClusterStorageClassService {
 
 		return ids;
 	}
+	
+	public List<Long> updateClusterStorageClass(Long storageClassId, YamlApplyParam yamlApplyParam){
+        String yaml = Base64Util.decode(yamlApplyParam.getYaml());
+        ClusterEntity cluster = storageClassDomainService.getCluster(storageClassId);
+        Integer clusterId = Long.valueOf(cluster.getClusterId()).intValue();
 
+        List<StorageClass> storageClass = storageClassAdapterService.registerStorageClass(clusterId.intValue(), yaml);
+
+        List<Long> ids = storageClass.stream().map( sc -> {
+            try {
+            	StorageClassEntity updatestorageClass = toEntity(sc,clusterId);
+
+                Long id = storageClassDomainService.update(updatestorageClass, storageClassId, clusterId.longValue());
+
+                return id;
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage(), e);
+                throw new InternalServerException("json 파싱 에러");
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                throw new InternalServerException("PersistentVolume update error");
+            }
+        }).collect(Collectors.toList());
+        return ids;
+    }
+	
+	
+	 private StorageClassEntity toEntity(StorageClass sc,Integer clusterId) throws JsonProcessingException {
+	        ObjectMapper mapper = new ObjectMapper();
+	    	// k8s Object -> Entity
+			String name = sc.getMetadata().getName();
+			String uid = sc.getMetadata().getUid();
+			String createdAt = sc.getMetadata().getCreationTimestamp();
+			String provider = sc.getProvisioner();
+			String type = sc.getParameters().get("type");
+			
+			String annotations = mapper.writeValueAsString(sc.getMetadata().getAnnotations());
+			String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
+			
+			ClusterEntity clusterEntity = new ClusterEntity();
+			clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+			
+			StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
+					.createdAt(DateUtil.strToLocalDateTime(createdAt))
+					.provider(provider).type(type)
+					.clusterIdx(clusterEntity)
+					.annotation(annotations).label(label)
+					.build();
+
+	        return clusterStorageClass;
+	    }
+		
+	
 }

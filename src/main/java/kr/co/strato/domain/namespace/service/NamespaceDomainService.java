@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
+import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -49,13 +50,15 @@ public class NamespaceDomainService {
 		return namespaceRepository.findByNameAndClusterIdx(name,clusterEntity);
 	}
 	
-	public void update(NamespaceEntity namespaceEntity) {
-		Optional<NamespaceEntity> namespace = namespaceRepository.findById(namespaceEntity.getId());
-		if (namespace.isPresent()) {
-			namespaceRepository.save(namespaceEntity);
-		} else {
-			throw new NotFoundResourceException("namespace_id : " + namespaceEntity.getId());
-		}
+    public ClusterEntity getCluster(Long id){
+    	NamespaceEntity entity = getDetail(id);
+        ClusterEntity cluster =  entity.getClusterIdx();
+        return cluster;
+    }
+    
+    public Long update(NamespaceEntity namespaceEntity,Long namespaceId, Long clusterId) {
+    	namespaceRepository.save(namespaceEntity);
+		return namespaceEntity.getId();
 	}
 	
 }
