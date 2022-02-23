@@ -26,24 +26,26 @@ public class PortalProjectService {
 	ProjectUserDomainService projectUserDomainService;
 	
 	/**
-     * 멤버 리스트 조회
+     * Project 리스트 조회
      * @param pageable
+     * @param param
      * @return
      */
     public Page<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
-	//public List<ProjectUserDto> getProjectList(Pageable pageable, String userId) {
-    	
-		//List<ProjectUserDto> userProjectList = projectUserDomainService.getProjectByUserId(userId);
-    	
-    	
     	
     	List<ProjectDto> projectList = projectDomainService.getProjectList(pageable, param);
     	
-    	//Entity -> DTO 변환
-    	//List<ProjectDto> dtos = projectList.getContent().stream().map(m -> ProjectDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
-    	
     	//페이징 정보 추가
         return new PageImpl<ProjectDto>(projectList, pageable, projectList.size());
-    	//return userProjectList;
+    }
+    
+    /**
+     * Project 상세 조회
+     * @param projectId
+     * @return
+     */
+    public ProjectDto getProjectDetail(Long projectId) {
+    	
+        return projectDomainService.getProjectDetail(projectId);
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,16 +28,28 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ProjectDto>> getProjectList(@RequestParam int page, @RequestParam int size, @RequestBody ProjectDto param){
+    public ResponseWrapper<Page<ProjectDto>> getProjectList(@RequestParam int page, @RequestParam int size, @RequestBody ProjectDto param) {
         
     	PageRequest pageable = new PageRequest();
     	pageable.setPage(page);
     	pageable.setSize(size);
     	
     	Page<ProjectDto> response = portalProjectService.getProjectList(pageable.of(), param);
-    	//List<ProjectUserDto> response = portalProjectService.getProjectList(pageable.of(), dto.getUserId());
         
         return new ResponseWrapper<Page<ProjectDto>>(response);
-    	//return new ResponseWrapper<List<ProjectUserDto>>(response);
+    }
+    
+    /**
+     * Project 상세 조회
+     * @param projectId
+     * @return
+     */
+    @GetMapping("/api/v1/project/projects/{projectId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<ProjectDto> getProjectList(@PathVariable("projectId") Long projectId) {
+        
+    	ProjectDto response = portalProjectService.getProjectDetail(projectId);
+        
+        return new ResponseWrapper<ProjectDto>(response);
     }
 }

@@ -22,12 +22,21 @@ public class ProjectDomainService {
 	/**
      * Project 리스트 조회
      * @param pageable
+     * @param param
      * @return
      */
     public List<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
     	
-    	//Project 리스트 조회
-    	//return projectRepository.findAll(pageable);
     	return projectRepository.getProjectList(pageable, param);
+    }
+    
+    /**
+     * Project 상세 조회
+     * @param projectId
+     * @return
+     */
+    public ProjectDto getProjectDetail(Long projectId) {
+    	
+    	return projectRepository.getProjectDetail(projectId);
     }
 }
