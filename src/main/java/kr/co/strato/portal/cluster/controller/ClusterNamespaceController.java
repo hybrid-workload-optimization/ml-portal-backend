@@ -89,11 +89,11 @@ public class ClusterNamespaceController {
 		return new ResponseWrapper<>(ids);
 	}
 
-	@DeleteMapping("/api/v1/cluster/deletClusterNamespace")
+	@DeleteMapping("/api/v1/cluster/deletClusterNamespace/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterNamespace(@RequestParam Integer kubeConfigId, 	@RequestParam NamespaceEntity namespaceEntity) {
+	public ResponseWrapper<Boolean> deleteClusterNamespace(@PathVariable(required = true) Long id) {
 		try {
-			namespaceService.deleteClusterNamespace(kubeConfigId, namespaceEntity);
+			namespaceService.deleteClusterNamespace(id);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

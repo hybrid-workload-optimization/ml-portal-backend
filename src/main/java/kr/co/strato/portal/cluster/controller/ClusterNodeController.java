@@ -76,11 +76,11 @@ public class ClusterNodeController {
 		return new ResponseWrapper<>(ids);
 	}
 */
-	@DeleteMapping("/api/v1/cluster/deletClusterNode")
+	@DeleteMapping("/api/v1/cluster/deletClusterNode/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterNode(@RequestParam Integer kubeConfigId, 	@RequestParam NodeEntity nodeEntity) {
+	public ResponseWrapper<Boolean> deleteClusterNode(@PathVariable("id") Long id) {
 		try {
-			nodeService.deleteClusterNode(kubeConfigId, nodeEntity);
+			nodeService.deleteClusterNode(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

@@ -26,6 +26,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.persistentVolume.service.PersistentVolumeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -62,12 +63,21 @@ public class ClusterPersistentVolumeService {
 		return persistentVolumeList;
 	}
 
-
-	public void deleteClusterPersistentVolume(Integer clusterId, PersistentVolumeEntity persistentVolumeEntity) throws Exception {
-		persistentVolumeDomainService.delete(persistentVolumeEntity);
-		persistentVolumeAdapterService.deletePersistentVolume(clusterId, persistentVolumeEntity.getName());
-	}
 	
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteClusterPersistentVolume(Long id){
+    	PersistentVolumeEntity pv = persistentVolumeDomainService.getDetail(id.longValue());
+        Long clusterId = pv.getClusterIdx().getClusterId();
+        String persistentVolumeName = pv.getName();
+
+        boolean isDeleted = persistentVolumeAdapterService.deletePersistentVolume(clusterId.intValue(), persistentVolumeName);
+        if(isDeleted){
+            return persistentVolumeDomainService.delete(id.longValue());
+        }else{
+            throw new InternalServerException("k8s persistentVolume 삭제 실패");
+        }
+    }
+
     public ClusterPersistentVolumeDto getClusterPersistentVolumeDetail(Long id){
     	PersistentVolumeEntity persistentVolumeEntity = persistentVolumeDomainService.getDetail(id); 
 

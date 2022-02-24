@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.repository.NodeRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
@@ -36,8 +37,13 @@ public class NodeDomainService {
 		return nodeRepository.findByClusterIdx(clusterEntity,pageable);
 	}
 	
-	public void delete(NodeEntity nodeEntity) {
-		nodeRepository.delete(nodeEntity);
+	public boolean delete(Long id) {
+		Optional<NodeEntity> opt = nodeRepository.findById(id);
+		if (opt.isPresent()) {
+			NodeEntity entity = opt.get();
+			nodeRepository.delete(entity);
+		}
+		return true;
 	}
 	
 	public NodeEntity getDetail(Long id) {

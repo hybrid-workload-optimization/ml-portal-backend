@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.NodeCondition;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -52,10 +53,21 @@ public class ClusterNodeService {
 		return nodeList;
 	}
 	
-	public void deleteClusterNode(Integer clusterId, NodeEntity nodeEntity) throws Exception {
-		nodeDomainService.delete(nodeEntity);
-		nodeAdapterService.deleteNode(clusterId, nodeEntity.getName());
-	}
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteClusterNode(Long id){
+    	NodeEntity n = nodeDomainService.getDetail(id.longValue());
+        Long clusterId = n.getClusterIdx().getClusterId();
+        String nodeName = n.getName();
+
+        boolean isDeleted = nodeAdapterService.deleteNode(clusterId.intValue(), nodeName);
+        if(isDeleted){
+            return nodeDomainService.delete(id.longValue());
+        }else{
+            throw new InternalServerException("k8s Node 삭제 실패");
+        }
+    }
+	
 	
     public ClusterNodeDto getClusterNodeDetail(Long id){
     	NodeEntity nodeEntity = nodeDomainService.getDetail(id); 

@@ -13,6 +13,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -33,8 +34,13 @@ public class NamespaceDomainService {
 		return namespaceRepository.findByName(name,pageable);
 	}
 	
-	public void delete(NamespaceEntity namespaceEntity) {
-		namespaceRepository.delete(namespaceEntity);
+	public boolean delete(Long id) {
+		Optional<NamespaceEntity> opt = namespaceRepository.findById(id);
+		if (opt.isPresent()) {
+			NamespaceEntity entity = opt.get();
+			namespaceRepository.delete(entity);
+		}
+		return true;
 	}
 	
 	public NamespaceEntity getDetail(Long id) {

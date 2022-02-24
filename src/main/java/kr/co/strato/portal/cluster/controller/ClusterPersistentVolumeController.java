@@ -88,11 +88,11 @@ public class ClusterPersistentVolumeController {
 		return new ResponseWrapper<>(results);
 	}
 
-	@DeleteMapping("/api/v1/cluster/deletClusterPersistentVolume")
+	@DeleteMapping("/api/v1/cluster/deletClusterPersistentVolume/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterPersistentVolume(@RequestParam Integer kubeConfigId, 	@RequestParam PersistentVolumeEntity persistentVolumeEntity) {
+	public ResponseWrapper<Boolean> deleteClusterPersistentVolume(@PathVariable(required = true) Long id) {
 		try {
-			persistentVolumeService.deleteClusterPersistentVolume(kubeConfigId, persistentVolumeEntity);
+			persistentVolumeService.deleteClusterPersistentVolume(id);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
