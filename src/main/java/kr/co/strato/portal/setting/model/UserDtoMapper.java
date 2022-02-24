@@ -20,8 +20,7 @@ public interface UserDtoMapper {
 		@Mapping(source = "organization",  target = "organization"),
 		@Mapping(source = "email",  target = "email"),
 		@Mapping(source = "contact",  target = "contact"),
-		@Mapping(source = "useYn",  target = "useYn"),
-		@Mapping(target = "password", ignore = true)
+		@Mapping(source = "useYn",  target = "useYn")
 	})
 	UserEntity toEntity(UserDto dto);
 	
