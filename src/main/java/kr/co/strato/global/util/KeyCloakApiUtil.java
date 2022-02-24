@@ -1,5 +1,7 @@
 package kr.co.strato.global.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -29,8 +31,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -42,13 +42,13 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.AbstractUriTemplateHandler;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,32 +74,89 @@ public class KeyCloakApiUtil {
 
 	@Value("${service.keycloak.manager.pw}")
 	private String keycloakManagerPw;
+	
+	@Value("${service.keycloak.manager.client.id}")
+	private String keycloakManagerClientId;
+	
+	@Value("${service.keycloak.manager.client.secret}")
+	private String keycloakManagerClientSecret;
+	
 
 	// 토큰 발급 API
-	private static final String URI_GET_TOKEN = "/auth/realms/kamp/protocol/openid-connect/token";
+	private static final String URI_GET_TOKEN = "/auth/realms/sptek-cloud/protocol/openid-connect/token";
+	
+	// 관리자 토큰 발급 API
+	private static final String UTI_GET_TOKEN_MANAGER = "/auth/realms/master/protocol/openid-connect/token";
 
 	// 유저 정보 조회 API(모든 유저 조회)
-	private static final String URI_GET_USERS_INFO = "/auth/admin/realms/kamp/users";
+	private static final String URI_GET_USERS_INFO = "/auth/admin/realms/sptek-cloud/users";
 
 	// 유저 정보 조회 API(단일 유저 조회-username)
-	private static final String URI_GET_USER_INFO = "/auth/admin/realms/kamp/users?username=";
+	private static final String URI_GET_USER_INFO = "/auth/admin/realms/sptek-cloud/users?username=";
 
 	// 유저 생성(회원가입)
-	private static final String URI_SET_USER = "/auth/admin/realms/kamp/users";
+	private static final String URI_SET_USER = "/auth/admin/realms/sptek-cloud/users";
 	
 	// 유저 수정 , 삭제
 	private static final String URI_UPDATE_USER = "/auth/admin/realms/sptek-cloud/users/{id}";
 	
-	private static final String URI_UPDATE_PASSWORD = "/auth/admin/realms/kamp/users/{id}/reset-password";
+	private static final String URI_UPDATE_PASSWORD = "/auth/admin/realms/sptek-cloud/users/{id}/reset-password";
 	
-	// 사용자 ROLE 조회 / 추가 / 삭제
-	private static final String URI_GET_USER_ROLE = "/auth/admin/realms/kamp/users/{id}/role-mappings/realm/";
+	// 사용자 ROLE 조회(GET) / 추가(POST) / 삭제
+	private static final String URI_GET_USER_ROLE = "/auth/admin/realms/sptek-cloud/users/{id}/role-mappings/realm/";
 	
 	private static final String MASTER_KEY = "stratoEncryptionqwer1234!@#$";
 
  	// 토큰 생성 - 관리자
 	@SuppressWarnings("unchecked")
 	public String getTokenByManager() throws Exception {
+		System.out.println("관리자 토큰 생성 >>>> ");
+
+		String uriGetToken = keycloakUrl + UTI_GET_TOKEN_MANAGER;
+		String token = null;
+
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "application/x-www-form-urlencoded");
+			logger.info("request uri_userInfo:" + uriGetToken);
+			logger.info("request headers" + headers);
+
+			Map<String, String> tokenMap = new HashMap<String, String>();
+			tokenMap.put("grant_type", "client_credentials");
+			tokenMap.put("client_id", keycloakManagerClientId);
+			tokenMap.put("client_secret", keycloakManagerClientSecret);
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
+
+			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
+
+			logger.info("status code:" + response.getStatusCode());
+			logger.info("response body:" + response.getBody());
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
+
+			System.out.println(res.toString());
+			System.out.println(res.get("access_token"));
+
+			token = (String) res.get("access_token");
+
+		} catch (HttpClientErrorException e) {
+			HttpStatus status = e.getStatusCode();
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+//					return false;
+			} else {
+				throw new Exception(e);
+			}
+		}
+
+		return token;
+	}
+	
+	// 토큰 생성 - 유저
+	@SuppressWarnings("unchecked")
+	public String getTokenByUser() throws Exception {
 
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
@@ -145,10 +202,60 @@ public class KeyCloakApiUtil {
 		return token;
 	}
 
+	// 토큰 재발급(refresh)
+	@SuppressWarnings("unchecked")
+	public String refreshToken() throws Exception {
+
+		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
+		String token = null;
+
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "application/x-www-form-urlencoded");
+			logger.info("request uri_userInfo:" + uriGetToken);
+			logger.info("request headers" + headers);
+
+			Map<String, String> tokenMap = new HashMap<String, String>();
+			tokenMap.put("client_id", keycloakClientId);
+			tokenMap.put("username", keycloakManagerId);
+			tokenMap.put("password", keycloakManagerPw);
+			tokenMap.put("grant_type", "password");
+			tokenMap.put("client_secret", keycloakClientSecret);
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
+
+			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
+
+			logger.info("status code:" + response.getStatusCode());
+			logger.info("response body:" + response.getBody());
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
+
+			System.out.println(res.toString());
+			System.out.println(res.get("access_token"));
+
+			token = (String) res.get("access_token");
+
+		} catch (HttpClientErrorException e) {
+			HttpStatus status = e.getStatusCode();
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+//					return false;
+			} else {
+				throw new Exception(e);
+			}
+		}
+
+		return token;
+	}
+	
+	
 	// 유저 정보 가져오기
-	public KeycloakUser getUserInfoByUserId(String token, String userId) throws Exception {
+	public KeycloakUser getUserInfoByUserId(String userId) throws Exception {
 
 		String uriUserInfo = keycloakUrl + URI_GET_USER_INFO + userId;
+		String token = getTokenByManager();
 
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -286,7 +393,6 @@ public class KeyCloakApiUtil {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 			}
 		}catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -330,15 +436,19 @@ public class KeyCloakApiUtil {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private ResponseEntity<String> request(String uri, HttpMethod httpMethod, HttpHeaders httpHeaders,
 			MultiValueMap<String, String> requestBody) throws Exception {
 		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
-		AbstractUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-
-		restTemplate.setUriTemplateHandler(uriTemplateHandler);
+//		deprecated	
+//		AbstractUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+//		restTemplate.setUriTemplateHandler(uriTemplateHandler);
+		
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(uri);
+		
+		restTemplate.setUriTemplateHandler(factory);
 		restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
 		restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
+		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
 		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, httpHeaders);
 		logger.info("request header:" + httpHeaders);
@@ -359,15 +469,21 @@ public class KeyCloakApiUtil {
 		try {
 
 			RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
-			@SuppressWarnings("deprecation")
-			AbstractUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-			restTemplate.setUriTemplateHandler(uriTemplateHandler);
+//			AbstractUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+//			restTemplate.setUriTemplateHandler(uriTemplateHandler);
+
+			DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(uri);
+			restTemplate.setUriTemplateHandler(factory);
 			restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
 			restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
+			restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
 			requestEntity = new HttpEntity<JsonNode>(requestBody, httpHeaders);
 			logger.info("[request]{} body={}", uri, (requestBody != null) ? requestBody.toString() : "");
-
+			
+			System.out.println("======== requestEntity :::");
+			System.out.println(requestEntity.toString());
+			
 			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
 		} catch (HttpStatusCodeException reste) {
@@ -412,4 +528,15 @@ public class KeyCloakApiUtil {
 	}
 	
 
+	private String replaceUri(String url, String key, String value) {
+		String result = null;
+		try {
+			result = url.replace("{" + key + "}", URLEncoder.encode(value, "UTF-8")).trim();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return result;
+		
+	}
+	
 }

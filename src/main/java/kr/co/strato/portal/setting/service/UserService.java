@@ -28,17 +28,19 @@ public class UserService {
 	//등록
 	public String postUser(UserDto param) {
 		
+		//keycloak 연동
+		try {
+			System.out.println("keycloak 연동 >> 등록");
+			keyCloakApiUtil.createSsoUser(param);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		
 		userDomainService.saveUser(entity);
 		
-		//keycloak 연동
-		try {
-//			keyCloakApiUtil.createSsoUser(param);
-			System.out.println("keycloak 연동 >> 등록");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 		
 		return param.getUserId();
 	}
