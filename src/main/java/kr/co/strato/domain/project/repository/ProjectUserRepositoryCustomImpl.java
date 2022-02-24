@@ -11,8 +11,10 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,20 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				  .from(projectUserEntity)
 				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
 				  .where(projectUserEntity.projectIdx.eq(projectIdx))
+				  .fetch();
+		
+		return result;
+	}
+	
+	@Override
+	public List<UserEntity> getProjectUserListExceptUse(Long projectIdx) {
+		
+		List<UserEntity> result = queryFactory
+				.select(userEntity)
+				  .from(userEntity)
+				  .where(userEntity.userId.notIn(
+						JPAExpressions.select(projectUserEntity.userId).from(projectUserEntity).where(projectUserEntity.projectIdx.eq(projectIdx))
+				  ))
 				  .fetch();
 		
 		return result;

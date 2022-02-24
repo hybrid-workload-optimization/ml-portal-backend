@@ -10,8 +10,11 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +39,27 @@ public class ProjectClusterRepositoryCustomImpl implements ProjectClusterReposit
 						clusterEntity.clusterName,
 						clusterEntity.description,
 						ExpressionUtils.as(
-								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", clusterEntity.createdAt, "%Y-%m-%d %H:%i"),
-								"createdAt"
+							Expressions.stringTemplate("DATE_FORMAT({0}, {1})", clusterEntity.createdAt, "%Y-%m-%d %H:%i"),
+							"createdAt"
 						)
 				  ))
 				  .from(projectClusterEntity)
 				  .join(clusterEntity).on(projectClusterEntity.clusterIdx.eq(clusterEntity.clusterIdx))
 				  .where(projectClusterEntity.projectIdx.eq(projectIdx))
+				  .fetch();
+		
+		return result;
+	}
+	
+	@Override
+	public List<ClusterEntity> getProjectClusterListExceptUse(Long projectIdx) {
+		
+		List<ClusterEntity> result = queryFactory
+				.select(clusterEntity)
+				  .from(clusterEntity)
+				  .where(clusterEntity.clusterIdx.notIn(
+						JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.eq(projectIdx))
+				  ))
 				  .fetch();
 		
 		return result;
