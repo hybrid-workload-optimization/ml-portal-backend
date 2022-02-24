@@ -28,6 +28,7 @@ public class StatefulSetDto {
     @Setter
     @NoArgsConstructor
     public static class ResListDto{
+        private Long id;
         private String name;
         private String namespace;
         private int podCnt;
