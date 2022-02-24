@@ -23,6 +23,7 @@ public class ProjectDto {
 	private String deletedYn;
 	
 	private String userId;
+	private String userName;
 	private Long clusterCount;
 	private Long userCount;
 	private String projectUserName;

@@ -68,9 +68,9 @@ public class NamespaceAdapterService {
             String results = commonProxy.apply(param);
             //json -> fabric8 k8s 오브젝트 파싱
             ObjectMapper mapper = new ObjectMapper();
-            List<Namespace> clusterNodes = mapper.readValue(results, new TypeReference<List<Namespace>>(){});
+            List<Namespace> clusterNamespaces = mapper.readValue(results, new TypeReference<List<Namespace>>(){});
 
-            return clusterNodes;
+            return clusterNamespaces;
 
         }catch (JsonProcessingException e){
             log.error(e.getMessage(), e);
@@ -81,7 +81,7 @@ public class NamespaceAdapterService {
         return null;
     }
 
-    public boolean deleteNode(Integer kubeConfigId, String name){
+    public boolean deleteNamespace(Integer kubeConfigId, String name){
     	ClusterResourceInfo param = ClusterResourceInfo.builder().kubeConfigId(kubeConfigId).name(name).build();
         return nonNamespaceProxy.deleteResource(ResourceType.namespace.get(), param);
     }

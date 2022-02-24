@@ -31,6 +31,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
@@ -66,12 +67,20 @@ public class ClusterNamespaceService {
 	}
 
 
-	
-	public void deleteClusterNamespace(Integer kubeConfigId, NamespaceEntity namespaceEntity) throws Exception {
-		namespaceDomainService.delete(namespaceEntity);
-		namespaceAdapterService.deleteNode(kubeConfigId, namespaceEntity.getName());
-	}
-	
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteClusterNamespace(Long id){
+    	NamespaceEntity n = namespaceDomainService.getDetail(id.longValue());
+        Long clusterId = n.getClusterIdx().getClusterId();
+        String resourceName = n.getName();
+
+        boolean isDeleted = namespaceAdapterService.deleteNamespace(clusterId.intValue(), resourceName);
+        if(isDeleted){
+            return namespaceDomainService.delete(id.longValue());
+        }else{
+            throw new InternalServerException("k8s Namespace 삭제 실패");
+        }
+    }
+
     public ClusterNamespaceDto getClusterNamespaceDetail(Long id){
     	NamespaceEntity nodeEntity = namespaceDomainService.getDetail(id); 
 
@@ -86,7 +95,9 @@ public class ClusterNamespaceService {
     }
    
 	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam, Integer kubeConfigId) {
-		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlApplyParam.getYaml());
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);
 		List<Long> ids = new ArrayList<>();
 		for (Namespace n : clusterNamespaces) {
 			try {
@@ -153,14 +164,14 @@ public class ClusterNamespaceService {
 	 private NamespaceEntity toEntity(Namespace	n,Integer clusterId) throws JsonProcessingException {
 	        ObjectMapper mapper = new ObjectMapper();
 	     // k8s Object -> Entity
-	        List<NamespaceCondition> conditions = n.getStatus().getConditions();
+	       
 			// k8s Object -> Entity
 			String name = n.getMetadata().getName();
 			String uid = n.getMetadata().getUid();
-
-			boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
-					.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
-
+		// List<NamespaceCondition> conditions = n.getStatus().getConditions();
+		//	boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+		//			.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+			String status = n.getStatus().getPhase();
 			String createdAt = n.getMetadata().getCreationTimestamp();
 			String annotations = mapper.writeValueAsString(n.getMetadata().getAnnotations());
 			String label = mapper.writeValueAsString(n.getMetadata().getLabels());

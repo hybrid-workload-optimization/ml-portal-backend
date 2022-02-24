@@ -1,5 +1,7 @@
 package kr.co.strato.global.util;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,7 +16,13 @@ public class DateUtil {
         return LocalDateTime.from(formatter.parse(text));
     }
 
-    public static String localDateTimeToStr(LocalDateTime localDateTime, String format){
+    public static String localDateTimeToStr(LocalDateTime localDateTime, String format) {
         return localDateTime.format(DateTimeFormatter.ofPattern(format));
+    }
+    
+    public static String currentDateTime(String dateFormat) {
+    	Timestamp timestamp  = new Timestamp(System.currentTimeMillis());
+    	SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+    	return sdf.format(timestamp);
     }
 }

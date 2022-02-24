@@ -88,11 +88,11 @@ public class ClusterStorageClassController {
 		return new ResponseWrapper<>(ids);
 	}
 
-	@DeleteMapping("/api/v1/cluster/deletClusterStorageClass")
+	@DeleteMapping("/api/v1/cluster/deletClusterStorageClass/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterStorageClass(@RequestParam Integer kubeConfigId, 	@RequestParam StorageClassEntity storageClassEntity) {
+	public ResponseWrapper<Boolean> deleteClusterStorageClass(@PathVariable(required = true) Long id) {
 		try {
-			storageClassService.deleteClusterStorageClass(kubeConfigId, storageClassEntity);
+			storageClassService.deleteClusterStorageClass(id);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
@@ -106,7 +106,7 @@ public class ClusterStorageClassController {
     public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	//        	
+        	storageClassService.updateClusterStorageClass(id, yamlApplyParam);      	
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

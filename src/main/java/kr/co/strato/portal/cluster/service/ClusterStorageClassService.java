@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -71,10 +72,21 @@ public class ClusterStorageClassService {
 		return ids;
 	}
 	
-	public void deleteClusterStorageClass(Integer clusterId, StorageClassEntity storageClassEntity) throws Exception {
-		storageClassDomainService.delete(storageClassEntity);
-		storageClassAdapterService.deleteStorageClass(clusterId, storageClassEntity.getName());
-	}
+	
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteClusterStorageClass(Long id){
+    	StorageClassEntity sc = storageClassDomainService.getDetail(id.longValue());
+        Long clusterId = sc.getClusterIdx().getClusterId();
+        String storageClassName = sc.getName();
+
+        boolean isDeleted = storageClassAdapterService.deleteStorageClass(clusterId.intValue(), storageClassName);
+        if(isDeleted){
+            return storageClassDomainService.delete(id.longValue());
+        }else{
+            throw new InternalServerException("k8s StorageClass 삭제 실패");
+        }
+    }
+
 	
     public ClusterStorageClassDto getClusterStorageClassDetail(Long id){
     	StorageClassEntity storageClassEntity = storageClassDomainService.getDetail(id); 
@@ -91,7 +103,9 @@ public class ClusterStorageClassService {
     
 	
 	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Integer clusterId) {
-		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlApplyParam.getYaml());
+		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
 		for (StorageClass sc : storageClassList) {

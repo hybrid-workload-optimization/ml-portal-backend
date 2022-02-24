@@ -1,7 +1,7 @@
 package kr.co.strato.domain.project.repository;
 
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
-import static kr.co.strato.domain.user.model.QUser.user;
+import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -30,11 +30,11 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 		List<ProjectUserDto> result = queryFactory
 				.select(Projections.fields(
 						ProjectUserDto.class,
-						projectUserEntity.id.as("userId"), 
-						projectUserEntity.projectIdx, 
-						user.userName,
-						user.email, 
-						user.organization,
+						projectUserEntity.userId.as("userId"), 
+						projectUserEntity.projectIdx,
+						userEntity.userName,
+						userEntity.email,
+						userEntity.organization,
 						projectUserEntity.projectUserRole,
 						ExpressionUtils.as(
 								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectUserEntity.createdAt, "%Y-%m-%d %H:%i"),
@@ -46,7 +46,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						)
 				  ))
 				  .from(projectUserEntity)
-				  .join(user).on(projectUserEntity.id.eq(user.userId))
+				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
 				  .where(projectUserEntity.projectIdx.eq(projectIdx))
 				  .fetch();
 		

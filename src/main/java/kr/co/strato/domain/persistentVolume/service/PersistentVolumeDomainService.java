@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.repository.PersistentVolumeRepository;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -50,6 +51,15 @@ public class PersistentVolumeDomainService {
 
 	public void delete(PersistentVolumeEntity persistentVolumeEntity) {
 		persistentVolumeRepository.delete(persistentVolumeEntity);
+	}
+	
+	public boolean delete(Long id) {
+		Optional<PersistentVolumeEntity> opt = persistentVolumeRepository.findById(id);
+		if (opt.isPresent()) {
+			PersistentVolumeEntity entity = opt.get();
+			persistentVolumeRepository.delete(entity);
+		}
+		return true;
 	}
 	
     public StorageClassEntity getStorageClassId(String name){
