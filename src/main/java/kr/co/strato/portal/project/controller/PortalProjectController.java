@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
@@ -93,8 +94,23 @@ public class PortalProjectController {
      */
     @PostMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseWrapper<Long> createProject(@RequestBody ProjectDto param) {
+    public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws Exception {
         
+    	/*System.out.println("Project Name === " + param.getProjectName());
+    	System.out.println("Description === " + param.getDescription());
+    	
+    	List<ProjectClusterDto> clusterList = param.getClusterList();
+    	System.out.println("Cluster Size === " + clusterList.size());
+    	for(ProjectClusterDto cluster : clusterList) {
+    		System.out.println("Cluster === " + cluster.getClusterIdx());
+    	}
+    	
+    	List<ProjectUserDto> userList = param.getUserList();
+    	System.out.println("User Size === " + userList.size());
+    	for(ProjectUserDto user : userList) {
+    		System.out.println("User === " + user.getUserId());
+    	}*/
+    	
     	Long response = portalProjectService.createProject(param);
         
         return new ResponseWrapper<Long> (response);

@@ -30,7 +30,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 		List<ProjectUserDto> result = queryFactory
 				.select(Projections.fields(
 						ProjectUserDto.class,
-						projectUserEntity.id.as("userId"), 
+						projectUserEntity.userId.as("userId"), 
 						projectUserEntity.projectIdx,
 						userEntity.userName,
 						userEntity.email,
@@ -46,7 +46,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						)
 				  ))
 				  .from(projectUserEntity)
-				  .join(userEntity).on(projectUserEntity.id.eq(userEntity.userId))
+				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
 				  .where(projectUserEntity.projectIdx.eq(projectIdx))
 				  .fetch();
 		

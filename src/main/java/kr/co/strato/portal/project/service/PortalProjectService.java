@@ -13,8 +13,10 @@ import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.project.model.mapper.ProjectDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -82,11 +84,8 @@ public class PortalProjectService {
      * @param
      * @return
      */
-    public Long createProject(ProjectDto param) {
+    public Long createProject(ProjectRequestDto param) throws Exception {
     	
-    	//DTO -> Entity
-        ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(param);
-    	
-    	return projectDomainService.createProject(projectEntity);
+    	return projectDomainService.createProject(param);
     }
 }
