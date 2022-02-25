@@ -7,7 +7,7 @@ import org.mapstruct.factory.Mappers;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.portal.project.model.ProjectDto;
 
-@Mapper(componentModel="spring", unmappedTargetPolicy=ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectDtoMapper {
 
 	ProjectDtoMapper INSTANCE = Mappers.getMapper(ProjectDtoMapper.class);

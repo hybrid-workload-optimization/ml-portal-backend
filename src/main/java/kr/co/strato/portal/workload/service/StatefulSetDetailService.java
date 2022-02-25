@@ -13,6 +13,7 @@ import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
+import kr.co.strato.portal.workload.model.StatefulSetDetailDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class StatefulSetDetailService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public List<Long> updateStatefulSet(Long statefulSetId, StatefulSetDetailDto.ReqUpdateDto reqUpdateDto){
         String yaml = Base64Util.decode(reqUpdateDto.getYaml());
         ClusterEntity cluster = statefulSetDomainService.getCluster(statefulSetId);
@@ -70,7 +72,35 @@ public class StatefulSetDetailService {
         }).collect(Collectors.toList());
 
         return ids;
+    }
 
+    public StatefulSetDetailDto.ResDetailDto getStatefulSet(Long statefulSetId){
+        //get statefulSet entity
+        StatefulSetEntity entity = statefulSetDomainService.get(statefulSetId);
+
+        //get k8s statefulSet model
+        String statefulSetName = entity.getStatefulSetName();
+        String namespaceName = entity.getNamespace().getName();
+        Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+        StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId.intValue(), namespaceName, statefulSetName);
+
+        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet);
+
+        return dto;
+    }
+
+    public String getStatefulSetYaml(Long statefulSetId){
+        //get statefulSet entity
+        StatefulSetEntity entity = statefulSetDomainService.get(statefulSetId);
+
+        //get k8s statefulSet model
+        String statefulSetName = entity.getStatefulSetName();
+        String namespaceName = entity.getNamespace().getName();
+        Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+
+        String yaml = statefulSetAdapterService.getYaml(clusterId.intValue(), namespaceName, statefulSetName);
+        yaml = Base64Util.encode(yaml);
+        return yaml;
     }
 
     /**
@@ -83,7 +113,6 @@ public class StatefulSetDetailService {
         ObjectMapper mapper = new ObjectMapper();
 
         String name = s.getMetadata().getName();
-        String namespace = s.getMetadata().getNamespace();
         String uid = s.getMetadata().getUid();
         String image = s.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
         String label = mapper.writeValueAsString(s.getMetadata().getLabels());

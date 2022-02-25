@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashMap;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,44 @@ public class StatefulSetDetailDto {
         private String yaml;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ResDetailDto{
+        private String name;
+        private String namespace;
+        private String uid;
+        private String createdAt;
+        private String image;
+        private HashMap<String, Object> annotation;
+        private HashMap<String, Object> label;
+        private Integer runningReplicas;
+        private Integer desiredReplicas;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ResPodListDto{
+        private String name;
+        private String namespace;
+        private String node;
+        private String status;
+        private String createdAt;
+
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ResPodDiagramDto{
+        private String name;
+        private String controller;
+        private String image;
+        private String status;
+        private String createdAt;
+        private String lastUpdatedAt;
+        private String ip;
+        private String node;
+    }
 }

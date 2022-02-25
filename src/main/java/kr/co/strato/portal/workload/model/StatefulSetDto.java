@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import java.util.HashMap;
 
 @Getter
 @Setter
@@ -27,13 +28,14 @@ public class StatefulSetDto {
     @Setter
     @NoArgsConstructor
     public static class ResListDto{
+        private Long id;
         private String name;
         private String namespace;
-        private String label;
         private int podCnt;
         private int podTotalCnt;
         private String image;
         private String dayAgo;
+        private HashMap<String, Object> label;
 
     }
 
