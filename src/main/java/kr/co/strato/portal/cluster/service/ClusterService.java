@@ -10,15 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -75,16 +76,22 @@ public class ClusterService {
 		// kubeCofingId = clusterId
 		Long clusterId = Long.valueOf(strClusterId);
 		
-		// k8s - get nodes of cluster 
+		// k8s - get cluster's information(health + version)
+		ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
+		
+		// k8s - get cluster's nodes
 		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
 		
 		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
 		clusterEntity.setClusterId(clusterId);
+		clusterEntity.setStatus(clusterInfo.getClusterHealty().getHealth());
+		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
+		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		
 		clusterDomainService.register(clusterEntity);
 		
-		// db - insert nodes of cluster 
+		// db - insert cluster's nodes
 		clusterNodeService.synClusterNodeSave(nodeList, clusterEntity.getClusterIdx());
 		
 		return clusterEntity.getClusterIdx();

@@ -25,4 +25,10 @@ public class DateUtil {
     	SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
     	return sdf.format(timestamp);
     }
+    
+    public static String currentDateTime() {
+    	Timestamp timestamp  = new Timestamp(System.currentTimeMillis());
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    	return sdf.format(timestamp);
+    }
 }

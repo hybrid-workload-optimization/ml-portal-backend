@@ -3,7 +3,11 @@ package kr.co.strato.adapter.k8s.cluster.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,5 +52,16 @@ public class ClusterAdapterService {
 		log.debug("[Check Cluster Connection] response : {}", response);
 		
 		return response;
+	}
+	
+	public ClusterInfoAdapterDto getClusterInfo(Long kubeConfigId) throws Exception {
+		log.debug("[Get Cluster Info] request : {}", kubeConfigId);
+		String response = clusterAdapterClient.getClusterInfo(kubeConfigId);
+		log.debug("[Get Cluster Info] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		ClusterInfoAdapterDto result = mapper.readValue(response, new TypeReference<ClusterInfoAdapterDto>(){});
+        
+		return result;
 	}
 }
