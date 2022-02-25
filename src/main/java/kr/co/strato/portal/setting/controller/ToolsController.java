@@ -23,7 +23,7 @@ public class ToolsController {
 	
 	@GetMapping("/tools")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ToolsDto> getTools(@RequestBody ToolsDto params){
+	public ResponseWrapper<ToolsDto> getTools(ToolsDto params){
 		ToolsDto tools = toolsService.getTools(params);
 		return new ResponseWrapper<>(tools);
 	}

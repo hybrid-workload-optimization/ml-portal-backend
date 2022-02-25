@@ -16,5 +16,6 @@ public class ToolsDto {
 	private String value;
 	private String description;
 	
-	private List<String> kubesprayVersions;
+	private List<SettingSelectorDto> kubesprayVersions;
+	
 }
