@@ -11,6 +11,8 @@ import org.mapstruct.factory.Mappers;
 public interface SelectProjectDtoMapper {
     SelectProjectDtoMapper INSTANCE = Mappers.getMapper(SelectProjectDtoMapper.class);
 
-    @Mapping(target = "name", source = "projectName")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "text", source = "projectName")
+    @Mapping(target = "value", source = "id")
     public SelectProjectDto toDto(ProjectEntity entity);
 }

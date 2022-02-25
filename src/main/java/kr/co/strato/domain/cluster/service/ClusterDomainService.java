@@ -1,7 +1,12 @@
 package kr.co.strato.domain.cluster.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +21,9 @@ public class ClusterDomainService {
 
 	@Autowired
 	ClusterRepository clusterRepository;
-	
+
+	@Autowired
+	ProjectClusterRepository projectClusterRepository;
 	
 	public void register(ClusterEntity clusterEntity) {
 		clusterRepository.save(clusterEntity);
@@ -55,6 +62,19 @@ public class ClusterDomainService {
 		}
 		
 		return false;
+	}
+
+	public List<ClusterEntity> getListByProjectIdx(Long projectIdx){
+		List<ProjectClusterEntity> projectClusterEntities = projectClusterRepository.findByProjectIdx(projectIdx);
+		List<ClusterEntity> clusters = projectClusterEntities.stream().map(e -> {
+			Optional<ClusterEntity> cluster = clusterRepository.findById(e.getClusterIdx());
+			if(cluster.isPresent()){
+				return cluster.get();
+			}
+			return null;
+		}).collect(Collectors.toList());
+
+		return clusters;
 	}
 	
 }
