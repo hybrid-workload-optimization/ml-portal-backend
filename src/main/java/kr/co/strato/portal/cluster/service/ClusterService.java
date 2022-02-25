@@ -10,7 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
@@ -33,6 +35,9 @@ public class ClusterService {
 	
 	@Autowired
 	NodeAdapterService nodeAdapterService;
+	
+	@Autowired
+	ClusterNodeService clusterNodeService;
 	
 	/**
 	 * Cluster 목록 조회
@@ -62,21 +67,25 @@ public class ClusterService {
 				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
 				.build();
 		
-		String clusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
-		if (StringUtils.isEmpty(clusterId)) {
+		String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
+		if (StringUtils.isEmpty(strClusterId)) {
 			throw new PortalException("Cluster registration failed");
 		}
 		
+		// kubeCofingId = clusterId
+		Long clusterId = Long.valueOf(strClusterId);
+		
 		// k8s - get nodes of cluster 
-		nodeAdapterService.getNodeList(Long.valueOf(clusterId));
+		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
 		
 		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
-		clusterEntity.setClusterId(Long.valueOf(clusterId));
+		clusterEntity.setClusterId(clusterId);
 		
 		clusterDomainService.register(clusterEntity);
 		
 		// db - insert nodes of cluster 
+		clusterNodeService.synClusterNodeSave(nodeList, clusterEntity.getClusterIdx());
 		
 		return clusterEntity.getClusterIdx();
 	}
