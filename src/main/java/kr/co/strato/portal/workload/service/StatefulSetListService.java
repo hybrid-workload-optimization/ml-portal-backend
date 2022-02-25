@@ -40,7 +40,7 @@ public class StatefulSetListService {
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
-        Integer clusterId = reqCreateDto.getClusterId();
+        Long clusterId = reqCreateDto.getClusterId();
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
         List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterId, yaml);

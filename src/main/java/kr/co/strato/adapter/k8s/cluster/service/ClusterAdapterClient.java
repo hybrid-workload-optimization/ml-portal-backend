@@ -20,7 +20,7 @@ public interface ClusterAdapterClient {
 	 * @return
 	 */
 	@PostMapping("/kubeConfig")
-    public String postCluster(@RequestParam("provider") String provider, @RequestParam("configContents") String configContents);
+    public String postCluster(@RequestBody ClusterAdapterDto clusterAdapterDto);
 
 	/**
 	 * k8s config 수정
@@ -31,7 +31,7 @@ public interface ClusterAdapterClient {
 	 * @return
 	 */
 	@PutMapping("/kubeConfig")
-	public boolean putCluster(@RequestParam("provider") String provider, @RequestParam("configContents") String configContents, @RequestParam("kubeConfigId") Long kubeConfigId);
+	public boolean putCluster(@RequestBody ClusterAdapterDto clusterAdapterDto);
 	
 	/**
 	 * k8s config 삭제

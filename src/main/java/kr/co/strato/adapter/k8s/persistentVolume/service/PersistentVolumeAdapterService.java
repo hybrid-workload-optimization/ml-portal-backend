@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.PersistentVolume;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ClusterResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -33,7 +32,7 @@ public class PersistentVolumeAdapterService {
      * @return
      * @throws JsonProcessingException
      */
-    public List<PersistentVolume> getPersistentVolumeList(Integer kubeConfigId) {
+    public List<PersistentVolume> getPersistentVolumeList(Long kubeConfigId) {
 		// 요청 파라미터 객체 생성
 		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).build();
 
@@ -54,7 +53,7 @@ public class PersistentVolumeAdapterService {
 	}
     
     
-    public List<PersistentVolume> registerPersistentVolume(Integer kubeConfigId, String yaml) {
+    public List<PersistentVolume> registerPersistentVolume(Long kubeConfigId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yaml).build();
 
         try{
@@ -75,7 +74,7 @@ public class PersistentVolumeAdapterService {
     }
     
     
-    public List<PersistentVolume> updatePersistentVolume(Integer clusterId, String yaml){
+    public List<PersistentVolume> updatePersistentVolume(Long clusterId, String yaml){
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
@@ -100,7 +99,7 @@ public class PersistentVolumeAdapterService {
         return nonNamespaceProxy.deleteResource(ResourceType.persistentVolume.get(), param);
     }
     
-    public String getPersistentVolumeYaml(Integer kubeConfigId,String name) {
+    public String getPersistentVolumeYaml(Long kubeConfigId,String name) {
 
   		String persistentVolumeYaml = nonNamespaceProxy.getResourceYaml(ResourceType.persistentVolume.get(), kubeConfigId,name);
   		return persistentVolumeYaml;

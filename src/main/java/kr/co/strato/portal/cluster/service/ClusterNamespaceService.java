@@ -1,10 +1,7 @@
 package kr.co.strato.portal.cluster.service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.api.model.HostPathVolumeSource;
-import io.fabric8.kubernetes.api.model.NFSVolumeSource;
 import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceCondition;
-import io.fabric8.kubernetes.api.model.ObjectReference;
-import io.fabric8.kubernetes.api.model.PersistentVolume;
-import io.fabric8.kubernetes.api.model.PersistentVolumeStatus;
-import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.namespace.service.NamespaceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
-import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
-import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
@@ -59,7 +46,7 @@ public class ClusterNamespaceService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public List<Namespace> getClusterNamespaceListSet(Integer kubeConfigId) {
+	public List<Namespace> getClusterNamespaceListSet(Long kubeConfigId) {
 		List<Namespace> namespaceList = namespaceAdapterService.getNamespaceList(kubeConfigId);
 		
 		synClusterNamespaceSave(namespaceList,kubeConfigId);
@@ -89,12 +76,12 @@ public class ClusterNamespaceService {
     }
     
 	
-   public String getClusterNamespaceYaml(Integer kubeConfigId,String name){
+   public String getClusterNamespaceYaml(Long kubeConfigId,String name){
     	String namespaceYaml = namespaceAdapterService.getNamespaceYaml(kubeConfigId,name); 
         return namespaceYaml;
     }
    
-	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam, Integer kubeConfigId) {
+	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam, Long kubeConfigId) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);
@@ -118,15 +105,15 @@ public class ClusterNamespaceService {
 	public List<Long> updateClusterNamespace(Long namespaceId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
         ClusterEntity cluster = namespaceDomainService.getCluster(namespaceId);
-        Integer clusterId = Long.valueOf(cluster.getClusterId()).intValue();
+        Long clusterId = cluster.getClusterId();
 
-        List<Namespace> namespaces = namespaceAdapterService.registerNamespace(clusterId.intValue(), yaml);
+        List<Namespace> namespaces = namespaceAdapterService.registerNamespace(clusterId, yaml);
 
         List<Long> ids = namespaces.stream().map( n -> {
             try {
             	NamespaceEntity updatePersistentVolume = toEntity(n,clusterId);
 
-                Long id = namespaceDomainService.update(updatePersistentVolume, namespaceId, clusterId.longValue());
+                Long id = namespaceDomainService.update(updatePersistentVolume, namespaceId, clusterId);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -143,7 +130,7 @@ public class ClusterNamespaceService {
     }
 	
 	
-	public List<Long> synClusterNamespaceSave(List<Namespace> clusterNamespaces, Integer kubeConfigId) {
+	public List<Long> synClusterNamespaceSave(List<Namespace> clusterNamespaces, Long kubeConfigId) {
 		List<Long> ids = new ArrayList<>();
 		
 		for (Namespace n : clusterNamespaces) {
@@ -161,7 +148,7 @@ public class ClusterNamespaceService {
 		return ids;
 	}
 	
-	 private NamespaceEntity toEntity(Namespace	n,Integer clusterId) throws JsonProcessingException {
+	 private NamespaceEntity toEntity(Namespace	n, Long clusterId) throws JsonProcessingException {
 	        ObjectMapper mapper = new ObjectMapper();
 	     // k8s Object -> Entity
 	       
@@ -177,7 +164,7 @@ public class ClusterNamespaceService {
 			String label = mapper.writeValueAsString(n.getMetadata().getLabels());
 
 			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+			clusterEntity.setClusterIdx(clusterId);
 
 			NamespaceEntity namespace = NamespaceEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))

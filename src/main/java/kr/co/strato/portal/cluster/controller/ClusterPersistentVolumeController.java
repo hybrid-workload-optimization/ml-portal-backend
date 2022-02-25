@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
@@ -42,7 +41,7 @@ public class ClusterPersistentVolumeController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterPersistentVolumeListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<PersistentVolume> getClusterPersistentVolumeListSet(@RequestParam Integer kubeConfigId) {
+	public List<PersistentVolume> getClusterPersistentVolumeListSet(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
@@ -66,7 +65,7 @@ public class ClusterPersistentVolumeController {
 	
 	@GetMapping("/api/v1/cluster/clusterPersistentVolumesYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getClusterPersistentVolumeDetail(@RequestParam Integer kubeConfigId,String name) {
+	public ResponseWrapper<String> getClusterPersistentVolumeDetail(@RequestParam Long kubeConfigId,String name) {
 		String resBody = persistentVolumeService.getClusterPersistentVolumeYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);
@@ -74,7 +73,7 @@ public class ClusterPersistentVolumeController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterPersistentVolume")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> results = null;
 		
 		try {

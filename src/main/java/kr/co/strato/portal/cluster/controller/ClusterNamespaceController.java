@@ -17,12 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.service.ClusterNamespaceService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +41,7 @@ public class ClusterNamespaceController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterNamespaceListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Namespace> getClusterNamespaceListSet(@RequestParam Integer kubeConfigId) {
+	public List<Namespace> getClusterNamespaceListSet(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
@@ -67,7 +65,7 @@ public class ClusterNamespaceController {
 	
 	@GetMapping("/api/v1/cluster/clusterNamespacesYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getClusterNamespaceDetail(@RequestParam Integer kubeConfigId,String name) {
+	public ResponseWrapper<String> getClusterNamespaceDetail(@RequestParam Long kubeConfigId,String name) {
 		String resBody = namespaceService.getClusterNamespaceYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);
@@ -75,7 +73,7 @@ public class ClusterNamespaceController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterNamespace")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {

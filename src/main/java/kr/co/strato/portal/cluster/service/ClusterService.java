@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
@@ -29,6 +30,9 @@ public class ClusterService {
 	
 	@Autowired
 	ClusterAdapterService clusterAdapterService;
+	
+	@Autowired
+	NodeAdapterService nodeAdapterService;
 	
 	/**
 	 * Cluster 목록 조회
@@ -52,6 +56,7 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	public Long registerCluster(ClusterDto clusterDto) throws Exception {
+		// k8s - post cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
 				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
@@ -62,10 +67,16 @@ public class ClusterService {
 			throw new PortalException("Cluster registration failed");
 		}
 		
+		// k8s - get nodes of cluster 
+		nodeAdapterService.getNodeList(Long.valueOf(clusterId));
+		
+		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
 		clusterEntity.setClusterId(Long.valueOf(clusterId));
 		
 		clusterDomainService.register(clusterEntity);
+		
+		// db - insert nodes of cluster 
 		
 		return clusterEntity.getClusterIdx();
 	}

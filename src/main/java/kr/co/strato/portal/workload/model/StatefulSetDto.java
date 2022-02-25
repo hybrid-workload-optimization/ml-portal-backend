@@ -1,13 +1,10 @@
 package kr.co.strato.portal.workload.model;
 
-import kr.co.strato.global.model.PageRequest;
+import java.util.HashMap;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import java.util.HashMap;
 
 @Getter
 @Setter
@@ -19,7 +16,7 @@ public class StatefulSetDto {
     @NoArgsConstructor
     public static class ReqCreateDto{
         //TODO validation체크
-        private Integer clusterId;
+        private Long clusterId;
         private String yaml;
     }
 

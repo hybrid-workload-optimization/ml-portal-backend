@@ -18,7 +18,6 @@ import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -47,14 +46,14 @@ public class ClusterStorageClassService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public List<StorageClass> getClusterStorageClassListSet(Integer clusterId) {
+	public List<StorageClass> getClusterStorageClassListSet(Long clusterId) {
 		List<StorageClass> storageClassList = storageClassAdapterService.getStorageClassList(clusterId);
 		
 		synClusterStorageClassSave(storageClassList,clusterId);
 		return storageClassList;
 	}
 
-	public List<Long> synClusterStorageClassSave(List<StorageClass> storageClassList, Integer clusterId) {
+	public List<Long> synClusterStorageClassSave(List<StorageClass> storageClassList, Long clusterId) {
 		List<Long> ids = new ArrayList<>();
 		for (StorageClass sc : storageClassList) {
 			try {
@@ -96,13 +95,13 @@ public class ClusterStorageClassService {
     }
 	
 	
-    public String getClusterStorageClassYaml(Integer kubeConfigId,String name){
+    public String getClusterStorageClassYaml(Long kubeConfigId,String name){
      	String namespaceYaml = storageClassAdapterService.getStorageClassYaml(kubeConfigId,name); 
          return namespaceYaml;
      }
     
 	
-	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Integer clusterId) {
+	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Long clusterId) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
@@ -128,15 +127,15 @@ public class ClusterStorageClassService {
 	public List<Long> updateClusterStorageClass(Long storageClassId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
         ClusterEntity cluster = storageClassDomainService.getCluster(storageClassId);
-        Integer clusterId = Long.valueOf(cluster.getClusterId()).intValue();
+        Long clusterId = cluster.getClusterId();
 
-        List<StorageClass> storageClass = storageClassAdapterService.registerStorageClass(clusterId.intValue(), yaml);
+        List<StorageClass> storageClass = storageClassAdapterService.registerStorageClass(clusterId, yaml);
 
         List<Long> ids = storageClass.stream().map( sc -> {
             try {
             	StorageClassEntity updatestorageClass = toEntity(sc,clusterId);
 
-                Long id = storageClassDomainService.update(updatestorageClass, storageClassId, clusterId.longValue());
+                Long id = storageClassDomainService.update(updatestorageClass, storageClassId, clusterId);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -151,7 +150,7 @@ public class ClusterStorageClassService {
     }
 	
 	
-	 private StorageClassEntity toEntity(StorageClass sc,Integer clusterId) throws JsonProcessingException {
+	 private StorageClassEntity toEntity(StorageClass sc, Long clusterId) throws JsonProcessingException {
 	        ObjectMapper mapper = new ObjectMapper();
 	    	// k8s Object -> Entity
 			String name = sc.getMetadata().getName();
@@ -164,7 +163,7 @@ public class ClusterStorageClassService {
 			String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
 			
 			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+			clusterEntity.setClusterIdx(clusterId);
 			
 			StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))

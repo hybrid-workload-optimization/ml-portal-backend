@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
@@ -42,7 +41,7 @@ public class ClusterStorageClassController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterStorageClassListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<StorageClass> getClusterStorageClassListSet(@RequestParam Integer kubeConfigId) {
+	public List<StorageClass> getClusterStorageClassListSet(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
@@ -66,7 +65,7 @@ public class ClusterStorageClassController {
 	
 	@GetMapping("/api/v1/cluster/clusterStorageClasssYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getClusterStorageClassDetail(@RequestParam Integer kubeConfigId,String name) {
+	public ResponseWrapper<String> getClusterStorageClassDetail(@RequestParam Long kubeConfigId,String name) {
 		String resBody = storageClassService.getClusterStorageClassYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);
@@ -74,7 +73,7 @@ public class ClusterStorageClassController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterStorageClass")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {

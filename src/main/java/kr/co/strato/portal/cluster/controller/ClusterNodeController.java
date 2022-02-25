@@ -39,7 +39,7 @@ public class ClusterNodeController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterNodesListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Node> getClusterNodeList(@RequestParam Integer kubeConfigId) {
+	public List<Node> getClusterNodeList(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
@@ -99,7 +99,7 @@ public class ClusterNodeController {
 	
 	@GetMapping("/api/v1/cluster/clusterNodesYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getNodeYaml(@RequestParam Integer kubeConfigId,String name) {
+	public ResponseWrapper<String> getNodeYaml(@RequestParam Long kubeConfigId,String name) {
 		String resBody = nodeService.getNodeYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);
