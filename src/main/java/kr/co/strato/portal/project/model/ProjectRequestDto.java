@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProjectRequestDto {
 
+	private Long projectIdx;
+	
 	private String loginId;
 	private String loginName;
 	

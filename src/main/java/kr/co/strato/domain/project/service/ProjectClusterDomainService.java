@@ -63,4 +63,25 @@ public class ProjectClusterDomainService {
 		
 		return projectClusterRepository.save(entity);
 	}
+	
+	/**
+     * Project Cluster 삭제
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteProjectByProjectIdx(Long projectIdx) {
+		
+		return projectClusterRepository.deleteByProjectIdx(projectIdx);
+	}
+	
+	/**
+     * 해당 Cluster를 사용하는 Project 조회(현재 Project 제외)
+     * @param projectIdx
+     * @param clusterIdx
+     * @return
+     */
+	public List<ProjectClusterEntity> getUseProjectByCluster(Long clusterIdx, Long projectIdx) {
+		
+		return projectClusterRepository.findByClusterIdxAndProjectIdxNot(clusterIdx, projectIdx);
+	}
 }
