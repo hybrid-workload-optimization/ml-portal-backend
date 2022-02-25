@@ -89,20 +89,14 @@ public class ClusterStorageClassController {
 
 	@DeleteMapping("/api/v1/cluster/deletClusterStorageClass/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterStorageClass(@PathVariable(required = true) Long id) {
-		try {
-			storageClassService.deleteClusterStorageClass(id);
-		} catch (Exception e) {
-			log.error("Error has occured", e);
-			throw new PortalException(e.getMessage());
-		} finally {
-		}
+	public ResponseWrapper<Boolean> deleteClusterStorageClass(@PathVariable Long id) {
+		boolean isDeleted = storageClassService.deleteClusterStorageClass(id);
 		
-		return new ResponseWrapper<>(null);
+		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterStorageClass/{id}")
-    public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
+    public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
         	storageClassService.updateClusterStorageClass(id, yamlApplyParam);      	
