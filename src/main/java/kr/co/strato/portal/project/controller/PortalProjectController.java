@@ -18,8 +18,10 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @RestController
 public class PortalProjectController {
@@ -88,6 +90,34 @@ public class PortalProjectController {
     }
     
     /**
+     * 로그인한 사용자가 생성한 Cluster 리스트 조회
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/project/clusters")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<ClusterDto>> getProjecClusterListByCreateUserId(@RequestBody ProjectRequestDto param) {
+        
+    	List<ClusterDto> response = portalProjectService.getProjecClusterListByCreateUserId(param.getLoginId());
+        
+        return new ResponseWrapper<List<ClusterDto>>(response);
+    }
+    
+    /**
+     * 현재 사용중인 전체 User 리스트 조회
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/project/users")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<UserDto>> getProjecUserListByUseYn() throws Exception {
+        
+    	List<UserDto> response = portalProjectService.getProjecUserListByUseYn("Y");
+        
+        return new ResponseWrapper<List<UserDto>>(response);
+    }
+    
+    /**
      * Project 생성
      * @param 
      * @return
@@ -96,23 +126,36 @@ public class PortalProjectController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws Exception {
         
-    	/*System.out.println("Project Name === " + param.getProjectName());
-    	System.out.println("Description === " + param.getDescription());
-    	
-    	List<ProjectClusterDto> clusterList = param.getClusterList();
-    	System.out.println("Cluster Size === " + clusterList.size());
-    	for(ProjectClusterDto cluster : clusterList) {
-    		System.out.println("Cluster === " + cluster.getClusterIdx());
-    	}
-    	
-    	List<ProjectUserDto> userList = param.getUserList();
-    	System.out.println("User Size === " + userList.size());
-    	for(ProjectUserDto user : userList) {
-    		System.out.println("User === " + user.getUserId());
-    	}*/
-    	
     	Long response = portalProjectService.createProject(param);
         
         return new ResponseWrapper<Long> (response);
+    }
+    
+    /**
+     * Project에서 사용중인 Cluster를 제외한 리스트 조회
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/project/{projectIdx}/clusters")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<ClusterDto>> getProjectClusterListExceptUse(@PathVariable("projectIdx") Long projectIdx) {
+        
+    	List<ClusterDto> response = portalProjectService.getProjectClusterListExceptUse(projectIdx);
+        
+        return new ResponseWrapper<List<ClusterDto>>(response);
+    }
+    
+    /**
+     * Project에서 사용중인 User를 제외한 리스트 조회
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/project/{projectIdx}/users")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<UserDto>> getProjectUserListExceptUse(@PathVariable("projectIdx") Long projectIdx) {
+        
+    	List<UserDto> response = portalProjectService.getProjectUserListExceptUse(projectIdx);
+        
+        return new ResponseWrapper<List<UserDto>>(response);
     }
 }

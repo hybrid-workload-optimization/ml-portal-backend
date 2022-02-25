@@ -1,6 +1,7 @@
 package kr.co.strato.portal.project.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,16 +10,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
+import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.project.model.ProjectDto.ProjectDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.project.model.ProjectUserDto.ProjectUserDtoBuilder;
+import kr.co.strato.portal.project.model.mapper.ProjectClusterDtoMapper;
 import kr.co.strato.portal.project.model.mapper.ProjectDtoMapper;
+import kr.co.strato.portal.project.model.mapper.ProjectUserDtoMapper;
+import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -80,12 +94,115 @@ public class PortalProjectService {
     }
     
     /**
+     * 로그인한 사용자가 생성한 Cluster 리스트 조회
+     * @param loginId
+     * @return
+     */
+    public List<ClusterDto> getProjecClusterListByCreateUserId(String loginId) {
+    	
+    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByCreateUserId(loginId);
+    	
+    	//Entity -> DTO 변환
+    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    }
+    
+    /**
+     * 현재 사용중인 전체 User 리스트 조회
+     * @param useYn
+     * @return
+     */
+    public List<UserDto> getProjecUserListByUseYn(String useYn) {
+    	
+    	List<UserEntity> userList = projectUserDomainService.getProjecUserListByUseYn(useYn);
+    	
+    	//Entity -> DTO 변환
+    	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    }
+    
+    /**
      * Project 생성
      * @param
      * @return
      */
     public Long createProject(ProjectRequestDto param) throws Exception {
     	
-    	return projectDomainService.createProject(param);
+    	String userId = param.getLoginId();
+    	String userName = param.getLoginName();
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	
+    	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
+    	projectBuiler.projectName(param.getProjectName());
+    	projectBuiler.description(param.getDescription());
+    	projectBuiler.createUserId(userId);
+    	projectBuiler.createUserName(userName);
+    	projectBuiler.createdAt(now);
+    	projectBuiler.updateUserId(userId);
+    	projectBuiler.updateUserName(userName);
+    	projectBuiler.updatedAt(now);
+    	projectBuiler.deletedYn("N");
+    	
+    	//ProjectDTO -> ProjectEntity
+        ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
+        Long resultIdx = projectDomainService.createProject(projectEntity);
+    	
+        if(resultIdx == null) {
+        	throw new Exception();
+        } else {
+        	//Project Cluster 등록
+    		List<ProjectClusterDto> clusterList = param.getClusterList();
+        	for(ProjectClusterDto cluster : clusterList) {
+        		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
+        		projectClusterBuiler.projectIdx(resultIdx);
+        		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
+        		
+        		//ProjectClusterDTO -> ProjectClusterEntity
+                ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
+                projectClusterDomainService.createProjectCluster(projectClusterEntity);
+        	}
+        	
+        	//Project User 등록
+    		List<ProjectUserDto> userList = param.getUserList();
+        	for(ProjectUserDto user : userList) {
+        		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
+        		projectUserBuiler.userId(user.getUserId());
+        		projectUserBuiler.projectIdx(resultIdx);
+        		projectUserBuiler.createUserId(userId);
+        		projectUserBuiler.createUserName(userName);
+        		projectUserBuiler.createdAt(now);
+        		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+        		
+        		//ProjectUserDTO -> ProjectUserEntity
+                ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+                projectUserDomainService.createProjectUser(projectUserEntity);
+        	}
+        }
+    	
+    	return resultIdx;
+    }
+    
+    /**
+     * Project에서 사용중인 Cluster를 제외한 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    public List<ClusterDto> getProjectClusterListExceptUse(Long projectIdx) {
+    	
+    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjectClusterListExceptUse(projectIdx);
+    	
+    	//Entity -> DTO 변환
+    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    }
+    
+    /**
+     * Project에서 사용중인 User를 제외한 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    public List<UserDto> getProjectUserListExceptUse(Long projectIdx) {
+    	
+    	List<UserEntity> userList = projectUserDomainService.getProjectUserListExceptUse(projectIdx);
+    	
+    	//Entity -> DTO 변환
+    	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
     }
 }
