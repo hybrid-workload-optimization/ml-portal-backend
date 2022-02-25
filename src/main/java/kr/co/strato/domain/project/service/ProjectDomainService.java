@@ -70,4 +70,8 @@ public class ProjectDomainService {
     	
     	return projectEntity.getId();
     }
+
+	public List<ProjectEntity> getProjects(){
+		return projectRepository.findAll();
+	}
 }
