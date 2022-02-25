@@ -64,62 +64,10 @@ public class ProjectDomainService {
      * @param
      * @return
      */
-    public Long createProject(ProjectRequestDto param) throws Exception {
+    public Long createProject(ProjectEntity projectEntity) throws Exception {
     	
-    	String userId = param.getLoginId();
-    	String userName = param.getLoginName();
-    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
-    	
-    	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
-    	projectBuiler.projectName(param.getProjectName());
-    	projectBuiler.description(param.getDescription());
-    	projectBuiler.createUserId(userId);
-    	projectBuiler.createUserName(userName);
-    	projectBuiler.createdAt(now);
-    	projectBuiler.updateUserId(userId);
-    	projectBuiler.updateUserName(userName);
-    	projectBuiler.updatedAt(now);
-    	projectBuiler.deletedYn("N");
-    	
-    	//ProjectDTO -> ProjectEntity
-        ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
     	projectRepository.save(projectEntity);
     	
-    	Long resultIdx = projectEntity.getId();
-    	
-    	if(resultIdx == null) {
-    		throw new Exception();
-    	} else {
-    		
-    		//Project Cluster 등록
-    		List<ProjectClusterDto> clusterList = param.getClusterList();
-        	for(ProjectClusterDto cluster : clusterList) {
-        		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
-        		projectClusterBuiler.projectIdx(resultIdx);
-        		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
-        		
-        		//ProjectClusterDTO -> ProjectClusterEntity
-                ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
-                projectClusterRepository.save(projectClusterEntity);
-        	}
-    		
-    		//Project User 등록
-    		List<ProjectUserDto> userList = param.getUserList();
-        	for(ProjectUserDto user : userList) {
-        		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
-        		projectUserBuiler.userId(user.getUserId());
-        		projectUserBuiler.projectIdx(resultIdx);
-        		projectUserBuiler.createUserId(userId);
-        		projectUserBuiler.createUserName(userName);
-        		projectUserBuiler.createdAt(now);
-        		projectUserBuiler.projectUserRole(user.getProjectUserRole());
-        		
-        		//ProjectUserDTO -> ProjectUserEntity
-                ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
-                projectUserRepository.save(projectUserEntity);
-        	}
-    	}
-    	
-    	return resultIdx;
+    	return projectEntity.getId();
     }
 }

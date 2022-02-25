@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
@@ -20,10 +22,15 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
+import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.project.model.ProjectDto.ProjectDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.project.model.ProjectUserDto.ProjectUserDtoBuilder;
+import kr.co.strato.portal.project.model.mapper.ProjectClusterDtoMapper;
 import kr.co.strato.portal.project.model.mapper.ProjectDtoMapper;
+import kr.co.strato.portal.project.model.mapper.ProjectUserDtoMapper;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -119,7 +126,58 @@ public class PortalProjectService {
      */
     public Long createProject(ProjectRequestDto param) throws Exception {
     	
-    	return projectDomainService.createProject(param);
+    	String userId = param.getLoginId();
+    	String userName = param.getLoginName();
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	
+    	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
+    	projectBuiler.projectName(param.getProjectName());
+    	projectBuiler.description(param.getDescription());
+    	projectBuiler.createUserId(userId);
+    	projectBuiler.createUserName(userName);
+    	projectBuiler.createdAt(now);
+    	projectBuiler.updateUserId(userId);
+    	projectBuiler.updateUserName(userName);
+    	projectBuiler.updatedAt(now);
+    	projectBuiler.deletedYn("N");
+    	
+    	//ProjectDTO -> ProjectEntity
+        ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
+        Long resultIdx = projectDomainService.createProject(projectEntity);
+    	
+        if(resultIdx == null) {
+        	throw new Exception();
+        } else {
+        	//Project Cluster 등록
+    		List<ProjectClusterDto> clusterList = param.getClusterList();
+        	for(ProjectClusterDto cluster : clusterList) {
+        		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
+        		projectClusterBuiler.projectIdx(resultIdx);
+        		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
+        		
+        		//ProjectClusterDTO -> ProjectClusterEntity
+                ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
+                projectClusterDomainService.createProjectCluster(projectClusterEntity);
+        	}
+        	
+        	//Project User 등록
+    		List<ProjectUserDto> userList = param.getUserList();
+        	for(ProjectUserDto user : userList) {
+        		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
+        		projectUserBuiler.userId(user.getUserId());
+        		projectUserBuiler.projectIdx(resultIdx);
+        		projectUserBuiler.createUserId(userId);
+        		projectUserBuiler.createUserName(userName);
+        		projectUserBuiler.createdAt(now);
+        		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+        		
+        		//ProjectUserDTO -> ProjectUserEntity
+                ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+                projectUserDomainService.createProjectUser(projectUserEntity);
+        	}
+        }
+    	
+    	return resultIdx;
     }
     
     /**

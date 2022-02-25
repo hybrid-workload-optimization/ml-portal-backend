@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.domain.user.model.UserEntity;
@@ -61,5 +62,15 @@ public class ProjectUserDomainService {
 	public List<UserEntity> getProjectUserListExceptUse(Long projectIdx) {
 		
 		return projectUserRepository.getProjectUserListExceptUse(projectIdx);
+	}
+	
+	/**
+     * Project User 생성
+     * @param entity
+     * @return
+     */
+	public ProjectUserEntity createProjectUser(ProjectUserEntity entity) {
+		
+		return projectUserRepository.save(entity);
 	}
 }

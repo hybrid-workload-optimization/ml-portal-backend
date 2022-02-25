@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.portal.cluster.model.ClusterDto;
@@ -51,5 +52,15 @@ public class ProjectClusterDomainService {
 	public List<ClusterEntity> getProjectClusterListExceptUse(Long projectIdx) {
 		
 		return projectClusterRepository.getProjectClusterListExceptUse(projectIdx);
+	}
+	
+	/**
+     * Project Cluster 생성
+     * @param entity
+     * @return
+     */
+	public ProjectClusterEntity createProjectCluster(ProjectClusterEntity entity) {
+		
+		return projectClusterRepository.save(entity);
 	}
 }
