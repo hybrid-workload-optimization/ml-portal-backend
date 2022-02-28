@@ -89,16 +89,10 @@ public class ClusterNamespaceController {
 
 	@DeleteMapping("/api/v1/cluster/deletClusterNamespace/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterNamespace(@PathVariable(required = true) Long id) {
-		try {
-			namespaceService.deleteClusterNamespace(id);
-		} catch (Exception e) {
-			log.error("Error has occured", e);
-			throw new PortalException(e.getMessage());
-		} finally {
-		}
+	public ResponseWrapper<Boolean> deleteClusterNamespace(@PathVariable Long id) {
+		boolean isDeleted = namespaceService.deleteClusterNamespace(id);
 		
-		return new ResponseWrapper<>(null);
+		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterNamespace/{id}")
@@ -106,7 +100,8 @@ public class ClusterNamespaceController {
     public ResponseWrapper<Long> updateClusterNamespace(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	namespaceService.updateClusterNamespace(id,yamlApplyParam);        	   	
+        	namespaceService.updateClusterNamespace(id,yamlApplyParam); 
+        	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

@@ -79,14 +79,9 @@ public class ClusterNodeController {
 	@DeleteMapping("/api/v1/cluster/deletClusterNode/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Boolean> deleteClusterNode(@PathVariable("id") Long id) {
-		try {
-			nodeService.deleteClusterNode(id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-		}
+		boolean isDeleted = nodeService.deleteClusterNode(id);
 		
-		return new ResponseWrapper<>(null);
+		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@GetMapping("/api/v1/cluster/clusterNodes/{id:.+}")

@@ -89,16 +89,10 @@ public class ClusterPersistentVolumeController {
 
 	@DeleteMapping("/api/v1/cluster/deletClusterPersistentVolume/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterPersistentVolume(@PathVariable(required = true) Long id) {
-		try {
-			persistentVolumeService.deleteClusterPersistentVolume(id);
-		} catch (Exception e) {
-			log.error("Error has occured", e);
-			throw new PortalException(e.getMessage());
-		} finally {
-		}
+	public ResponseWrapper<Boolean> deleteClusterPersistentVolume(@PathVariable Long id) {
+		boolean isDeleted = persistentVolumeService.deleteClusterPersistentVolume(id);
 		
-		return new ResponseWrapper<>(null);
+		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@PutMapping("/api/v1/clusters/updateClusterPersistentVolume/{id}")
@@ -106,7 +100,8 @@ public class ClusterPersistentVolumeController {
     public ResponseWrapper<Long> updateClusterPersistentVolume(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	persistentVolumeService.updateClusterPersistentVolume(id,yamlApplyParam);        	
+        	persistentVolumeService.updateClusterPersistentVolume(id,yamlApplyParam); 
+        	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

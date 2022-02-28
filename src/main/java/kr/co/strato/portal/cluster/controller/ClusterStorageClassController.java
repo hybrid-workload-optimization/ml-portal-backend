@@ -99,7 +99,8 @@ public class ClusterStorageClassController {
     public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	storageClassService.updateClusterStorageClass(id, yamlApplyParam);      	
+        	storageClassService.updateClusterStorageClass(id, yamlApplyParam);  
+        	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
