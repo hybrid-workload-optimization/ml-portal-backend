@@ -66,5 +66,10 @@ public class NamespaceDomainService {
     	namespaceRepository.save(namespaceEntity);
 		return namespaceEntity.getId();
 	}
+
+	public List<NamespaceEntity> findByClusterIdx(Long clusterIdx){
+		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
+		return namespaceRepository.findByClusterIdx(cluster);
+	}
 	
 }

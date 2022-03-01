@@ -29,7 +29,7 @@ public class IngressDomainService {
 	}
 	
 	public Page<IngressEntity> findByName(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,Pageable pageable) {
-		return ingressRepository.findByNameAndClusterIdxAndNamespaceIdx(name,clusterEntity, namespace,pageable);
+		return ingressRepository.findByNameAndClusterAndNamespace(name,clusterEntity, namespace,pageable);
 	}
 	
 	public boolean delete(Long id) {

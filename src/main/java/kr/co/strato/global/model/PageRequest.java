@@ -1,8 +1,10 @@
 package kr.co.strato.global.model;
 
+import lombok.ToString;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.StringUtils;
 
+@ToString
 public class PageRequest {
     private int page; //페이지 순번
     private int size; //페이지 크기, Optional(default = 10)

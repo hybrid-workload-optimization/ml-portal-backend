@@ -5,6 +5,7 @@ import java.util.HashMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -39,6 +40,7 @@ public class StatefulSetDto {
     @Getter
     @Setter
     @NoArgsConstructor
+    @ToString
     public static class SearchParam{
         private Long projectId;
         private Long clsuterId;

@@ -21,6 +21,7 @@ public class StatefulSetDetailDto {
     @Setter
     @NoArgsConstructor
     public static class ResDetailDto{
+        private Long id;
         private String name;
         private String namespace;
         private String uid;

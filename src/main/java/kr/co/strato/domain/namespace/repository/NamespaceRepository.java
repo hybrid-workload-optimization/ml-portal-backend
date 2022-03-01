@@ -13,4 +13,6 @@ public interface NamespaceRepository extends JpaRepository<NamespaceEntity, Long
 	Page<NamespaceEntity> findByName(String name, Pageable pageable);//name 조회(Page 객체 반환)	
 	
 	List<NamespaceEntity> findByNameAndClusterIdx(String name, ClusterEntity clusterEntity);//name clusterEntity 조회
+
+	List<NamespaceEntity> findByClusterIdx(ClusterEntity clusterIdx);
 }
