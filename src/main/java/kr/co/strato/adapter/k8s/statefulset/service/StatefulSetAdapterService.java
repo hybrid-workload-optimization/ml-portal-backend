@@ -33,7 +33,7 @@ public class StatefulSetAdapterService {
      * @param yaml
      * @return
      */
-    public List<StatefulSet> create(Integer clusterId, String yaml) {
+    public List<StatefulSet> create(Long clusterId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
@@ -54,7 +54,7 @@ public class StatefulSetAdapterService {
         }
     }
 
-    public List<StatefulSet> update(Integer clusterId, String yaml){
+    public List<StatefulSet> update(Long clusterId, String yaml){
         System.out.println("yaml~~~~");
         System.out.println(yaml);
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();

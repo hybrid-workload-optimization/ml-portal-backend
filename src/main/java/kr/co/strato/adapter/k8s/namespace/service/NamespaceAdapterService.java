@@ -32,7 +32,7 @@ public class NamespaceAdapterService {
      * @return
      * @throws JsonProcessingException
      */
-    public List<Namespace> getNamespaceList(Integer kubeConfigId) {
+    public List<Namespace> getNamespaceList(Long kubeConfigId) {
 		// 요청 파라미터 객체 생성
 		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).build();
 
@@ -53,7 +53,7 @@ public class NamespaceAdapterService {
 	}
     
     
-    public String getNamespaceYaml(Integer kubeConfigId,String name) {
+    public String getNamespaceYaml(Long kubeConfigId,String name) {
   		// 조회 요청
     	String namespaceYaml = nonNamespaceProxy.getResourceYaml(ResourceType.namespace.get(), kubeConfigId,name);
 
@@ -61,7 +61,7 @@ public class NamespaceAdapterService {
   	}
     
     
-    public List<Namespace> registerNamespace(Integer kubeConfigId, String yaml) {
+    public List<Namespace> registerNamespace(Long kubeConfigId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yaml).build();
 
         try{

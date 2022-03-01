@@ -33,7 +33,7 @@ public class NodeAdapterService {
      * @return
      * @throws JsonProcessingException
      */
-    public List<Node> getNodeList(Integer kubeConfigId) {
+    public List<Node> getNodeList(Long kubeConfigId) {
 		// 요청 파라미터 객체 생성
 		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).build();
 
@@ -54,7 +54,7 @@ public class NodeAdapterService {
 	}
     
     
-    public List<Node> registerNode(Integer kubeConfigId, String yaml) {
+    public List<Node> registerNode(Long kubeConfigId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yaml).build();
 
         try{
@@ -79,7 +79,7 @@ public class NodeAdapterService {
         return nonNamespaceProxy.deleteResource(ResourceType.node.get(), param);
     }
     
-    public String getNodeYaml(Integer kubeConfigId,String name) {
+    public String getNodeYaml(Long kubeConfigId,String name) {
 
   		String nodeYaml = nonNamespaceProxy.getResourceYaml(ResourceType.node.get(), kubeConfigId,name);
   		return nodeYaml;

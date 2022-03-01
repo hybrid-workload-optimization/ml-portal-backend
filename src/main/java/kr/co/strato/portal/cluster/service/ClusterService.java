@@ -11,11 +11,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,12 @@ public class ClusterService {
 	
 	@Autowired
 	ClusterAdapterService clusterAdapterService;
+	
+	@Autowired
+	NodeAdapterService nodeAdapterService;
+	
+	@Autowired
+	ClusterNodeService clusterNodeService;
 	
 	/**
 	 * Cluster 목록 조회
@@ -52,20 +62,37 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	public Long registerCluster(ClusterDto clusterDto) throws Exception {
+		// k8s - post cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
 				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
 				.build();
 		
-		String clusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
-		if (StringUtils.isEmpty(clusterId)) {
+		String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
+		if (StringUtils.isEmpty(strClusterId)) {
 			throw new PortalException("Cluster registration failed");
 		}
 		
+		// kubeCofingId = clusterId
+		Long clusterId = Long.valueOf(strClusterId);
+		
+		// k8s - get cluster's information(health + version)
+		ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
+		
+		// k8s - get cluster's nodes
+		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
+		
+		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
-		clusterEntity.setClusterId(Long.valueOf(clusterId));
+		clusterEntity.setClusterId(clusterId);
+		clusterEntity.setStatus(clusterInfo.getClusterHealty().getHealth());
+		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
+		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		
 		clusterDomainService.register(clusterEntity);
+		
+		// db - insert cluster's nodes
+		clusterNodeService.synClusterNodeSave(nodeList, clusterEntity.getClusterIdx());
 		
 		return clusterEntity.getClusterIdx();
 	}

@@ -1,12 +1,18 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -15,12 +21,6 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDtoMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -52,14 +52,14 @@ public class StatefulSetDetailService {
         ClusterEntity cluster = statefulSetDomainService.getCluster(statefulSetId);
         Long clusterId = cluster.getClusterId();
 
-        List<StatefulSet> statefulSets = statefulSetAdapterService.update(clusterId.intValue(), yaml);
+        List<StatefulSet> statefulSets = statefulSetAdapterService.update(clusterId, yaml);
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity updateStatefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.update(updateStatefulSet, statefulSetId, clusterId.longValue(), namespaceName);
+                Long id = statefulSetDomainService.update(updateStatefulSet, statefulSetId, clusterId, namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {

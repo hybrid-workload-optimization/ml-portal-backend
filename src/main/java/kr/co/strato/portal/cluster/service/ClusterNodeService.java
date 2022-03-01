@@ -19,7 +19,6 @@ import io.fabric8.kubernetes.api.model.NodeCondition;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -46,7 +45,7 @@ public class ClusterNodeService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public List<Node> getClusterNodeList(Integer clusterId) {
+	public List<Node> getClusterNodeList(Long clusterId) {
 		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
 		
 		synClusterNodeSave(nodeList,clusterId);
@@ -77,7 +76,7 @@ public class ClusterNodeService {
     }
 	
 	
-	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Integer clusterId) {
+	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Long clusterId) {
 		String decodeYaml = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),decodeYaml);
@@ -86,7 +85,7 @@ public class ClusterNodeService {
 	}
 	
 
-	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Integer clusterId) {
+	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Long clusterId) {
 		List<Long> ids = new ArrayList<>();
 		for (Node n : clusterNodes) {
 			try {
@@ -104,7 +103,7 @@ public class ClusterNodeService {
 		return ids;
 	}
 	
-	private NodeEntity toEntity(Node n, Integer clusterId) throws JsonProcessingException {
+	private NodeEntity toEntity(Node n, Long clusterId) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
      // k8s Object -> Entity
         List<NodeCondition> conditions = n.getStatus().getConditions();
@@ -140,7 +139,7 @@ public class ClusterNodeService {
 		String role = mapper.writeValueAsString(roles);
 
 		ClusterEntity clusterEntity = new ClusterEntity();
-		clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+		clusterEntity.setClusterIdx(clusterId);
 
 		NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
 				.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
@@ -153,7 +152,7 @@ public class ClusterNodeService {
 
         return clusterNode;
     }
-    public String getNodeYaml(Integer kubeConfigId,String name){
+    public String getNodeYaml(Long kubeConfigId,String name){
      	String namespaceYaml = nodeAdapterService.getNodeYaml(kubeConfigId,name); 
          return namespaceYaml;
      }

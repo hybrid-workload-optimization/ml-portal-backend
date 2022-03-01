@@ -1,29 +1,18 @@
 package kr.co.strato.domain.project.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
-import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.domain.project.repository.ProjectRepository;
 import kr.co.strato.domain.project.repository.ProjectUserRepository;
-import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.project.model.ProjectClusterDto;
-import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
-import kr.co.strato.portal.project.model.ProjectDto.ProjectDtoBuilder;
-import kr.co.strato.portal.project.model.ProjectRequestDto;
-import kr.co.strato.portal.project.model.ProjectUserDto;
-import kr.co.strato.portal.project.model.ProjectUserDto.ProjectUserDtoBuilder;
-import kr.co.strato.portal.project.model.mapper.ProjectClusterDtoMapper;
-import kr.co.strato.portal.project.model.mapper.ProjectDtoMapper;
-import kr.co.strato.portal.project.model.mapper.ProjectUserDtoMapper;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -64,7 +53,7 @@ public class ProjectDomainService {
      * @param
      * @return
      */
-    public Long createProject(ProjectEntity projectEntity) throws Exception {
+    public Long createProject(ProjectEntity projectEntity) {
     	
     	projectRepository.save(projectEntity);
     	
@@ -74,4 +63,34 @@ public class ProjectDomainService {
 	public List<ProjectEntity> getProjects(){
 		return projectRepository.findAll();
 	}
+	
+	/**
+     * Project 조회
+     * @param
+     * @return
+     */
+    public Optional<ProjectEntity> getProjectById(Long projectIdx) {
+    	
+    	return projectRepository.findById(projectIdx);
+    }
+	
+	/**
+     * Project 수정
+     * @param
+     * @return
+     */
+    public ProjectEntity updateProject(ProjectEntity projectEntity) {
+    	
+    	return projectRepository.save(projectEntity);
+    }
+    
+    /**
+     * Project 삭제
+     * @param
+     * @return
+     */
+    public void deleteProject(Long projectIdx) {
+    	
+    	projectRepository.deleteById(projectIdx);
+    }
 }

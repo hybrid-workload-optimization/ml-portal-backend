@@ -26,7 +26,6 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.persistentVolume.service.PersistentVolumeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -56,7 +55,7 @@ public class ClusterPersistentVolumeService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public List<PersistentVolume> getClusterPersistentVolumeListSet(Integer clusterId) {
+	public List<PersistentVolume> getClusterPersistentVolumeListSet(Long clusterId) {
 		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.getPersistentVolumeList(clusterId);
 		
 		synClusterPersistentVolumeSave(persistentVolumeList,clusterId);
@@ -86,13 +85,13 @@ public class ClusterPersistentVolumeService {
     }
 	
 	
-    public String getClusterPersistentVolumeYaml(Integer kubeConfigId,String name){
+    public String getClusterPersistentVolumeYaml(Long kubeConfigId,String name){
      	String namespaceYaml = persistentVolumeAdapterService.getPersistentVolumeYaml(kubeConfigId,name); 
          return namespaceYaml;
      }
     
 	
-	public List<Long> registerClusterPersistentVolume(YamlApplyParam yamlApplyParam, Integer clusterId) {
+	public List<Long> registerClusterPersistentVolume(YamlApplyParam yamlApplyParam, Long clusterId) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.registerPersistentVolume(yamlApplyParam.getKubeConfigId(),	yamlDecode);
 		
@@ -104,15 +103,15 @@ public class ClusterPersistentVolumeService {
 	public List<Long> updateClusterPersistentVolume(Long PersistentVolumeId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
         ClusterEntity cluster = persistentVolumeDomainService.getCluster(PersistentVolumeId);
-        Integer clusterId = Long.valueOf(cluster.getClusterId()).intValue();
+        Long clusterId = cluster.getClusterId();
 
-        List<PersistentVolume> persistentVolumes = persistentVolumeAdapterService.updatePersistentVolume(clusterId.intValue(), yaml);
+        List<PersistentVolume> persistentVolumes = persistentVolumeAdapterService.updatePersistentVolume(clusterId, yaml);
 
         List<Long> ids = persistentVolumes.stream().map( pv -> {
             try {
                 PersistentVolumeEntity updatePersistentVolume = toEntity(pv,clusterId);
 
-                Long id = persistentVolumeDomainService.update(updatePersistentVolume, PersistentVolumeId, clusterId.longValue());
+                Long id = persistentVolumeDomainService.update(updatePersistentVolume, PersistentVolumeId, clusterId);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -126,7 +125,7 @@ public class ClusterPersistentVolumeService {
         return ids;
     }
 	
-	public List<Long> synClusterPersistentVolumeSave(List<PersistentVolume> persistentVolumeList, Integer clusterId) {
+	public List<Long> synClusterPersistentVolumeSave(List<PersistentVolume> persistentVolumeList, Long clusterId) {
 		List<Long> ids = new ArrayList<>();
 		for (PersistentVolume pv : persistentVolumeList) {
 			try {
@@ -150,7 +149,7 @@ public class ClusterPersistentVolumeService {
      * @return
      * @throws JsonProcessingException
      */
-    private PersistentVolumeEntity toEntity(PersistentVolume pv,Integer clusterId) throws JsonProcessingException {
+    private PersistentVolumeEntity toEntity(PersistentVolume pv,Long clusterId) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
      // k8s Object -> Entity
 		String name = pv.getMetadata().getName();
@@ -210,7 +209,8 @@ public class ClusterPersistentVolumeService {
 		String label = mapper.writeValueAsString(pv.getMetadata().getLabels());
 		
 		ClusterEntity clusterEntity = new ClusterEntity();
-		clusterEntity.setClusterIdx(Integer.toUnsignedLong(clusterId));
+		clusterEntity.setClusterIdx(clusterId);
+		
 		StorageClassEntity storageClassEntity = new StorageClassEntity();
 		if(storageClassName!=null) {
 			storageClassEntity = persistentVolumeDomainService.getStorageClassId(storageClassName);

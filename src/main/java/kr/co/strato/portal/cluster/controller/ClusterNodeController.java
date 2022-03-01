@@ -39,7 +39,7 @@ public class ClusterNodeController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterNodesListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Node> getClusterNodeList(@RequestParam Integer kubeConfigId) {
+	public List<Node> getClusterNodeList(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
@@ -79,14 +79,9 @@ public class ClusterNodeController {
 	@DeleteMapping("/api/v1/cluster/deletClusterNode/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Boolean> deleteClusterNode(@PathVariable("id") Long id) {
-		try {
-			nodeService.deleteClusterNode(id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-		}
+		boolean isDeleted = nodeService.deleteClusterNode(id);
 		
-		return new ResponseWrapper<>(null);
+		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@GetMapping("/api/v1/cluster/clusterNodes/{id:.+}")
@@ -99,7 +94,7 @@ public class ClusterNodeController {
 	
 	@GetMapping("/api/v1/cluster/clusterNodesYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getNodeYaml(@RequestParam Integer kubeConfigId,String name) {
+	public ResponseWrapper<String> getNodeYaml(@RequestParam Long kubeConfigId,String name) {
 		String resBody = nodeService.getNodeYaml(kubeConfigId,name);
 
 		return new ResponseWrapper<>(resBody);

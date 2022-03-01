@@ -32,7 +32,7 @@ public class StorageClassAdapterService {
      * @return
      * @throws JsonProcessingException
      */
-    public List<StorageClass> getStorageClassList(Integer kubeConfigId) {
+    public List<StorageClass> getStorageClassList(Long kubeConfigId) {
 		// 요청 파라미터 객체 생성
 		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).build();
 
@@ -53,7 +53,7 @@ public class StorageClassAdapterService {
 	}
     
     
-    public List<StorageClass> registerStorageClass(Integer kubeConfigId, String yaml) {
+    public List<StorageClass> registerStorageClass(Long kubeConfigId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yaml).build();
 
         try{
@@ -78,7 +78,7 @@ public class StorageClassAdapterService {
         return nonNamespaceProxy.deleteResource(ResourceType.storageClass.get(), param);
     }
     
-    public String getStorageClassYaml(Integer kubeConfigId,String name) {
+    public String getStorageClassYaml(Long kubeConfigId,String name) {
 
   		String storageClassYaml = nonNamespaceProxy.getResourceYaml(ResourceType.storageClass.get(), kubeConfigId,name);
   		return storageClassYaml;

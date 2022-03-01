@@ -1,10 +1,13 @@
 package kr.co.strato.adapter.k8s.common.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
-
 import java.util.Map;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 리소스 리스트 검색 정보
@@ -17,7 +20,7 @@ import java.util.Map;
 public class ResourceListSearchInfo {
 
     @ApiModelProperty(value="kubeConfigId", example="4", required=true)
-    private Integer kubeConfigId;
+    private Long kubeConfigId;
     @ApiModelProperty(value="Namespace", example="default", required=false)
     private String namespace;
     //PersistentVolume

@@ -2,6 +2,7 @@ package kr.co.strato.adapter.k8s.cluster.service;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +21,7 @@ public interface ClusterAdapterClient {
 	 * @return
 	 */
 	@PostMapping("/kubeConfig")
-    public String postCluster(@RequestParam("provider") String provider, @RequestParam("configContents") String configContents);
+    public String postCluster(@RequestBody ClusterAdapterDto clusterAdapterDto);
 
 	/**
 	 * k8s config 수정
@@ -31,7 +32,7 @@ public interface ClusterAdapterClient {
 	 * @return
 	 */
 	@PutMapping("/kubeConfig")
-	public boolean putCluster(@RequestParam("provider") String provider, @RequestParam("configContents") String configContents, @RequestParam("kubeConfigId") Long kubeConfigId);
+	public boolean putCluster(@RequestBody ClusterAdapterDto clusterAdapterDto);
 	
 	/**
 	 * k8s config 삭제
@@ -50,5 +51,28 @@ public interface ClusterAdapterClient {
 	 */
 	@PostMapping("/kubeConfig/checkConnection")
 	public boolean isClusterConnection(@RequestBody ClusterAdapterDto clusterAdapterDto);
+	
+	/**
+	 * k8s cluster (health + version)정보
+	 * 
+	 * @param kubeConfigId
+	 * @return
+	 */
+	@GetMapping("/cluster/info")
+	public String getClusterInfo(@RequestParam("kubeConfigId") Long kubeConfigId);
+	
+	/**
+	 * k8s cluster health 정보
+	 * @return
+	 */
+	@GetMapping("/cluster/health")
+	public String getClusterHealth(@RequestParam("kubeConfigId") Long kubeConfigId);
+	
+	/**
+	 * k8s cluster version 정보
+	 * @return
+	 */
+	@GetMapping("/cluster/version")
+	public String getClusterVersion(@RequestParam("kubeConfigId") Long kubeConfigId);
 	
 }

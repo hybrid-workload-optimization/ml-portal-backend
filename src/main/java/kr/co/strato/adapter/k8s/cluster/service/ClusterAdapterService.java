@@ -3,7 +3,11 @@ package kr.co.strato.adapter.k8s.cluster.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,7 +19,7 @@ public class ClusterAdapterService {
 	
 	public String registerCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
 		log.debug("[Register Cluster] request : {}", clusterAdapterDto.toString());
-		String response = clusterAdapterClient.postCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents());
+		String response = clusterAdapterClient.postCluster(clusterAdapterDto);
 		log.debug("[Register Cluster] response : {}", response);
 		
 		return response;
@@ -23,7 +27,7 @@ public class ClusterAdapterService {
 	
 	public boolean updateCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
 		log.debug("[Update Cluster] request : {}", clusterAdapterDto.toString());
-		boolean response = clusterAdapterClient.putCluster(clusterAdapterDto.getProvider(), clusterAdapterDto.getConfigContents(), clusterAdapterDto.getKubeConfigId());
+		boolean response = clusterAdapterClient.putCluster(clusterAdapterDto);
 		log.debug("[Update Cluster] response : {}", response);
 		
 		return response;
@@ -48,5 +52,16 @@ public class ClusterAdapterService {
 		log.debug("[Check Cluster Connection] response : {}", response);
 		
 		return response;
+	}
+	
+	public ClusterInfoAdapterDto getClusterInfo(Long kubeConfigId) throws Exception {
+		log.debug("[Get Cluster Info] request : {}", kubeConfigId);
+		String response = clusterAdapterClient.getClusterInfo(kubeConfigId);
+		log.debug("[Get Cluster Info] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		ClusterInfoAdapterDto result = mapper.readValue(response, new TypeReference<ClusterInfoAdapterDto>(){});
+        
+		return result;
 	}
 }

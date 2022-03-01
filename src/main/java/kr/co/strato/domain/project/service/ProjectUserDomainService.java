@@ -73,4 +73,14 @@ public class ProjectUserDomainService {
 		
 		return projectUserRepository.save(entity);
 	}
+	
+	/**
+     * Project User 삭제
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteProjectByProjectIdx(Long projectIdx) {
+		
+		return projectUserRepository.deleteByProjectIdx(projectIdx);
+	}
 }
