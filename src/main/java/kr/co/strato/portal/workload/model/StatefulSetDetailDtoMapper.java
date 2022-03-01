@@ -19,6 +19,7 @@ import java.util.HashMap;
 public interface StatefulSetDetailDtoMapper {
     StatefulSetDetailDtoMapper INSTANCE = Mappers.getMapper(StatefulSetDetailDtoMapper.class);
 
+    @Mapping(target = "id", source = "entity.id")
     @Mapping(target = "name", source = "entity.statefulSetName")
     @Mapping(target = "namespace", source = "entity.namespace.name")
     @Mapping(target = "uid", source = "entity.statefulSetUid")
