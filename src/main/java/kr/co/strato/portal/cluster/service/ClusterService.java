@@ -1,7 +1,9 @@
 package kr.co.strato.portal.cluster.service;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
@@ -78,6 +82,16 @@ public class ClusterService {
 		
 		// k8s - get cluster's information(health + version)
 		ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
+		String clusterHealth		= clusterInfo.getClusterHealth().getHealth();
+		List<String> clusterProblem	= clusterInfo.getClusterHealth().getProblem();
+		// for test
+		//List<String> clusterProblem	= Arrays.asList("problem1", "problem12", "problem3");
+		
+		Map<String, Object> clusterProblemMap = new HashMap<>();
+		clusterProblemMap.put(ClusterEntity.DATA_KEY_PROBLEM, clusterProblem);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		String clusterProblemString = mapper.writeValueAsString(clusterProblemMap);
 		
 		// k8s - get cluster's nodes
 		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
@@ -85,7 +99,8 @@ public class ClusterService {
 		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
 		clusterEntity.setClusterId(clusterId);
-		clusterEntity.setStatus(clusterInfo.getClusterHealty().getHealth());
+		clusterEntity.setStatus(clusterHealth);
+		clusterEntity.setProblem(clusterProblemString);
 		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		

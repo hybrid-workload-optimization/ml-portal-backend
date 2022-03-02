@@ -22,6 +22,8 @@ import lombok.Setter;
 @Table(name = "cluster")
 public class ClusterEntity {
 	
+	public final static String DATA_KEY_PROBLEM = "problem";
+	
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cluster_idx", unique = true)
@@ -66,4 +68,6 @@ public class ClusterEntity {
 	@Column(name = "cluster_id")
 	private Long clusterId;
 	
+	@Column
+	private String problem;
 }
