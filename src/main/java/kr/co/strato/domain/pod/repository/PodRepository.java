@@ -2,7 +2,7 @@ package kr.co.strato.domain.pod.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.domain.pod.model.PodEntity;
 
-public interface PodRepository extends JpaRepository<StatefulSetEntity, Long>, CustomPodRepository {
+public interface PodRepository extends JpaRepository<PodEntity, Long>, CustomPodRepository {
 }
