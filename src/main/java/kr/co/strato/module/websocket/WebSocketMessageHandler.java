@@ -20,7 +20,10 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
     private Map<String, WebSocketMessageBroker> clientMap = new ConcurrentHashMap<>();
 
     @Value("${service.kubernetes-interface.wsUrl}")
-    private String serverUrl;
+    private String k8sUrl;
+
+    @Value("${service.cloud-interface.wsUrl}")
+    private String cloudUrl;
 
 
     @Override
@@ -34,6 +37,13 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
             if(path.startsWith("/")) {
                 path = path.substring(1);
             }
+            String serverUrl = getUrl(path);
+            if(serverUrl == null) {
+                logger.info("Unknown server type - URI: {}", path);
+                session.close();
+                return;
+            }
+
             String url = String.format("%s%s", serverUrl, path);
 
             WebSocketMessageBroker client = new WebSocketMessageBroker(session, url);
@@ -89,4 +99,23 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
             };
         }
     }
+
+    /**
+     * 서비스 타입에 따라 I/F URL 반환
+     * @param path
+     * @return
+     */
+    private String getUrl(String path) {
+        String[] arr = path.split("/");
+        String type = arr[0];
+
+        String url = null;
+        if(type.equals("pod")) {
+            url = k8sUrl;
+        } else if(type.equals("cluster")) {
+            url = cloudUrl;
+        }
+        return url;
+    }
+
 }
