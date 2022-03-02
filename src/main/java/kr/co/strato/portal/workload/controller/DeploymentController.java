@@ -42,17 +42,17 @@ public class DeploymentController {
 	
 	@PostMapping("/deployments")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<DeploymentDto> post(@RequestBody DeploymentDto deploymentDto) {
+	public ResponseWrapper<DeploymentDto> post(@RequestBody DeploymentArgDto deploymentArgDto) {
 		ResponseWrapper<DeploymentDto> result = null;
-		deploymentService.save(deploymentDto);
+		deploymentService.create(deploymentArgDto);
 		return result;
 	}
 	
 	@PutMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> put(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentDto deploymentDto) {
-		deploymentDto.setIdx(idx);
-		deploymentService.save(deploymentDto);
+	public ResponseWrapper<DeploymentDto> put(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
+		deploymentArgDto.setDeploymentIdx(idx);
+		deploymentService.update(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();
 	}
 	
