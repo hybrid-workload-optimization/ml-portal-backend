@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class ClusterInfoAdapterDto {
 
-	private ClusterHealthAdapterDto clusterHealty;
+	private ClusterHealthAdapterDto clusterHealth;
 	
 	private String kubeletVersion;
 	
