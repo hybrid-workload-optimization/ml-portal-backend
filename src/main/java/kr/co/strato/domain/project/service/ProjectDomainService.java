@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ public class ProjectDomainService {
      * @param param
      * @return
      */
-    public List<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
+    public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
     	
     	return projectRepository.getProjectList(pageable, param);
     }
