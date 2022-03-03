@@ -96,8 +96,8 @@ public class ClusterStorageClassService {
 	
 	
     public String getClusterStorageClassYaml(Long kubeConfigId,String name){
-     	String namespaceYaml = storageClassAdapterService.getStorageClassYaml(kubeConfigId,name); 
-         return namespaceYaml;
+     	String storageClassYaml = storageClassAdapterService.getStorageClassYaml(kubeConfigId,name); 
+         return storageClassYaml;
      }
     
 	
@@ -143,7 +143,7 @@ public class ClusterStorageClassService {
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("PersistentVolume update error");
+                throw new InternalServerException("StorageClass update error");
             }
         }).collect(Collectors.toList());
         return ids;

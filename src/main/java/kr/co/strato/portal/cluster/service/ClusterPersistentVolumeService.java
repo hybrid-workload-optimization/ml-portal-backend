@@ -86,8 +86,8 @@ public class ClusterPersistentVolumeService {
 	
 	
     public String getClusterPersistentVolumeYaml(Long kubeConfigId,String name){
-     	String namespaceYaml = persistentVolumeAdapterService.getPersistentVolumeYaml(kubeConfigId,name); 
-         return namespaceYaml;
+     	String persistentVolumeYaml = persistentVolumeAdapterService.getPersistentVolumeYaml(kubeConfigId,name); 
+         return persistentVolumeYaml;
      }
     
 	

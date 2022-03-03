@@ -42,6 +42,9 @@ public class IngressEntity {
 	@Column(name = "ingress_uid")
 	private String uid;
 	
+	@Column(name = "ingress_class")
+	private String ingressClass;
+	
 	
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
