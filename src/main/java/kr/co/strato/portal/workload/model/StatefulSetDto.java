@@ -43,7 +43,7 @@ public class StatefulSetDto {
     @ToString
     public static class SearchParam{
         private Long projectId;
-        private Long clsuterId;
+        private Long clusterId;
         private Long namespaceId;
     }
 }

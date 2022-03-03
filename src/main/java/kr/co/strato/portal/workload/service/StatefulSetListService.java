@@ -66,7 +66,7 @@ public class StatefulSetListService {
     }
 
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
-        Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClsuterId(), searchParam.getNamespaceId());
+        Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId());
         List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
         Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
 
