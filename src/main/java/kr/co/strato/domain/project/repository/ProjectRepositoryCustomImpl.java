@@ -37,16 +37,12 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	@Override
 	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
 		
-		System.out.println("Offset === " + pageable.getOffset());
-		System.out.println("Pagesize === " + pageable.getPageSize());
-		
 		BooleanBuilder builder = new BooleanBuilder();
 	    if(!"".equals(param.getProjectName()) && param.getProjectName() != null) {
 	    	builder.and(projectEntity.projectName.contains(param.getProjectName()));
 	    }
 		
 		QueryResults<ProjectDto> result = queryFactory
-		//List<ProjectDto> result = queryFactory
 				  .select(Projections.fields(
 						  ProjectDto.class,
 						  projectEntity.id, 
