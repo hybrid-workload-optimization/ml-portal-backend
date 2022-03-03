@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.repository.UserRepository;
+import kr.co.strato.domain.user.repository.UserRoleRepository;
 
 /**
  * @author tmdgh
@@ -20,12 +21,19 @@ public class UserDomainService {
 	@Autowired
 	UserRepository userRepository;
 	
+	@Autowired
+	UserRoleRepository userRoleRepository;
 	
 	/**
 	 * 유저 등록/수정
 	 * @param entity
 	 */
 	public void saveUser(UserEntity entity) {
+
+		//기본권한 매핑
+		if(entity.getUserRoleIdx() == null || entity.getUserRoleIdx() == null) {
+			entity.setUserRoleIdx(userRoleRepository.findTop1BByUserRoleName("PROJECT MEMBER").getId());
+		}
 		//DB 저장
 		userRepository.save(entity);
 		
@@ -98,8 +106,6 @@ public class UserDomainService {
 		
 		return userRepository.findByUserName(userName, pageable);
 	}
-
-
 
 	
 	

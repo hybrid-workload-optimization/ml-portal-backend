@@ -112,5 +112,15 @@ public class UserController {
 		return new ResponseWrapper<>(userDto);
 	}
 	
+	@GetMapping("/test")
+	@ResponseStatus(HttpStatus.OK)
+	public void testController() {
+		System.out.println("============>> 테스트");
+		
+		userService.getTest();
+		
+		System.out.println("<<============ 테스트 종료");
+	}
+	
 
 }
