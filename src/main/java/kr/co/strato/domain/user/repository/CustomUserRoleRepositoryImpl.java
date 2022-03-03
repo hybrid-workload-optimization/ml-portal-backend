@@ -17,7 +17,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.global.util.OrderUtil;
-import kr.co.strato.portal.setting.model.AuthorityDto;
+import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 
 import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
 import static kr.co.strato.domain.user.model.QUserRoleMenuEntity.userRoleMenuEntity;
@@ -35,7 +35,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 	
 	
 	@Override
-	public Page<AuthorityDto> getListUserRoleToDto(AuthorityDto params, Pageable pageable) {
+	public Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto params, Pageable pageable) {
 		BooleanBuilder builder = new BooleanBuilder();
 		if ( ObjectUtils.isNotEmpty(params) ) {
 			if ( params.getUserRoleIdx() != null && params.getUserRoleIdx() > 0 ){
@@ -47,8 +47,8 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 			}
 		}
 		
-		QueryResults<AuthorityDto> results = jpaQueryFactory
-				.select(Projections.fields(AuthorityDto.class, 
+		QueryResults<AuthorityRequestDto> results = jpaQueryFactory
+				.select(Projections.fields(AuthorityRequestDto.class, 
 								userRoleEntity.id.as("userRoleIdx")
 							,	userRoleEntity.userRoleName
 						))
@@ -59,7 +59,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 				.limit(pageable.getPageSize())
 				.fetchResults();
 		
-		List<AuthorityDto> content = results.getResults();
+		List<AuthorityRequestDto> content = results.getResults();
 		long total = results.getTotal();
 		
 		return new PageImpl<>(content, pageable, total);

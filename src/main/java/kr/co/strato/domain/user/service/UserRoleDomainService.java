@@ -1,6 +1,8 @@
 package kr.co.strato.domain.user.service;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,5 +29,13 @@ public class UserRoleDomainService {
 	
 	public void saveUserRole(UserRoleEntity entity) {
 		userRoleRepository.save(entity);
+	}
+	
+	public void deleteUserRole(UserRoleEntity entity) {
+		userRoleRepository.delete(entity);
+	}
+
+	public List<UserRoleEntity> getAllListAuthority() {
+		return userRoleRepository.findAll();
 	}
 }

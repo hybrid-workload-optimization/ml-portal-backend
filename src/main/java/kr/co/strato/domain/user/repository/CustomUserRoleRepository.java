@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import kr.co.strato.portal.setting.model.AuthorityDto;
+import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 
 
 public interface CustomUserRoleRepository {
 
-	Page<AuthorityDto> getListUserRoleToDto(AuthorityDto params, Pageable pageable);
+	Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto params, Pageable pageable);
 
 }
