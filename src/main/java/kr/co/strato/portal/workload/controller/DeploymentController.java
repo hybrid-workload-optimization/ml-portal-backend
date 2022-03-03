@@ -58,8 +58,9 @@ public class DeploymentController {
 	
 	@DeleteMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> delete(@PathVariable(name = "idx") Long idx) {
-		deploymentService.delete(idx);
+	public ResponseWrapper<DeploymentDto> delete(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
+		deploymentArgDto.setDeploymentIdx(idx);
+		deploymentService.delete(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();
 	}
 }

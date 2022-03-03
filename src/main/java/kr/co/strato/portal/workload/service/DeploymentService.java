@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.deployment.service.DeploymentDomainService;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.global.model.PageRequest;
 
 @Slf4j
@@ -34,6 +36,10 @@ public class DeploymentService {
 	
 	@Autowired
 	DeploymentAdapterService deploymentAdapterService;
+	
+	@Autowired
+	NamespaceDomainService namespaceDomainService;
+	
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -62,7 +68,7 @@ public class DeploymentService {
 	
 	private void save(DeploymentArgDto deploymentArgDto){
 		Long clusterId = deploymentArgDto.getClusterId();
-		String yaml = deploymentArgDto.getYmal();
+		String yaml = deploymentArgDto.getYaml();
 		
 		
 		List<Deployment> deployments = deploymentAdapterService.create(clusterId, yaml);
@@ -76,6 +82,11 @@ public class DeploymentService {
 			}
 			
 			if(deploymentEntity != null) {
+				NamespaceEntity namespaceEntity = new NamespaceEntity();
+				namespaceEntity.setId(deploymentArgDto.getNamespaceIdx());
+				deploymentEntity.setNamespaceEntity(namespaceEntity);
+				
+				//수정시
 				if(deploymentArgDto.getDeploymentIdx() != null)
 					deploymentEntity.setDeploymentIdx(deploymentArgDto.getDeploymentIdx());
 				
@@ -91,8 +102,23 @@ public class DeploymentService {
 	
 	
 	//삭제
-	public void delete(Long idx){
-		deploymentDomainService.delete(idx);
+	public void delete(DeploymentArgDto deploymentArgDto){
+		Long clusterId = deploymentArgDto.getClusterId();
+		Long namespaceIdx = deploymentArgDto.getNamespaceIdx();
+		Long deploymentIdx = deploymentArgDto.getDeploymentIdx();
+		String deploymentName = null;
+		String namespaceName = null;
+		
+		NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+		if(namespaceEntity != null)
+			namespaceName = namespaceEntity.getName();
+		
+		DeploymentEntity deploymentEntity = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
+		if(deploymentEntity != null)
+			deploymentName = deploymentEntity.getDeploymentName();
+		
+		deploymentAdapterService.delete(clusterId, namespaceName, deploymentName);
+		deploymentDomainService.delete(deploymentIdx);
 	}
 	
 	
@@ -149,6 +175,13 @@ public class DeploymentService {
         	condition = mapper.writeValueAsString(deploymentStatus.getConditions());
         }
         
+        float fMaxSurge = 0f;
+        if(maxSurge != null && !maxSurge.isEmpty())
+        	fMaxSurge = Float.parseFloat(maxSurge);
+        
+        float fMaxUnavailable = 0f;
+        if(maxUnavailable != null && !maxUnavailable.isEmpty())
+        	fMaxUnavailable = Float.parseFloat(maxUnavailable);
         
         DeploymentEntity deploymentEntity = DeploymentEntity.builder()
 				.deploymentName(name)
@@ -157,8 +190,8 @@ public class DeploymentService {
 				.createdAt(LocalDateTime.now())
 				.strategy(strategy)
 				.selector(selector)
-				.maxSurge(Float.parseFloat(maxSurge))
-				.maxUnavailable(Float.parseFloat(maxUnavailable))
+				.maxSurge(fMaxSurge)
+				.maxUnavailable(fMaxUnavailable)
 				.annotation(annotation)
 				.label(label)
 				.podUpdated(podUpdated)

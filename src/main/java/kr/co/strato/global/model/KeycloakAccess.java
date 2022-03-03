@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -13,13 +13,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KeycloakUser {
-	private String id;
-	private long createdTimestamp;
-	private String username;
-	private boolean enabled;
-	private boolean emailVerified;
-	private KeycloakAccess access;
+public class KeycloakAccess {
+
+	private boolean manageGroupMembership;
+	private boolean view;
+	private boolean mapRoles;
+	private boolean impersonate;
+	private boolean manage;
 	
 	
 }

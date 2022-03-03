@@ -11,6 +11,7 @@ import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.Base64Util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class DeploymentAdapterService {
     private InNamespaceProxy inNamespaceProxy;
 
     public List<Deployment> create(Long clusterId, String yaml) {
+    	yaml = Base64Util.decode(yaml);
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
@@ -61,9 +63,13 @@ public class DeploymentAdapterService {
         }
     }
 
-    public boolean delete(Integer clusterId, String namespaceName, String deploymentName){
+    public boolean delete(Long clusterId, String namespaceName, String deploymentName){
+    	Integer iClusterId = null;
+    	if(clusterId != null)
+    		iClusterId = Long.valueOf(clusterId).intValue();
+    	
         WorkloadResourceInfo reqBody = WorkloadResourceInfo.builder()
-                .kubeConfigId(clusterId)
+                .kubeConfigId(iClusterId)
                 .namespace(namespaceName)
                 .name(deploymentName)
                 .build();
@@ -76,9 +82,13 @@ public class DeploymentAdapterService {
         
     }
 
-    public Deployment retrieve(Integer clusterId, String namespaceName, String deploymentName){
+    public Deployment retrieve(Long clusterId, String namespaceName, String deploymentName){
+    	Integer iClusterId = null;
+    	if(clusterId != null)
+    		iClusterId = Long.valueOf(clusterId).intValue();
+    	
         try{
-            String res = inNamespaceProxy.getResource(ResourceType.deployment.get(), clusterId, namespaceName, deploymentName);
+            String res = inNamespaceProxy.getResource(ResourceType.deployment.get(), iClusterId, namespaceName, deploymentName);
             Deployment deployment = new ObjectMapper().readValue(res, new TypeReference<Deployment>(){});
             return deployment;
         }catch (JsonProcessingException e){
@@ -90,9 +100,13 @@ public class DeploymentAdapterService {
         }
     }
 
-    public String getYaml(Integer clusterId, String namespaceName, String deploymentName){
+    public String getYaml(Long clusterId, String namespaceName, String deploymentName){
+    	Integer iClusterId = null;
+    	if(clusterId != null)
+    		iClusterId = Long.valueOf(clusterId).intValue();
+    	
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.deployment.get(), clusterId, namespaceName, deploymentName);
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.deployment.get(), iClusterId, namespaceName, deploymentName);
             return yaml;
         }catch (Exception e){
             log.error(e.getMessage(), e);

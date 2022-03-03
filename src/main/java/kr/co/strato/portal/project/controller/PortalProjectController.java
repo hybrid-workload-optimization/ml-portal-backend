@@ -11,18 +11,16 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
-import kr.co.strato.portal.cluster.model.ClusterDto;
-import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
 
@@ -39,13 +37,9 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ProjectDto>> getProjectList(@RequestParam int page, @RequestParam int size, @RequestBody ProjectDto param) {
+    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest, ProjectDto param) {
         
-    	PageRequest pageable = new PageRequest();
-    	pageable.setPage(page);
-    	pageable.setSize(size);
-    	
-    	Page<ProjectDto> response = portalProjectService.getProjectList(pageable.of(), param);
+    	Page<ProjectDto> response = portalProjectService.getProjectList(pageRequest.of(), param);
         
         return new ResponseWrapper<Page<ProjectDto>>(response);
     }

@@ -7,10 +7,12 @@ import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -33,15 +35,14 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}*/
 	
 	@Override
-	public List<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
+	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
 		
 		BooleanBuilder builder = new BooleanBuilder();
 	    if(!"".equals(param.getProjectName()) && param.getProjectName() != null) {
 	    	builder.and(projectEntity.projectName.contains(param.getProjectName()));
 	    }
 		
-		//QueryResults<ProjectDto> result = queryFactory
-		List<ProjectDto> result = queryFactory
+		QueryResults<ProjectDto> result = queryFactory
 				  .select(Projections.fields(
 						  ProjectDto.class,
 						  projectEntity.id, 
@@ -71,9 +72,14 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .where(projectEntity.id.in(
 						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(param.getUserId()), builder))
 				  )
-				  .fetch();
+				  .offset(pageable.getOffset())
+                  .limit(pageable.getPageSize())
+				  .fetchResults();
 		
-		return result;
+		List<ProjectDto> resultList = result.getResults();
+        long total = result.getTotal();
+		
+		return new PageImpl<ProjectDto>(resultList, pageable, total);
 	}
 	
 	@Override

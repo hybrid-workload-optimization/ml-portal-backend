@@ -63,10 +63,10 @@ public class PortalProjectService {
      */
     public Page<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
     	
-    	List<ProjectDto> projectList = projectDomainService.getProjectList(pageable, param);
+    	PageImpl<ProjectDto> projectList = projectDomainService.getProjectList(pageable, param);
     	
     	//페이징 정보 추가
-        return new PageImpl<ProjectDto>(projectList, pageable, projectList.size());
+        return projectList;
     }
     
     /**

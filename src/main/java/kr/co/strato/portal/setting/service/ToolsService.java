@@ -77,6 +77,7 @@ public class ToolsService {
 	 */
 	public Long patchTools(ToolsDto dto) {
 		// DTO TO ENTITY
+		dto.setKey(dto.getKey().toUpperCase()); //사전 약속으로 대문자 세팅
 		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntity(dto);
 		// GET REAL ENTITY (BY PARAM ENTITY)
 		SettingEntity entity = settingDomainService.getSetting(param);

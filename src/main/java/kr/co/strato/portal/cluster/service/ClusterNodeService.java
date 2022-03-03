@@ -153,8 +153,8 @@ public class ClusterNodeService {
         return clusterNode;
     }
     public String getNodeYaml(Long kubeConfigId,String name){
-     	String namespaceYaml = nodeAdapterService.getNodeYaml(kubeConfigId,name); 
-         return namespaceYaml;
+     	String nodeYaml = nodeAdapterService.getNodeYaml(kubeConfigId,name); 
+         return nodeYaml;
      }
     
 }
