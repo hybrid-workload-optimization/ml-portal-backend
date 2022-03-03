@@ -33,7 +33,8 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
 
         String sessionId = session.getId();
         if(!clientMap.containsKey(sessionId)) {
-            String path = (String)session.getAttributes().get("path");
+            String wsPath = (String)session.getAttributes().get("path");
+            String path = wsPath.replace("/ws", "");
             if(path.startsWith("/")) {
                 path = path.substring(1);
             }
