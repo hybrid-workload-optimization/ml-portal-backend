@@ -25,6 +25,7 @@ import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.workload.model.StatefulSetDto;
 
 @RestController
 public class PortalProjectController {
@@ -39,13 +40,9 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ProjectDto>> getProjectList(@RequestParam int page, @RequestParam int size, @RequestBody ProjectDto param) {
+    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest, ProjectDto param) {
         
-    	PageRequest pageable = new PageRequest();
-    	pageable.setPage(page);
-    	pageable.setSize(size);
-    	
-    	Page<ProjectDto> response = portalProjectService.getProjectList(pageable.of(), param);
+    	Page<ProjectDto> response = portalProjectService.getProjectList(pageRequest.of(), param);
         
         return new ResponseWrapper<Page<ProjectDto>>(response);
     }
