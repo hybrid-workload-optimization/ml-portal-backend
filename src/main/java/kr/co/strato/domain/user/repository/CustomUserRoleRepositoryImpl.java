@@ -39,7 +39,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 		BooleanBuilder builder = new BooleanBuilder();
 		if ( ObjectUtils.isNotEmpty(params) ) {
 			if ( params.getUserRoleIdx() != null && params.getUserRoleIdx() > 0 ){
-				builder.and(condition(params.getUserRoleIdx(), userRoleEntity.userRoleIdx::eq));
+				builder.and(condition(params.getUserRoleIdx(), userRoleEntity.id::eq));
 			}
 			
 			if ( StringUtils.isNotEmpty(params.getUserRoleName()) ) {
@@ -49,7 +49,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 		
 		QueryResults<AuthorityDto> results = jpaQueryFactory
 				.select(Projections.fields(AuthorityDto.class, 
-								userRoleEntity.userRoleIdx
+								userRoleEntity.id.as("userRoleIdx")
 							,	userRoleEntity.userRoleName
 						))
 				.from(userRoleEntity)

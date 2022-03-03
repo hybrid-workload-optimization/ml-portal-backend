@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,7 +26,7 @@ public class AuthorityController {
 	//목록
 	@GetMapping("/authorities")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<AuthorityDto>> getListUserRole(@RequestBody AuthorityDto param){
+	public ResponseWrapper<Page<AuthorityDto>> getListUserRole(AuthorityDto param){
 		Page<AuthorityDto> userList = authorityService.getListAuthorityDto(param, param.of());
 		return new ResponseWrapper<>(userList);
 	}
@@ -33,8 +34,16 @@ public class AuthorityController {
 	//상세
 	@GetMapping("/authorities/{authId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<UserRoleEntity> getUserRole(@PathVariable(name = "authId") Long authId, @RequestBody AuthorityDto param){
+	public ResponseWrapper<AuthorityDto> getUserRole(@PathVariable(name = "authId") Long authId, AuthorityDto param){
 		return new ResponseWrapper<>(null);
 	}
+	
+	//신규저장
+	@PostMapping("/authorities")
+	public ResponseWrapper<Long> postUserRole(@RequestBody AuthorityDto param) {
+		Long idx = authorityService.postUserRole(param);
+		return new ResponseWrapper<>(null);
+	}
+	
 	
 }

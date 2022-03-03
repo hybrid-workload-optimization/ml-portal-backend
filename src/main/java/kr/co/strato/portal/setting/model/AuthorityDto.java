@@ -17,8 +17,10 @@ public class AuthorityDto extends PageRequest {
 	
 	private List<Menu> menuList;
 	
-//	private List<User> userList;
-	
+	private Long targetUserRoleIdx;
+//	
+////	private List<User> userList;
+//	
 	@Getter
 	@Setter
 	class Menu {
@@ -28,6 +30,9 @@ public class AuthorityDto extends PageRequest {
 		private Long parentMenuIdx;
 		private Integer menuOrder;
 		private Integer menuDepth;
-		private Character useYn;
+		private String useYn;
+		
+		private String viewableYn;
+		private String writableYn;
 	}
 }
