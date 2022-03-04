@@ -3,7 +3,7 @@ package kr.co.strato.global.util;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -11,7 +11,10 @@ import java.util.regex.Pattern;
 public class DateUtil {
     public static LocalDateTime strToLocalDateTime(String text){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return LocalDateTime.parse(text, formatter);
+		LocalDateTime local = LocalDateTime.parse(text, formatter);
+		local = local.plusHours(9L);
+
+        return local;
     }
 
     public static LocalDateTime strToLocalDateTime(String text, String pattern){
