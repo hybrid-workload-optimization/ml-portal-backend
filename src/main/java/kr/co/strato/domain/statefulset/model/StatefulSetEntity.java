@@ -39,7 +39,7 @@ public class StatefulSetEntity {
     @Lob
     private String label;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;
 

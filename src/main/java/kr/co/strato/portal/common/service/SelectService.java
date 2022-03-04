@@ -11,6 +11,7 @@ import kr.co.strato.portal.common.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,12 @@ public class SelectService {
     }
 
     public List<SelectDto> getSelectClusters(Long projectIdx){
-        List<ClusterEntity> clusters = clusterDomainService.getListByProjectIdx(projectIdx);
+        List<ClusterEntity> clusters = new ArrayList<>();
+        if(projectIdx != null && projectIdx > 0L){
+            clusters = clusterDomainService.getListByProjectIdx(projectIdx);
+        }else{
+            clusters = clusterDomainService.getListAll();
+        }
         List<SelectDto> selectClusters = clusters.stream().map( e  -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
         return selectClusters;
     }

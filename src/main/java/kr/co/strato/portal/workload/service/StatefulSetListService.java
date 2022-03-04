@@ -37,20 +37,24 @@ public class StatefulSetListService {
     @Autowired
     private StatefulSetAdapterService statefulSetAdapterService;
 
+    @Autowired
+    private ClusterDomainService clusterDomainService;
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
-        Long clusterId = reqCreateDto.getClusterId();
+        Long clusterIdx = reqCreateDto.getClusterIdx();
+        ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
-        List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterId, yaml);
+        List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterEntity.getClusterId(), yaml);
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity statefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.register(statefulSet, clusterId.longValue(), namespaceName);
+                Long id = statefulSetDomainService.register(statefulSet, clusterEntity.getClusterId(), namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -92,6 +96,8 @@ public class StatefulSetListService {
         String annotations = mapper.writeValueAsString(s.getMetadata().getAnnotations());
         String createAt = s.getMetadata().getCreationTimestamp();
 
+        System.out.println("createAT~~~");
+        System.out.println(createAt);
         StatefulSetEntity statefulSet = StatefulSetEntity.builder()
                 .statefulSetName(name)
                 .statefulSetUid(uid)

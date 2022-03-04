@@ -17,7 +17,7 @@ public class StatefulSetDto {
     @NoArgsConstructor
     public static class ReqCreateDto{
         //TODO validation체크
-        private Long clusterId;
+        private Long clusterIdx;
         private String yaml;
     }
 

@@ -76,5 +76,10 @@ public class ClusterDomainService {
 
 		return clusters;
 	}
-	
+
+	public List<ClusterEntity> getListAll(){
+		List<ClusterEntity> clusters = clusterRepository.findAll();
+
+		return clusters;
+	}
 }
