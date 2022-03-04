@@ -55,6 +55,11 @@ public class AuthorityService {
 	// 권한 상세 조회 (for front-end)
 	public AuthorityViewDto getAuthorityToDto(Long authId) {
 		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(authId);
+		
+		userRole.getUsers().stream().forEach(s -> {
+			System.out.println("####s :: " + s.getUserName());
+		});
+		
 		AuthorityViewDto authority = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(userRole);
 		
 		return authority;

@@ -2,10 +2,12 @@ package kr.co.strato.domain.user.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sun.istack.NotNull;
@@ -55,11 +57,13 @@ public class UserEntity {
 	@Column(name = "created_at")
 	private String createdAt;
 
-	@JoinColumn(name = "user_role_idx")
-	private Long userRoleIdx;
+//	@Column(name = "user_role_idx")
+//	private Long userRoleIdx;
 	
 	@Column(name = "use_yn")
 	private String useYn;
 
-
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_role_idx")
+	private UserRoleEntity userRole;
 }

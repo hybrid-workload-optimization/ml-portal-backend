@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,6 +66,7 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public Long registerCluster(ClusterDto clusterDto) throws Exception {
 		// k8s - post cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()

@@ -57,4 +57,6 @@ public class AuthorityController {
 		return new ResponseWrapper<>(idx);
 	}
 	
+	
+	
 }

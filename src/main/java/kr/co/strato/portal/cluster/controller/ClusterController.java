@@ -53,7 +53,7 @@ public class ClusterController {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			try {
@@ -93,7 +93,7 @@ public class ClusterController {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			try {
@@ -134,7 +134,7 @@ public class ClusterController {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			try {
@@ -176,7 +176,7 @@ public class ClusterController {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			try {
@@ -216,7 +216,7 @@ public class ClusterController {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			try {
@@ -246,7 +246,7 @@ public class ClusterController {
         try {
         	result = clusterService.isClusterDuplication(name);
 		} catch (Exception e) {
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		}
         
@@ -260,7 +260,7 @@ public class ClusterController {
         try {
         	result = clusterService.isClusterConnection(clusterDto.getKubeConfig());
 		} catch (Exception e) {
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		}
         
@@ -274,7 +274,7 @@ public class ClusterController {
         try {
         	//results = clusterService.getClusterList(pageRequest.of());
 		} catch (Exception e) {
-			log.error("Error has occured", e);
+			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		} finally {
 			//@TODO : work_history 등록 필요
