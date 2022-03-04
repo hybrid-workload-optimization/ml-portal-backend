@@ -39,14 +39,16 @@ public class StatefulSetAdapterService {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
-//            System.out.println(results);
 
             //json -> fabric8 k8s 오브젝트 파싱
             ObjectMapper mapper = new ObjectMapper();
             List<StatefulSet> statefulsets = mapper.readValue(results, new TypeReference<List<StatefulSet>>(){});
 
             return statefulsets;
-
+        }catch (FeignException e){
+            log.error(e.getMessage(), e);
+//            System.out.println(e.request());
+            throw new InternalServerException("k8s interface 통신 에러 - statefulSet 생성 에러");
         }catch (JsonProcessingException e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("json 파싱 에러");
@@ -57,8 +59,6 @@ public class StatefulSetAdapterService {
     }
 
     public List<StatefulSet> update(Long clusterId, String yaml){
-        System.out.println("yaml~~~~");
-        System.out.println(yaml);
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
@@ -71,9 +71,8 @@ public class StatefulSetAdapterService {
             return statefulsets;
 
         }catch (FeignException e){
-//            log.error(e.getMessage(), e);
-            e.printStackTrace();
-            System.out.println(e.request());
+            log.error(e.getMessage(), e);
+//            System.out.println(e.request());
             throw new InternalServerException("k8s interface 통신 에러 - statefulSet 업데이트 에러");
         }catch (JsonProcessingException e){
             log.error(e.getMessage(), e);
