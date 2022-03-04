@@ -95,7 +95,7 @@ public class ClusterStorageClassController {
 		return new ResponseWrapper<>(isDeleted);
 	}
 	
-	@PutMapping("/api/v1/clusters/updateClusterStorageClass/{id}")
+	@PutMapping("/api/v1/cluster/updateClusterStorageClass/{id}")
     public ResponseWrapper<Long> updateClusterStorageClass(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
