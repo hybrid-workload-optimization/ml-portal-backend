@@ -95,7 +95,7 @@ public class ClusterPersistentVolumeController {
 		return new ResponseWrapper<>(isDeleted);
 	}
 	
-	@PutMapping("/api/v1/clusters/updateClusterPersistentVolume/{id}")
+	@PutMapping("/api/v1/cluster/updateClusterPersistentVolume/{id}")
 	@ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Long> updateClusterPersistentVolume(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;

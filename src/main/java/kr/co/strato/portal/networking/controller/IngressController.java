@@ -1,4 +1,4 @@
-package kr.co.strato.portal.cluster.controller;
+package kr.co.strato.portal.networking.controller;
 
 import java.util.List;
 
@@ -14,24 +14,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
-import kr.co.strato.portal.cluster.service.ClusterNamespaceService;
+import kr.co.strato.portal.networking.model.IngressDto;
+import kr.co.strato.portal.networking.service.IngressService;
 import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
 @RestController
-public class ClusterNamespaceController {
+public class IngressController {
 
 	@Autowired
-	private ClusterNamespaceService namespaceService;
+	private IngressService ingressService;
 
 	
 	/**
@@ -39,13 +41,13 @@ public class ClusterNamespaceController {
 	 * @return
 	 * k8s data 호출 및 db저장
 	 */
-	@GetMapping("/api/v1/cluster/clusterNamespaceListSet")
+	@GetMapping("/api/v1/networking/ingressListSet")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Namespace> getClusterNamespaceListSet(@RequestParam Long kubeConfigId) {
+	public List<Ingress> getIngressListSet(@RequestParam Long kubeConfigId) {
 		if (kubeConfigId == null) {
 			throw new BadRequestException("kubeConfigId id is null");
 		}
-		return namespaceService.getClusterNamespaceListSet(kubeConfigId);
+		return ingressService.getIngressListSet(kubeConfigId);
 	}
 	
 	
@@ -54,30 +56,30 @@ public class ClusterNamespaceController {
 	 * @return
 	 * page List
 	 */
-	@GetMapping("/api/v1/cluster/clusterNamespaces")
+	@GetMapping("/api/v1/networking/ingress")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterNamespaceDto>> getClusterNamespaceList(String name,PageRequest pageRequest){
-        Page<ClusterNamespaceDto> results = namespaceService.getClusterNamespaceList(name,pageRequest.of());
+    public ResponseWrapper<Page<IngressDto>> getIngressList(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,PageRequest pageRequest){
+        Page<IngressDto> results = ingressService.getIngressList(name,clusterEntity,namespace,pageRequest.of());
         return new ResponseWrapper<>(results);
     }
 
 
 	
-	@GetMapping("/api/v1/cluster/clusterNamespacesYaml")
+	@GetMapping("/api/v1/networking/ingresssYaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getClusterNamespaceDetail(@RequestParam Long kubeConfigId,String name) {
-		String resBody = namespaceService.getClusterNamespaceYaml(kubeConfigId,name);
+	public ResponseWrapper<String> getIngressDetail(@RequestParam Long kubeConfigId,String name,String namespace) {
+		String resBody = ingressService.getIngressYaml(kubeConfigId,name,namespace);
 
 		return new ResponseWrapper<>(resBody);
 	}
 	
-	@PostMapping("/api/v1/cluster/registerClusterNamespace")
+	@PostMapping("/api/v1/networking/registerIngress")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerIngress(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = namespaceService.registerClusterNamespace(yamlApplyParam,kubeConfigId);
+			 ids = ingressService.registerIngress(yamlApplyParam,kubeConfigId);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());
@@ -87,20 +89,19 @@ public class ClusterNamespaceController {
 		return new ResponseWrapper<>(ids);
 	}
 
-	@DeleteMapping("/api/v1/cluster/deletClusterNamespace/{id}")
+	@DeleteMapping("/api/v1/networking/deletIngress/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteClusterNamespace(@PathVariable Long id) {
-		boolean isDeleted = namespaceService.deleteClusterNamespace(id);
+	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id) {
+		boolean isDeleted = ingressService.deleteIngress(id);
 		
 		return new ResponseWrapper<>(isDeleted);
 	}
 	
-	@PutMapping("/api/v1/cluster/updateClusterNamespace/{id}")
-	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Long> updateClusterNamespace(@PathVariable(required = true) Long id, @RequestBody YamlApplyParam yamlApplyParam){
+	@PutMapping("/api/v1/networking/updateIngress/{id}")
+    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	namespaceService.updateClusterNamespace(id,yamlApplyParam); 
+        	ingressService.updateIngress(id, yamlApplyParam);  
         	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);
@@ -112,10 +113,10 @@ public class ClusterNamespaceController {
     }
 	
 	
-	@GetMapping("/api/v1/cluster/clusterNamespaces/{id:.+}")
+	@GetMapping("/api/v1/networking/ingress/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterNamespaceDto> getClusterNamespaceDetail(@PathVariable("id") Long id) {
-		ClusterNamespaceDto resBody = namespaceService.getClusterNamespaceDetail(id);
+	public ResponseWrapper<IngressDto> getIngressDetail(@PathVariable("id") Long id) {
+		IngressDto resBody = ingressService.getIngressDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}
