@@ -1,8 +1,14 @@
 package kr.co.strato.adapter.k8s.deployment.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import feign.FeignException;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -13,10 +19,6 @@ import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 
 @Service
@@ -64,12 +66,9 @@ public class DeploymentAdapterService {
     }
 
     public boolean delete(Long clusterId, String namespaceName, String deploymentName){
-    	Integer iClusterId = null;
-    	if(clusterId != null)
-    		iClusterId = Long.valueOf(clusterId).intValue();
     	
         WorkloadResourceInfo reqBody = WorkloadResourceInfo.builder()
-                .kubeConfigId(iClusterId)
+                .kubeConfigId(clusterId)
                 .namespace(namespaceName)
                 .name(deploymentName)
                 .build();

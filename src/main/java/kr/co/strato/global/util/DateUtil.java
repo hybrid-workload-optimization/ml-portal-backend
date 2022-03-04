@@ -1,9 +1,12 @@
 package kr.co.strato.global.util;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 public class DateUtil {
     public static LocalDateTime strToLocalDateTime(String text){
@@ -28,7 +31,85 @@ public class DateUtil {
     
     public static String currentDateTime() {
     	Timestamp timestamp  = new Timestamp(System.currentTimeMillis());
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     	return sdf.format(timestamp);
+    }
+    
+    /**
+     * 날짜형 문자열 변환
+     * 
+     * reference : http://zeany.net/62
+     * 
+     * @param strDate
+     * @return
+     */
+    public static Date parse(String strDate) {
+		if (strDate == null || strDate.isEmpty()) {
+			return null;
+		}
+
+		StringBuilder sdfSb = new StringBuilder("yyyy-MM-dd");
+
+		if (strDate.length() < 19) { // "yyyy-MM-dd HH:mm:ss".length == 19
+			return null;
+		}
+
+		if (strDate.charAt(10) == 'T') {
+			sdfSb.append("'T'HH:mm:ss");
+		} else if (strDate.charAt(10) == ' ') {
+			sdfSb.append(" HH:mm:ss");
+		} else {
+			return null;
+		}
+
+		int timezoneIndex;
+		// .SSS는 있을 수도 있고 없을 수도 있음, 없는 경우에는 19번째부터 timezone이고 있는 경우는 23번째부터 timezone
+
+		if (strDate.substring(19).length() >= 4 && Pattern.matches("[.]\\d{3}", strDate.substring(19, 23))) {
+			sdfSb.append(".SSS");
+			timezoneIndex = 23;
+		} else {
+			timezoneIndex = 19;
+		}
+
+		// Timezone을 요약해보면 Z, +09, +0900은 X로, +09:00은 XXX로, KST는 Z로
+		String timezone = strDate.substring(timezoneIndex);
+		if (timezone.equals("")) {
+			// skip
+		} else if (timezone.equals("Z")) {
+			sdfSb.append("X");
+		} else if (Pattern.matches("[+|-]\\d{2}", timezone)) {
+			sdfSb.append("X");
+		} else if (Pattern.matches("[+|-]\\d{4}", timezone)) {
+			sdfSb.append("X");
+		} else if (Pattern.matches("[+|-]\\d{2}[:]\\d{2}", timezone)) {
+			sdfSb.append("XXX");
+		} else if (Pattern.matches("[A-Z]{3}", timezone)) {
+			sdfSb.append("Z");
+		} else {
+			return null;
+		}
+		
+		Date resultDate = null;
+		
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(sdfSb.toString());
+			resultDate = sdf.parse(strDate);
+		} catch (ParseException e) {
+			// ignore
+		}
+		
+		return resultDate;
+	}
+    
+    public static String convertDateTime(String dateTime) {
+    	Date date = parse(dateTime);
+    	if (date == null) {
+    		return null;
+    	}
+    	
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	
+    	return sdf.format(date);
     }
 }

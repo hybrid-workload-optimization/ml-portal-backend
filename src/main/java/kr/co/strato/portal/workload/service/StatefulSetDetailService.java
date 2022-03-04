@@ -38,7 +38,7 @@ public class StatefulSetDetailService {
         String namespaceName = s.getNamespace().getName();
         String resourceName = s.getStatefulSetName();
 
-        boolean isDeleted = statefulSetAdapterService.delete(clusterId.intValue(), namespaceName, resourceName);
+        boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, resourceName);
         if(isDeleted){
             return statefulSetDomainService.delete(id.longValue());
         }else{

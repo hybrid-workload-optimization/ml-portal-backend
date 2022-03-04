@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -38,10 +39,10 @@ public class ClusterEntity {
 	@Column(name = "provider_version")
 	private String providerVersion;
 	
-	@Column(name = "kube_config")
+	@Column(name = "kube_config", columnDefinition = "text")
 	private String kubeConfig;
 	
-	@Column
+	@Column(length = 2000)
 	private String description;
 	
 	@Column
@@ -68,6 +69,6 @@ public class ClusterEntity {
 	@Column(name = "cluster_id")
 	private Long clusterId;
 	
-	@Column
+	@Lob
 	private String problem;
 }
