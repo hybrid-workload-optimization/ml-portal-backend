@@ -3,6 +3,8 @@ package kr.co.strato.domain.replicaset.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
@@ -25,6 +27,10 @@ public class ReplicaSetDomainService {
 		replicaSetRepository.delete(replicaSetEntity);
 	}
 
+	public Page<ReplicaSetEntity> getList(Pageable pageable, Long projectIdx, Long clusterIdx, Long namespaceIdx) {
+        return replicaSetRepository.getReplicaSetList(pageable, projectIdx, clusterIdx, namespaceIdx);
+    }
+	
 	public ReplicaSetEntity get(Long replicaSetIdx) {
 		Optional<ReplicaSetEntity> replicaSet = replicaSetRepository.findById(replicaSetIdx);
 		if (replicaSet.isPresent()) {

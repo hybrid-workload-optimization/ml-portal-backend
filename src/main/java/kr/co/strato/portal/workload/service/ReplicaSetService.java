@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -20,6 +23,8 @@ import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.ReplicaSetDto;
+import kr.co.strato.portal.workload.model.ReplicaSetDto.Search;
+import kr.co.strato.portal.workload.model.ReplicaSetDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,6 +42,26 @@ public class ReplicaSetService {
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
+	
+	/**
+	 * Replica Set 목록 조회
+	 * 
+	 * @param pageable
+	 * @param search
+	 * @return
+	 * @throws Exception
+	 */
+	public Page<ReplicaSetDto.List> getReplicaSetList(Pageable pageable, Search search) throws Exception {
+		Page<ReplicaSetEntity> replicaSetPage = replicaSetDomainService.getList(pageable, search.getProjectIdx(), search.getClusterIdx(), search.getNamespaceIdx());
+        
+		List<ReplicaSetDto.List> replicaSetList = replicaSetPage.stream()
+				.map(r -> ReplicaSetDtoMapper.INSTANCE.toList(r))
+				.collect(Collectors.toList());
+		
+        Page<ReplicaSetDto.List> pages = new PageImpl<>(replicaSetList, pageable, replicaSetPage.getTotalElements());
+        
+        return pages;
+	}
 	
 	/**
 	 * Replica Set 등록
@@ -132,5 +157,7 @@ public class ReplicaSetService {
 
         return result;
 	}
+
+	
 	
 }

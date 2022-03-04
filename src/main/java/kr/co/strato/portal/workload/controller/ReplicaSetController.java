@@ -5,19 +5,23 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
 import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
+import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.work.model.WorkHistoryDto;
 import kr.co.strato.portal.work.service.WorkHistoryService;
 import kr.co.strato.portal.workload.model.ReplicaSetDto;
@@ -34,6 +38,44 @@ public class ReplicaSetController {
 	@Autowired
 	WorkHistoryService workHistoryService;
 	
+	
+	@GetMapping("/api/v1/replicasets")
+    public ResponseWrapper<Page<ReplicaSetDto.List>> getReplicaSetList(PageRequest pageRequest, ReplicaSetDto.Search search){
+        Page<ReplicaSetDto.List> results = null;
+        
+        String workTarget					= null;
+        Map<String, Object> workMetadata	= new HashMap<>();
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+        
+        try {
+        	results = replicaSetService.getReplicaSetList(pageRequest.of(), search);
+		} catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.WORKLOAD)
+						.workMenu2(WorkMenu2.REPLICA_SET)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.LIST)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+        
+        return new ResponseWrapper<>(results);
+    }
 	
 	@PostMapping("/api/v1/replicasets")
     public ResponseWrapper<List<Long>> registerReplicaSet(@RequestBody ReplicaSetDto replicaSetDto){

@@ -7,6 +7,6 @@ import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 
 public interface CustomReplicaSetRepository {
 
-	public Page<ReplicaSetEntity> getReplicaSetList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId);
+	public Page<ReplicaSetEntity> getReplicaSetList(Pageable pageable, Long projectIdx, Long clusterIdx, Long namespaceIdx);
 	
 }

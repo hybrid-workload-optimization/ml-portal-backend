@@ -24,21 +24,21 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
     }
     
 	@Override
-	public Page<ReplicaSetEntity> getReplicaSetList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId) {
+	public Page<ReplicaSetEntity> getReplicaSetList(Pageable pageable, Long projectIdx, Long clusterIdx, Long namespaceIdx) {
 		QReplicaSetEntity qReplicaSetEntity = QReplicaSetEntity.replicaSetEntity;
         QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
         QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
         // TODO : projectId/clusterId 검색 조건에 대한 방향 설정이 필요할듯함.
-        if (projectId != null && projectId > 0L) {
+        if (projectIdx != null && projectIdx > 0L) {
             // nothing to do
         }
-        if (clusterId != null && clusterId > 0L) {
+        if (clusterIdx != null && clusterIdx > 0L) {
             //builder.and(qClusterEntity.clusterId.eq(clusterId));
         }
-        if (namespaceId != null && namespaceId > 0L) {
-            builder.and(qNamespaceEntity.id.eq(namespaceId));
+        if (namespaceIdx != null && namespaceIdx > 0L) {
+            builder.and(qNamespaceEntity.id.eq(namespaceIdx));
         }
 
         QueryResults<ReplicaSetEntity> results = jpaQueryFactory
