@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,8 +33,11 @@ public class UserRoleEntity {
 	@Column(name = "user_role_name")
 	private String userRoleName;
 	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userRole")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userRole", fetch = FetchType.LAZY)
 	private List<UserRoleMenuEntity> userRoleMenus = new ArrayList<UserRoleMenuEntity>();
+	
+	@OneToMany(mappedBy = "userRole", fetch = FetchType.LAZY )
+	private List<UserEntity> users = new ArrayList<UserEntity>();
 	
 	public void addToUserRoleMenu(UserRoleMenuEntity userRoleMenuEntity) {
 		userRoleMenuEntity.setUserRole(this);

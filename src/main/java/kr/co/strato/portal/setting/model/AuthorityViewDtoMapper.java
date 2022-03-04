@@ -10,6 +10,7 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.model.UserRoleMenuEntity;
 
@@ -19,7 +20,8 @@ public interface AuthorityViewDtoMapper {
 	
 	@Mappings({
 		@Mapping(source = "id", target = "userRoleIdx"),
-		@Mapping(source = "userRoleMenus", target = "menuList", qualifiedByName = "toMenuDto")
+		@Mapping(source = "userRoleMenus", target = "menuList", qualifiedByName = "toAuthorityViewDtoInnerMenu"),
+		@Mapping(source = "users", target = "userList", qualifiedByName = "toAuthorityViewDtoInnerUser")
 	})
 	@Named("toAuthorityViewDto")
 	public AuthorityViewDto toAuthorityViewDto (UserRoleEntity entity);
@@ -33,8 +35,12 @@ public interface AuthorityViewDtoMapper {
 		@Mapping(source = "menu.menuDepth", target = "menuDepth"),
 		@Mapping(source = "menu.useYn", target = "useYn"),
 	})
-	@Named("toMenuDto")
-	public MenuDto toMenuDto (UserRoleMenuEntity entity);
+	@Named("toAuthorityViewDtoInnerMenu")
+	public AuthorityViewDto.Menu toAuthorityViewDtoInnerMenu (UserRoleMenuEntity entity);
+	
+	
+	@Named("toAuthorityViewDtoInnerUser")
+	public AuthorityViewDto.User toAuthorityViewDtoInnerUser (UserEntity entitiy);
 	
 	@IterableMapping(qualifiedByName = "toAuthorityViewDto")
 	List<AuthorityViewDto> toAuthorityViewDtoList (List<UserRoleEntity> entityList);

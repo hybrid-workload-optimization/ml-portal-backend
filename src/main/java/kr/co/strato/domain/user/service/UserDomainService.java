@@ -30,10 +30,11 @@ public class UserDomainService {
 	 */
 	public void saveUser(UserEntity entity) {
 
-		//기본권한 매핑
-		if(entity.getUserRoleIdx() == null || entity.getUserRoleIdx() == null) {
-			entity.setUserRoleIdx(userRoleRepository.findTop1BByUserRoleName("PROJECT MEMBER").getId());
-		}
+		//기본권한 매핑 
+		// 김재연 임시 주석
+//		if(entity.getUserRoleIdx() == null || entity.getUserRoleIdx() == null) {
+//			entity.setUserRoleIdx(userRoleRepository.findTop1BByUserRoleName("PROJECT MEMBER").getId());
+//		}
 		//DB 저장
 		userRepository.save(entity);
 		
