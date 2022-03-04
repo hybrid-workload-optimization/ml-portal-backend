@@ -51,7 +51,7 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects/{projectIdx}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<ProjectDto> getProjectList(@PathVariable("projectIdx") Long projectIdx) {
+    public ResponseWrapper<ProjectDto> getProjectDetail(@PathVariable("projectIdx") Long projectIdx) {
         
     	ProjectDto response = portalProjectService.getProjectDetail(projectIdx);
         
