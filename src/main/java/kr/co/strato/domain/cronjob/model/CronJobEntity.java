@@ -31,7 +31,7 @@ public class CronJobEntity {
 	@Column(name = "cron_job_name")
 	private String cronJobName;
 	
-	@Column(name = "cron_job_name")
+	@Column(name = "cron_job_uid")
 	private String cronJobUid;
 	
 	@Column(name = "created_at")
