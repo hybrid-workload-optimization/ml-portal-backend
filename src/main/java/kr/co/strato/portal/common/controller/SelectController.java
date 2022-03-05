@@ -22,15 +22,15 @@ public class SelectController {
         return new ResponseWrapper<>(results);
     }
 
-    @GetMapping("api/v1/select/clusters/{clusterIdx}/namespaces")
+    @GetMapping("api/v1/select/namespaces")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<SelectDto>> getNamespaces(@PathVariable Long clusterIdx){
+    public ResponseWrapper<List<SelectDto>> getNamespaces(@RequestParam Long clusterIdx){
         List<SelectDto> results = selectService.getSelectNamespaces(clusterIdx);
 
         return new ResponseWrapper<>(results);
     }
 
-    @GetMapping("api/v1/select/projects/clusters")
+    @GetMapping("api/v1/select/clusters")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<SelectDto>> getClusters(@RequestParam(required = false) Long projectIdx){
         List<SelectDto> results = selectService.getSelectClusters(projectIdx);
