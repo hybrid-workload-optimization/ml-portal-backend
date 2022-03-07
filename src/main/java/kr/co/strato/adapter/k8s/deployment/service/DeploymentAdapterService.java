@@ -82,12 +82,8 @@ public class DeploymentAdapterService {
     }
 
     public Deployment retrieve(Long clusterId, String namespaceName, String deploymentName){
-    	Integer iClusterId = null;
-    	if(clusterId != null)
-    		iClusterId = Long.valueOf(clusterId).intValue();
-    	
         try{
-            String res = inNamespaceProxy.getResource(ResourceType.deployment.get(), iClusterId, namespaceName, deploymentName);
+            String res = inNamespaceProxy.getResource(ResourceType.deployment.get(), clusterId, namespaceName, deploymentName);
             Deployment deployment = new ObjectMapper().readValue(res, new TypeReference<Deployment>(){});
             return deployment;
         }catch (JsonProcessingException e){

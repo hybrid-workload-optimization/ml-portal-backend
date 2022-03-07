@@ -11,6 +11,7 @@ import org.mapstruct.factory.Mappers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -22,21 +23,35 @@ public interface ReplicaSetDtoMapper {
 	
 	public ReplicaSetDto toDto(ReplicaSetEntity replicaSetEntity);
 	
-	@Mapping(target = "name", source = "replicaSetName")
-    @Mapping(target = "namespace", source = "namespace.name")
-    @Mapping(target = "age", source = "createdAt")
-    @Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
-	public ReplicaSetDto.List toList(ReplicaSetEntity replicaSetEntity);
+	@Mapping(target = "name", 		source = "r.replicaSetName")
+    @Mapping(target = "namespace",	source = "r.namespace.name")
+    @Mapping(target = "age",		source = "r.createdAt")
+    @Mapping(target = "label",		source = "r.label",			qualifiedByName = "jsonToMap")
+	public ReplicaSetDto.List toList(ReplicaSetEntity r);
 	
-	@Named("labelToMap")
-    default HashMap<String, Object> labelToMap(String label) {
-        try{
+	@Mapping(target = "replicaSetIdx",		source = "r.replicaSetIdx")
+    @Mapping(target = "name",				source = "r.replicaSetName")
+    @Mapping(target = "namespace",			source = "r.namespace.name")
+    @Mapping(target = "uid",				source = "r.replicaSetUid")
+    @Mapping(target = "label",				source = "r.label",			qualifiedByName = "jsonToMap")
+    @Mapping(target = "annotation",			source = "r.annotation",	qualifiedByName = "jsonToMap")
+	@Mapping(target = "createdAt",			source = "r.createdAt")
+	@Mapping(target = "selector",			source = "r.selector",		qualifiedByName = "jsonToMap")
+	@Mapping(target = "image",				source = "r.image")
+	@Mapping(target = "runningPod",			source = "k8s.status.readyReplicas")
+    @Mapping(target = "desiredPod",			source = "k8s.status.replicas")
+    public ReplicaSetDto.Detail toDetail(ReplicaSetEntity r, ReplicaSet k8s);
+	
+	@Named("jsonToMap")
+    default HashMap<String, Object> jsonToMap(String json) {
+        try {
             ObjectMapper mapper = new ObjectMapper();
-            HashMap<String, Object> map = mapper.readValue(label, HashMap.class);
+            HashMap<String, Object> map = mapper.readValue(json, HashMap.class);
 
             return map;
-        }catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             return new HashMap<>();
         }
     }
+	
 }

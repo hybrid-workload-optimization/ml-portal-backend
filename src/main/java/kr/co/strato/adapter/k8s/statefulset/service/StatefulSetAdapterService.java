@@ -112,7 +112,7 @@ public class StatefulSetAdapterService {
      * @param statefulSetName
      * @return
      */
-    public StatefulSet get(Integer clusterId, String namespaceName, String statefulSetName){
+    public StatefulSet get(Long clusterId, String namespaceName, String statefulSetName){
         try{
             String res = inNamespaceProxy.getResource(ResourceType.statefulSet.get(), clusterId, namespaceName, statefulSetName);
 

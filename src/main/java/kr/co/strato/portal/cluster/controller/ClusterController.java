@@ -77,7 +77,7 @@ public class ClusterController {
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<ClusterDto> registerCluster(@PathVariable(required = true) Long clusterIdx){
+    public ResponseWrapper<ClusterDto> getCluster(@PathVariable(required = true) Long clusterIdx){
 		ClusterDto result = null;
         
 		String workTarget					= null;

@@ -64,6 +64,26 @@ public class ReplicaSetService {
 	}
 	
 	/**
+	 * Replica Set 상세 조회
+	 * 
+	 * @param replicaSetIdx
+	 * @return
+	 * @throws Exception
+	 */
+	public ReplicaSetDto.Detail getReplicaSet(Long replicaSetIdx) throws Exception {
+		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
+		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		String namespaceName	= replicaSetEntity.getNamespace().getName();
+		String replicaSetName	= replicaSetEntity.getReplicaSetName();
+		
+		ReplicaSet replicaSet = replicaSetAdapterService.get(clusterId, namespaceName, replicaSetName);
+		
+		ReplicaSetDto.Detail result = ReplicaSetDtoMapper.INSTANCE.toDetail(replicaSetEntity, replicaSet);
+		
+		return result;
+	}
+
+	/**
 	 * Replica Set 등록
 	 * 
 	 * @param replicaSetDto
@@ -75,7 +95,7 @@ public class ReplicaSetService {
 		ClusterEntity cluster = clusterDomainService.get(replicaSetDto.getClusterIdx());
 		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.registerReplicaSet(cluster.getClusterId(), replicaSetDto.getYaml());
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), replicaSetDto.getYaml());
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
@@ -109,7 +129,7 @@ public class ReplicaSetService {
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
         String replicaSetName	= replicaSetEntity.getReplicaSetName();
         
-		boolean isDeleted = replicaSetAdapterService.deleteReplicaSet(clusterId, namespaceName, replicaSetName);
+		boolean isDeleted = replicaSetAdapterService.delete(clusterId, namespaceName, replicaSetName);
 		if (!isDeleted) {
 			throw new PortalException("ReplicaSet deletion failed");
 		}
@@ -157,7 +177,5 @@ public class ReplicaSetService {
 
         return result;
 	}
-
-	
 	
 }

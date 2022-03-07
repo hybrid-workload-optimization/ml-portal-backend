@@ -82,7 +82,7 @@ public class StatefulSetDetailService {
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
         Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
-        StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId.intValue(), namespaceName, statefulSetName);
+        StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
         StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet);
 

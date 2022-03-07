@@ -21,7 +21,6 @@ import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
 import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
-import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.work.model.WorkHistoryDto;
 import kr.co.strato.portal.work.service.WorkHistoryService;
 import kr.co.strato.portal.workload.model.ReplicaSetDto;
@@ -75,6 +74,46 @@ public class ReplicaSetController {
 		}
         
         return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/replicasets/{replicaSetIdx}")
+    public ResponseWrapper<ReplicaSetDto.Detail> getReplicaSet(@PathVariable(required = true) Long replicaSetIdx){
+		ReplicaSetDto.Detail result = null;
+        
+		String workTarget					= null;
+        Map<String, Object> workMetadata	= new HashMap<>();
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+        
+        workMetadata.put("replicaSetIdx", replicaSetIdx);
+        
+        try {
+        	result = replicaSetService.getReplicaSet(replicaSetIdx);
+		} catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.CLUSTER)
+						.workMenu2(WorkMenu2.NONE)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.DETAIL)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+        
+        return new ResponseWrapper<>(result);
     }
 	
 	@PostMapping("/api/v1/replicasets")
