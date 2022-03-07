@@ -6,8 +6,9 @@ import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -53,9 +54,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.DefaultUriTemplateHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -335,14 +334,19 @@ public class KeyCloakApiUtil {
 			} else {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 			}
+			
+			
+			// 유저 생성시 무조건 프로젝트 멤버로 생성
+			KeycloakRole role = getRoleProjectMember();
+			
 			//@TODO 하드코딩으로 해야 하나..? 
-			KeycloakRole role = new KeycloakRole();
-			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
-			role.setName("proj_member");
-			role.setDescription("프로젝트 멤버");
-			role.setComposite(false);
-			role.setClientRole(false);
-			role.setContainerId("sptek-cloud");
+//			KeycloakRole role = new KeycloakRole();
+//			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
+//			role.setName("proj_member");
+//			role.setDescription("프로젝트 멤버");
+//			role.setComposite(false);
+//			role.setClientRole(false);
+//			role.setContainerId("sptek-cloud");
 			
 			postUserRole(user, ssoUser, role);
 
@@ -391,14 +395,17 @@ public class KeyCloakApiUtil {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
 			}
 			
+			
+			
 			//@TODO ROLE 수정
-			KeycloakRole role = new KeycloakRole();
-			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
-			role.setName("proj_member");
-			role.setDescription("프로젝트 멤버");
-			role.setComposite(false);
-			role.setClientRole(false);
-			role.setContainerId("sptek-cloud");
+			KeycloakRole role = getRoleProjectMember();
+//			KeycloakRole role = new KeycloakRole();
+//			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
+//			role.setName("proj_member");
+//			role.setDescription("프로젝트 멤버");
+//			role.setComposite(false);
+//			role.setClientRole(false);
+//			role.setContainerId("sptek-cloud");
 			
 			postUserRole(user, ssoUser, role);
 
@@ -453,11 +460,13 @@ public class KeyCloakApiUtil {
 	}
 	
 	// 전체 ROLE 조회
-	public void getRoleList() throws Exception {
+	public List<KeycloakRole> getRoleList() throws Exception {
 		System.out.println("전체 ROLE 조회");
 		
 		String URI = keycloakUrl + URI_GET_ROLE;
 		String ssoToken = getTokenByManager();
+		
+		List<KeycloakRole> result = null;
 		
 		try {
 			HttpClient httpClient = HttpClientBuilder.create().build();
@@ -467,7 +476,6 @@ public class KeyCloakApiUtil {
 			HttpResponse response = httpClient.execute(httpGet);
 			
 			System.out.println("전체 ROLE 조회 결과 >> ");
-//			System.out.println("조회결과 :  " + EntityUtils.toString(response.getEntity()));
 			
 			ObjectMapper objectMapper = new ObjectMapper();
 			
@@ -476,6 +484,9 @@ public class KeyCloakApiUtil {
 			for (KeycloakRole keycloakRole : roles) {
 				System.out.println("roles : " + keycloakRole.toString());
 			}
+			
+			result = new ArrayList<>(Arrays.asList(roles));
+			
 			
 			if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
 				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
@@ -486,6 +497,9 @@ public class KeyCloakApiUtil {
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}
+		
+		return result;
+		
 	}
 	
 	
@@ -684,6 +698,21 @@ public class KeyCloakApiUtil {
 		}
 	}
 	
+	
+	public KeycloakRole getRoleProjectMember() throws Exception {
+		KeycloakRole result = null;
+		
+		List<KeycloakRole> roles = getRoleList();
+		
+		result = roles.stream()
+				.filter(r -> r.getName().equals("proj_member"))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException());
+				
+		
+		return result;
+	}
+	
 	// 토큰
 	@SuppressWarnings("unchecked")
 	public boolean checkTokenValidationByManager(String token) throws Exception {
@@ -724,10 +753,7 @@ public class KeyCloakApiUtil {
 	private ResponseEntity<String> request(String uri, HttpMethod httpMethod, HttpHeaders httpHeaders,
 			MultiValueMap<String, String> requestBody) throws Exception {
 		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
-//		deprecated	
-//		AbstractUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-//		restTemplate.setUriTemplateHandler(uriTemplateHandler);
-		
+
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(uri);
 		
 		restTemplate.setUriTemplateHandler(factory);
@@ -742,9 +768,6 @@ public class KeyCloakApiUtil {
 		return restTemplate.exchange(uri, httpMethod, requestEntity, String.class);
 	}
 
-	
-	
-	
 	
 	public ResponseEntity<JsonNode> requestJsonNode(String uri, HttpMethod httpMethod, HttpHeaders httpHeaders,
 			JsonNode requestBody) throws Exception {
