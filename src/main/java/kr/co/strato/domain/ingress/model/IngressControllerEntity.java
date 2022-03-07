@@ -47,7 +47,7 @@ public class IngressControllerEntity {
 	private LocalDateTime createdAt;
 	
 	@Column(name = "default_yn")
-	private Character defaultYn;
+	private String defaultYn;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
