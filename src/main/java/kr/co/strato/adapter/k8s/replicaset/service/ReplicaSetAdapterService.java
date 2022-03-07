@@ -68,8 +68,7 @@ public class ReplicaSetAdapterService {
 		
 		return result;
 	}
-
-
+	
 	public boolean delete(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
 		WorkloadResourceInfo body = WorkloadResourceInfo.builder()
                 .kubeConfigId(clusterId)

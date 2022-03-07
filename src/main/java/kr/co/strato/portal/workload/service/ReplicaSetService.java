@@ -118,6 +118,43 @@ public class ReplicaSetService {
 	}
 	
 	/**
+	 * Replica Set 수정
+	 * 
+	 * @param replicaSetIdx
+	 * @param replicaSetDto
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Long> updateReplicaSet(Long replicaSetIdx, ReplicaSetDto replicaSetDto) throws Exception {
+		// get clusterId(kubeConfigId)
+		ReplicaSetEntity replicaSet = replicaSetDomainService.get(replicaSetIdx);
+		ClusterEntity cluster = replicaSet.getNamespace().getClusterIdx();
+		
+		// k8s - post replica set
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), replicaSetDto.getYaml());
+		
+		// db - save replica set
+		List<Long> result = replicaSetList.stream()
+				.map(r -> {
+					ReplicaSetEntity replicaSetEntity = null;
+					try {
+						replicaSetEntity = toReplicaSetEntity(cluster, r);
+						replicaSetEntity.setReplicaSetIdx(replicaSetIdx);
+					} catch (PortalException e) {
+						log.error(e.getMessage(), e);
+						throw new PortalException(e.getErrorType().getDetail());
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						throw new PortalException(e.getMessage());
+					}
+					return replicaSetDomainService.register(replicaSetEntity);
+				})
+				.collect(Collectors.toList());
+		
+		return result;
+	}
+	
+	/**
 	 * Replica Set 삭제
 	 * 
 	 * @param replicaSetIdx
@@ -177,5 +214,5 @@ public class ReplicaSetService {
 
         return result;
 	}
-	
+
 }
