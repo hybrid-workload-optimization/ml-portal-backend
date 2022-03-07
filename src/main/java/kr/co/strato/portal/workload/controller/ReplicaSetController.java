@@ -39,7 +39,7 @@ public class ReplicaSetController {
 	WorkHistoryService workHistoryService;
 	
 	
-	@GetMapping("/api/v1/replicasets")
+	@GetMapping("/api/v1/workload/replicasets")
     public ResponseWrapper<Page<ReplicaSetDto.List>> getReplicaSetList(PageRequest pageRequest, ReplicaSetDto.Search search){
         Page<ReplicaSetDto.List> results = null;
         
@@ -77,7 +77,7 @@ public class ReplicaSetController {
         return new ResponseWrapper<>(results);
     }
 	
-	@GetMapping("/api/v1/replicasets/{replicaSetIdx}")
+	@GetMapping("/api/v1/workload/replicasets/{replicaSetIdx}")
     public ResponseWrapper<ReplicaSetDto.Detail> getReplicaSet(@PathVariable(required = true) Long replicaSetIdx){
 		ReplicaSetDto.Detail result = null;
         
@@ -117,7 +117,7 @@ public class ReplicaSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@PostMapping("/api/v1/replicasets")
+	@PostMapping("/api/v1/workload/replicasets")
     public ResponseWrapper<List<Long>> registerReplicaSet(@RequestBody ReplicaSetDto replicaSetDto){
         List<Long> result = null;
         
@@ -157,7 +157,7 @@ public class ReplicaSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@PutMapping("/api/v1/replicasets/{replicaSetIdx}")
+	@PutMapping("/api/v1/workload/replicasets/{replicaSetIdx}")
     public ResponseWrapper<List<Long>> updateReplicaSet(@PathVariable(required = true) Long replicaSetIdx, @RequestBody ReplicaSetDto replicaSetDto){
 		List<Long> result = null;
         
@@ -198,7 +198,7 @@ public class ReplicaSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@DeleteMapping("/api/v1/replicasets/{replicaSetIdx}")
+	@DeleteMapping("/api/v1/workload/replicasets/{replicaSetIdx}")
     public ResponseWrapper<Boolean> deleteReplicaSet(@PathVariable(required = true) Long replicaSetIdx){
 		boolean result = true;
 		
