@@ -60,10 +60,9 @@ public class ClusterNodeController {
     }
 
 
-/* node 생성
 	@PostMapping("/api/v1/cluster/registerClusterNode")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {
@@ -75,7 +74,7 @@ public class ClusterNodeController {
 		
 		return new ResponseWrapper<>(ids);
 	}
-*/
+	
 	@DeleteMapping("/api/v1/cluster/deletClusterNode/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Boolean> deleteClusterNode(@PathVariable("id") Long id) {
