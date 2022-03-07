@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(value="InNamespace", url = "${service.kubernetes-interface.url}")
 public interface InNamespaceProxy {
 
-    @PostMapping("/inNamespace/{resourceType}/listStr")
+    @PostMapping("/inNamespace/{resourceType}/list")
     public @ResponseBody
     String getResourceList(
             @PathVariable("resourceType") String resourceType,
             @RequestBody ResourceListSearchInfo listSearchInfo);
 
-    @GetMapping("/inNamespace/{resourceType}/detailStr")
+    @GetMapping("/inNamespace/{resourceType}/detail")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
             @RequestParam("kubeConfigId") Integer kubeConfigId,
