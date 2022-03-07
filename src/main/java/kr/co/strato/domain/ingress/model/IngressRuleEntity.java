@@ -9,12 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,32 +26,34 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-@Table(name = "ingress")
-public class IngressEntity {
+@Table(name = "ingress_rule")
+public class IngressRuleEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ingress_idx")
+	@Column(name = "ingress_rule_idx")
 	private Long id;
 
-	@Column(name = "ingress_name")
-	private String name;
+	private String host;
 
-	@Column(name = "ingress_uid")
-	private String uid;
+	private String protocol;
 	
-	@Column(name = "ingress_class")
-	private String ingressClass;
+	private String path;
+	
+	@Column(name = "path_type")
+	private String pathType;
+	
+	private String service;
+	
+	private int port;
 	
 	
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
-
-	@ManyToOne
-	@JoinColumn(name = "namespace_idx")
-	private NamespaceEntity namespace;
 	
-	//@ManyToOne
-	//@JoinColumn(name = "ingress_controller_idx")
-	//private NamespaceEntity ingressController;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ingress_idx")
+	private IngressEntity ingress;
+	
+	
 
 }

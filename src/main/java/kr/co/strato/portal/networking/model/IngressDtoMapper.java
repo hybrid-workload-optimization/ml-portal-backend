@@ -13,7 +13,6 @@ public interface IngressDtoMapper {
 	IngressDtoMapper INSTANCE = Mappers.getMapper(IngressDtoMapper.class);
 	
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
-	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
 	public IngressDto toDto(IngressEntity ingressEntity);
 	
 }

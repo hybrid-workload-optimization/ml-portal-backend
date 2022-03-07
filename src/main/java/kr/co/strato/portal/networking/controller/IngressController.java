@@ -58,8 +58,8 @@ public class IngressController {
 	 */
 	@GetMapping("/api/v1/networking/ingress")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<IngressDto>> getIngressList(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,PageRequest pageRequest){
-        Page<IngressDto> results = ingressService.getIngressList(name,clusterEntity,namespace,pageRequest.of());
+    public ResponseWrapper<Page<IngressDto>> getIngressList(String name,NamespaceEntity namespace,PageRequest pageRequest){
+        Page<IngressDto> results = ingressService.getIngressList(name,namespace,pageRequest.of());
         return new ResponseWrapper<>(results);
     }
 
@@ -91,17 +91,17 @@ public class IngressController {
 
 	@DeleteMapping("/api/v1/networking/deletIngress/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id) {
-		boolean isDeleted = ingressService.deleteIngress(id);
+	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id, @RequestBody Long kubeConfigId) {
+		boolean isDeleted = ingressService.deleteIngress(id,kubeConfigId);
 		
 		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@PutMapping("/api/v1/networking/updateIngress/{id}")
-    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
+    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam,Long kubeConfigId){
         Long result = null;
         try {
-        	ingressService.updateIngress(id, yamlApplyParam);  
+        	ingressService.updateIngress(id, kubeConfigId,yamlApplyParam);  
         	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);

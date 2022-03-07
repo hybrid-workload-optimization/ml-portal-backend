@@ -28,8 +28,8 @@ public class IngressDomainService {
 		return ingressRepository.findAll(pageable);
 	}
 	
-	public Page<IngressEntity> findByName(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,Pageable pageable) {
-		return ingressRepository.findByNameAndClusterAndNamespace(name,clusterEntity, namespace,pageable);
+	public Page<IngressEntity> findByName(String name,NamespaceEntity namespace,Pageable pageable) {
+		return ingressRepository.findByNameAndNamespace(name, namespace,pageable);
 	}
 	
 	public boolean delete(Long id) {
@@ -50,14 +50,6 @@ public class IngressDomainService {
 		}
 	}
 	
-	
-	
-    public ClusterEntity getCluster(Long id){
-    	IngressEntity entity = getDetail(id);
-        ClusterEntity cluster =  entity.getCluster();
-        return cluster;
-    }
-    
     public Long update(IngressEntity ingressEntity,Long namespaceId, Long clusterId) {
     	ingressRepository.save(ingressEntity);
 		return ingressEntity.getId();

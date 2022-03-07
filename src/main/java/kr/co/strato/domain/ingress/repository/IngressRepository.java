@@ -10,6 +10,6 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 
 public interface IngressRepository extends JpaRepository<IngressEntity, Long>  {
 	
-	Page<IngressEntity> findByNameAndClusterAndNamespace(String name,ClusterEntity clusterEntity,NamespaceEntity namespace, Pageable pageable);
+	Page<IngressEntity> findByNameAndNamespace(String name,NamespaceEntity namespace, Pageable pageable);
 	
 }
