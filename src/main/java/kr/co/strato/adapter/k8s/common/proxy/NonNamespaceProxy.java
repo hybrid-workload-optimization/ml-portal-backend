@@ -21,7 +21,7 @@ public interface NonNamespaceProxy {
             @PathVariable("resourceType") String resourceType,
             @RequestBody ResourceListSearchInfo listSearchInfo);
 
-    @GetMapping("/nonNamespace/{resourceType}/detail")
+    @GetMapping("/nonNamespace/{resourceType}")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
             @RequestParam("kubeConfigId") Long kubeConfigId,

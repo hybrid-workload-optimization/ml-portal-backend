@@ -15,7 +15,7 @@ public interface InNamespaceProxy {
             @PathVariable("resourceType") String resourceType,
             @RequestBody ResourceListSearchInfo listSearchInfo);
 
-    @GetMapping("/inNamespace/{resourceType}/detail")
+    @GetMapping("/inNamespace/{resourceType}")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
             @RequestParam("kubeConfigId") Integer kubeConfigId,
