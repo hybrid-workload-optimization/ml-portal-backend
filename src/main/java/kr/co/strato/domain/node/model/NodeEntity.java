@@ -82,6 +82,7 @@ public class NodeEntity {
 	@Lob
 	@Column(name = "`condition`")
 	private String condition;
+	
 	@Lob
 	@Column(name = "`role`")
 	private String role;

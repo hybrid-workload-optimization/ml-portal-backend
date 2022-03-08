@@ -58,6 +58,7 @@ public class ClusterNodeService {
 		
 		return page;
 	}
+	
   public Page<ClusterNodeDto.ResListDto> getClusterNodes(Pageable pageable, ClusterNodeDto.SearchParam searchParam){
         Page<NodeEntity> nodes = nodeDomainService.getNodeList(pageable, searchParam.getClusterIdx(), searchParam.getName());
         List<ClusterNodeDto.ResListDto> dtos = nodes.stream().map(e -> ClusterNodeDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
@@ -158,18 +159,20 @@ public class ClusterNodeService {
 		List<String> roles = new ArrayList<>();
 		n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
 				.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
+		
 		String role = mapper.writeValueAsString(roles);
-
+		
 		ClusterEntity clusterEntity = new ClusterEntity();
 		clusterEntity.setClusterIdx(clusterId);
-
+		
 		NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
 				.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.podCidr(podCapacity).osImage(image)
 				.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
 				.cluster(clusterEntity)
-				.annotation(annotations).label(label).condition(condition).role(role)
+				.annotation(annotations).label(label).condition(condition)
+				.role(role)
 				.build();
 
         return clusterNode;

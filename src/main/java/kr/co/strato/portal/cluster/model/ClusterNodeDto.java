@@ -2,6 +2,7 @@ package kr.co.strato.portal.cluster.model;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,8 +37,7 @@ public class ClusterNodeDto {
 		private float allocatedMemory;
 		private LocalDateTime createdAt;
 		private Long clusterIdx;
-		private String role;
-		
+		private List<String> role;
 	}
 
 	
@@ -61,10 +61,11 @@ public class ClusterNodeDto {
 		private String kubeletVersion;
 		private String kubeproxyVersion;
 		private Long clusterIdx;
-		private String annotation;
-		private String label;
-		private String condition;
-		private String role;
+		
+		private HashMap<String, Object> annotation;
+		private HashMap<String, Object> label;
+		private HashMap<String, Object> condition;
+		private List<String>  role;
     }
 	
 	@Getter

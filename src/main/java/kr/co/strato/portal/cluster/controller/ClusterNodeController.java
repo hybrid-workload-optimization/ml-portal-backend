@@ -16,14 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.Node;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
-import kr.co.strato.portal.workload.model.StatefulSetDto;
 
 
 
