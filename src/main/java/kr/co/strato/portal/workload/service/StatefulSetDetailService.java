@@ -98,7 +98,7 @@ public class StatefulSetDetailService {
         String namespaceName = entity.getNamespace().getName();
         Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
 
-        String yaml = statefulSetAdapterService.getYaml(clusterId.intValue(), namespaceName, statefulSetName);
+        String yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
         yaml = Base64Util.encode(yaml);
         return yaml;
     }

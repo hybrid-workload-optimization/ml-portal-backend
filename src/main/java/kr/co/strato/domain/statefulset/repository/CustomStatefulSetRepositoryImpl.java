@@ -33,7 +33,7 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
             //TODO 프로젝트 조회 조건 추가 필요
         }
         if(clusterId != null && clusterId > 0L){
-            builder.and(qClusterEntity.clusterId.eq(clusterId));
+            builder.and(qClusterEntity.clusterIdx.eq(clusterId));
         }
         if(namespaceId != null && namespaceId > 0L){
             builder.and(qNamespaceEntity.id.eq(namespaceId));
@@ -44,7 +44,7 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
                         .select(qStatefulSetEntity)
                         .from(qStatefulSetEntity)
                         .leftJoin(qStatefulSetEntity.namespace, qNamespaceEntity)
-//                        .innerJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                        .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
                         .where(builder)
                         .orderBy(qStatefulSetEntity.id.desc())
                         .offset(pageable.getOffset())

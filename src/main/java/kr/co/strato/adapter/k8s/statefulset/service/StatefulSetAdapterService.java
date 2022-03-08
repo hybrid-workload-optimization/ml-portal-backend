@@ -114,11 +114,11 @@ public class StatefulSetAdapterService {
      */
     public StatefulSet get(Long clusterId, String namespaceName, String statefulSetName){
         try{
-            String res = inNamespaceProxy.getResource(ResourceType.statefulSet.get(), clusterId, namespaceName, statefulSetName);
+            String result = inNamespaceProxy.getResource(ResourceType.statefulSet.get(), clusterId, namespaceName, statefulSetName);
 
             //json -> fabric8 k8s 오브젝트 파싱
             ObjectMapper mapper = new ObjectMapper();
-            StatefulSet statefulSet = mapper.readValue(res, new TypeReference<StatefulSet>(){});
+            StatefulSet statefulSet = mapper.readValue(result, new TypeReference<StatefulSet>(){});
 
             return statefulSet;
         }catch (JsonProcessingException e){
@@ -130,9 +130,16 @@ public class StatefulSetAdapterService {
         }
     }
 
-    public String getYaml(Integer clusterId, String namespaceName, String statefulSetName){
+    /**
+     * 스테이트풀셋 yaml 조회
+     * @param clusterId
+     * @param namespaceName
+     * @param statefulSetName
+     * @return
+     */
+    public String getYaml(Long clusterId, String namespaceName, String statefulSetName){
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId, namespaceName, statefulSetName);
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId.intValue(), namespaceName, statefulSetName);
 
             return yaml;
         }catch (Exception e){

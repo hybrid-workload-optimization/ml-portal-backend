@@ -1,8 +1,8 @@
-package kr.co.strato.portal.workload.model;
+package kr.co.strato.portal.networking.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.domain.service.model.ServiceEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -11,28 +11,22 @@ import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface StatefulSetDtoMapper {
-    StatefulSetDtoMapper INSTANCE = Mappers.getMapper(StatefulSetDtoMapper.class);
+public interface K8sServiceDtoMapper {
+    K8sServiceDtoMapper INSTANCE = Mappers.getMapper(K8sServiceDtoMapper.class);
 
-    @Mapping(target = "name", source = "statefulSetName")
+    @Mapping(target = "name", source = "serviceName")
     @Mapping(target = "namespace", source = "namespace.name")
-    @Mapping(target = "dayAgo", source = "createdAt")
     @Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
-    public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity);
-
-    @Named("getDayAgo")
-    default String getDayAgo(LocalDateTime createdAt){
-        LocalDateTime now = LocalDateTime.now();
-        Period period = Period.between(createdAt.toLocalDate(), now.toLocalDate());
-
-        return String.valueOf(period.getDays());
-    }
+    @Mapping(target = "type", source = "serviceType")
+    @Mapping(target = "age", source = "createdAt")
+    public K8sServiceDto.ResListDto toResListDto(ServiceEntity entity);
 
     @Named("labelToMap")
-    default HashMap<String, Object> labelToMap(String label) {
+    default HashMap<String, Object> labelToMap(String label){
         try{
             ObjectMapper mapper = new ObjectMapper();
             HashMap<String, Object> map = mapper.readValue(label, HashMap.class);
@@ -42,4 +36,6 @@ public interface StatefulSetDtoMapper {
             return new HashMap<>();
         }
     }
+
+
 }
