@@ -282,4 +282,129 @@ public class ClusterController {
         return new ResponseWrapper<>(results);
     }
 	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/depolyments")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterDeploymentList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterDeploymentList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/statefulsets")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterStatefulSetList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterStatefulSetList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/pods")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterPodList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterPodList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/cronjobs")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterCronJobList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterCronJobList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/jobs")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterJobList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterJobList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/replicasets")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterReplicaSetList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterReplicaSetList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/daemonsets")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterDaemonSetList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterDaemonSetList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/services")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterServiceList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterServiceList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/ingresses")
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterIngressList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterIngressList(clusterIdx, pageRequest.of());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+	
+        return new ResponseWrapper<>(results);
+    }
 }

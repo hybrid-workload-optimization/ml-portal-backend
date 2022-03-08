@@ -200,4 +200,48 @@ public class ClusterService {
 		return clusterNodeService.getClusterNodeList(clusterIdx, pageable);
 	}
 
+	public Page<ClusterNodeDto.ResListDto> getClusterDeploymentList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterStatefulSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterPodList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterCronJobList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterJobList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterReplicaSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterDaemonSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterServiceList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterIngressList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
