@@ -196,7 +196,7 @@ public class ClusterService {
 		return clusterAdapterService.isClusterConnection(Base64.getEncoder().encodeToString(configContents.getBytes()));
 	}
 
-	public Page<ClusterNodeDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
+	public Page<ClusterNodeDto.ResListDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
 		return clusterNodeService.getClusterNodeList(clusterIdx, pageable);
 	}
 

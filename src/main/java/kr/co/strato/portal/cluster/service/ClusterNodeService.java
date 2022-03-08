@@ -36,14 +36,7 @@ public class ClusterNodeService {
 	private NodeDomainService 	nodeDomainService;
 	
 	
-	public Page<ClusterNodeDto> getClusterNodeList(String name,Pageable pageable) {
-		Page<NodeEntity> clusterNodePage = nodeDomainService.findByName(name,pageable);
-		List<ClusterNodeDto> clusterList = clusterNodePage.getContent().stream().map(c -> ClusterNodeDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
-		
-		Page<ClusterNodeDto> page = new PageImpl<>(clusterList, pageable, clusterNodePage.getTotalElements());
-		return page;
-	}
-	
+
 	/**
 	 * Node 목록 조회(By ClusterIdx)
 	 * 
@@ -51,20 +44,27 @@ public class ClusterNodeService {
 	 * @param pageable
 	 * @return
 	 */
-	public Page<ClusterNodeDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
+	public Page<ClusterNodeDto.ResListDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
 		ClusterEntity clusterEntity = new ClusterEntity();
 		clusterEntity.setClusterIdx(clusterIdx);
 		
 		Page<NodeEntity> nodePage = nodeDomainService.findByClusterIdx(clusterEntity, pageable);
 		
-		List<ClusterNodeDto> nodeList = nodePage.getContent().stream()
-				.map(c -> ClusterNodeDtoMapper.INSTANCE.toDto(c))
+		List<ClusterNodeDto.ResListDto> nodeList = nodePage.getContent().stream()
+				.map(c -> ClusterNodeDtoMapper.INSTANCE.toResListDto(c))
 				.collect(Collectors.toList());
 		
-		Page<ClusterNodeDto> page = new PageImpl<>(nodeList, pageable, nodePage.getTotalElements());
+		Page<ClusterNodeDto.ResListDto> page = new PageImpl<>(nodeList, pageable, nodePage.getTotalElements());
 		
 		return page;
 	}
+  public Page<ClusterNodeDto.ResListDto> getClusterNodes(Pageable pageable, ClusterNodeDto.SearchParam searchParam){
+        Page<NodeEntity> nodes = nodeDomainService.getNodeList(pageable, searchParam.getClusterIdx(), searchParam.getName());
+        List<ClusterNodeDto.ResListDto> dtos = nodes.stream().map(e -> ClusterNodeDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
+        Page<ClusterNodeDto.ResListDto> pages = new PageImpl<>(dtos, pageable, nodes.getTotalElements());
+        return pages;
+   }
+
 
 	@Transactional(rollbackFor = Exception.class)
 	public List<Node> getClusterNodeList(Long clusterId) {
@@ -78,7 +78,7 @@ public class ClusterNodeService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteClusterNode(Long id){
     	NodeEntity n = nodeDomainService.getDetail(id.longValue());
-        Long clusterId = n.getClusterIdx().getClusterId();
+        Long clusterId = n.getCluster().getClusterIdx();
         String nodeName = n.getName();
 
         boolean isDeleted = nodeAdapterService.deleteNode(clusterId.intValue(), nodeName);
@@ -90,10 +90,10 @@ public class ClusterNodeService {
     }
 	
 	
-    public ClusterNodeDto getClusterNodeDetail(Long id){
+    public ClusterNodeDto.ResDetailDto getClusterNodeDetail(Long id){
     	NodeEntity nodeEntity = nodeDomainService.getDetail(id); 
 
-    	ClusterNodeDto clusterNodeDto = ClusterNodeDtoMapper.INSTANCE.toDto(nodeEntity);
+    	ClusterNodeDto.ResDetailDto clusterNodeDto = ClusterNodeDtoMapper.INSTANCE.toResDetailDto(nodeEntity);
         return clusterNodeDto;
     }
 	
@@ -168,7 +168,7 @@ public class ClusterNodeService {
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.podCidr(podCapacity).osImage(image)
 				.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
-				.clusterIdx(clusterEntity)
+				.cluster(clusterEntity)
 				.annotation(annotations).label(label).condition(condition).role(role)
 				.build();
 

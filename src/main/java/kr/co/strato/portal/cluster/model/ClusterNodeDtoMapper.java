@@ -6,14 +6,19 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.portal.workload.model.StatefulSetDto;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ClusterNodeDtoMapper {
 
 	ClusterNodeDtoMapper INSTANCE = Mappers.getMapper(ClusterNodeDtoMapper.class);
 	
-//	public Node toEntity(ClusterNodeDto dto);
+	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
+	 public ClusterNodeDto.ResListDto toResListDto(NodeEntity node);
 	
-	@Mapping(target = "clusterIdx" , source = "clusterIdx.clusterIdx")
-	public ClusterNodeDto toDto(NodeEntity node);
+	
+	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
+	 public ClusterNodeDto.ResDetailDto toResDetailDto(NodeEntity node);
+	
 }

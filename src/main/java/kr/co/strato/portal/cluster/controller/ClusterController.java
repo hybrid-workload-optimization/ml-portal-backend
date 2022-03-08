@@ -269,8 +269,8 @@ public class ClusterController {
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}/nodes")
-    public ResponseWrapper<Page<ClusterNodeDto>> getClusterNodeList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
-		Page<ClusterNodeDto> results = null;
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterNodeList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto.ResListDto> results = null;
     
     	try {
 			results = clusterService.getClusterNodeList(clusterIdx, pageRequest.of());
