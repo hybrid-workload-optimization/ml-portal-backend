@@ -27,6 +27,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,6 +45,7 @@ public class ClusterService {
 	
 	@Autowired
 	ClusterNodeService clusterNodeService;
+
 	
 	/**
 	 * Cluster 목록 조회
@@ -192,6 +194,10 @@ public class ClusterService {
 	 */
 	public boolean isClusterConnection(String configContents) throws Exception {
 		return clusterAdapterService.isClusterConnection(Base64.getEncoder().encodeToString(configContents.getBytes()));
+	}
+
+	public Page<ClusterNodeDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
+		return clusterNodeService.getClusterNodeList(clusterIdx, pageable);
 	}
 
 }

@@ -18,6 +18,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
@@ -268,20 +269,17 @@ public class ClusterController {
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}/nodes")
-    public ResponseWrapper<ClusterDto.NodeDto> getClusterNodeList(@PathVariable(required = true) Long clusterIdx){
-		Page<ClusterDto.NodeDto> results = null;
-        
-        try {
-        	//results = clusterService.getClusterList(pageRequest.of());
+    public ResponseWrapper<Page<ClusterNodeDto>> getClusterNodeList(@PathVariable(required = true) Long clusterIdx, PageRequest pageRequest){
+		Page<ClusterNodeDto> results = null;
+    
+    	try {
+			results = clusterService.getClusterNodeList(clusterIdx, pageRequest.of());
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
-		} finally {
-			//@TODO : work_history 등록 필요
 		}
-        
-        //return new ResponseWrapper<>(results);
-        return null;
+	
+        return new ResponseWrapper<>(results);
     }
 	
 }

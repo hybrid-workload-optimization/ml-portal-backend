@@ -43,6 +43,28 @@ public class ClusterNodeService {
 		Page<ClusterNodeDto> page = new PageImpl<>(clusterList, pageable, clusterNodePage.getTotalElements());
 		return page;
 	}
+	
+	/**
+	 * Node 목록 조회(By ClusterIdx)
+	 * 
+	 * @param clusterIdx
+	 * @param pageable
+	 * @return
+	 */
+	public Page<ClusterNodeDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
+		ClusterEntity clusterEntity = new ClusterEntity();
+		clusterEntity.setClusterIdx(clusterIdx);
+		
+		Page<NodeEntity> nodePage = nodeDomainService.findByClusterIdx(clusterEntity, pageable);
+		
+		List<ClusterNodeDto> nodeList = nodePage.getContent().stream()
+				.map(c -> ClusterNodeDtoMapper.INSTANCE.toDto(c))
+				.collect(Collectors.toList());
+		
+		Page<ClusterNodeDto> page = new PageImpl<>(nodeList, pageable, nodePage.getTotalElements());
+		
+		return page;
+	}
 
 	@Transactional(rollbackFor = Exception.class)
 	public List<Node> getClusterNodeList(Long clusterId) {
