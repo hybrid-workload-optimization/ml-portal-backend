@@ -12,7 +12,9 @@ import lombok.ToString;
 public class AuthorityViewDto {
 
 	private Long userRoleIdx;
+	private String userRoleCode;
 	private String userRoleName;
+	private String description;
 	private Long targetUserRoleIdx;
 	
 	private List<Menu> menuList;	// 권한별 메뉴

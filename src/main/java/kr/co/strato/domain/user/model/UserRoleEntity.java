@@ -22,7 +22,7 @@ import lombok.ToString;
 @Table(name = "user_role")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"userRoleMenus", "users"})
 public class UserRoleEntity {
 	
 	@Id
@@ -30,8 +30,14 @@ public class UserRoleEntity {
     @Column(name = "user_role_idx")
 	private Long id;
 	
+	@Column(name = "user_role_code")
+	private String userRoleCode;
+	
 	@Column(name = "user_role_name")
 	private String userRoleName;
+	
+	@Column(name = "description")
+	private String description;
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userRole", fetch = FetchType.LAZY)
 	private List<UserRoleMenuEntity> userRoleMenus = new ArrayList<UserRoleMenuEntity>();

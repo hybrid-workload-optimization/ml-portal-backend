@@ -27,6 +27,11 @@ public class UserRoleDomainService {
 		return userRole;
 	}
 	
+	public UserRoleEntity getUserRoleByCode(String code) {
+		UserRoleEntity userRole = userRoleRepository.findTop1BByUserRoleCode(code);
+		return userRole;
+	}
+	
 	public void saveUserRole(UserRoleEntity entity) {
 		userRoleRepository.save(entity);
 	}

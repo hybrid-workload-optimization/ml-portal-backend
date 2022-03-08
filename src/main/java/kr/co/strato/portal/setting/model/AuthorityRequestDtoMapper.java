@@ -6,6 +6,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -15,5 +16,7 @@ public interface AuthorityRequestDtoMapper {
 	@Mappings({
 		@Mapping(source = "userRoleIdx", target = "id")
 	})
-	public UserRoleEntity toEntity(AuthorityRequestDto dto);
+	public UserRoleEntity toEntity (AuthorityRequestDto.ReqRegistDto dto);
+	
+	public UserEntity toUserEntity (AuthorityRequestDto.User dto);
 }
