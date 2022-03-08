@@ -43,4 +43,9 @@ public class UserRoleDomainService {
 	public List<UserRoleEntity> getAllListAuthority() {
 		return userRoleRepository.findAll();
 	}
+
+	public int getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
+		int count = userRoleRepository.findCountByAccessRoleNameAndGroupYn(userRoleName, groupYn);
+		return count;
+	}
 }

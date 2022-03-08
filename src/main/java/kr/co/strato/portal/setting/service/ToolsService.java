@@ -51,6 +51,13 @@ public class ToolsService {
 			convertKubesprayVersions.add(selector);
 		}
 		
+		//테스트용
+//		String setting = kubesprayAdapterService.getSetting(returnDto.getValue());
+//		HashMap<String, Object> settingMap = ToolsDtoMapper.INSTANCE.jsonToMap(setting);
+//		System.out.println("####settingMap :: "  +settingMap.toString());
+//		
+//		System.out.println("####settingMap.get(\"default_kubelet_config_dir\") :: " + settingMap.get("default_kubelet_config_dir"));
+		
 		if ( ObjectUtils.isEmpty(returnDto) ) returnDto = new ToolsDto();
 		returnDto.setKubesprayVersions(convertKubesprayVersions);
 		return returnDto;

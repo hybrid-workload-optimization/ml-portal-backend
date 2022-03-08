@@ -27,6 +27,8 @@ public class AuthorityRequestDto {
 		private String userRoleCode;
 		private String userRoleName;
 		private String description;
+		private String groupYn;
+		private Long parentUserRoleIdx;
 	}
 	
 	@Getter

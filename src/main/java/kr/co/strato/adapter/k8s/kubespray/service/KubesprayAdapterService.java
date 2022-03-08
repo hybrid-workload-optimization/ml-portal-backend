@@ -20,4 +20,12 @@ public class KubesprayAdapterService {
 		
 		return versions;
 	}
+	
+	public String getSetting(String version) {
+		log.debug("[KubesprayAdapterService.getSetting] start..");
+		String setting = client.getKubespraySetting(version);
+		log.debug("[KubesprayAdapterService.getSetting] end..");
+		
+		return setting;
+	}
 }

@@ -14,7 +14,9 @@ public interface AuthorityRequestDtoMapper {
 	AuthorityRequestDtoMapper INSTANCE = Mappers.getMapper(AuthorityRequestDtoMapper.class);
 	
 	@Mappings({
-		@Mapping(source = "userRoleIdx", target = "id")
+		@Mapping(source = "userRoleIdx", target = "id"),
+		@Mapping(source = "parentUserRoleIdx", target = "parentUserRoleIdx"),
+		@Mapping(source = "groupYn", target = "groupYn")
 	})
 	public UserRoleEntity toEntity (AuthorityRequestDto.ReqRegistDto dto);
 	

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +26,16 @@ public class AuthorityController {
 	
 	@Autowired
 	private AuthorityService authorityService;
+	
+	//권한/그룹 중복 체크
+	@GetMapping("/authorities/duplicate-check")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<Boolean> getCheckUserRole(@RequestParam String userRoleName, @RequestParam String groupYn){
+		// flag == true then 중복아님 else 중복
+		Boolean flag = authorityService.getUserRoleDuplicateCheck(userRoleName, groupYn);
+		
+		return new ResponseWrapper<>(flag);
+	}
 	
 	//권한 전체 조회
 	@GetMapping("/authorities")

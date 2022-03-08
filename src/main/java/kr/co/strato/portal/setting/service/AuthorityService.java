@@ -47,6 +47,16 @@ public class AuthorityService {
 		return userRoleRepository.getListPagingUserRoleToDto(param, pageable);
 	}
 	
+	// 권한/그룹 중복체크(명칭)
+	public Boolean getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
+		int i = userRoleDomainService.getUserRoleDuplicateCheck(userRoleName, groupYn);
+		if ( i > 0 ) {
+			return false;
+		}else {
+			return true;
+		}
+	}
+	
 	// 권한 전체 조회 (for front-end)
 	public List<AuthorityViewDto> getAllListAuthorityToDto() {
 		List<UserRoleEntity> userRoleList = userRoleDomainService.getAllListAuthority();
@@ -72,19 +82,24 @@ public class AuthorityService {
 	@Transactional
 	public Long postUserRole(AuthorityRequestDto.ReqRegistDto param) {
 		UserRoleEntity paramEntity = AuthorityRequestDtoMapper.INSTANCE.toEntity(param);
-		UserRoleEntity userRole = userRoleDomainService.getUserRoleByCode(paramEntity.getUserRoleName());
-		if ( ObjectUtils.isNotEmpty(userRole) ) {
-			throw new AlreadyExistResourceException("role name : " + param.getUserRoleName());
-		}
 		
-		List<MenuEntity> menus = menuDomainService.getAllMenu();
-		for ( MenuEntity menu : menus ) {
-			UserRoleMenuEntity userRoleMenu = new UserRoleMenuEntity();
-			userRoleMenu.setMenu(menu);
-			userRoleMenu.setViewableYn("N");
-			userRoleMenu.setWritableYn("N");
-			userRoleMenu.setCreated_at(new Date());
-			paramEntity.addToUserRoleMenu(userRoleMenu);
+		if ( StringUtils.equals(param.getGroupYn(), "Y") ) {
+			//권한그룹 생성
+			paramEntity.setUserRoleCode("GROUP_" + Long.toString(System.currentTimeMillis()));
+			paramEntity.setParentUserRoleIdx((long)0);
+		} else {
+			paramEntity.setUserRoleCode("ROLE_" + Long.toString(System.currentTimeMillis()));
+			
+			//자식일경우 그룹에 매핑된 실제 권한이므로 메뉴생성
+			List<MenuEntity> menus = menuDomainService.getAllMenu();
+			for ( MenuEntity menu : menus ) {
+				UserRoleMenuEntity userRoleMenu = new UserRoleMenuEntity();
+				userRoleMenu.setMenu(menu);
+				userRoleMenu.setViewableYn("N");
+				userRoleMenu.setWritableYn("N");
+				userRoleMenu.setCreated_at(new Date());
+				paramEntity.addToUserRoleMenu(userRoleMenu);
+			}
 		}
 		userRoleDomainService.saveUserRole(paramEntity);
 		

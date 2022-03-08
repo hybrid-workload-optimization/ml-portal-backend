@@ -15,7 +15,8 @@ public class AuthorityViewDto {
 	private String userRoleCode;
 	private String userRoleName;
 	private String description;
-	private Long targetUserRoleIdx;
+	private Long parentUserRoleIdx;
+	private String groupYn;
 	
 	private List<Menu> menuList;	// 권한별 메뉴
 	private List<User> userList;	// 권한별 사용자
