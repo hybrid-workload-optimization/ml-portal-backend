@@ -13,6 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ClusterDto {
 	
+	private Long clusterIdx;
+	
 	private String clusterName;
 	
 	private String provider;
