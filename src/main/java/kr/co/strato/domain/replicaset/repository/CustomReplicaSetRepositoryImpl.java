@@ -30,12 +30,11 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
         QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
-        // TODO : projectId/clusterId 검색 조건에 대한 방향 설정이 필요할듯함.
         if (projectIdx != null && projectIdx > 0L) {
             // nothing to do
         }
         if (clusterIdx != null && clusterIdx > 0L) {
-            //builder.and(qClusterEntity.clusterId.eq(clusterId));
+        	builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
         }
         if (namespaceIdx != null && namespaceIdx > 0L) {
             builder.and(qNamespaceEntity.id.eq(namespaceIdx));
@@ -45,7 +44,7 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
         		.select(qReplicaSetEntity)
                 .from(qReplicaSetEntity)
                 .leftJoin(qReplicaSetEntity.namespace, qNamespaceEntity)
-                //.innerJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
                 .where(builder)
                 .orderBy(qReplicaSetEntity.replicaSetIdx.desc())
                 .offset(pageable.getOffset())

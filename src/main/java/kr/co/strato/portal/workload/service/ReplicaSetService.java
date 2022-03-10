@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ public class ReplicaSetService {
 		ClusterEntity cluster = clusterDomainService.get(replicaSetDto.getClusterIdx());
 		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), replicaSetDto.getYaml());
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
