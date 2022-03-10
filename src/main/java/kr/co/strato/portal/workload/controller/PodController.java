@@ -1,9 +1,16 @@
 package kr.co.strato.portal.workload.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,10 +25,34 @@ public class PodController {
     private PodService podService;
     
     @PostMapping("api/v1/pods")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseWrapper<List<Long>> createPod(@Valid @RequestBody PodDto.ReqCreateDto reqCreateDto){
+        List<Long> results = podService.createPod(reqCreateDto);
+
+        return new ResponseWrapper<>(results);
+    }
+    
+    
+    @GetMapping("api/v1/pods")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Page<PodDto.ResListDto>> getPodList(PageRequest pageRequest, PodDto.SearchParam searchParam) {
     	Page<PodDto.ResListDto> results = podService.getPods(pageRequest.of(), searchParam);
 
         return new ResponseWrapper<Page<PodDto.ResListDto>>(results);
     }
+    
+    @GetMapping("api/v1/pod/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<PodDto.ResDetailDto> getPodDetail(@PathVariable Long id){
+        PodDto.ResDetailDto result = podService.getPodDetail(id);
+
+        return new ResponseWrapper<>(result);
+    }
+
+    /**
+     * 남은 기능
+     * - 삭제
+     * - 수정
+     * - 생성
+     */
 }
