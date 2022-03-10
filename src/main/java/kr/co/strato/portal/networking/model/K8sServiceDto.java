@@ -39,4 +39,11 @@ public class K8sServiceDto {
         private Long clusterIdx;
         private String yaml;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ReqUpdateDto{
+        private String yaml;
+    }
 }

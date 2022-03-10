@@ -29,6 +29,14 @@ public class K8sServiceController {
     @PostMapping("api/v1/networking/services")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseWrapper<List<Long>> createService(@Valid @RequestBody K8sServiceDto.ReqCreateDto reqCreateDto){
+        List<Long> results = k8sServiceService.createService(reqCreateDto);
+
+        return new ResponseWrapper<>(results);
+    }
+
+    @PutMapping("api/v1/networking/services/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<Long>> updateService(@PathVariable Long id, @RequestBody K8sServiceDto.ReqUpdateDto reqUpdateDto){
 
         return null;
     }

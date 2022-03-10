@@ -50,8 +50,6 @@ public class ServiceEntity {
     @JoinColumn(name =  "namespace_idx")
     private NamespaceEntity namespace;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ingress_idx")
-    private IngressEntity ingress;
+
 
 }

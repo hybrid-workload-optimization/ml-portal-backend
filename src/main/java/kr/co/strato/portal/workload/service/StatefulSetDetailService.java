@@ -59,7 +59,7 @@ public class StatefulSetDetailService {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity updateStatefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.update(updateStatefulSet, statefulSetId, clusterId, namespaceName);
+                Long id = statefulSetDomainService.update(updateStatefulSet, statefulSetId, cluster, namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {

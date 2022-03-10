@@ -43,18 +43,18 @@ public class StatefulSetListService {
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
         Long clusterIdx = reqCreateDto.getClusterIdx();
-        ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+        ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
-        List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterEntity.getClusterId(), yaml);
+        List<StatefulSet> statefulSets = statefulSetAdapterService.create(cluster.getClusterId(), yaml);
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
-                StatefulSetEntity statefulSet = toStatefulSetEntity(s);
+                StatefulSetEntity statefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.register(statefulSet, clusterEntity.getClusterId(), namespaceName);
+                Long id = statefulSetDomainService.register(statefulSet, cluster, namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -85,7 +85,7 @@ public class StatefulSetListService {
      * @return
      * @throws JsonProcessingException
      */
-    private StatefulSetEntity toStatefulSetEntity(StatefulSet s) throws JsonProcessingException {
+    private StatefulSetEntity toEntity(StatefulSet s) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
 
         String name = s.getMetadata().getName();

@@ -21,22 +21,20 @@ public class StatefulSetDomainService {
     @Autowired
     private StatefulSetRepository statefulSetRepository;
 
-    @Autowired
-    private ClusterRepository clusterRepository;
 
     @Autowired
     private NamespaceRepository namespaceRepository;
 
 
-    public Long register(StatefulSetEntity statefulSet, Long clusterId, String namespaceName) {
-        addNamespace(statefulSet, clusterId, namespaceName);
+    public Long register(StatefulSetEntity statefulSet, ClusterEntity cluster, String namespaceName) {
+        statefulSet.setNamespace(getNamespace(cluster, namespaceName));
         statefulSetRepository.save(statefulSet);
         return statefulSet.getId();
     }
 
-    public Long update(StatefulSetEntity statefulSet, Long statefulSetId, Long clusterId, String namespaceName) {
+    public Long update(StatefulSetEntity statefulSet, Long statefulSetId, ClusterEntity cluster, String namespaceName) {
         statefulSet.setId(statefulSetId);
-        addNamespace(statefulSet, clusterId, namespaceName);
+        statefulSet.setNamespace(getNamespace(cluster, namespaceName));
         statefulSetRepository.save(statefulSet);
         return statefulSet.getId();
     }
@@ -69,16 +67,12 @@ public class StatefulSetDomainService {
     }
 
 
-    private void addNamespace(StatefulSetEntity statefulSet, Long clusterId, String namespaceName){
-        Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
+    private NamespaceEntity getNamespace(ClusterEntity cluster, String namespaceName){
+        List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
 
-        if(optCluster.isPresent()){
-            ClusterEntity cluster = optCluster.get();
-            List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
-
-            if(namespaces != null && namespaces.size() > 0){
-                statefulSet.setNamespace(namespaces.get(0));
-            }
+        if(namespaces != null && namespaces.size() > 0){
+            return namespaces.get(0);
         }
+        return null;
     }
 }
