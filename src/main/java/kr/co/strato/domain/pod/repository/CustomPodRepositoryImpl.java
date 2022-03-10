@@ -23,7 +23,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
     }
 	
 	@Override
-    public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId) {
+    public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
 
         QPodEntity qPodEntity = QPodEntity.podEntity;
         QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
@@ -40,6 +40,9 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
         }
         if(namespaceId != null && namespaceId > 0L){
             builder.and(qNamespaceEntity.id.eq(namespaceId));
+        }
+        if(nodeId != null && nodeId > 0L){
+            builder.and(qNodeEntity.id.eq(nodeId));
         }
 
         QueryResults<PodEntity> results =

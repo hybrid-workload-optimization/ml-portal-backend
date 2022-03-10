@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,6 +65,26 @@ public class ReplicaSetService {
 	}
 	
 	/**
+	 * Replica Set 상세 조회
+	 * 
+	 * @param replicaSetIdx
+	 * @return
+	 * @throws Exception
+	 */
+	public ReplicaSetDto.Detail getReplicaSet(Long replicaSetIdx) throws Exception {
+		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
+		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		String namespaceName	= replicaSetEntity.getNamespace().getName();
+		String replicaSetName	= replicaSetEntity.getReplicaSetName();
+		
+		ReplicaSet replicaSet = replicaSetAdapterService.get(clusterId, namespaceName, replicaSetName);
+		
+		ReplicaSetDto.Detail result = ReplicaSetDtoMapper.INSTANCE.toDetail(replicaSetEntity, replicaSet);
+		
+		return result;
+	}
+
+	/**
 	 * Replica Set 등록
 	 * 
 	 * @param replicaSetDto
@@ -75,7 +96,7 @@ public class ReplicaSetService {
 		ClusterEntity cluster = clusterDomainService.get(replicaSetDto.getClusterIdx());
 		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.registerReplicaSet(cluster.getClusterId(), replicaSetDto.getYaml());
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
@@ -83,6 +104,43 @@ public class ReplicaSetService {
 					ReplicaSetEntity replicaSetEntity = null;
 					try {
 						replicaSetEntity = toReplicaSetEntity(cluster, r);
+					} catch (PortalException e) {
+						log.error(e.getMessage(), e);
+						throw new PortalException(e.getErrorType().getDetail());
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						throw new PortalException(e.getMessage());
+					}
+					return replicaSetDomainService.register(replicaSetEntity);
+				})
+				.collect(Collectors.toList());
+		
+		return result;
+	}
+	
+	/**
+	 * Replica Set 수정
+	 * 
+	 * @param replicaSetIdx
+	 * @param replicaSetDto
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Long> updateReplicaSet(Long replicaSetIdx, ReplicaSetDto replicaSetDto) throws Exception {
+		// get clusterId(kubeConfigId)
+		ReplicaSetEntity replicaSet = replicaSetDomainService.get(replicaSetIdx);
+		ClusterEntity cluster = replicaSet.getNamespace().getClusterIdx();
+		
+		// k8s - post replica set
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), replicaSetDto.getYaml());
+		
+		// db - save replica set
+		List<Long> result = replicaSetList.stream()
+				.map(r -> {
+					ReplicaSetEntity replicaSetEntity = null;
+					try {
+						replicaSetEntity = toReplicaSetEntity(cluster, r);
+						replicaSetEntity.setReplicaSetIdx(replicaSetIdx);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -109,7 +167,7 @@ public class ReplicaSetService {
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
         String replicaSetName	= replicaSetEntity.getReplicaSetName();
         
-		boolean isDeleted = replicaSetAdapterService.deleteReplicaSet(clusterId, namespaceName, replicaSetName);
+		boolean isDeleted = replicaSetAdapterService.delete(clusterId, namespaceName, replicaSetName);
 		if (!isDeleted) {
 			throw new PortalException("ReplicaSet deletion failed");
 		}
@@ -158,6 +216,20 @@ public class ReplicaSetService {
         return result;
 	}
 
-	
-	
+	/**
+	 * Replica Set Yaml 조회
+	 * 
+	 * @param replicaSetIdx
+	 * @return
+	 * @throws Exception
+	 */
+	public String getReplicaSetYaml(Long replicaSetIdx) throws Exception {
+		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
+		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		String namespaceName	= replicaSetEntity.getNamespace().getName();
+        String replicaSetName	= replicaSetEntity.getReplicaSetName();
+        
+		return replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
+	}
+
 }

@@ -23,6 +23,7 @@ import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.networking.model.IngressDto;
 import kr.co.strato.portal.networking.service.IngressService;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +59,8 @@ public class IngressController {
 	 */
 	@GetMapping("/api/v1/networking/ingress")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<IngressDto>> getIngressList(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,PageRequest pageRequest){
-        Page<IngressDto> results = ingressService.getIngressList(name,clusterEntity,namespace,pageRequest.of());
+    public ResponseWrapper<Page<IngressDto.ResListDto>> getIngressList(PageRequest pageRequest,IngressDto.SearchParam searchParam){
+        Page<IngressDto.ResListDto> results = ingressService.getIngressList(pageRequest.of(),searchParam);
         return new ResponseWrapper<>(results);
     }
 
@@ -91,17 +92,17 @@ public class IngressController {
 
 	@DeleteMapping("/api/v1/networking/deletIngress/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id) {
-		boolean isDeleted = ingressService.deleteIngress(id);
+	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id, @RequestBody Long kubeConfigId) {
+		boolean isDeleted = ingressService.deleteIngress(id,kubeConfigId);
 		
 		return new ResponseWrapper<>(isDeleted);
 	}
 	
 	@PutMapping("/api/v1/networking/updateIngress/{id}")
-    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
+    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam,Long kubeConfigId){
         Long result = null;
         try {
-        	ingressService.updateIngress(id, yamlApplyParam);  
+        	ingressService.updateIngress(id, kubeConfigId,yamlApplyParam);  
         	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);
@@ -115,8 +116,8 @@ public class IngressController {
 	
 	@GetMapping("/api/v1/networking/ingress/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<IngressDto> getIngressDetail(@PathVariable("id") Long id) {
-		IngressDto resBody = ingressService.getIngressDetail(id);
+	public ResponseWrapper<IngressDto.ResDetailDto> getIngressDetail(@PathVariable("id") Long id) {
+		IngressDto.ResDetailDto resBody = ingressService.getIngressDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}

@@ -25,6 +25,7 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDtoMapper;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -37,11 +38,11 @@ public class ClusterNamespaceService {
 	private NamespaceDomainService 	namespaceDomainService;
 	
 	
-	public Page<ClusterNamespaceDto> getClusterNamespaceList(String name,Pageable pageable) {
-		Page<NamespaceEntity> namespacePage = namespaceDomainService.findByName(name,pageable);
-		List<ClusterNamespaceDto> namespaceList = namespacePage.getContent().stream().map(c -> ClusterNamespaceDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+	public Page<ClusterNamespaceDto.ResListDto> getClusterNamespaceList(Pageable pageable, ClusterNamespaceDto.SearchParam searchParam) {
+		Page<NamespaceEntity> namespacePage = namespaceDomainService.getNamespaceList(pageable, searchParam.getClusterIdx(), searchParam.getName());
+		List<ClusterNamespaceDto.ResListDto> namespaceList = namespacePage.getContent().stream().map(c -> ClusterNamespaceDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
-		Page<ClusterNamespaceDto> page = new PageImpl<>(namespaceList, pageable, namespacePage.getTotalElements());
+		Page<ClusterNamespaceDto.ResListDto> page = new PageImpl<>(namespaceList, pageable, namespacePage.getTotalElements());
 		return page;
 	}
 
@@ -68,10 +69,10 @@ public class ClusterNamespaceService {
         }
     }
 
-    public ClusterNamespaceDto getClusterNamespaceDetail(Long id){
+    public ClusterNamespaceDto.ResDetailDto getClusterNamespaceDetail(Long id){
     	NamespaceEntity nodeEntity = namespaceDomainService.getDetail(id); 
 
-    	ClusterNamespaceDto clusterNodeDto = ClusterNamespaceDtoMapper.INSTANCE.toDto(nodeEntity);
+    	ClusterNamespaceDto.ResDetailDto clusterNodeDto = ClusterNamespaceDtoMapper.INSTANCE.toResDetailDto(nodeEntity);
         return clusterNodeDto;
     }
     

@@ -82,7 +82,7 @@ public class StatefulSetDetailService {
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
         Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
-        StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId.intValue(), namespaceName, statefulSetName);
+        StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
         StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet);
 
@@ -98,7 +98,7 @@ public class StatefulSetDetailService {
         String namespaceName = entity.getNamespace().getName();
         Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
 
-        String yaml = statefulSetAdapterService.getYaml(clusterId.intValue(), namespaceName, statefulSetName);
+        String yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
         yaml = Base64Util.encode(yaml);
         return yaml;
     }

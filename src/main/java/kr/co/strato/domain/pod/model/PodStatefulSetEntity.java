@@ -2,6 +2,7 @@ package kr.co.strato.domain.pod.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -27,11 +28,11 @@ public class PodStatefulSetEntity {
 	@Column(name = "pod_stateful_set_idx")
 	private Long podStatefulSetIdx;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "stateful_set_idx")
 	private StatefulSetEntity statefulSet;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pod_idx")
 	private PodEntity pod;
 

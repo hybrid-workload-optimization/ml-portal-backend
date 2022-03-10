@@ -23,6 +23,7 @@ import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +38,11 @@ public class ClusterStorageClassService {
 	private StorageClassDomainService storageClassDomainService;
 	
 	
-	public Page<ClusterStorageClassDto> getClusterStorageClassList(String name,Pageable pageable) {
-		Page<StorageClassEntity> storageClassPage = storageClassDomainService.findByName(name,pageable);
-		List<ClusterStorageClassDto> storageClassList = storageClassPage.getContent().stream().map(c -> ClusterStorageClassDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+	public Page<ClusterStorageClassDto.ResListDto> getClusterStorageClassList(Pageable pageable, ClusterStorageClassDto.SearchParam searchParam) {
+		Page<StorageClassEntity> storageClassPage = storageClassDomainService.getStorageClassList(pageable, searchParam.getClusterIdx(), searchParam.getName());
+		List<ClusterStorageClassDto.ResListDto> storageClassList = storageClassPage.getContent().stream().map(c -> ClusterStorageClassDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
-		Page<ClusterStorageClassDto> page = new PageImpl<>(storageClassList, pageable, storageClassPage.getTotalElements());
+		Page<ClusterStorageClassDto.ResListDto> page = new PageImpl<>(storageClassList, pageable, storageClassPage.getTotalElements());
 		return page;
 	}
 
@@ -75,7 +76,7 @@ public class ClusterStorageClassService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteClusterStorageClass(Long id){
     	StorageClassEntity sc = storageClassDomainService.getDetail(id.longValue());
-        Long clusterId = sc.getClusterIdx().getClusterId();
+        Long clusterId = sc.getCluster().getClusterId();
         String storageClassName = sc.getName();
 
         boolean isDeleted = storageClassAdapterService.deleteStorageClass(clusterId.intValue(), storageClassName);
@@ -87,10 +88,10 @@ public class ClusterStorageClassService {
     }
 
 	
-    public ClusterStorageClassDto getClusterStorageClassDetail(Long id){
+    public ClusterStorageClassDto.ResDetailDto getClusterStorageClassDetail(Long id){
     	StorageClassEntity storageClassEntity = storageClassDomainService.getDetail(id); 
 
-    	ClusterStorageClassDto clusterStorageClassDto = ClusterStorageClassDtoMapper.INSTANCE.toDto(storageClassEntity);
+    	ClusterStorageClassDto.ResDetailDto clusterStorageClassDto = ClusterStorageClassDtoMapper.INSTANCE.toResDetailDto(storageClassEntity);
         return clusterStorageClassDto;
     }
 	
@@ -168,7 +169,7 @@ public class ClusterStorageClassService {
 			StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))
 					.provider(provider).type(type)
-					.clusterIdx(clusterEntity)
+					.cluster(clusterEntity)
 					.annotation(annotations).label(label)
 					.build();
 

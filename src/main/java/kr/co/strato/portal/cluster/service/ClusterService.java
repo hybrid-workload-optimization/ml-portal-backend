@@ -27,6 +27,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,6 +45,7 @@ public class ClusterService {
 	
 	@Autowired
 	ClusterNodeService clusterNodeService;
+
 	
 	/**
 	 * Cluster 목록 조회
@@ -194,4 +196,52 @@ public class ClusterService {
 		return clusterAdapterService.isClusterConnection(Base64.getEncoder().encodeToString(configContents.getBytes()));
 	}
 
+	public Page<ClusterNodeDto.ResListDto> getClusterNodeList(Long clusterIdx, Pageable pageable) {
+		return clusterNodeService.getClusterNodeList(clusterIdx, pageable);
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterDeploymentList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterStatefulSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterPodList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterCronJobList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterJobList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterReplicaSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterDaemonSetList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterServiceList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<ClusterNodeDto.ResListDto> getClusterIngressList(Long clusterIdx, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

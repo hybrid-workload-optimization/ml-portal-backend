@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
+import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
@@ -29,9 +30,8 @@ public class NamespaceDomainService {
 	public Page<NamespaceEntity> getList(Pageable pageable) {
 		return namespaceRepository.findAll(pageable);
 	}
-	
-	public Page<NamespaceEntity> findByName(String name,Pageable pageable) {
-		return namespaceRepository.findByName(name,pageable);
+	public Page<NamespaceEntity> getNamespaceList(Pageable pageable, Long clusterId,String name) {
+		return namespaceRepository.getNamespaceList(pageable,  clusterId,name);
 	}
 	
 	public boolean delete(Long id) {

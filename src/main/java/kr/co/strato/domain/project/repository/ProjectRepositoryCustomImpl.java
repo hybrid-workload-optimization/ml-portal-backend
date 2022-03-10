@@ -1,5 +1,6 @@
 package kr.co.strato.domain.project.repository;
 
+import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
 import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
 import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
@@ -119,7 +120,10 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
 	                              "projectUserEmail"),
 						  
-						  projectEntity.updatedAt
+						  ExpressionUtils.as(
+									Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d %H:%i"),
+									"createdAt"
+								)
 				  ))
 				  .from(projectEntity)
 				  .where(projectEntity.id.eq(projectIdx)

@@ -34,6 +34,22 @@ public class ReplicaSetDto {
 	
 	@Getter
 	@Setter
+	public static class Detail {
+		private Long replicaSetIdx;
+		private String name;
+		private String namespace;
+		private String uid;
+		private HashMap<String, Object> label;
+		private HashMap<String, Object> annotation;
+		private String createdAt;
+		private HashMap<String, Object>  selector;
+		private String image;
+		private int runningPod;
+		private int desiredPod;
+	}
+	
+	@Getter
+	@Setter
 	public static class Search {
 		private Long projectIdx;
 		private Long clusterIdx;

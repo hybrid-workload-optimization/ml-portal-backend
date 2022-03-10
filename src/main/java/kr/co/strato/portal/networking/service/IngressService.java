@@ -12,14 +12,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
+import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.ingress.model.IngressControllerEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
+import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 import kr.co.strato.domain.ingress.service.IngressDomainService;
+import kr.co.strato.domain.ingress.service.IngressRuleDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
@@ -34,15 +41,19 @@ public class IngressService {
 
 	@Autowired
 	private IngressAdapterService ingressAdapterService;
+	
 	@Autowired
 	private IngressDomainService ingressDomainService;
 	
+	@Autowired
+	private IngressRuleDomainService ingressRuleDomainService;
 	
-	public Page<IngressDto> getIngressList(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,Pageable pageable) {
-		Page<IngressEntity> ingressPage = ingressDomainService.findByName(name,clusterEntity,namespace,pageable);
-		List<IngressDto> ingressList = ingressPage.getContent().stream().map(c -> IngressDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+	
+	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable,IngressDto.SearchParam searchParam) {
+		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable,searchParam.getName(),searchParam.getNamespaceIdx());
+		List<IngressDto.ResListDto> ingressList = ingressPage.getContent().stream().map(c -> IngressDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
-		Page<IngressDto> page = new PageImpl<>(ingressList, pageable, ingressPage.getTotalElements());
+		Page<IngressDto.ResListDto> page = new PageImpl<>(ingressList, pageable, ingressPage.getTotalElements());
 		return page;
 	}
 
@@ -74,13 +85,13 @@ public class IngressService {
 	
 	
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteIngress(Long id){
+    public boolean deleteIngress(Long id,Long clusterId){
     	IngressEntity i = ingressDomainService.getDetail(id.longValue());
-        Long clusterId = i.getCluster().getClusterId();
         String IngressName = i.getName();
 
         boolean isDeleted = ingressAdapterService.deleteIngress(clusterId, IngressName);
         if(isDeleted){
+        	ingressRuleDomainService.delete(id);
             return ingressDomainService.delete(id.longValue());
         }else{
             throw new InternalServerException("k8s Ingress 삭제 실패");
@@ -88,10 +99,10 @@ public class IngressService {
     }
 
 	
-    public IngressDto getIngressDetail(Long id){
+    public IngressDto.ResDetailDto getIngressDetail(Long id){
     	IngressEntity ingressEntity = ingressDomainService.getDetail(id); 
 
-    	IngressDto ingressDto = IngressDtoMapper.INSTANCE.toDto(ingressEntity);
+    	IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
         return ingressDto;
     }
 	
@@ -112,9 +123,12 @@ public class IngressService {
 			try {
 				// k8s Object -> Entity
 				IngressEntity ingress = toEntity(i,clusterId);
-
 				// save
 				Long id = ingressDomainService.register(ingress);
+				
+				//ingress rule save
+				ingressRuleRegister(i,id);
+				
 				ids.add(id);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
@@ -125,10 +139,8 @@ public class IngressService {
 		return ids;
 	}
 	
-	public List<Long> updateIngress(Long ingressId, YamlApplyParam yamlApplyParam){
+	public List<Long> updateIngress(Long ingressId,Long clusterId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
-        ClusterEntity cluster = ingressDomainService.getCluster(ingressId);
-        Long clusterId = cluster.getClusterId();
 
         List<Ingress> ingress = ingressAdapterService.registerIngress(clusterId, yaml);
 
@@ -137,6 +149,10 @@ public class IngressService {
             	IngressEntity updateIngress = toEntity(i,clusterId);
 
                 Long id = ingressDomainService.update(updateIngress, ingressId, clusterId);
+                
+                ingressRuleDomainService.delete(id);
+                //ingress rule save
+				ingressRuleRegister(i,id);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -152,24 +168,72 @@ public class IngressService {
 	
 	
 	 private IngressEntity toEntity(Ingress i, Long clusterId) throws JsonProcessingException {
-	        ObjectMapper mapper = new ObjectMapper();
 	    	// k8s Object -> Entity
 			String name = i.getMetadata().getName();
 			String uid = i.getMetadata().getUid();
 			String ingressClass = i.getSpec().getIngressClassName();
 			String createdAt = i.getMetadata().getCreationTimestamp();
 			
-			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(clusterId);
+			IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
+			//ingressControllerEntity.setId((long) 1);
 			
+			List<NamespaceEntity> namespaceEntity= ingressDomainService.findByClusterIdx(clusterId);
+			if(ingressClass != null){
+				Ingress ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
+				ingressControllerEntity = ingressDomainService.findByName(ingressClassK8s.getMetadata().getName());
+			}else {
+				ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
+			}
+
 			IngressEntity ingress = IngressEntity.builder().name(name).uid(uid)
 					.ingressClass(ingressClass)
+					.ingressController(ingressControllerEntity)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))
-					.cluster(clusterEntity)
+					.namespace(namespaceEntity.get(0))
 					.build();
 
 	        return ingress;
 	    }
+	 
+	 
+	 
+	 
+		public void ingressRuleRegister(Ingress i, Long ingressId) {
+			List<IngressRuleEntity> ingressRuls = new ArrayList<>();
+			List<IngressRule> rules = i.getSpec().getRules();
+			for (IngressRule rule : rules) {
+
+				String host = rule.getHost();
+				HTTPIngressRuleValue ruleValue = rule.getHttp();
+
+				if (host == null) {
+					
+
+				} else {
+					List<HTTPIngressPath> rulePaths = ruleValue.getPaths();
+					for (HTTPIngressPath rulePath : rulePaths) {
+						String path = rulePath.getPath();
+						String pathType = rulePath.getPathType();
+						String protocol = "http";
+
+						IngressBackend backend = rulePath.getBackend();
+						IngressServiceBackend serviceBackend = backend.getService();
+						String serviceName = serviceBackend.getName();
+						ServiceBackendPort servicebackendPort = serviceBackend.getPort();
+
+						Integer portNumber = servicebackendPort.getNumber();
+
+						IngressRuleEntity ingressRuleEntity = IngressRuleEntity.builder().host(host).protocol(protocol)
+								.path(path).pathType(pathType).service(serviceName).port(portNumber).build();
+
+						ingressRuls.add(ingressRuleEntity);
+					}
+				}
+
+			}
+			ingressRuleDomainService.saveAllingress(ingressRuls);
+
+		}
 		
 	
 }

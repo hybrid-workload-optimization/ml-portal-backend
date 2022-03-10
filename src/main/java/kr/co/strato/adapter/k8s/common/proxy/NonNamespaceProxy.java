@@ -15,13 +15,13 @@ import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 @FeignClient(value="NonNamespace", url = "${service.kubernetes-interface.url}")
 public interface NonNamespaceProxy {
 
-    @PostMapping("/nonNamespace/{resourceType}/listStr")
+    @PostMapping("/nonNamespace/{resourceType}/list")
     public @ResponseBody
     String getResourceList(
             @PathVariable("resourceType") String resourceType,
             @RequestBody ResourceListSearchInfo listSearchInfo);
 
-    @GetMapping("/nonNamespace/{resourceType}/detailStr")
+    @GetMapping("/nonNamespace/{resourceType}")
     public @ResponseBody String getResource(
             @PathVariable("resourceType") String resourceType,
             @RequestParam("kubeConfigId") Long kubeConfigId,

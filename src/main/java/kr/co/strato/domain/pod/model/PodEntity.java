@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -32,7 +33,7 @@ import lombok.Setter;
 public class PodEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pod_idx")
+    @Column(name = "pod_idx", unique = true)
     private Long id;
 
     private String podUid;
@@ -59,17 +60,19 @@ public class PodEntity {
     @Lob
     private String label;
     
-    private int cpu;
+    private float cpu;
     
-    private int memory;
+    private float memory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;
     
     @Lob
-    private String condition;
+    @Column(name = "`condition`")
+	private String condition;
     
     private String ownerUid;
+    
 
 }

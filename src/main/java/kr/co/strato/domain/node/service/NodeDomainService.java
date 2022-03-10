@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.repository.NodeRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
@@ -28,14 +27,11 @@ public class NodeDomainService {
 	public Page<NodeEntity> getList(Pageable pageable) {
 		return nodeRepository.findAll(pageable);
 	}
-	
-	public Page<NodeEntity> findByName(String name,Pageable pageable) {
-		return nodeRepository.findByName(name,pageable);
+
+	public Page<NodeEntity> getNodeList(Pageable pageable, Long clusterId,String name) {
+		return nodeRepository.getNodeList(pageable,  clusterId,name);
 	}
 	
-	public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity,Pageable pageable) {
-		return nodeRepository.findByClusterIdx(clusterEntity,pageable);
-	}
 	
 	public boolean delete(Long id) {
 		Optional<NodeEntity> opt = nodeRepository.findById(id);
@@ -53,5 +49,8 @@ public class NodeDomainService {
 		} else {
 			throw new NotFoundResourceException(id.toString());
 		}
+	}
+	public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity,Pageable pageable) {
+		return nodeRepository.findByClusterIdx(clusterEntity,pageable);
 	}
 }

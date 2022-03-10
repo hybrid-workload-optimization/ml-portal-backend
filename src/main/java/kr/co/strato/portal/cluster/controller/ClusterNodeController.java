@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.Node;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
@@ -45,25 +44,20 @@ public class ClusterNodeController {
 		}
 		return nodeService.getClusterNodeList(kubeConfigId);
 	}
+		
 	
-	
-	/**
-	 * @param pageRequest
-	 * @return
-	 * page List
-	 */
 	@GetMapping("/api/v1/cluster/clusterNodes")
-	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterNodeDto>> getClusterNodeList(String name,PageRequest pageRequest){
-        Page<ClusterNodeDto> results = nodeService.getClusterNodeList(name,pageRequest.of());
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Page<ClusterNodeDto.ResListDto>> getClusterNodeList(PageRequest pageRequest, ClusterNodeDto.SearchParam searchParam){
+        Page<ClusterNodeDto.ResListDto> results = nodeService.getClusterNodes(pageRequest.of(), searchParam);
+
         return new ResponseWrapper<>(results);
     }
 
 
-/* node 생성
 	@PostMapping("/api/v1/cluster/registerClusterNode")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Integer kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
 		List<Long> ids = null;
 		
 		try {
@@ -75,7 +69,7 @@ public class ClusterNodeController {
 		
 		return new ResponseWrapper<>(ids);
 	}
-*/
+	
 	@DeleteMapping("/api/v1/cluster/deletClusterNode/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Boolean> deleteClusterNode(@PathVariable("id") Long id) {
@@ -86,8 +80,8 @@ public class ClusterNodeController {
 	
 	@GetMapping("/api/v1/cluster/clusterNodes/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterNodeDto> getClusterNodeDetail(@PathVariable("id") Long id) {
-		ClusterNodeDto resBody = nodeService.getClusterNodeDetail(id);
+	public ResponseWrapper<ClusterNodeDto.ResDetailDto> getClusterNodeDetail(@PathVariable("id") Long id) {
+		ClusterNodeDto.ResDetailDto resBody = nodeService.getClusterNodeDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}

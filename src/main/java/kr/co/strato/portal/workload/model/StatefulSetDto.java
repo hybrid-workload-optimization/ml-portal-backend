@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.model;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class StatefulSetDto {
         private int podCnt;
         private int podTotalCnt;
         private String image;
-        private String dayAgo;
+        private LocalDateTime dayAgo;
         private HashMap<String, Object> label;
 
     }

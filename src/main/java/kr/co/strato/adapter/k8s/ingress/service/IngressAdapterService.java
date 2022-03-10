@@ -16,6 +16,7 @@ import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
+import kr.co.strato.adapter.k8s.common.proxy.NonNamespaceProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 public class IngressAdapterService {
 	@Autowired
 	private InNamespaceProxy inNamespaceProxy;
+	
+	@Autowired
+	private NonNamespaceProxy nonNamespaceProxy;
+	
     @Autowired
     private CommonProxy commonProxy;
 
@@ -79,9 +84,29 @@ public class IngressAdapterService {
     }
     
     public String getIngressYaml(Long kubeConfigId,String name, String namespace) {
-  		String ingressYaml = inNamespaceProxy.getResourceYaml(ResourceType.ingress.get(), Long.valueOf(kubeConfigId).intValue(),namespace,name);
+  		String ingressYaml = inNamespaceProxy.getResourceYaml(ResourceType.ingress.get(), kubeConfigId, namespace,name);
   		return ingressYaml;
   	}
+    
+    public Ingress getIngressClassName(Long kubeConfigId,String name) {
+		// 요청 파라미터 객체 생성
+		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).name(name).build();
+
+		// 조회 요청
+		String results = nonNamespaceProxy.getResourceList(ResourceType.ingressClass.get(), param);
+
+		try {
+			// json -> fabric8 k8s 오브젝트 파싱
+			ObjectMapper mapper = new ObjectMapper();
+			Ingress ingress = mapper.readValue(results, new TypeReference<Ingress>() {
+			});
+
+			return ingress;
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("json 파싱 에러");
+		}
+	}
     
     
 }

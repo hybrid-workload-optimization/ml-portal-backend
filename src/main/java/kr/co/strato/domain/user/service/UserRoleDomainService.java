@@ -27,6 +27,11 @@ public class UserRoleDomainService {
 		return userRole;
 	}
 	
+	public UserRoleEntity getUserRoleByCode(String code) {
+		UserRoleEntity userRole = userRoleRepository.findTop1BByUserRoleCode(code);
+		return userRole;
+	}
+	
 	public void saveUserRole(UserRoleEntity entity) {
 		userRoleRepository.save(entity);
 	}
@@ -37,5 +42,10 @@ public class UserRoleDomainService {
 
 	public List<UserRoleEntity> getAllListAuthority() {
 		return userRoleRepository.findAll();
+	}
+
+	public int getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
+		int count = userRoleRepository.findCountByAccessRoleNameAndGroupYn(userRoleName, groupYn);
+		return count;
 	}
 }

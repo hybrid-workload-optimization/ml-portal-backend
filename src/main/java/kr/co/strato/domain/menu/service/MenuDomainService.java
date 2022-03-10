@@ -15,8 +15,6 @@ public class MenuDomainService {
 	
 	public List<MenuEntity> getAllMenu(){
 		List<MenuEntity> menuList = menuRepository.findAll();
-		
-		System.out.println("####menuList :: " + menuList.toString());
 		return menuList;
 	}
 }

@@ -26,34 +26,67 @@ public class ReplicaSetAdapterService {
 	@Autowired
     private InNamespaceProxy inNamespaceProxy;
 	
-	
-	public List<ReplicaSet> registerReplicaSet(Long clusterId, String yaml) throws Exception {
+	public List<ReplicaSet> getList(Long clusterId, String yaml) throws Exception {
 		YamlApplyParam body = YamlApplyParam.builder()
 				.kubeConfigId(clusterId)
 				.yaml(yaml)
 				.build();
 		
-		log.debug("[Register Replica Set] request : {}", body.toString());
+		log.debug("[Get Replica Set List] request : {}", body.toString());
 		String response = commonProxy.apply(body);
-		log.debug("[Register Replica Set] response : {}", response);
+		log.debug("[Get Replica Set List] response : {}", response);
 		
 		ObjectMapper mapper = new ObjectMapper(); 
 		List<ReplicaSet> result = mapper.readValue(response, new TypeReference<List<ReplicaSet>>(){});
 		
 		return result;
 	}
-
-
-	public boolean deleteReplicaSet(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
+	
+	public ReplicaSet get(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
+		log.debug("[Get Replica Set] request : {}/{}/{}", clusterId, namespaceName, replicaSetName);
+		String response = inNamespaceProxy.getResource(ResourceType.replicaSet.get(), clusterId, namespaceName, replicaSetName);
+		log.debug("[Get Replica Set] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper(); 
+		ReplicaSet result = mapper.readValue(response, new TypeReference<ReplicaSet>(){});
+		
+		return result;
+	}
+	
+	public List<ReplicaSet> create(Long clusterId, String yaml) throws Exception {
+		YamlApplyParam body = YamlApplyParam.builder()
+				.kubeConfigId(clusterId)
+				.yaml(yaml)
+				.build();
+		
+		log.debug("[Create Replica Set] request : {}", body.toString());
+		String response = commonProxy.apply(body);
+		log.debug("[Create Replica Set] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper(); 
+		List<ReplicaSet> result = mapper.readValue(response, new TypeReference<List<ReplicaSet>>(){});
+		
+		return result;
+	}
+	
+	public boolean delete(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
 		WorkloadResourceInfo body = WorkloadResourceInfo.builder()
                 .kubeConfigId(clusterId)
                 .namespace(namespaceName)
                 .name(replicaSetName)
                 .build();
 		
-		log.debug("[Register Replica Set] request : {}", body.toString());
+		log.debug("[Delete Replica Set] request : {}", body.toString());
 		boolean response = inNamespaceProxy.deleteResource(ResourceType.replicaSet.get(), body);
-		log.debug("[Register Replica Set] response : {}", response);
+		log.debug("[Delete Replica Set] response : {}", response);
+		
+		return response;
+	}
+	
+	public String getYaml(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
+		log.debug("[Get Replica Set Yaml] request : {}/{}/{}", clusterId, namespaceName, replicaSetName);
+		String response = inNamespaceProxy.getResourceYaml(ResourceType.replicaSet.get(), clusterId, namespaceName, replicaSetName);
+		log.debug("[Get Replica Set Yaml] response : {}", response);
 		
 		return response;
 	}

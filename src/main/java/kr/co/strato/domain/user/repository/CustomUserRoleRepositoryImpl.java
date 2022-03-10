@@ -35,7 +35,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 	
 	
 	@Override
-	public Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto params, Pageable pageable) {
+	public Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto.ReqViewDto params, Pageable pageable) {
 		BooleanBuilder builder = new BooleanBuilder();
 		if ( ObjectUtils.isNotEmpty(params) ) {
 			if ( params.getUserRoleIdx() != null && params.getUserRoleIdx() > 0 ){

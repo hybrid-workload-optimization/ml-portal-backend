@@ -1,5 +1,7 @@
 package kr.co.strato.portal.setting.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.mapstruct.IterableMapping;
@@ -10,6 +12,11 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.domain.setting.model.SettingEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -22,8 +29,23 @@ public interface ToolsDtoMapper {
 		@Mapping(source = "key",      target = "settingKey"),
 		@Mapping(source = "value",    target = "settingValue")
 	})
-	@Named("toolsDtoToEntity")
-	public SettingEntity toEntity(ToolsDto dto);
+	@Named(value = "toolsDtoByReqViewDtoToEntity")
+	public SettingEntity toEntityByReqViewDto(ToolsDto.ReqViewDto dto);
+	
+	@Mappings({
+		@Mapping(source = "type",     target = "settingType"),
+		@Mapping(source = "key",      target = "settingKey"),
+		@Mapping(source = "value",    target = "settingValue")
+	})
+	public SettingEntity toEntityByReqRegistDto(ToolsDto.ReqRegistDto dto);
+	
+	@Mappings({
+		@Mapping(source = "idx",      target = "settingIdx"),
+		@Mapping(source = "type",     target = "settingType"),
+		@Mapping(source = "key",      target = "settingKey"),
+		@Mapping(source = "value",    target = "settingValue")
+	})
+	public SettingEntity toEntityByReqModifyDto(ToolsDto.ReqModifyDto dto);
 	
 	@Mappings({
 		@Mapping(source = "settingIdx",      target = "idx"),
@@ -31,8 +53,21 @@ public interface ToolsDtoMapper {
 		@Mapping(source = "settingKey",      target = "key"),
 		@Mapping(source = "settingValue",    target = "value")
 	})
-	public ToolsDto toDto(SettingEntity entity);
+	public ToolsDto.ViewDto toViewDto(SettingEntity entity);
 	
-	@IterableMapping(qualifiedByName = "toolsDtoToEntity")
-	public List<SettingEntity> toEntityList(List<ToolsDto> dtoList);
+	@IterableMapping(qualifiedByName = "toolsDtoByReqViewDtoToEntity")
+	public List<SettingEntity> toEntityListByReqViewDto(List<ToolsDto.ReqViewDto> dtoList);
+	
+	@Named("jsonToMap")
+    default List<HashMap<String, Object>> jsonArrayToMap(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<HashMap<String, Object>> list = mapper.readValue(json, new TypeReference<List<HashMap<String, Object>>>(){});
+            
+            return list;
+        } catch (JsonProcessingException e) {
+        	e.printStackTrace();
+            return new ArrayList<HashMap<String, Object>>();
+        }
+    }
 }

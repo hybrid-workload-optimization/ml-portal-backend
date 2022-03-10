@@ -73,8 +73,7 @@ public class NodeEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
-	//private Long clusterIdx;
-	private ClusterEntity clusterIdx;
+	private ClusterEntity cluster;
 	
 	@Lob
 	private String annotation;
@@ -83,6 +82,7 @@ public class NodeEntity {
 	@Lob
 	@Column(name = "`condition`")
 	private String condition;
+	
 	@Lob
 	@Column(name = "`role`")
 	private String role;

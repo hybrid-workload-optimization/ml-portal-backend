@@ -1,6 +1,7 @@
 package kr.co.strato.domain.ingress.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.ingress.model.IngressControllerEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
+import kr.co.strato.domain.ingress.repository.IngressControllerRepository;
 import kr.co.strato.domain.ingress.repository.IngressRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -19,6 +23,12 @@ public class IngressDomainService {
 	
 	@Autowired
 	private IngressRepository ingressRepository;
+	@Autowired
+	private NamespaceRepository namespaceRepository;
+	
+	
+	@Autowired
+	private IngressControllerRepository ingressControllerRepository;
 	
 	public Long register(IngressEntity ingressEntity) {
 		ingressRepository.save(ingressEntity);
@@ -28,8 +38,8 @@ public class IngressDomainService {
 		return ingressRepository.findAll(pageable);
 	}
 	
-	public Page<IngressEntity> findByName(String name,ClusterEntity clusterEntity,NamespaceEntity namespace,Pageable pageable) {
-		return ingressRepository.findByNameAndClusterAndNamespace(name,clusterEntity, namespace,pageable);
+	public Page<IngressEntity> getIngressList(Pageable pageable,String name,Long namespaceId) {
+		return ingressRepository.getIngressList(pageable,name, namespaceId);
 	}
 	
 	public boolean delete(Long id) {
@@ -50,17 +60,24 @@ public class IngressDomainService {
 		}
 	}
 	
-	
-	
-    public ClusterEntity getCluster(Long id){
-    	IngressEntity entity = getDetail(id);
-        ClusterEntity cluster =  entity.getCluster();
-        return cluster;
-    }
-    
     public Long update(IngressEntity ingressEntity,Long namespaceId, Long clusterId) {
     	ingressRepository.save(ingressEntity);
 		return ingressEntity.getId();
 	}
+    
+	public IngressControllerEntity findByDefaultYn(String defaultYn) {
+		IngressControllerEntity ingressDefault = ingressControllerRepository.findByDefaultYn(defaultYn);
+		return ingressDefault;
+	}
 	
+	public IngressControllerEntity findByName(String name) {
+		IngressControllerEntity ingressDefault = ingressControllerRepository.findByName(name);
+		return ingressDefault;
+	}
+	
+	public List<NamespaceEntity> findByClusterIdx(Long clusterIdx){
+		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
+		return namespaceRepository.findByClusterIdx(cluster);
+	}
+    
 }

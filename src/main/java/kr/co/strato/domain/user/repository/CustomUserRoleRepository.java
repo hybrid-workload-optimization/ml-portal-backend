@@ -11,6 +11,6 @@ import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 
 public interface CustomUserRoleRepository {
 
-	Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto params, Pageable pageable);
+	Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto.ReqViewDto params, Pageable pageable);
 
 }
