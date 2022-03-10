@@ -57,7 +57,7 @@ public class PersistentVolumeEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "storage_class_idx")
-	private StorageClassEntity storageClassIdx;
+	private StorageClassEntity storageClass;
 	
 	
 	private String type;
@@ -75,6 +75,6 @@ public class PersistentVolumeEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
-	private ClusterEntity clusterIdx;
+	private ClusterEntity cluster;
 	
 }

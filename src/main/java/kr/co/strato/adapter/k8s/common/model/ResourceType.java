@@ -18,7 +18,8 @@ public enum ResourceType {
     endpoints,
     pvc,
     configMap,
-    secret;
+    secret,
+    ingressClass;
 
     public String get(){
         return this.toString();

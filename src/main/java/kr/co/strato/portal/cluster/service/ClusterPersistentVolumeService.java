@@ -32,6 +32,7 @@ import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +47,11 @@ public class ClusterPersistentVolumeService {
 	private PersistentVolumeDomainService 	persistentVolumeDomainService;
 	
 	
-	public Page<ClusterPersistentVolumeDto> getClusterPersistentVolumeList(String name,Pageable pageable) {
-		Page<PersistentVolumeEntity> persistentVolumePage = persistentVolumeDomainService.findByName(name,pageable);
-		List<ClusterPersistentVolumeDto> persistentVolumeList = persistentVolumePage.getContent().stream().map(c -> ClusterPersistentVolumeDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+	public Page<ClusterPersistentVolumeDto.ResListDto> getClusterPersistentVolumeList(Pageable pageable, ClusterPersistentVolumeDto.SearchParam searchParam) {
+		Page<PersistentVolumeEntity> persistentVolumePage = persistentVolumeDomainService.getPersistentVolumeList(pageable, searchParam.getClusterIdx(), searchParam.getName());
+		List<ClusterPersistentVolumeDto.ResListDto> persistentVolumeList = persistentVolumePage.getContent().stream().map(c -> ClusterPersistentVolumeDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
-		Page<ClusterPersistentVolumeDto> page = new PageImpl<>(persistentVolumeList, pageable, persistentVolumePage.getTotalElements());
+		Page<ClusterPersistentVolumeDto.ResListDto> page = new PageImpl<>(persistentVolumeList, pageable, persistentVolumePage.getTotalElements());
 		return page;
 	}
 
@@ -66,7 +67,7 @@ public class ClusterPersistentVolumeService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteClusterPersistentVolume(Long id){
     	PersistentVolumeEntity pv = persistentVolumeDomainService.getDetail(id.longValue());
-        Long clusterId = pv.getClusterIdx().getClusterId();
+        Long clusterId = pv.getCluster().getClusterId();
         String persistentVolumeName = pv.getName();
 
         boolean isDeleted = persistentVolumeAdapterService.deletePersistentVolume(clusterId.intValue(), persistentVolumeName);
@@ -77,10 +78,10 @@ public class ClusterPersistentVolumeService {
         }
     }
 
-    public ClusterPersistentVolumeDto getClusterPersistentVolumeDetail(Long id){
+    public ClusterPersistentVolumeDto.ResDetailDto getClusterPersistentVolumeDetail(Long id){
     	PersistentVolumeEntity persistentVolumeEntity = persistentVolumeDomainService.getDetail(id); 
 
-    	ClusterPersistentVolumeDto clusterPersistentVolumeDto = ClusterPersistentVolumeDtoMapper.INSTANCE.toDto(persistentVolumeEntity);
+    	ClusterPersistentVolumeDto.ResDetailDto clusterPersistentVolumeDto = ClusterPersistentVolumeDtoMapper.INSTANCE.toResDetailDto(persistentVolumeEntity);
         return clusterPersistentVolumeDto;
     }
 	
@@ -220,10 +221,10 @@ public class ClusterPersistentVolumeService {
 		PersistentVolumeEntity clusterPersistentVolume = PersistentVolumeEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.accessMode(accessModes).claim(claim).reclaim(reclaim).reclaimPolicy(reclaimPolicy)
-				.storageClassIdx(storageClassEntity)
+				.storageClass(storageClassEntity)
 				.resourceName(resourceName)
 				.type(type).path(path).size(size)
-				.clusterIdx(clusterEntity)
+				.cluster(clusterEntity)
 				.annotation(annotations).label(label)
 				.build();
 

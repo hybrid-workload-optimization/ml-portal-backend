@@ -27,8 +27,8 @@ public class StorageClassDomainService {
 	private PersistentVolumeRepository persistentVolumeRepository;
 	
 	
-	public Page<StorageClassEntity> findByName(String name,Pageable pageable) {
-		return storageClassRepository.findByName(name,pageable);
+	public Page<StorageClassEntity> getStorageClassList(Pageable pageable, Long clusterId,String name) {
+		return storageClassRepository.getStorageClassList(pageable,clusterId,name);
 	}
 	
 	public StorageClassEntity getDetail(Long id) {
@@ -63,13 +63,13 @@ public class StorageClassDomainService {
 		storageClassRepository.delete(storageClassEntity);
 	}
 	
-	public Optional<List<PersistentVolumeEntity>> persistentVolumeStorageClassIdx(Long StorageClassIdx) {
+	public List<PersistentVolumeEntity> persistentVolumeStorageClassIdx(Long StorageClassIdx) {
 		return persistentVolumeRepository.findByStorageClassIdx(StorageClassIdx);
 	}
 	
 	public ClusterEntity getCluster(Long id) {
 		StorageClassEntity entity = getDetail(id);
-		ClusterEntity cluster = entity.getClusterIdx();
+		ClusterEntity cluster = entity.getCluster();
 		return cluster;
 	}
 

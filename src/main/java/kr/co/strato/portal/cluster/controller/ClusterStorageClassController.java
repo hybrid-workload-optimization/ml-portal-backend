@@ -21,6 +21,7 @@ import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.service.ClusterStorageClassService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,10 +55,10 @@ public class ClusterStorageClassController {
 	 * @return
 	 * page List
 	 */
-	@GetMapping("/api/v1/cluster/clusterStorageClasss")
+	@GetMapping("/api/v1/cluster/clusterStorageClassList")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterStorageClassDto>> getClusterStorageClassList(String name,PageRequest pageRequest){
-        Page<ClusterStorageClassDto> results = storageClassService.getClusterStorageClassList(name,pageRequest.of());
+    public ResponseWrapper<Page<ClusterStorageClassDto.ResListDto>> getClusterStorageClassList(PageRequest pageRequest, ClusterStorageClassDto.SearchParam searchParam){
+        Page<ClusterStorageClassDto.ResListDto> results = storageClassService.getClusterStorageClassList(pageRequest.of(), searchParam);
         return new ResponseWrapper<>(results);
     }
 
@@ -113,8 +114,8 @@ public class ClusterStorageClassController {
 	
 	@GetMapping("/api/v1/cluster/clusterStorageClasss/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterStorageClassDto> getClusterStorageClassDetail(@PathVariable("id") Long id) {
-		ClusterStorageClassDto resBody = storageClassService.getClusterStorageClassDetail(id);
+	public ResponseWrapper<ClusterStorageClassDto.ResDetailDto> getClusterStorageClassDetail(@PathVariable("id") Long id) {
+		ClusterStorageClassDto.ResDetailDto resBody = storageClassService.getClusterStorageClassDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}

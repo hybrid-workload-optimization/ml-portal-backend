@@ -21,6 +21,7 @@ import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.service.ClusterPersistentVolumeService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,8 +57,8 @@ public class ClusterPersistentVolumeController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterPersistentVolumes")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterPersistentVolumeDto>> getClusterPersistentVolumeList(String name,PageRequest pageRequest){
-        Page<ClusterPersistentVolumeDto> results = persistentVolumeService.getClusterPersistentVolumeList(name,pageRequest.of());
+    public ResponseWrapper<Page<ClusterPersistentVolumeDto.ResListDto>> getClusterPersistentVolumeList(PageRequest pageRequest, ClusterPersistentVolumeDto.SearchParam searchParam){
+        Page<ClusterPersistentVolumeDto.ResListDto> results = persistentVolumeService.getClusterPersistentVolumeList(pageRequest.of(), searchParam);
         return new ResponseWrapper<>(results);
     }
 
@@ -114,8 +115,8 @@ public class ClusterPersistentVolumeController {
 	
 	@GetMapping("/api/v1/cluster/clusterPersistentVolumes/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterPersistentVolumeDto> getClusterPersistentVolumeDetail(@PathVariable("id") Long id) {
-		ClusterPersistentVolumeDto resBody = persistentVolumeService.getClusterPersistentVolumeDetail(id);
+	public ResponseWrapper<ClusterPersistentVolumeDto.ResDetailDto> getClusterPersistentVolumeDetail(@PathVariable("id") Long id) {
+		ClusterPersistentVolumeDto.ResDetailDto resBody = persistentVolumeService.getClusterPersistentVolumeDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}

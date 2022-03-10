@@ -25,8 +25,8 @@ public class PersistentVolumeDomainService {
 	@Autowired
 	private StorageClassRepository storageClassRepository;
 	
-	public Page<PersistentVolumeEntity> findByName(String name,Pageable pageable) {
-		return persistentVolumeRepository.findByName(name,pageable);
+	public Page<PersistentVolumeEntity> getPersistentVolumeList(Pageable pageable, Long clusterId,String name){
+		return persistentVolumeRepository.getPersistentVolumeList(pageable,clusterId,name);
 	}
 	
 	public PersistentVolumeEntity getDetail(Long id) {
@@ -63,17 +63,13 @@ public class PersistentVolumeDomainService {
 	}
 	
     public StorageClassEntity getStorageClassId(String name){
-        Optional<StorageClassEntity> StorageClass = storageClassRepository.findByName(name);
-        if(StorageClass.isPresent()){
-            return StorageClass.get();
-        }else{
-            throw new NotFoundResourceException(name.toString());
-        }
+        StorageClassEntity storageClass = storageClassRepository.findByName(name);
+		return storageClass;
     }
 	
     public ClusterEntity getCluster(Long id){
     	PersistentVolumeEntity entity = getDetail(id);
-        ClusterEntity cluster =  entity.getClusterIdx();
+        ClusterEntity cluster =  entity.getCluster();
 
         return cluster;
     }

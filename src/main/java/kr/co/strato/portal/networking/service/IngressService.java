@@ -22,7 +22,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.ingress.model.IngressControllerEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 import kr.co.strato.domain.ingress.service.IngressDomainService;
@@ -49,11 +49,11 @@ public class IngressService {
 	private IngressRuleDomainService ingressRuleDomainService;
 	
 	
-	public Page<IngressDto> getIngressList(String name,NamespaceEntity namespace,Pageable pageable) {
-		Page<IngressEntity> ingressPage = ingressDomainService.findByName(name,namespace,pageable);
-		List<IngressDto> ingressList = ingressPage.getContent().stream().map(c -> IngressDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable,IngressDto.SearchParam searchParam) {
+		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable,searchParam.getName(),searchParam.getNamespaceIdx());
+		List<IngressDto.ResListDto> ingressList = ingressPage.getContent().stream().map(c -> IngressDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
-		Page<IngressDto> page = new PageImpl<>(ingressList, pageable, ingressPage.getTotalElements());
+		Page<IngressDto.ResListDto> page = new PageImpl<>(ingressList, pageable, ingressPage.getTotalElements());
 		return page;
 	}
 
@@ -99,10 +99,10 @@ public class IngressService {
     }
 
 	
-    public IngressDto getIngressDetail(Long id){
+    public IngressDto.ResDetailDto getIngressDetail(Long id){
     	IngressEntity ingressEntity = ingressDomainService.getDetail(id); 
 
-    	IngressDto ingressDto = IngressDtoMapper.INSTANCE.toDto(ingressEntity);
+    	IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
         return ingressDto;
     }
 	
@@ -174,9 +174,22 @@ public class IngressService {
 			String ingressClass = i.getSpec().getIngressClassName();
 			String createdAt = i.getMetadata().getCreationTimestamp();
 			
+			IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
+			//ingressControllerEntity.setId((long) 1);
+			
+			List<NamespaceEntity> namespaceEntity= ingressDomainService.findByClusterIdx(clusterId);
+			if(ingressClass != null){
+				Ingress ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
+				ingressControllerEntity = ingressDomainService.findByName(ingressClassK8s.getMetadata().getName());
+			}else {
+				ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
+			}
+
 			IngressEntity ingress = IngressEntity.builder().name(name).uid(uid)
 					.ingressClass(ingressClass)
+					.ingressController(ingressControllerEntity)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))
+					.namespace(namespaceEntity.get(0))
 					.build();
 
 	        return ingress;

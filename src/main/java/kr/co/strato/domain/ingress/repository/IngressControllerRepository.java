@@ -6,4 +6,5 @@ import kr.co.strato.domain.ingress.model.IngressControllerEntity;
 
 public interface IngressControllerRepository extends JpaRepository<IngressControllerEntity, Long>  {
 	IngressControllerEntity findByName(String name);
+	IngressControllerEntity findByDefaultYn(String defaultYn);
 } 
