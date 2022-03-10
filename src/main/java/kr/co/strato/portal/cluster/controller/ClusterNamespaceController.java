@@ -22,6 +22,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterNamespaceService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +57,8 @@ public class ClusterNamespaceController {
 	 */
 	@GetMapping("/api/v1/cluster/clusterNamespaces")
 	@ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ClusterNamespaceDto>> getClusterNamespaceList(String name,PageRequest pageRequest){
-        Page<ClusterNamespaceDto> results = namespaceService.getClusterNamespaceList(name,pageRequest.of());
+    public ResponseWrapper<Page<ClusterNamespaceDto.ResListDto>> getClusterNamespaceList(PageRequest pageRequest, ClusterNamespaceDto.SearchParam searchParam){
+        Page<ClusterNamespaceDto.ResListDto> results = namespaceService.getClusterNamespaceList(pageRequest.of(), searchParam);
         return new ResponseWrapper<>(results);
     }
 
@@ -114,8 +115,8 @@ public class ClusterNamespaceController {
 	
 	@GetMapping("/api/v1/cluster/clusterNamespaces/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ClusterNamespaceDto> getClusterNamespaceDetail(@PathVariable("id") Long id) {
-		ClusterNamespaceDto resBody = namespaceService.getClusterNamespaceDetail(id);
+	public ResponseWrapper<ClusterNamespaceDto.ResDetailDto> getClusterNamespaceDetail(@PathVariable("id") Long id) {
+		ClusterNamespaceDto.ResDetailDto resBody = namespaceService.getClusterNamespaceDetail(id);
 
 		return new ResponseWrapper<>(resBody);
 	}
