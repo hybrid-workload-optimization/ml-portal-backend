@@ -31,7 +31,7 @@ public interface InNamespaceProxy {
     @GetMapping("/inNamespace/{resourceType}/yaml")
     public String getResourceYaml(
             @PathVariable("resourceType") String resourceType,
-            @RequestParam("kubeConfigId") Integer kubeConfigId,
+            @RequestParam("kubeConfigId") Long kubeConfigId,
             @RequestParam("namespace") String namespace,
             @RequestParam("name") String name);
 

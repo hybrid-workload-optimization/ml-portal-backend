@@ -83,4 +83,12 @@ public class ReplicaSetAdapterService {
 		return response;
 	}
 	
+	public String getYaml(Long clusterId, String namespaceName, String replicaSetName) throws Exception {
+		log.debug("[Get Replica Set Yaml] request : {}/{}/{}", clusterId, namespaceName, replicaSetName);
+		String response = inNamespaceProxy.getResourceYaml(ResourceType.replicaSet.get(), clusterId, namespaceName, replicaSetName);
+		log.debug("[Get Replica Set Yaml] response : {}", response);
+		
+		return response;
+	}
+	
 }

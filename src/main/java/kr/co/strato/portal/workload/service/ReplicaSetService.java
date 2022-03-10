@@ -215,4 +215,20 @@ public class ReplicaSetService {
         return result;
 	}
 
+	/**
+	 * Replica Set Yaml 조회
+	 * 
+	 * @param replicaSetIdx
+	 * @return
+	 * @throws Exception
+	 */
+	public String getReplicaSetYaml(Long replicaSetIdx) throws Exception {
+		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
+		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		String namespaceName	= replicaSetEntity.getNamespace().getName();
+        String replicaSetName	= replicaSetEntity.getReplicaSetName();
+        
+		return replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
+	}
+
 }

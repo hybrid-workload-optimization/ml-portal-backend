@@ -133,7 +133,7 @@ public class ServiceAdapterService {
      */
     public String getYaml(Long clusterId, String namespaceName, String serviceName){
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId.intValue(), namespaceName, serviceName);
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId, namespaceName, serviceName);
 
             return yaml;
         }catch (Exception e){

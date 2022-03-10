@@ -139,7 +139,7 @@ public class StatefulSetAdapterService {
      */
     public String getYaml(Long clusterId, String namespaceName, String statefulSetName){
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId.intValue(), namespaceName, statefulSetName);
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId, namespaceName, statefulSetName);
 
             return yaml;
         }catch (Exception e){

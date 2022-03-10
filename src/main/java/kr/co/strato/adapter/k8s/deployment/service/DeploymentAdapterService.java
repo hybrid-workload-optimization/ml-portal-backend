@@ -96,12 +96,8 @@ public class DeploymentAdapterService {
     }
 
     public String getYaml(Long clusterId, String namespaceName, String deploymentName){
-    	Integer iClusterId = null;
-    	if(clusterId != null)
-    		iClusterId = Long.valueOf(clusterId).intValue();
-    	
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.deployment.get(), iClusterId, namespaceName, deploymentName);
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.deployment.get(), clusterId, namespaceName, deploymentName);
             return yaml;
         }catch (Exception e){
             log.error(e.getMessage(), e);

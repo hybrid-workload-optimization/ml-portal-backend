@@ -238,4 +238,18 @@ public class ReplicaSetController {
         return new ResponseWrapper<>(result);
     }
 	
+	@GetMapping("/api/v1/workload/replicasets/{replicaSetIdx}/yaml")
+    public ResponseWrapper<String> getReplicaSetYaml(@PathVariable(required = true) Long replicaSetIdx){
+		String result = null;
+        
+        try {
+        	result = replicaSetService.getReplicaSetYaml(replicaSetIdx);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+        
+        return new ResponseWrapper<>(result);
+    }
+	
 }

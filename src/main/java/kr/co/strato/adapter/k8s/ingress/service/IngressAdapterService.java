@@ -79,7 +79,7 @@ public class IngressAdapterService {
     }
     
     public String getIngressYaml(Long kubeConfigId,String name, String namespace) {
-  		String ingressYaml = inNamespaceProxy.getResourceYaml(ResourceType.ingress.get(), Long.valueOf(kubeConfigId).intValue(),namespace,name);
+  		String ingressYaml = inNamespaceProxy.getResourceYaml(ResourceType.ingress.get(), kubeConfigId, namespace,name);
   		return ingressYaml;
   	}
     
