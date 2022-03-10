@@ -52,7 +52,7 @@ public class StatefulSetListService {
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
-                StatefulSetEntity statefulSet = toEntity(s);
+                StatefulSetEntity statefulSet = toStatefulSetEntity(s);
 
                 Long id = statefulSetDomainService.register(statefulSet, clusterEntity.getClusterId(), namespaceName);
 
@@ -72,9 +72,9 @@ public class StatefulSetListService {
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
         Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId());
         List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
-        Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
+        Page<StatefulSetDto.ResListDto> page = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
 
-        return pages;
+        return page;
     }
 
 
@@ -85,7 +85,7 @@ public class StatefulSetListService {
      * @return
      * @throws JsonProcessingException
      */
-    private StatefulSetEntity toEntity(StatefulSet s) throws JsonProcessingException {
+    private StatefulSetEntity toStatefulSetEntity(StatefulSet s) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
 
         String name = s.getMetadata().getName();
@@ -96,8 +96,6 @@ public class StatefulSetListService {
         String annotations = mapper.writeValueAsString(s.getMetadata().getAnnotations());
         String createAt = s.getMetadata().getCreationTimestamp();
 
-        System.out.println("createAT~~~");
-        System.out.println(createAt);
         StatefulSetEntity statefulSet = StatefulSetEntity.builder()
                 .statefulSetName(name)
                 .statefulSetUid(uid)

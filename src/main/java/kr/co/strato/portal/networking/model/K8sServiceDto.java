@@ -20,7 +20,7 @@ public class K8sServiceDto {
         private String type;
         private String internalEndpoint;
         private String externalEndpoint;
-        private String age;
+        private LocalDateTime age;
     }
 
     @Getter
@@ -30,5 +30,13 @@ public class K8sServiceDto {
         private Long projectIdx;
         private Long clusterIdx;
         private Long namespaceIdx;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ReqCreateDto{
+        private Long clusterIdx;
+        private String yaml;
     }
 }
