@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.model;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,12 +56,13 @@ public class PodDto {
     	private Long id;
         private String name;
         private String namespace;
-        private String podUid;
+        private String uid;
         private String ip;
         private String ownerUid;
         private String qosClass;
 //        private String image;
         
+        private HashMap<String, Object> annotation;
         private HashMap<String, Object> label;
         private LocalDateTime createdAt;
         
@@ -68,8 +70,7 @@ public class PodDto {
         private int restart;
         private String status;
         
-        // TODO List로 바꾸기
-        private HashMap<String, Object> condition;
+        private List<HashMap<String, Object>> condition;
     }
     
     @Getter

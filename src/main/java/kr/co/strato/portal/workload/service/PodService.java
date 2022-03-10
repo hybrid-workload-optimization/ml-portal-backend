@@ -84,8 +84,6 @@ public class PodService {
         String label = mapper.writeValueAsString(pod.getMetadata().getLabels());
         String annotations = mapper.writeValueAsString(pod.getMetadata().getAnnotations());
         String createAt = pod.getMetadata().getCreationTimestamp();
-        
-        // Owner UID
         String ownerUid = pod.getMetadata().getOwnerReferences().get(0).getUid();
 
         PodEntity podEntity = PodEntity.builder()
@@ -151,5 +149,4 @@ public class PodService {
     	return pods;
     }
     
-//    private List<Long> synPodSave()
 }

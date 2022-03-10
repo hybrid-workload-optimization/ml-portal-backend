@@ -36,8 +36,10 @@ public interface PodDtoMapper {
     @Mappings({
     	@Mapping(target = "name", source = "entity.podName"),
         @Mapping(target = "namespace", source = "entity.namespace.name"),
+        @Mapping(target = "uid", source = "entity.podUid"),
         @Mapping(target = "node", source = "entity.node.name"),
         @Mapping(target = "label", source = "entity.label", qualifiedByName = "dataToMap"),
+        @Mapping(target = "annotation", source = "entity.annotation", qualifiedByName = "dataToMap"),
         @Mapping(target = "condition", source = "entity.condition", qualifiedByName = "dataToList"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
@@ -45,12 +47,12 @@ public interface PodDtoMapper {
     
     @Named("getCpu")
     default float getCpu(float cpu){
-        return Math.round(cpu * 100) / 100;
+        return (float) (Math.round(cpu * 100) / 100.0);
     }
     
     @Named("getMemory")
     default float getMemory(float memory){
-        return Math.round(memory * 100) / 100;
+        return (float) (Math.round(memory * 100) / 100.0);
     }
 
     @Named("getDayAgo")
@@ -76,11 +78,10 @@ public interface PodDtoMapper {
     @Named("dataToList")
     default List<HashMap<String, Object>> dataToList(String data) {
         try{
-            ObjectMapper mapper = new ObjectMapper();
-            List<HashMap<String, Object>> map = mapper.readValue(data, List.class);
-
-            return map;
-        }catch (JsonProcessingException e){
+        	ObjectMapper mapper = new ObjectMapper();
+            List<HashMap<String, Object>> list = mapper.readValue(data, List.class);
+            return list;
+        }catch (Exception e){
             return new ArrayList<>();
         }
     }

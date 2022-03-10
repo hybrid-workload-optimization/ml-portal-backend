@@ -1,6 +1,5 @@
 package kr.co.strato.domain.pod.model;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -20,7 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @IdClass(PodPersistentVolumeClaimPK.class)
-@Table(name = "pod")
+@Table(name = "pod_persistent_volume_claim")
 public class PodPersistentVolumeClaimEntity {
     
 	@Id
@@ -30,6 +29,5 @@ public class PodPersistentVolumeClaimEntity {
 	@Id
     @Column(name = "persistent_volume_claim_idx")
     private Long persistentVolumeClaimIdx;
-
 
 }
