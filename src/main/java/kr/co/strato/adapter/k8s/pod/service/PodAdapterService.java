@@ -128,7 +128,7 @@ public class PodAdapterService {
         }
     }
 
-    public String getYaml(Integer clusterId, String namespaceName, String podName){
+    public String getYaml(Long clusterId, String namespaceName, String podName){
         try{
             String yaml = inNamespaceProxy.getResourceYaml(ResourceType.pod.get(), clusterId, namespaceName, podName);
 
