@@ -10,7 +10,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.strato.adapter.k8s.kubespray.model.KubesprayDto;
 import kr.co.strato.adapter.k8s.kubespray.service.KubesprayAdapterService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
@@ -75,6 +77,7 @@ public class ToolsService {
 	 * @param GeneralDto dto
 	 * @return Long id
 	 */
+	@Transactional
 	public Long patchTools(ToolsDto.ReqModifyDto dto) {
 		System.out.println("####dto :: " + dto.toString());
 		
@@ -104,15 +107,19 @@ public class ToolsService {
 				l = settingDomainService.saveSetting(entity);
 			}
 			
-			modifyToolsAdvanced(dto.getSetting());
+			modifyToolsAdvanced(dto.getValue(), dto.getSetting());
 		}
 		
 		return l;
 	}
 	
-	public void modifyToolsAdvanced(HashMap<String, String> advancedData) {
+	public boolean modifyToolsAdvanced(String version, HashMap<String, String> advancedData) {
 		System.out.println("####advancedData :: " + advancedData.toString());
+		KubesprayDto kubesprayDto = new KubesprayDto(version, advancedData);
 		
+		boolean flag = kubesprayAdapterService.patchSetting(kubesprayDto);
+		
+		return flag;
 	}
 
 	public List<HashMap<String, Object>> getToolsAdvanced(String version) {

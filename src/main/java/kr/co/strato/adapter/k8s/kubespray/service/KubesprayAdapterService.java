@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.adapter.k8s.kubespray.model.KubesprayDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -27,5 +28,13 @@ public class KubesprayAdapterService {
 		log.debug("[KubesprayAdapterService.getSetting] end..");
 		
 		return setting;
+	}
+	
+	public boolean patchSetting(KubesprayDto kubesprayDto) {
+		log.debug("[KubesprayAdapterService.patchSetting] start..");
+		boolean flag = client.patchKubespraySetting(kubesprayDto);
+		log.debug("[KubesprayAdapterService.patchSetting] end..");
+		
+		return flag;
 	}
 }
