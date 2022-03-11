@@ -157,7 +157,7 @@ public class PortalProjectController {
     }
     
     /**
-     * Project 수정
+     * Project 상세 정보 수정
      * @param 
      * @return
      */
@@ -166,6 +166,34 @@ public class PortalProjectController {
     public ResponseWrapper<Boolean> updateProject(@RequestBody ProjectRequestDto param) {
         
     	Boolean response = portalProjectService.updateProject(param);
+        
+        return new ResponseWrapper<Boolean>(response);
+    }
+    
+    /**
+     * Project Cluster 수정
+     * @param 
+     * @return
+     */
+    @PatchMapping("/api/v1/project/cluster")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseWrapper<Boolean> updateProjectCluster(@RequestBody ProjectRequestDto param) {
+        
+    	Boolean response = portalProjectService.updateProjectCluster(param);
+        
+        return new ResponseWrapper<Boolean>(response);
+    }
+    
+    /**
+     * Project User 수정
+     * @param 
+     * @return
+     */
+    @PatchMapping("/api/v1/project/user")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseWrapper<Boolean> updateProjectUser(@RequestBody ProjectRequestDto param) {
+        
+    	Boolean response = portalProjectService.updateProjectUser(param);
         
         return new ResponseWrapper<Boolean>(response);
     }

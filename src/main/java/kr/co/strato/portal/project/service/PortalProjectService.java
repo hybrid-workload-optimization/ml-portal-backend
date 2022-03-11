@@ -219,7 +219,7 @@ public class PortalProjectService {
     }
     
     /**
-     * Project 수정
+     * Project 상세 정보 수정
      * @param
      * @return
      */
@@ -253,6 +253,7 @@ public class PortalProjectService {
             ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
             projectDomainService.updateProject(projectEntity);
         	
+/*            
             //Project Cluster 삭제
             projectClusterDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
             
@@ -268,6 +269,93 @@ public class PortalProjectService {
                 projectClusterDomainService.createProjectCluster(projectClusterEntity);
         	}
             
+            //Project User 삭제
+            projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
+            
+            //Project User 등록
+            List<ProjectUserDto> userList = param.getUserList();
+        	for(ProjectUserDto user : userList) {
+        		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
+        		projectUserBuiler.userId(user.getUserId());
+        		projectUserBuiler.projectIdx(param.getProjectIdx());
+        		projectUserBuiler.createUserId(userId);
+        		projectUserBuiler.createUserName(userName);
+        		projectUserBuiler.createdAt(now);
+        		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+        		
+        		//ProjectUserDTO -> ProjectUserEntity
+                ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+                projectUserDomainService.createProjectUser(projectUserEntity);
+        	}
+*/        	
+        	
+        	result = true;
+    	} catch(Exception e) {
+    		throw new UpdateProjectFailException();
+    	}
+    	
+    	return result;
+    }
+    
+    /**
+     * Project Cluster 수정
+     * @param
+     * @return
+     */
+    public Boolean updateProjectCluster(ProjectRequestDto param) throws NotFoundProjectException, UpdateProjectFailException {
+    	
+    	boolean result = false;
+    	
+System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% " + param.getProjectIdx());  	
+    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	if(projectInfo == null) {
+    		throw new NotFoundProjectException();
+    	}
+    	
+    	try {
+            //Project Cluster 삭제
+            projectClusterDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
+            
+            //Project Cluster 등록
+    		List<ProjectClusterDto> clusterList = param.getClusterList();
+        	for(ProjectClusterDto cluster : clusterList) {
+        		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
+        		projectClusterBuiler.projectIdx(param.getProjectIdx());
+System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@========================= " + cluster.getClusterIdx());       		
+        		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
+        		
+        		//ProjectClusterDTO -> ProjectClusterEntity
+                ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
+                projectClusterDomainService.createProjectCluster(projectClusterEntity);
+        	}
+        	
+        	result = true;
+    	} catch(Exception e) {
+    		throw new UpdateProjectFailException();
+    	}
+    	
+    	return result;
+    }
+    
+    /**
+     * Project User 수정
+     * @param
+     * @return
+     */
+    public Boolean updateProjectUser(ProjectRequestDto param) throws NotFoundProjectException, UpdateProjectFailException {
+    	
+    	String userId = param.getLoginId();
+    	String userName = param.getLoginName();
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	
+    	boolean result = false;
+    	
+    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	if(projectInfo == null) {
+    		throw new NotFoundProjectException();
+    	}
+    	
+    	try {
             //Project User 삭제
             projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
             
