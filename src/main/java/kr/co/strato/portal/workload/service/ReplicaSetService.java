@@ -132,7 +132,7 @@ public class ReplicaSetService {
 		ClusterEntity cluster = replicaSet.getNamespace().getClusterIdx();
 		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), replicaSetDto.getYaml());
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
@@ -196,6 +196,9 @@ public class ReplicaSetService {
         String annotations	= mapper.writeValueAsString(r.getMetadata().getAnnotations());
         String createAt		= r.getMetadata().getCreationTimestamp();
         
+        log.debug("toReplicaSetEntity namespace = {}", namespace);
+        log.debug("toReplicaSetEntity clusterEntity = {}", clusterEntity.toString());
+        
         // find namespaceIdx
         List<NamespaceEntity> namespaceList = namespaceDomainService.findByNameAndClusterIdx(namespace, clusterEntity);
         if (CollectionUtils.isEmpty(namespaceList)) {
@@ -229,7 +232,9 @@ public class ReplicaSetService {
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
         String replicaSetName	= replicaSetEntity.getReplicaSetName();
         
-		return replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
+		String yaml = replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
+		
+		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 
 }
