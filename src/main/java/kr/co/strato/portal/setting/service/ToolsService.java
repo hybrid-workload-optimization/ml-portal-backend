@@ -64,11 +64,18 @@ public class ToolsService {
 	 * @return GeneralDto dto
 	 */
 	public Long postTools(ToolsDto.ReqRegistDto dto) {
+		dto.setKey(dto.getKey().toUpperCase()); //사전 약속으로 대문자 세팅
+		
 		// DTO TO ENTITY
 		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntityByReqRegistDto(dto);
 		param.setUpdatedAt(new Date());
 		
 		Long l = settingDomainService.saveSetting(param);
+		
+		if ( StringUtils.equals("KUBESPRAY", dto.getKey()) && ObjectUtils.isNotEmpty(dto.getSetting()) ) {
+			modifyToolsAdvanced(dto.getValue(), dto.getSetting());
+		}
+		
 		return l;
 	}
 	
@@ -79,8 +86,6 @@ public class ToolsService {
 	 */
 	@Transactional
 	public Long patchTools(ToolsDto.ReqModifyDto dto) {
-		System.out.println("####dto :: " + dto.toString());
-		
 		// DTO TO ENTITY
 		dto.setKey(dto.getKey().toUpperCase()); //사전 약속으로 대문자 세팅
 		SettingEntity param = ToolsDtoMapper.INSTANCE.toEntityByReqModifyDto(dto);
@@ -107,15 +112,19 @@ public class ToolsService {
 				l = settingDomainService.saveSetting(entity);
 			}
 			
-			modifyToolsAdvanced(dto.getValue(), dto.getSetting());
+			if ( ObjectUtils.isNotEmpty(dto.getSetting()) ) {
+				modifyToolsAdvanced(entity.getSettingValue(), dto.getSetting());
+			}
 		}
 		
 		return l;
 	}
 	
 	public boolean modifyToolsAdvanced(String version, HashMap<String, String> advancedData) {
-		System.out.println("####advancedData :: " + advancedData.toString());
-		KubesprayDto kubesprayDto = new KubesprayDto(version, advancedData);
+		KubesprayDto kubesprayDto = KubesprayDto.builder()
+				.version(version)
+				.data(advancedData)
+				.build();
 		
 		boolean flag = kubesprayAdapterService.patchSetting(kubesprayDto);
 		

@@ -56,12 +56,11 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
 	public List<NamespaceEntity> findByNameAndClusterIdx(String name, ClusterEntity clusterEntity) {
 		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
         QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
-
-
+        
+        // required condition
         BooleanBuilder builder = new BooleanBuilder();
-        if(clusterEntity.getClusterId() != null && clusterEntity.getClusterId() > 0L){
-            builder.and(qClusterEntity.clusterIdx.eq(clusterEntity.getClusterId()));
-        }
+        builder.and(qClusterEntity.clusterIdx.eq(clusterEntity.getClusterId()));
+        builder.and(qNamespaceEntity.name.eq(name));
 
         QueryResults<NamespaceEntity> results =
                 jpaQueryFactory
