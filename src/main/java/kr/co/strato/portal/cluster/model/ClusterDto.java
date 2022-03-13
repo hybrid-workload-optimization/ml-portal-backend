@@ -1,6 +1,6 @@
 package kr.co.strato.portal.cluster.model;
 
-import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import javax.validation.constraints.NotNull;
 
@@ -25,5 +25,11 @@ public class ClusterDto {
 	private String description;
 	
 	private Long clusterId;
+	
+	private String providerVersion;
+	
+	private String status;
+	
+	//private HashMap<String, Object> problem;
 	
 }
