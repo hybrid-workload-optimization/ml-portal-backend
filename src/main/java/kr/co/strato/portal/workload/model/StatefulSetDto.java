@@ -3,6 +3,8 @@ package kr.co.strato.portal.workload.model;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
+import kr.co.strato.global.validation.annotation.K8sKind;
+import kr.co.strato.global.validation.model.K8sKindType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +21,8 @@ public class StatefulSetDto {
     public static class ReqCreateDto{
         //TODO validation체크
         private Long clusterIdx;
+
+        @K8sKind(value = K8sKindType.StatefulSet)
         private String yaml;
     }
 
