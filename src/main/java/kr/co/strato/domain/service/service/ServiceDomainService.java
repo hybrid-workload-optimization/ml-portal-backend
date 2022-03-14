@@ -3,7 +3,6 @@ package kr.co.strato.domain.service.service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
-import kr.co.strato.domain.service.model.QServiceEntity;
 import kr.co.strato.domain.service.model.ServiceEndpointEntity;
 import kr.co.strato.domain.service.model.ServiceEntity;
 import kr.co.strato.domain.service.repository.ServiceEndPointRepository;
