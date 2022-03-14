@@ -54,9 +54,12 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Page<ClusterDto> getClusterList(Pageable pageable) throws Exception {
+	public Page<ClusterDto.List> getClusterList(Pageable pageable) throws Exception {
 		Page<ClusterEntity> clusterPage = clusterDomainService.getList(pageable);
-		List<ClusterDto> clusterList = clusterPage.getContent().stream().map(c -> ClusterDtoMapper.INSTANCE.toDto(c)).collect(Collectors.toList());
+		
+		List<ClusterDto.List> clusterList = clusterPage.getContent().stream()
+				.map(c -> ClusterDtoMapper.INSTANCE.toList(c))
+				.collect(Collectors.toList());
 		
 		return new PageImpl<>(clusterList, pageable, clusterPage.getTotalElements());
 	}
@@ -151,10 +154,24 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public ClusterDto getCluster(Long clusterIdx) throws Exception {
+	public ClusterDto.Detail getCluster(Long clusterIdx) throws Exception {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
-		return ClusterDtoMapper.INSTANCE.toDto(clusterEntity);
+		ClusterDto.Detail detail = ClusterDtoMapper.INSTANCE.toDetail(clusterEntity);
+		// TODO : 추가 정보 설정 필요
+		/*
+		// Master 가동률
+		float availablePercentMaster;
+		// Worker 가동률
+		float availablePercentWorker;
+		// Master 수량
+		int masterCount;
+		// Worker 수량
+		int workerCount;
+		// move to monitoring service
+		String monitoringServiceUrl;
+		*/
+		return detail;
 	}
 
 	/**

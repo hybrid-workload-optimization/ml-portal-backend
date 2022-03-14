@@ -64,7 +64,7 @@ public class ClusterNodeDto {
 		
 		private HashMap<String, Object> annotation;
 		private HashMap<String, Object> label;
-		private HashMap<String, Object> condition;
+		private List<HashMap<String, Object>> condition;
 		private List<String>  role;
     }
 	

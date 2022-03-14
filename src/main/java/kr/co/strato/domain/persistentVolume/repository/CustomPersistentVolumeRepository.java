@@ -11,4 +11,6 @@ public interface CustomPersistentVolumeRepository {
     public Page<PersistentVolumeEntity> getPersistentVolumeList(Pageable pageable, Long clusterId,String name);
 	
     List<PersistentVolumeEntity> findByStorageClassIdx(Long storageClassIdx);
+    
+    PersistentVolumeEntity findPersistentVolumeDetail(Long id);
 }

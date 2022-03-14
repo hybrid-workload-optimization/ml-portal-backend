@@ -40,8 +40,8 @@ public class ClusterController {
 	WorkHistoryService workHistoryService;
 	
 	@GetMapping("/api/v1/clusters")
-    public ResponseWrapper<Page<ClusterDto>> getCluterList(PageRequest pageRequest){
-        Page<ClusterDto> results = null;
+    public ResponseWrapper<Page<ClusterDto.List>> getCluterList(PageRequest pageRequest){
+        Page<ClusterDto.List> results = null;
         
         String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();
@@ -78,8 +78,8 @@ public class ClusterController {
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<ClusterDto> getCluster(@PathVariable(required = true) Long clusterIdx){
-		ClusterDto result = null;
+    public ResponseWrapper<ClusterDto.Detail> getCluster(@PathVariable(required = true) Long clusterIdx){
+		ClusterDto.Detail result = null;
         
 		String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();

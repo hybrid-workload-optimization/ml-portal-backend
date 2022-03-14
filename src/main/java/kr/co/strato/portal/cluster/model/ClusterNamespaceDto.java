@@ -35,7 +35,6 @@ public class ClusterNamespaceDto {
     	private Long clusterIdx;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
-    	private HashMap<String, Object> condition;
 	}
 
 	
@@ -52,7 +51,6 @@ public class ClusterNamespaceDto {
     	private Long clusterIdx;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
-    	private HashMap<String, Object> condition;
     }
 	
 	@Getter
