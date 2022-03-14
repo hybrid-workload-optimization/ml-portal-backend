@@ -30,12 +30,8 @@ public class PersistentVolumeDomainService {
 	}
 	
 	public PersistentVolumeEntity getDetail(Long id) {
-		Optional<PersistentVolumeEntity> persistentVolume = persistentVolumeRepository.findById(id);
-		if (persistentVolume.isPresent()) {
-			return persistentVolume.get();
-		} else {
-			throw new NotFoundResourceException(id.toString());
-		}
+		PersistentVolumeEntity persistentVolume = persistentVolumeRepository.findPersistentVolumeDetail(id);
+		return persistentVolume;
 	}
 
 	public Long register(PersistentVolumeEntity persistentVolumeEntity) {
