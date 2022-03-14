@@ -1,8 +1,6 @@
 package kr.co.strato.domain.statefulset.service;
 
-import javassist.NotFoundException;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
@@ -32,22 +30,21 @@ public class StatefulSetDomainService {
         return statefulSet.getId();
     }
 
-    public Long update(StatefulSetEntity statefulSet, Long statefulSetId, ClusterEntity cluster, String namespaceName) {
-        statefulSet.setId(statefulSetId);
-        statefulSet.setNamespace(getNamespace(cluster, namespaceName));
-        statefulSetRepository.save(statefulSet);
-        return statefulSet.getId();
+    /**
+     * 스테이트풀셋 전체 업데이트(id, namespace 제외)
+     * @param statefulSetId 업데이트 될 엔티티의 아이디
+     * @param updateEntity 업데이트 할 새로운 데이터 엔티티
+     * @return
+     */
+    public Long update(Long statefulSetId, StatefulSetEntity updateEntity) {
+        StatefulSetEntity oldEntity = get(statefulSetId);
+        changeToNewData(oldEntity, updateEntity);
+        statefulSetRepository.save(oldEntity);
+        return oldEntity.getId();
     }
 
-    public StatefulSetEntity get(Long resourceId){
-        StatefulSetEntity statefulSet = statefulSetRepository.findById(resourceId)
-                .orElseThrow(() -> new NotFoundResourceException("statefulSet id:"+resourceId));
-
-        return statefulSet;
-    }
-
-    public boolean delete(Long resourceId){
-        Optional<StatefulSetEntity> opt = statefulSetRepository.findById(resourceId);
+    public boolean delete(Long statefulSetId){
+        Optional<StatefulSetEntity> opt = statefulSetRepository.findById(statefulSetId);
         if(opt.isPresent()){
             StatefulSetEntity entity = opt.get();
             statefulSetRepository.delete(entity);
@@ -59,13 +56,19 @@ public class StatefulSetDomainService {
         return statefulSetRepository.getStatefulSetList(pageable, projectId, clusterId, namespaceId);
     }
 
-    public ClusterEntity getCluster(Long statefulSetId){
+    public ClusterEntity getClusterEntity(Long statefulSetId){
         StatefulSetEntity entity = get(statefulSetId);
-        ClusterEntity cluster =  entity.getNamespace().getClusterIdx();
 
-        return cluster;
+        return entity.getNamespace().getClusterIdx();
     }
 
+
+    public StatefulSetEntity get(Long statefulSetId){
+        StatefulSetEntity statefulSetEntity = statefulSetRepository.findById(statefulSetId)
+                .orElseThrow(() -> new NotFoundResourceException("statefulSet id:"+statefulSetId));
+
+        return statefulSetEntity;
+    }
 
     private NamespaceEntity getNamespace(ClusterEntity cluster, String namespaceName){
         List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
@@ -74,5 +77,13 @@ public class StatefulSetDomainService {
             return namespaces.get(0);
         }
         return null;
+    }
+
+    private void changeToNewData(StatefulSetEntity oldEntity, StatefulSetEntity newEntity){
+        oldEntity.setStatefulSetUid(newEntity.getStatefulSetUid());
+        oldEntity.setCreatedAt(newEntity.getCreatedAt());
+        oldEntity.setImage(newEntity.getImage());
+        oldEntity.setAnnotation(newEntity.getAnnotation());
+        oldEntity.setLabel(newEntity.getLabel());
     }
 }

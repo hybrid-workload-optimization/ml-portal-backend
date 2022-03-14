@@ -27,18 +27,20 @@ public class ServiceEntity {
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    private ServiceType serviceType;
+    private ServiceType type;
 
     private String clusterIp;
 
     private String sessionAffinity;
 
+    @Lob
     private String internalEndpoint;
 
+    @Lob
     private String externalEndpoint;
 
     @Lob
-    private String seletor;
+    private String selector;
 
     @Lob
     private String annotation;

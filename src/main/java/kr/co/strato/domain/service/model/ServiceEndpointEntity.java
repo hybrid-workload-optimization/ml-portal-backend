@@ -22,7 +22,11 @@ public class ServiceEndpointEntity {
 
     private Integer port;
 
-    private String name;
+    private String protocol;
+
+    private String endpointName;
+
+    private String nodeName;
 
     private String ready;
 

@@ -32,34 +32,33 @@ public class StatefulSetDetailService {
     private StatefulSetAdapterService statefulSetAdapterService;
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteStatefulSet(Integer id){
-        StatefulSetEntity s = statefulSetDomainService.get(id.longValue());
-        Long clusterId = s.getNamespace().getClusterIdx().getClusterId();
-        String namespaceName = s.getNamespace().getName();
-        String resourceName = s.getStatefulSetName();
+    public boolean deleteStatefulSet(Long id){
+        StatefulSetEntity statefulSetEntity = statefulSetDomainService.get(id);
+        Long clusterId = statefulSetEntity.getNamespace().getClusterIdx().getClusterId();
+        String namespaceName = statefulSetEntity.getNamespace().getName();
+        String statefulSetName = statefulSetEntity.getStatefulSetName();
 
-        boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, resourceName);
+        boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, statefulSetName);
         if(isDeleted){
-            return statefulSetDomainService.delete(id.longValue());
+            return statefulSetDomainService.delete(id);
         }else{
-            throw new InternalServerException("k8s statefulSet 삭제 실패");
+            throw new InternalServerException("Fail to delete the k8s statefulSet");
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> updateStatefulSet(Long statefulSetId, StatefulSetDetailDto.ReqUpdateDto reqUpdateDto){
         String yaml = Base64Util.decode(reqUpdateDto.getYaml());
-        ClusterEntity cluster = statefulSetDomainService.getCluster(statefulSetId);
+        ClusterEntity cluster = statefulSetDomainService.getClusterEntity(statefulSetId);
         Long clusterId = cluster.getClusterId();
 
         List<StatefulSet> statefulSets = statefulSetAdapterService.update(clusterId, yaml);
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
-                String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity updateStatefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.update(updateStatefulSet, statefulSetId, cluster, namespaceName);
+                Long id = statefulSetDomainService.update(statefulSetId, updateStatefulSet);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -67,7 +66,7 @@ public class StatefulSetDetailService {
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("statefulSet update error");
+                throw new InternalServerException("Error registering the updated statefulSet in the db");
             }
         }).collect(Collectors.toList());
 
@@ -100,6 +99,7 @@ public class StatefulSetDetailService {
 
         String yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
         yaml = Base64Util.encode(yaml);
+
         return yaml;
     }
 

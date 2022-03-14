@@ -37,7 +37,32 @@ public class K8sServiceController {
     @PutMapping("api/v1/networking/services/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<Long>> updateService(@PathVariable Long id, @RequestBody K8sServiceDto.ReqUpdateDto reqUpdateDto){
+        List<Long> results = k8sServiceService.updateService(id, reqUpdateDto);
 
-        return null;
+        return new ResponseWrapper<>(results);
+    }
+
+    @DeleteMapping("api/v1/networking/services/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Boolean> deleteService(@PathVariable Long id){
+        boolean isDeleted = k8sServiceService.deleteService(id);
+
+        return new ResponseWrapper<>(isDeleted);
+    }
+
+    @GetMapping("api/v1/networking/services/{id}/yaml")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<String> getServiceYaml(@PathVariable Long id){
+        String result = k8sServiceService.getServiceYaml(id);
+
+        return new ResponseWrapper<>(result);
+    }
+
+    @GetMapping("api/v1/networking/services/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<K8sServiceDto.ResDetailDto> getService(@PathVariable Long id){
+        K8sServiceDto.ResDetailDto result = k8sServiceService.getService(id);
+
+        return new ResponseWrapper<>(result);
     }
 }

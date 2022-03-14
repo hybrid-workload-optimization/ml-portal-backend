@@ -62,7 +62,7 @@ public class StatefulSetListService {
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("statefulSet register error");
+                throw new InternalServerException("Error registering the updated statefulSet in the db");
             }
         }).collect(Collectors.toList());
 

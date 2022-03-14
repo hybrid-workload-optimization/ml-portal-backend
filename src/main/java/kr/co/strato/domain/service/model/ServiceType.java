@@ -10,7 +10,7 @@ public enum ServiceType {
     }
 
     public static ServiceType get(String type){
-        if("CLUSTERID".equals(type.toUpperCase())){
+        if("CLUSTERIP".equals(type.toUpperCase())){
             return ServiceType.ClusterIP;
         }else if("LOADBALANCER".equals(type.toUpperCase())){
             return ServiceType.LoadBalancer;

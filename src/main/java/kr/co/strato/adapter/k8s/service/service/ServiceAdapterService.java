@@ -59,6 +59,7 @@ public class ServiceAdapterService {
      * @return
      */
     public List<Service> update(Long clusterId, String yaml){
+        System.out.println("yaml~~~:"+yaml);
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
@@ -96,6 +97,7 @@ public class ServiceAdapterService {
         try{
             return inNamespaceProxy.deleteResource(ResourceType.service.get(), reqBody);
         }catch (Exception e){
+            log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - statefulSet 삭제 에러");
         }
     }
@@ -133,8 +135,11 @@ public class ServiceAdapterService {
      */
     public String getYaml(Long clusterId, String namespaceName, String serviceName){
         try{
-            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.statefulSet.get(), clusterId, namespaceName, serviceName);
-
+            String yaml = inNamespaceProxy.getResourceYaml(ResourceType.service.get(), clusterId, namespaceName, serviceName);
+            System.out.println("clusterId:"+clusterId);
+            System.out.println("namespaceName:"+namespaceName);
+            System.out.println("serviceName:"+serviceName);
+            System.out.println("yaml:"+yaml);
             return yaml;
         }catch (Exception e){
             log.error(e.getMessage(), e);

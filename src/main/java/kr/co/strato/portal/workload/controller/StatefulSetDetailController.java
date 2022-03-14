@@ -19,7 +19,7 @@ public class StatefulSetDetailController {
 
     @DeleteMapping("api/v1/statefulset-detail/statefulsets/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Boolean> deleteStatefulSet(@PathVariable Integer id){
+    public ResponseWrapper<Boolean> deleteStatefulSet(@PathVariable Long id){
         boolean isDeleted = statefulSetDetailService.deleteStatefulSet(id);
 
         return new ResponseWrapper<>(isDeleted);
