@@ -1,5 +1,6 @@
 package kr.co.strato.portal.cluster.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface ClusterNodeDtoMapper {
 	@Mapping(target = "clusterIdx", source = "cluster.clusterIdx")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
-	@Mapping(target = "condition", source = "condition", qualifiedByName = "labelToMap")
+	@Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList")
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToList")
 	public ClusterNodeDto.ResDetailDto toResDetailDto(NodeEntity node);
 
@@ -50,14 +51,22 @@ public interface ClusterNodeDtoMapper {
 			try {
 				map = mapper.readValue(role, List.class);
 			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 			return map;
 	}
 
+	  @Named("dataToList")
+	    default List<HashMap<String, Object>> dataToList(String data) {
+	        try{
+	        	ObjectMapper mapper = new ObjectMapper();
+	            List<HashMap<String, Object>> list = mapper.readValue(data, List.class);
+	            return list;
+	        }catch (Exception e){
+	            return new ArrayList<>();
+	        }
+	    }
 }
