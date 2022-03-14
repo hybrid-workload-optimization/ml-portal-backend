@@ -27,18 +27,20 @@ public class ServiceEntity {
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    private ServiceType serviceType;
+    private ServiceType type;
 
     private String clusterIp;
 
     private String sessionAffinity;
 
+    @Lob
     private String internalEndpoint;
 
+    @Lob
     private String externalEndpoint;
 
     @Lob
-    private String seletor;
+    private String selector;
 
     @Lob
     private String annotation;
@@ -50,8 +52,6 @@ public class ServiceEntity {
     @JoinColumn(name =  "namespace_idx")
     private NamespaceEntity namespace;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ingress_idx")
-    private IngressEntity ingress;
+
 
 }

@@ -43,18 +43,18 @@ public class StatefulSetListService {
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
         Long clusterIdx = reqCreateDto.getClusterIdx();
-        ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+        ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
-        List<StatefulSet> statefulSets = statefulSetAdapterService.create(clusterEntity.getClusterId(), yaml);
+        List<StatefulSet> statefulSets = statefulSetAdapterService.create(cluster.getClusterId(), yaml);
 
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity statefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.register(statefulSet, clusterEntity.getClusterId(), namespaceName);
+                Long id = statefulSetDomainService.register(statefulSet, cluster, namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {
@@ -62,7 +62,7 @@ public class StatefulSetListService {
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("statefulSet register error");
+                throw new InternalServerException("Error registering the updated statefulSet in the db");
             }
         }).collect(Collectors.toList());
 
@@ -72,9 +72,9 @@ public class StatefulSetListService {
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
         Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId());
         List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
-        Page<StatefulSetDto.ResListDto> pages = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
+        Page<StatefulSetDto.ResListDto> page = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
 
-        return pages;
+        return page;
     }
 
 
@@ -96,8 +96,6 @@ public class StatefulSetListService {
         String annotations = mapper.writeValueAsString(s.getMetadata().getAnnotations());
         String createAt = s.getMetadata().getCreationTimestamp();
 
-        System.out.println("createAT~~~");
-        System.out.println(createAt);
         StatefulSetEntity statefulSet = StatefulSetEntity.builder()
                 .statefulSetName(name)
                 .statefulSetUid(uid)
