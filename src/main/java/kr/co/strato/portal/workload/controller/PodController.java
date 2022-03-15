@@ -5,8 +5,12 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +59,14 @@ public class PodController {
     public ResponseWrapper<PodDto.ResOwnerDto> getPodOwnerInfo(@PathVariable Long podId, @RequestParam("resourceType") String resourceType) {
     	PodDto.ResOwnerDto result = podService.getPodOwnerInfo(podId, resourceType);
     	return new ResponseWrapper<>(result);
+    }
+    
+    @GetMapping("api/v1/pod//log/download")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ByteArrayResource> getPodLogDownload(@RequestParam("clusterId") Long clusterId, @RequestParam("namespace") String namespace, @RequestParam("name") String name) {
+    	ResponseEntity<ByteArrayResource> result = podService.getLogDownloadFile(clusterId, namespace, name);	
+    	return result;
+
     }
 
     /**

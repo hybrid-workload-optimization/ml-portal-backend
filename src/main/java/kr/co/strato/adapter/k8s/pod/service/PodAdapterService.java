@@ -3,6 +3,8 @@ package kr.co.strato.adapter.k8s.pod.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +19,7 @@ import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
+import kr.co.strato.adapter.k8s.common.proxy.PodProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +32,9 @@ public class PodAdapterService {
 
     @Autowired
     private InNamespaceProxy inNamespaceProxy;
+    
+    @Autowired
+    private PodProxy podProxy;
 
     /**
      * k8s Pod 생성
@@ -154,6 +160,16 @@ public class PodAdapterService {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - pod 조회 에러");
+        }
+    }
+    
+    public ResponseEntity<ByteArrayResource> getLogDownloadFile(Long clusterId, String namespaceName, String podName) {
+    	try {
+    		ResponseEntity<ByteArrayResource> entity = podProxy.getResourceLogFile(clusterId, namespaceName, podName);
+    		return entity;
+    	}catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - pod log download 에러");
         }
     }
 }
