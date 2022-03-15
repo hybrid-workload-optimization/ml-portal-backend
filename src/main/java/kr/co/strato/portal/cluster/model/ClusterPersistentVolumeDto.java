@@ -38,6 +38,7 @@ public class ClusterPersistentVolumeDto {
 		private String reclaim;
 		private String reclaimPolicy;
 		private Long storageClassIdx;
+		private String storageClassName;
 		private String type;
 		private String path;
 		private String resourceName;

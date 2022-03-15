@@ -21,6 +21,7 @@ public interface ClusterPersistentVolumeDtoMapper {
 	
 	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
 	@Mapping(target = "storageClassIdx" , source = "storageClass.id")
+	@Mapping(target = "storageClassName" , source = "storageClass.name")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterPersistentVolumeDto.ResListDto toResListDto(PersistentVolumeEntity persistentVolume);
