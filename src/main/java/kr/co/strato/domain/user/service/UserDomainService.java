@@ -30,14 +30,11 @@ public class UserDomainService {
 	 */
 	public void saveUser(UserEntity entity) {
 
-		//기본권한 매핑 
-		// 김재연 임시 주석
-//		if(entity.getUserRoleIdx() == null || entity.getUserRoleIdx() == null) {
-//			entity.setUserRoleIdx(userRoleRepository.findTop1BByUserRoleName("PROJECT MEMBER").getId());
-//		}
+		String roleCode = entity.getUserRole().getUserRoleCode();
+		//권한 매핑 
+		entity.getUserRole().setId(userRoleRepository.findTop1BByUserRoleCode(roleCode).getId());
 		//DB 저장
 		userRepository.save(entity);
-		
 	}
 	
 	
@@ -72,7 +69,7 @@ public class UserDomainService {
 		System.out.println("========= UserDomainSErvice. getAllUSerList");
 		System.out.println(pageable.toString());
 		System.out.println(pageable.getSort());
-		Page<UserEntity> list =  userRepository.findAll(pageable);
+		Page<UserEntity> list =  userRepository.findByUseYn("Y", pageable);
 		if(list != null) System.out.println(list.toString());
 		return list;
 		
@@ -95,7 +92,9 @@ public class UserDomainService {
 	 * @return
 	 */
 	public UserEntity getUserInfoByUserId(String userId) {
-		return userRepository.findByUserId(userId);
+//		return userRepository.findByUserId(userId);
+		// 사용중인 user만 검색하기 위해 useYn  추가
+		return userRepository.findByUserIdAndUseYn(userId, "Y");
 	}
 	
 	/**

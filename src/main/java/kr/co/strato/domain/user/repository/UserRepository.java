@@ -16,5 +16,9 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 	
 	UserEntity findByUserId(String userId);
 	
+	UserEntity findByUserIdAndUseYn(String useId, String useYn);
+	
 	public List<UserEntity> findByUseYn(String useYn);
+	
+	Page<UserEntity> findByUseYn(String useYn, Pageable pageable);
 }

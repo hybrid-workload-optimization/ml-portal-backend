@@ -42,6 +42,9 @@ public class UserEntity {
 	@Column(name = "contact")
 	private String contact;
 	
+	@Column(name ="updated_at")
+	private String updatedAt;
+	
 	@Column(name = "update_user_id")
 	private String updateUserId;
 	

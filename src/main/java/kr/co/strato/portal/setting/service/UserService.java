@@ -33,12 +33,12 @@ public class UserService {
 		
 		
 		//keycloak 연동
-		try {
-			System.out.println("keycloak 연동 >> 등록");
-			keyCloakApiUtil.createSsoUser(param);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}		
+//		try {
+//			System.out.println("keycloak 연동 >> 등록");
+//			keyCloakApiUtil.createSsoUser(param);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		userDomainService.saveUser(entity);
 		
@@ -97,7 +97,7 @@ public class UserService {
 	//상세
 	public UserDto getUserInfo(String userId) {
 		UserEntity userEntity = userDomainService.getUserInfoByUserId(userId);
-		
+		System.out.println(userEntity.toString());
 		UserDto userDto = UserDtoMapper.INSTANCE.toDto(userEntity);
 		
 		return userDto;
@@ -114,7 +114,7 @@ public class UserService {
 			//유저 정보 가져오기
 			keyCloakApiUtil.getUserInfoByUserId("test05");
 
-			UserDto user = new UserDto("test05", null, null, null, null);
+			UserDto user = new UserDto("test05", null, null, null, null, null);
 			// 유저 ROLE 추가하기
 			KeycloakRole role = new KeycloakRole();
 			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");

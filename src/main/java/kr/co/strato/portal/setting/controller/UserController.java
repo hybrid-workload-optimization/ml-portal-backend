@@ -89,6 +89,9 @@ public class UserController {
 		
 		System.out.println("=====전체 목록=====");
 		if(list != null) System.out.println(list.toString());
+		for (UserDto userDto : list) {
+			System.out.println(userDto.toString());
+		}
 		
 		return new ResponseWrapper<>(list);
 	}

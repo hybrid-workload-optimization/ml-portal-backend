@@ -7,6 +7,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,44 +15,43 @@ import lombok.ToString;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class UserDto {
 	
 	private String userId;
-	
 	private String password;
-	
 	private String userName;
-	
 	private String email;
-	
 	private String organization;
-	
 	private String contact;
-	
+	private String updatedAt;
 	private String updateUserId;
-	
 	private String updateUserName;
-	
 	private String createUserId;
-	
 	private String createUserName;
-	
 	private String createdAt;
-
-	private Long userRoleIdx;
-	
 	private String useYn;
+	private UserRole userRole;
 	
-	public UserDto() {
-		
+	@Getter
+	@Setter
+	@ToString
+	public static class UserRole {
+		private Long userRoleIdx;
+		private String userRoleCode;
+		private String userRoleName;
+		private String description;
+		private String groupYn;
+		private Long parentUserRoleIdx;
 	}
 	
-	public UserDto(String userId, String userName, String email, String organization, String useYn) {
+	public UserDto(String userId, String userName, String email, String organization, String useYn, UserRole userRole) {
 		this.userId = userId;
 		this.userName = userName;
 		this.email = email;
 		this.organization = organization;
 		this.useYn = userId;
+		this.userRole = userRole;
 	}
 }
