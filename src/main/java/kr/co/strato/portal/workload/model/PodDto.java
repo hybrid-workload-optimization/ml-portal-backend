@@ -34,7 +34,7 @@ public class PodDto {
         private int restart;
         private float cpu;
         private float memory;
-        private String dayAgo;
+        private LocalDateTime createdAt;
         private HashMap<String, Object> label;
     }
 
@@ -58,7 +58,6 @@ public class PodDto {
         private String namespace;
         private String uid;
         private String ip;
-        private String ownerUid;
         private String qosClass;
 //        private String image;
         
@@ -69,8 +68,20 @@ public class PodDto {
         private String node;
         private int restart;
         private String status;
+        private String kind;
         
         private List<HashMap<String, Object>> condition;
+    }
+    
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ResOwnerDto{
+    	private String type;
+    	private String name;
+    	private String image;
+    	private long podCnt;
+    	private LocalDateTime createdAt;
     }
     
     @Getter

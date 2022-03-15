@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,6 +48,13 @@ public class PodController {
         PodDto.ResDetailDto result = podService.getPodDetail(id);
 
         return new ResponseWrapper<>(result);
+    }
+    
+    @GetMapping("api/v1/pod/ownerInfo/{podId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<PodDto.ResOwnerDto> getPodOwnerInfo(@PathVariable Long podId, @RequestParam("resourceType") String resourceType) {
+    	PodDto.ResOwnerDto result = podService.getPodOwnerInfo(podId, resourceType);
+    	return new ResponseWrapper<>(result);
     }
 
     /**

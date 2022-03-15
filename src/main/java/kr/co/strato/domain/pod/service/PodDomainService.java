@@ -1,6 +1,8 @@
 package kr.co.strato.domain.pod.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,9 @@ import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.node.repository.NodeRepository;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.repository.PodRepository;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.portal.workload.model.PodDto;
 
 @Service
 public class PodDomainService {
@@ -39,6 +43,10 @@ public class PodDomainService {
     
     public Page<PodEntity> getPods(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
         return podRepository.getPodList(pageable, projectId, clusterId, namespaceId, nodeId);
+    }
+    
+    public StatefulSetEntity getPodStatefulSet(Long podId) {
+    	return podRepository.getPodStatefulSet(podId);
     }
     
     /**

@@ -2,7 +2,9 @@ package kr.co.strato.domain.statefulset.model;
 
 
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
+
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.pod.model.PodStatefulSetEntity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -10,6 +12,7 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -43,4 +46,9 @@ public class StatefulSetEntity {
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;
 
+    @OneToMany(mappedBy = "statefulSet")
+    private List<PodStatefulSetEntity> podStatefulSets;
+    
+    @Transient
+    private Long podCnt;
 }

@@ -1,8 +1,11 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.hibernate.engine.jdbc.connections.spi.DataSourceBasedMultiTenantConnectionProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,9 +17,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Pod;
+import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
@@ -110,6 +115,17 @@ public class PodService {
 //    	
 //    	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity, k8sPod);
     	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity);
+    	return dto;
+    }
+    
+    public PodDto.ResOwnerDto getPodOwnerInfo(Long podId, String resourceType) {
+    	PodDto.ResOwnerDto dto = new PodDto.ResOwnerDto();
+    	if (resourceType.equals(ResourceType.statefulSet.get())) {
+    		StatefulSetEntity entity = podDomainService.getPodStatefulSet(podId);
+    		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, resourceType);
+    	}
+    	
+    	
     	return dto;
     }
     

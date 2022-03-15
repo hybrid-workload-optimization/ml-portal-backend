@@ -1,5 +1,7 @@
 package kr.co.strato.domain.pod.repository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -7,13 +9,23 @@ import org.springframework.data.domain.Pageable;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.node.model.QNodeEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.QPodEntity;
+import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
+import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.portal.workload.model.PodDto;
+import kr.co.strato.portal.workload.model.PodDtoMapper;
 
 public class CustomPodRepositoryImpl implements CustomPodRepository {
 	private final JPAQueryFactory jpaQueryFactory;
@@ -62,4 +74,36 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 
         return new PageImpl<>(content, pageable, total);
     }
+	
+	@Override
+	public StatefulSetEntity getPodStatefulSet(Long podId) {
+		QPodStatefulSetEntity qMappingEntity = QPodStatefulSetEntity.podStatefulSetEntity;
+		QStatefulSetEntity qStatefulSetEntity = QStatefulSetEntity.statefulSetEntity;
+		QPodEntity qPodEntity = QPodEntity.podEntity;
+
+		StatefulSetEntity result = 
+				jpaQueryFactory
+						.select(
+								Projections.fields(
+										StatefulSetEntity.class,
+										qStatefulSetEntity.statefulSetName,
+										qStatefulSetEntity.image,
+										qStatefulSetEntity.createdAt,
+										ExpressionUtils.as(
+												JPAExpressions
+													.select(qMappingEntity.pod.id.count())
+													.from(qStatefulSetEntity)
+													.leftJoin(qStatefulSetEntity.podStatefulSets, qMappingEntity),
+													"podCnt"
+										))
+								
+						)
+						.from(qStatefulSetEntity)
+						.leftJoin(qStatefulSetEntity.podStatefulSets, qMappingEntity)
+						.leftJoin(qMappingEntity.pod, qPodEntity)
+						.where(qPodEntity.id.eq(podId))
+						.fetchOne();
+		
+		return result;
+	}
 }

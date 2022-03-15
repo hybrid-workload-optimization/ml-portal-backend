@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PodDtoMapper {
@@ -26,7 +27,6 @@ public interface PodDtoMapper {
     	@Mapping(target = "name", source = "podName"),
         @Mapping(target = "namespace", source = "namespace.name"),
         @Mapping(target = "node", source = "node.name"),
-        @Mapping(target = "dayAgo", source = "createdAt", qualifiedByName = "getDayAgo"),
         @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
         @Mapping(target = "cpu", source = "cpu", qualifiedByName = "getCpu"),
         @Mapping(target = "memory", source = "memory", qualifiedByName = "getMemory"),
@@ -45,6 +45,12 @@ public interface PodDtoMapper {
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
     // TODO Detail 정보에 k8s 정보 추가
     
+    @Mappings({
+    	@Mapping(target = "name", source = "entity.statefulSetName"),
+    	@Mapping(target = "type", source = "resourceType")
+    })
+    public PodDto.ResOwnerDto toResStatefulSetOwnerInfoDto(StatefulSetEntity entity, String resourceType);
+    
     @Named("getCpu")
     default float getCpu(float cpu){
         return (float) (Math.round(cpu * 100) / 100.0);
@@ -53,14 +59,6 @@ public interface PodDtoMapper {
     @Named("getMemory")
     default float getMemory(float memory){
         return (float) (Math.round(memory * 100) / 100.0);
-    }
-
-    @Named("getDayAgo")
-    default String getDayAgo(LocalDateTime createdAt){
-        LocalDateTime now = LocalDateTime.now();
-        Period period = Period.between(createdAt.toLocalDate(), now.toLocalDate());
-
-        return String.valueOf(period.getDays());
     }
 
     @Named("dataToMap")
