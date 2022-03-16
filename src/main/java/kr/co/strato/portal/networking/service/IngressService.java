@@ -73,6 +73,8 @@ public class IngressService {
 
 				// save
 				Long id = ingressDomainService.register(ingress);
+				//ingress rule save
+				ingressRuleRegister(i,id);
 				ids.add(id);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
@@ -179,8 +181,12 @@ public class IngressService {
 			
 			List<NamespaceEntity> namespaceEntity= ingressDomainService.findByClusterIdx(clusterId);
 			if(ingressClass != null){
-				Ingress ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
-				ingressControllerEntity = ingressDomainService.findByName(ingressClassK8s.getMetadata().getName());
+				
+				List<Ingress> ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
+				name = ingressClassK8s.get(0).getMetadata().getName();
+				
+				ingressControllerEntity = ingressDomainService.findIngressControllerByName(ingressClassK8s.get(0).getMetadata().getName());
+				
 			}else {
 				ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
 			}
@@ -206,34 +212,38 @@ public class IngressService {
 				String host = rule.getHost();
 				HTTPIngressRuleValue ruleValue = rule.getHttp();
 
-				if (host == null) {
-					
+				if (host != null) {
 
 				} else {
-					List<HTTPIngressPath> rulePaths = ruleValue.getPaths();
-					for (HTTPIngressPath rulePath : rulePaths) {
-						String path = rulePath.getPath();
-						String pathType = rulePath.getPathType();
-						String protocol = "http";
+					if(ruleValue!=null) {
+						List<HTTPIngressPath> rulePaths = ruleValue.getPaths();
+						for (HTTPIngressPath rulePath : rulePaths) {
+							String path = rulePath.getPath();
+							String pathType = rulePath.getPathType();
+							String protocol = "http";
 
-						IngressBackend backend = rulePath.getBackend();
-						IngressServiceBackend serviceBackend = backend.getService();
-						String serviceName = serviceBackend.getName();
-						ServiceBackendPort servicebackendPort = serviceBackend.getPort();
+							IngressBackend backend = rulePath.getBackend();
+							IngressServiceBackend serviceBackend = backend.getService();
+							String serviceName = serviceBackend.getName();
+							ServiceBackendPort servicebackendPort = serviceBackend.getPort();
 
-						Integer portNumber = servicebackendPort.getNumber();
+							Integer portNumber = servicebackendPort.getNumber();
+							
+							IngressEntity ingressEntity = new IngressEntity();
+							ingressEntity.setId(ingressId);
+							
+							IngressRuleEntity ingressRuleEntity = IngressRuleEntity.builder().ingress(ingressEntity).host(host).protocol(protocol)
+									.path(path).pathType(pathType).service(serviceName).port(portNumber).build();
 
-						IngressRuleEntity ingressRuleEntity = IngressRuleEntity.builder().host(host).protocol(protocol)
-								.path(path).pathType(pathType).service(serviceName).port(portNumber).build();
+							ingressRuls.add(ingressRuleEntity);
+						}
+						ingressRuleDomainService.saveAllingress(ingressRuls);
 
-						ingressRuls.add(ingressRuleEntity);
 					}
+					
 				}
-
 			}
-			ingressRuleDomainService.saveAllingress(ingressRuls);
 
 		}
-		
 	
 }

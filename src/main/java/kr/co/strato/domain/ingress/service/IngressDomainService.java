@@ -70,7 +70,7 @@ public class IngressDomainService {
 		return ingressDefault;
 	}
 	
-	public IngressControllerEntity findByName(String name) {
+	public IngressControllerEntity findIngressControllerByName(String name) {
 		IngressControllerEntity ingressDefault = ingressControllerRepository.findByName(name);
 		return ingressDefault;
 	}

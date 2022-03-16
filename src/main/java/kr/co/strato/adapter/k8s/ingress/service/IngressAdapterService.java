@@ -8,7 +8,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 
+import feign.FeignException;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -47,13 +52,23 @@ public class IngressAdapterService {
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
 			ObjectMapper mapper = new ObjectMapper();
-			List<Ingress> ingress = mapper.readValue(results, new TypeReference<List<Ingress>>() {
-			});
+
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			List<Ingress> ingress = gson.fromJson(results, new TypeToken<List<Ingress>>() {}.getType());
+
+//			ObjectMapper mapper = new ObjectMapper();
+//			List<Ingress> ingress = mapper.readValue(results, new TypeReference<List<Ingress>>() {});
 
 			return ingress;
-		} catch (JsonProcessingException e) {
+		} catch (FeignException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
+		} catch (JsonParseException e) {
 			log.error(e.getMessage(), e);
 			throw new InternalServerException("json 파싱 에러");
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
 		}
 	}
     
@@ -63,19 +78,24 @@ public class IngressAdapterService {
 
         try{
             String results = commonProxy.apply(param);
-            //json -> fabric8 k8s 오브젝트 파싱
-            ObjectMapper mapper = new ObjectMapper();
-            List<Ingress> ingress = mapper.readValue(results, new TypeReference<List<Ingress>>(){});
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			List<Ingress> ingress = gson.fromJson(results, new TypeToken<List<Ingress>>() {
+			}.getType());
 
-            return ingress;
+//			ObjectMapper mapper = new ObjectMapper();
+//			List<Ingress> ingress = mapper.readValue(results, new TypeReference<List<Ingress>>() {});
 
-        }catch (JsonProcessingException e){
-            log.error(e.getMessage(), e);
-            throw new InternalServerException("json 파싱 에러");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
+			return ingress;
+		} catch (FeignException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
+		} catch (JsonParseException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("json 파싱 에러");
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
+		}
     }
 
     public boolean deleteIngress(Long kubeConfigId, String name){
@@ -88,7 +108,7 @@ public class IngressAdapterService {
   		return ingressYaml;
   	}
     
-    public Ingress getIngressClassName(Long kubeConfigId,String name) {
+    public List<Ingress> getIngressClassName(Long kubeConfigId,String name) {
 		// 요청 파라미터 객체 생성
 		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).name(name).build();
 
@@ -98,7 +118,7 @@ public class IngressAdapterService {
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
 			ObjectMapper mapper = new ObjectMapper();
-			Ingress ingress = mapper.readValue(results, new TypeReference<Ingress>() {
+			List<Ingress> ingress = mapper.readValue(results, new TypeReference<List<Ingress>>() {
 			});
 
 			return ingress;
@@ -107,6 +127,5 @@ public class IngressAdapterService {
 			throw new InternalServerException("json 파싱 에러");
 		}
 	}
-    
     
 }

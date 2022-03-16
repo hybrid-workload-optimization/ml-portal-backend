@@ -27,7 +27,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-@Table(name = "ingress")
+@Table(name = "ingress_controller")
 public class IngressControllerEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

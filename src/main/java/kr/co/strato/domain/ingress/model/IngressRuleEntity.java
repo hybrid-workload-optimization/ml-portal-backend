@@ -45,10 +45,7 @@ public class IngressRuleEntity {
 	private String service;
 	
 	private int port;
-	
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ingress_idx")
