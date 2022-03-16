@@ -2,7 +2,9 @@ package kr.co.strato.portal.setting.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import kr.co.strato.domain.menu.model.MenuEntity;
 import kr.co.strato.domain.menu.service.MenuDomainService;
@@ -20,7 +23,6 @@ import kr.co.strato.domain.user.model.UserRoleMenuEntity;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
-import kr.co.strato.global.error.exception.AlreadyExistResourceException;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
@@ -51,9 +53,9 @@ public class AuthorityService {
 	public Boolean getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
 		int i = userRoleDomainService.getUserRoleDuplicateCheck(userRoleName, groupYn);
 		if ( i > 0 ) {
-			return false;
-		}else {
 			return true;
+		}else {
+			return false;
 		}
 	}
 	
@@ -66,14 +68,26 @@ public class AuthorityService {
 			authorityList = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDtoList(userRoleList);
 		}
 		
-		return authorityList;
+		System.out.println("####userRoleList ::  " + userRoleList.toString());
+		System.out.println("####authorityList ::  " + authorityList.toString());
+		
+		if ( authorityList.size() > 0 ) {
+			//트리형태로 변환
+			return getAuthorityTreeList(authorityList);
+		}else {
+			return new ArrayList<>();
+		}
 	}
 	
 	// 권한 상세 조회 (for front-end)
 	public AuthorityViewDto getAuthorityToDto(Long authId) {
 		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(authId);
-		
 		AuthorityViewDto authority = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(userRole);
+		
+		if ( ObjectUtils.isNotEmpty(authority) && authority.getMenuList() != null && authority.getMenuList().size() > 0 ) {
+			List<AuthorityViewDto.Menu> treeMenuList = getMenuTreeList(authority.getMenuList());
+			authority.setMenuList(treeMenuList);
+		}
 		
 		return authority;
 	}
@@ -101,6 +115,8 @@ public class AuthorityService {
 				paramEntity.addToUserRoleMenu(userRoleMenu);
 			}
 		}
+		paramEntity.setUserDefinedYn("Y");
+		
 		userRoleDomainService.saveUserRole(paramEntity);
 		
 		return paramEntity.getId();
@@ -149,23 +165,120 @@ public class AuthorityService {
 		});
 		
 		// 신규 사용자 매핑
-		param.getUserList().stream().forEach(userParam -> {
-			if ( StringUtils.equals(userParam.getType(), "N") ) {
-				//신규
-				UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
-				newUserEntity.setUserRole(userRole);
-			}else if (  StringUtils.equals(userParam.getType(), "D")  ) {
-				// 권한별 사용자 매핑 변경
-				userRole.getUsers().stream().forEach(user -> {
-					if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
-						//권한 삭제(초기화)
-						user.setUserRole(defaultUserRole);
-					}
-				});
-			}
-		});
+		if ( !CollectionUtils.isEmpty(param.getUserList()) ) {
+			param.getUserList().stream().forEach(userParam -> {
+				if ( StringUtils.equals(userParam.getType(), "N") ) {
+					//신규
+					UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
+					newUserEntity.setUserRole(userRole);
+				}else if (  StringUtils.equals(userParam.getType(), "D")  ) {
+					// 권한별 사용자 매핑 변경
+					userRole.getUsers().stream().forEach(user -> {
+						if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
+							//권한 삭제(초기화)
+							user.setUserRole(defaultUserRole);
+						}
+					});
+				}
+			});
+		}
+		
 		userRoleDomainService.saveUserRole(userRole);
 		
 		return userRole.getId();
+	}
+	
+	private List<AuthorityViewDto> getAuthorityTreeList(List<AuthorityViewDto> roleList) {
+		List<AuthorityViewDto> treeList     = new ArrayList<>();
+		List<AuthorityViewDto> childrenList = new ArrayList<>();
+
+		if ( roleList != null && roleList.size() > 0 ) {
+			for ( AuthorityViewDto role : roleList ) {
+				if ( StringUtils.equals("Y", role.getGroupYn()) ) {
+					treeList.add(role);
+				}
+				else {
+					childrenList.add(role);
+				}
+			}
+
+			for ( AuthorityViewDto pTree : treeList ) {
+				List<AuthorityViewDto> cTreeList = new ArrayList<>();
+				List<AuthorityViewDto.Menu> treeMenuList = new ArrayList<>(); //메뉴구조 트리화를 위함
+				for ( AuthorityViewDto cTree : childrenList ) {
+					if ( StringUtils.equals(pTree.getUserRoleIdx().toString(), cTree.getParentUserRoleIdx().toString()) ) {
+						// 서브롤이 확인됬을경우
+						treeMenuList = getMenuTreeList(cTree.getMenuList());
+						
+						// 메뉴 > 트리화
+						cTree.setMenuList(treeMenuList);
+						
+						// 트리 리스트에 세팅
+						cTreeList.add(cTree);
+					}
+				}
+				pTree.setSubRoleList(cTreeList);
+			}
+		}
+
+		return treeList;
+	}
+	
+	private List<AuthorityViewDto.Menu> getMenuTreeList(List<AuthorityViewDto.Menu> menuList) {
+		List<AuthorityViewDto.Menu> parentList   = new ArrayList<>();
+		List<AuthorityViewDto.Menu> childrenList = new ArrayList<>();
+
+		Map<Long, Long> allIdMap = new HashMap<>();
+		for ( AuthorityViewDto.Menu menu : menuList ) {
+			allIdMap.put(menu.getMenuIdx(), menu.getMenuIdx());
+		}
+
+		for ( AuthorityViewDto.Menu menu : menuList ) {
+			if ( StringUtils.equals(menu.getParentMenuIdx().toString(), "0") || !allIdMap.containsKey(menu.getParentMenuIdx()) ) {
+				parentList.add(menu);
+			}
+			else {
+				childrenList.add(menu);
+			}
+		}
+
+		if ( !CollectionUtils.isEmpty(parentList) ) {
+			for ( AuthorityViewDto.Menu menu : parentList ) {
+				List<AuthorityViewDto.Menu> children = getChildrenList(childrenList, menu.getMenuIdx());
+				if ( !CollectionUtils.isEmpty(children) ) {
+					menu.setSubMenuList(children);
+				}
+			}
+		}
+
+		return parentList;
+	}
+	
+	private List<AuthorityViewDto.Menu> getChildrenList(List<AuthorityViewDto.Menu> menuList, Long superMenuId) {
+		List<AuthorityViewDto.Menu> parentList   = new ArrayList<>();
+		List<AuthorityViewDto.Menu> childrenList = new ArrayList<>();
+		if ( menuList == null || menuList.size() == 0 ) {
+			return parentList;
+		}
+
+		for ( AuthorityViewDto.Menu menu : menuList ) {
+			if ( StringUtils.equals(superMenuId.toString(), menu.getParentMenuIdx().toString()) ) {
+				parentList.add(menu);
+			}
+			else {
+				childrenList.add(menu);
+			}
+		}
+
+		if ( !CollectionUtils.isEmpty(parentList) ) {
+			for ( AuthorityViewDto.Menu menu : parentList ) {
+				List<AuthorityViewDto.Menu> children = getChildrenList(childrenList, menu.getMenuIdx());
+				if ( !CollectionUtils.isEmpty(children) ) {
+					menu.setSubMenuList(children);
+				}
+			}
+		}
+
+		return parentList;
 	}
 }

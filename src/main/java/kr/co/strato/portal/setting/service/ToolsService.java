@@ -53,6 +53,9 @@ public class ToolsService {
 			convertKubesprayVersions.add(selector);
 		}
 		
+//		SettingSelectorDto selector = new SettingSelectorDto("10.10.10", "10.10.10", "10.10.10");
+//		convertKubesprayVersions.add(selector);
+		
 		if ( ObjectUtils.isEmpty(returnDto) ) returnDto = new ToolsDto.ViewDto();
 		returnDto.setKubesprayVersions(convertKubesprayVersions);
 		return returnDto;
@@ -132,23 +135,28 @@ public class ToolsService {
 	}
 
 	public List<HashMap<String, Object>> getToolsAdvanced(String version) {
-		String setting = kubesprayAdapterService.getSetting(version);
-		List<HashMap<String, Object>> settingMapList = ToolsDtoMapper.INSTANCE.jsonArrayToMap(setting);
-		
-		settingMapList.stream().forEach( sObj -> {
-			if ( ObjectUtils.isNotEmpty(sObj.get("option")) ) {
-				List<String> optionList = (List<String>) sObj.get("option");
-				List<SettingSelectorDto> optionSelectList = new ArrayList<>();
-				for ( String o : optionList ) {
-					SettingSelectorDto dto = new SettingSelectorDto(o, o, o);
-					optionSelectList.add(dto);
+		String setting = "";
+		try {
+			setting = kubesprayAdapterService.getSetting(version);
+			List<HashMap<String, Object>> settingMapList = ToolsDtoMapper.INSTANCE.jsonArrayToMap(setting);
+			
+			settingMapList.stream().forEach( sObj -> {
+				if ( ObjectUtils.isNotEmpty(sObj.get("option")) ) {
+					List<String> optionList = (List<String>) sObj.get("option");
+					List<SettingSelectorDto> optionSelectList = new ArrayList<>();
+					for ( String o : optionList ) {
+						SettingSelectorDto dto = new SettingSelectorDto(o, o, o);
+						optionSelectList.add(dto);
+					}
+					sObj.put("optionList", optionSelectList);
+				}else {
+					sObj.put("optionList", null);
 				}
-				sObj.put("optionList", optionSelectList);
-			}else {
-				sObj.put("optionList", null);
-			}
-		});
-		
-		return settingMapList;
+			});
+			
+			return settingMapList;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }
