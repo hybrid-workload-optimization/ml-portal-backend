@@ -38,8 +38,6 @@ public class ServiceDomainService {
         service.setNamespace(namespace);
         serviceRepository.save(service);
 
-        deleteServiceEndpoints(service);
-
         if(serviceEndpoints != null){
             for(ServiceEndpointEntity endpoint : serviceEndpoints){
                 registerServiceEndpoint(endpoint,service);
@@ -60,6 +58,7 @@ public class ServiceDomainService {
         changeToNewData(oldEntity, updateEntity);
         serviceRepository.save(oldEntity);
 
+        deleteServiceEndpoints(oldEntity);
 
         if(serviceEndpoints != null){
             for(ServiceEndpointEntity endpoint : serviceEndpoints){

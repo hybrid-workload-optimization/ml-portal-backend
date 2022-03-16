@@ -173,7 +173,7 @@ public class K8sServiceService {
         String externalEndPoint = null;
 
         if(ServiceType.NodePort.get().equals(type)){
-            externalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
+            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
         }else{
             internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
         }
