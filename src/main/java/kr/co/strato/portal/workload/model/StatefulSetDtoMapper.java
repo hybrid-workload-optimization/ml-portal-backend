@@ -19,7 +19,7 @@ public interface StatefulSetDtoMapper {
 
     @Mapping(target = "name", source = "statefulSetName")
     @Mapping(target = "namespace", source = "namespace.name")
-    @Mapping(target = "dayAgo", source = "createdAt")
+    @Mapping(target = "age", source = "createdAt")
     @Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
     public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity);
 

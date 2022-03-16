@@ -34,10 +34,10 @@ public class StatefulSetDto {
         private Long id;
         private String name;
         private String namespace;
-        private int podCnt;
-        private int podTotalCnt;
+        private int replicas;
+        private int readyReplicas;
         private String image;
-        private LocalDateTime dayAgo;
+        private LocalDateTime age;
         private HashMap<String, Object> label;
 
     }

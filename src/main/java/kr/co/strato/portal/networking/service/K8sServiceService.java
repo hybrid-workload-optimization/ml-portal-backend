@@ -173,12 +173,8 @@ public class K8sServiceService {
         String label = gson.toJson(s.getMetadata().getLabels());
         String internalEndPoint = null;
         String externalEndPoint = null;
+        internalEndPoint = gson.toJson(s.getSpec().getPorts());
 
-        if(ServiceType.NodePort.get().equals(type)){
-            internalEndPoint = gson.toJson(s.getSpec().getPorts());
-        }else{
-            internalEndPoint = gson.toJson(s.getSpec().getPorts());
-        }
 
         ServiceEntity service = ServiceEntity.builder()
                 .serviceUid(uid)

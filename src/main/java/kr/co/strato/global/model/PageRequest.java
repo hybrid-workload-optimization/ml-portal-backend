@@ -13,8 +13,8 @@ public class PageRequest {
 
 
 
-    private static final int DEFAULT_SIZE = 10;
-    private static final int MAX_SIZE = 50;
+    private static final int DEFAULT_SIZE = 100;
+    private static final int MAX_SIZE = 800;
 
     public int getPage() {
         return page;
