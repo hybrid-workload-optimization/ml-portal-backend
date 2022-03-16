@@ -49,6 +49,4 @@ public class StatefulSetEntity {
     @OneToMany(mappedBy = "statefulSet")
     private List<PodStatefulSetEntity> podStatefulSets;
     
-    @Transient
-    private Long podCnt;
 }

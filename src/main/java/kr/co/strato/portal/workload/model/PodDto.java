@@ -3,6 +3,7 @@ package kr.co.strato.portal.workload.model;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -80,7 +81,7 @@ public class PodDto {
     	private String type;
     	private String name;
     	private String image;
-    	private long podCnt;
+    	private String pod;
     	private LocalDateTime createdAt;
     }
     
@@ -89,6 +90,11 @@ public class PodDto {
     @NoArgsConstructor
     public static class OwnerSearchParam{
         private Long clusterId;
+        private String nodeName;
+        private String namespace;
+        private String storageClass;
+        private Map<String, String> selector;
+        private String ownerName;
         private String ownerUid;
     }
 }

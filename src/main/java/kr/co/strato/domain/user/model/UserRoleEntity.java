@@ -45,6 +45,9 @@ public class UserRoleEntity {
 	@Column(name = "group_yn")
 	private String groupYn;
 	
+	@Column(name = "user_defined_yn")
+	private String userDefinedYn;
+	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "userRole", fetch = FetchType.LAZY)
 	private List<UserRoleMenuEntity> userRoleMenus = new ArrayList<UserRoleMenuEntity>();
 	

@@ -41,7 +41,7 @@ public class ServiceAdapterService {
             String results = commonProxy.apply(param);
             ObjectMapper mapper = new ObjectMapper();
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Gson gson = new GsonBuilder().create();
             List<Service> services = gson.fromJson(results, new TypeToken<List<Service>>(){}.getType());
             return services;
         }catch(FeignException e){

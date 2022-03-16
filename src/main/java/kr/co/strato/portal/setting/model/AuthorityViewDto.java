@@ -17,7 +17,9 @@ public class AuthorityViewDto {
 	private String description;
 	private Long parentUserRoleIdx;
 	private String groupYn;
+	private String userDefinedYn;
 	
+	private List<AuthorityViewDto> subRoleList;
 	private List<Menu> menuList;	// 권한별 메뉴
 	private List<User> userList;	// 권한별 사용자
 	
@@ -35,6 +37,10 @@ public class AuthorityViewDto {
 		
 		private String viewableYn;
 		private String writableYn;
+		
+		private String role;	//viewableYn 과 writableYn를 기준으로 데이터를 만들어서 넣어주는 용도
+		
+		private List<Menu> subMenuList;
 	}
 	
 	@Getter

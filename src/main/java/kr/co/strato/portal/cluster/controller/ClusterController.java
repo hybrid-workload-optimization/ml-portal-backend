@@ -3,6 +3,8 @@ package kr.co.strato.portal.cluster.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -118,7 +120,7 @@ public class ClusterController {
     }
 	
 	@PostMapping("/api/v1/clusters")
-    public ResponseWrapper<Long> registerCluster(@RequestBody ClusterDto clusterDto){
+    public ResponseWrapper<Long> registerCluster(@Valid @RequestBody ClusterDto.Form clusterDto){
         Long result = null;
         
         String workTarget					= null;
@@ -130,7 +132,7 @@ public class ClusterController {
         workMetadata.put("clusterDto", clusterDto);
         
         try {
-        	result = clusterService.registerCluster(clusterDto);
+        	result = clusterService.createCluster(clusterDto);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -159,7 +161,7 @@ public class ClusterController {
     }
 
 	@PutMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<Long> updateCluster(@PathVariable(required = true) Long clusterIdx, @RequestBody ClusterDto clusterDto){
+    public ResponseWrapper<Long> updateCluster(@PathVariable(required = true) Long clusterIdx, @Valid  @RequestBody ClusterDto.Form clusterDto){
         Long result = null;
         
         String workTarget					= null;
@@ -255,7 +257,7 @@ public class ClusterController {
     }
 	
 	@PostMapping("/api/v1/clusters/connection")
-    public ResponseWrapper<Boolean> isClusterConnection(@RequestBody ClusterDto clusterDto){
+    public ResponseWrapper<Boolean> isClusterConnection(@RequestBody ClusterDto.Form clusterDto){
 		boolean result = false;
         
         try {

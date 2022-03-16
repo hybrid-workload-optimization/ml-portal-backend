@@ -30,8 +30,8 @@ public class AuthorityController {
 	//권한/그룹 중복 체크
 	@GetMapping("/authorities/duplicate-check")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> getCheckUserRole(@RequestParam String userRoleName, @RequestParam String groupYn){
-		// flag == true then 중복아님 else 중복
+	public ResponseWrapper<Boolean> getCheckAuthority(@RequestParam String userRoleName, @RequestParam String groupYn){
+		// flag == true then 중복 else 중복아님
 		Boolean flag = authorityService.getUserRoleDuplicateCheck(userRoleName, groupYn);
 		
 		return new ResponseWrapper<>(flag);
@@ -40,7 +40,7 @@ public class AuthorityController {
 	//권한 전체 조회
 	@GetMapping("/authorities")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<AuthorityViewDto>> getAllListUserRole(){
+	public ResponseWrapper<List<AuthorityViewDto>> getAllListAuthority(){
 		List<AuthorityViewDto> authorityList = authorityService.getAllListAuthorityToDto();
 		return new ResponseWrapper<>(authorityList);
 	}
@@ -48,28 +48,28 @@ public class AuthorityController {
 	//권한 상세
 	@GetMapping("/authorities/{authId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<AuthorityViewDto> getUserRole(@PathVariable(name = "authId") Long authId){
+	public ResponseWrapper<AuthorityViewDto> getAuthority(@PathVariable(name = "authId") Long authId){
 		AuthorityViewDto authority = authorityService.getAuthorityToDto(authId);
 		return new ResponseWrapper<>(authority);
 	}
 	
 	//권한 신규생성
 	@PostMapping("/authorities")
-	public ResponseWrapper<Long> postUserRole(@RequestBody AuthorityRequestDto.ReqRegistDto param) {
+	public ResponseWrapper<Long> registAuthority(@RequestBody AuthorityRequestDto.ReqRegistDto param) {
 		Long idx = authorityService.postUserRole(param);
 		return new ResponseWrapper<>(idx);
 	}
 	
 	//권한 삭제
 	@DeleteMapping("/authorities")
-	public ResponseWrapper<Long> deleteUserRole(@RequestBody AuthorityRequestDto.ReqDeleteDto param) {
+	public ResponseWrapper<Long> deleteAuthority(@RequestBody AuthorityRequestDto.ReqDeleteDto param) {
 		Long idx = authorityService.deleteUserRole(param);
 		return new ResponseWrapper<>(idx);
 	}
 	
 	//권한 수정
 	@PatchMapping("/authorities")
-	public ResponseWrapper<Long> modifyUserRole(@RequestBody AuthorityRequestDto.ReqModifyDto param) {
+	public ResponseWrapper<Long> patchAuthority(@RequestBody AuthorityRequestDto.ReqModifyDto param) {
 		Long idx = authorityService.modifyUserRole(param);
 		return new ResponseWrapper<>(idx);
 	}
