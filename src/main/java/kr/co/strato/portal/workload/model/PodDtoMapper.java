@@ -5,6 +5,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -43,6 +45,7 @@ public interface PodDtoMapper {
         @Mapping(target = "label", source = "entity.label", qualifiedByName = "dataToMap"),
         @Mapping(target = "annotation", source = "entity.annotation", qualifiedByName = "dataToMap"),
         @Mapping(target = "condition", source = "entity.condition", qualifiedByName = "dataToList"),
+        @Mapping(target = "persistentVolumeClaims", source = "entity.podPersistentVolumeClaims", qualifiedByName = "pvcToList"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
     // TODO Detail 정보에 k8s 정보 추가
@@ -83,6 +86,19 @@ public interface PodDtoMapper {
         	ObjectMapper mapper = new ObjectMapper();
             List<HashMap<String, Object>> list = mapper.readValue(data, List.class);
             return list;
+        }catch (Exception e){
+            return new ArrayList<>();
+        }
+    }
+    
+    @Named("pvcToList")
+    default List<HashMap<String, Object>> pvcToList(List<PodPersistentVolumeClaimEntity> pvcEntity) {
+        try{
+        	return new ArrayList<>();
+//            List<HashMap<String, Object>> list = pvcEntity.stream().map(e => {
+//        		return new Map<String,Object> ();
+//            }).collect(Collectors.toList());
+//            return list;
         }catch (Exception e){
             return new ArrayList<>();
         }

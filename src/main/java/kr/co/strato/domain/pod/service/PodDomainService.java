@@ -37,7 +37,8 @@ public class PodDomainService {
 
 
     public PodEntity get(Long podId) {
-    	PodEntity pod = podRepository.findById(podId).orElseThrow(() -> new NotFoundResourceException("pod id:"+ podId));
+//    	PodEntity pod = podRepository.findById(podId).orElseThrow(() -> new NotFoundResourceException("pod id:"+ podId));
+    	PodEntity pod = podRepository.getPodDetail(podId);
     	return pod;
     }
     

@@ -7,7 +7,13 @@ import lombok.Data;
 @Data
 public class PodPersistentVolumeClaimPK implements Serializable {
 
-	private Long podIdx;
-	private Long persistentVolumeClaimIdx;
+	private Long pod;
+	private Long persistentVolumeClaim;
+	
+	public PodPersistentVolumeClaimPK() {}
+	public PodPersistentVolumeClaimPK(Long pod, Long persistentVolumeClaim) {
+		this.pod = pod;
+		this.persistentVolumeClaim = persistentVolumeClaim;
+	}
 }
 

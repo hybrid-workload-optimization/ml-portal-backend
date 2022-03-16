@@ -9,6 +9,8 @@ import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.portal.workload.model.PodDto;
 
 public interface CustomPodRepository {
+	public PodEntity getPodDetail(Long podId);
+	
 	public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId);
 	
 	public StatefulSetEntity getPodStatefulSet(Long podId);

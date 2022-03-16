@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -72,6 +73,7 @@ public class PodDto {
         private String kind;
         
         private List<HashMap<String, Object>> condition;
+        private List<HashMap<String, Object>> persistentVolumeClaims;
     }
     
     @Getter

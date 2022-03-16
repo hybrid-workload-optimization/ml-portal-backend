@@ -1,11 +1,14 @@
 package kr.co.strato.domain.pod.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,11 +26,13 @@ import lombok.Setter;
 public class PodPersistentVolumeClaimEntity {
     
 	@Id
-    @Column(name = "pod_idx")
-    private Long podIdx;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "pod_idx")
+    private PodEntity pod;
 
 	@Id
-    @Column(name = "persistent_volume_claim_idx")
-    private Long persistentVolumeClaimIdx;
-
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "persistent_volume_claim_idx")
+    private PersistentVolumeClaimEntity persistentVolumeClaim;
+	
 }
