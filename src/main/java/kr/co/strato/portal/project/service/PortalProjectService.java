@@ -158,34 +158,39 @@ public class PortalProjectService {
             	throw new CreateProjectFailException();
             } else {
             	//Project Cluster 등록
-        		List<ProjectClusterDto> clusterList = param.getClusterList();
-            	for(ProjectClusterDto cluster : clusterList) {
-            		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
-            		projectClusterBuiler.projectIdx(resultIdx);
-            		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
-            		
-            		//ProjectClusterDTO -> ProjectClusterEntity
-                    ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
-                    projectClusterDomainService.createProjectCluster(projectClusterEntity);
-            	}
+        		if(param.getClusterList() != null) {
+        			List<ProjectClusterDto> clusterList = param.getClusterList();
+                	for(ProjectClusterDto cluster : clusterList) {
+                		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
+                		projectClusterBuiler.projectIdx(resultIdx);
+                		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
+                		
+                		//ProjectClusterDTO -> ProjectClusterEntity
+                        ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
+                        projectClusterDomainService.createProjectCluster(projectClusterEntity);
+                	}
+        		}
             	
             	//Project User 등록
-        		List<ProjectUserDto> userList = param.getUserList();
-            	for(ProjectUserDto user : userList) {
-            		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
-            		projectUserBuiler.userId(user.getUserId());
-            		projectUserBuiler.projectIdx(resultIdx);
-            		projectUserBuiler.createUserId(userId);
-            		projectUserBuiler.createUserName(userName);
-            		projectUserBuiler.createdAt(now);
-            		projectUserBuiler.projectUserRole(user.getProjectUserRole());
-            		
-            		//ProjectUserDTO -> ProjectUserEntity
-                    ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
-                    projectUserDomainService.createProjectUser(projectUserEntity);
-            	}
+        		if(param.getUserList() != null) {
+        			List<ProjectUserDto> userList = param.getUserList();
+                	for(ProjectUserDto user : userList) {
+                		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
+                		projectUserBuiler.userId(user.getUserId());
+                		projectUserBuiler.projectIdx(resultIdx);
+                		projectUserBuiler.createUserId(userId);
+                		projectUserBuiler.createUserName(userName);
+                		projectUserBuiler.createdAt(now);
+                		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+                		
+                		//ProjectUserDTO -> ProjectUserEntity
+                        ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+                        projectUserDomainService.createProjectUser(projectUserEntity);
+                	}
+        		}
             }
     	} catch(Exception e) {
+    		e.printStackTrace();
     		throw new CreateProjectFailException();
     	}
     	

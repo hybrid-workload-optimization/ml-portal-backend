@@ -93,7 +93,7 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/clusters")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ClusterDto>> getProjecClusterListByCreateUserId(@RequestBody ProjectRequestDto param) {
+    public ResponseWrapper<List<ClusterDto>> getProjecClusterListByCreateUserId(ProjectRequestDto param) {
         
     	List<ClusterDto> response = portalProjectService.getProjecClusterListByCreateUserId(param.getLoginId());
         
