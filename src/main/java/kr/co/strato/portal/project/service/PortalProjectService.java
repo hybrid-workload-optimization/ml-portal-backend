@@ -104,12 +104,12 @@ public class PortalProjectService {
      * @param loginId
      * @return
      */
-    public List<ClusterDto> getProjecClusterListByCreateUserId(String loginId) {
+    public List<ClusterDto.List> getProjecClusterListByCreateUserId(String loginId) {
     	
     	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByCreateUserId(loginId);
     	
     	//Entity -> DTO 변환
-    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toList(m)).collect(Collectors.toList());
     }
     
     /**
@@ -202,12 +202,12 @@ public class PortalProjectService {
      * @param projectIdx
      * @return
      */
-    public List<ClusterDto> getProjectClusterListExceptUse(Long projectIdx) {
+    public List<ClusterDto.List> getProjectClusterListExceptUse(Long projectIdx) {
     	
     	List<ClusterEntity> clusterList = projectClusterDomainService.getProjectClusterListExceptUse(projectIdx);
     	
     	//Entity -> DTO 변환
-    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toList(m)).collect(Collectors.toList());
     }
     
     /**

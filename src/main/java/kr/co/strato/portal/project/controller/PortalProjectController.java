@@ -93,11 +93,11 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/clusters")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ClusterDto>> getProjecClusterListByCreateUserId(ProjectRequestDto param) {
+    public ResponseWrapper<List<ClusterDto.List>> getProjecClusterListByCreateUserId(ProjectRequestDto param) {
         
-    	List<ClusterDto> response = portalProjectService.getProjecClusterListByCreateUserId(param.getLoginId());
+    	List<ClusterDto.List> response = portalProjectService.getProjecClusterListByCreateUserId(param.getLoginId());
         
-        return new ResponseWrapper<List<ClusterDto>>(response);
+        return new ResponseWrapper<List<ClusterDto.List>>(response);
     }
     
     /**
@@ -135,11 +135,11 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/{projectIdx}/clusters")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ClusterDto>> getProjectClusterListExceptUse(@PathVariable("projectIdx") Long projectIdx) {
+    public ResponseWrapper<List<ClusterDto.List>> getProjectClusterListExceptUse(@PathVariable("projectIdx") Long projectIdx) {
         
-    	List<ClusterDto> response = portalProjectService.getProjectClusterListExceptUse(projectIdx);
+    	List<ClusterDto.List> response = portalProjectService.getProjectClusterListExceptUse(projectIdx);
         
-        return new ResponseWrapper<List<ClusterDto>>(response);
+        return new ResponseWrapper<List<ClusterDto.List>>(response);
     }
     
     /**
