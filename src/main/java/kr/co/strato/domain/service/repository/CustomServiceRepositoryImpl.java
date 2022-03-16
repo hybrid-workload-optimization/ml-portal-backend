@@ -40,7 +40,7 @@ public class CustomServiceRepositoryImpl implements  CustomServiceRepository{
                         .select(qService)
                         .from(qService)
                         .leftJoin(qService.namespace, qNamespace)
-                        .leftJoin(qNamespace.clusterIdx, qCluster)
+                        .leftJoin(qNamespace.cluster, qCluster)
                         .where(builder)
                         .orderBy(qService.id.desc())
                         .offset(pageable.getOffset())

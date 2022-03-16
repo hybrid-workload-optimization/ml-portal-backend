@@ -39,12 +39,11 @@ public class NodeAdapterService {
 
 		// 조회 요청
 		String results = nonNamespaceProxy.getResourceList(ResourceType.node.get(), param);
-
+		log.debug("[Get Node List] response : {}", results);
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
 			ObjectMapper mapper = new ObjectMapper();
-			List<Node> clusterNodes = mapper.readValue(results, new TypeReference<List<Node>>() {
-			});
+			List<Node> clusterNodes = mapper.readValue(results, new TypeReference<List<Node>>() {});
 
 			return clusterNodes;
 		} catch (JsonProcessingException e) {

@@ -59,7 +59,7 @@ public class StatefulSetDomainService {
     public ClusterEntity getClusterEntity(Long statefulSetId){
         StatefulSetEntity entity = get(statefulSetId);
 
-        return entity.getNamespace().getClusterIdx();
+        return entity.getNamespace().getCluster();
     }
 
 

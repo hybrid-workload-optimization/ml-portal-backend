@@ -48,7 +48,7 @@ public class NamespaceEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
-	private ClusterEntity clusterIdx;
+	private ClusterEntity cluster;
 	
 	@Lob
 	private String annotation;

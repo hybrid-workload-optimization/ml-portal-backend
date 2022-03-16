@@ -18,13 +18,13 @@ public interface ClusterNamespaceDtoMapper {
 
 	ClusterNamespaceDtoMapper INSTANCE = Mappers.getMapper(ClusterNamespaceDtoMapper.class);
 
-	@Mapping(target = "clusterIdx" , source = "clusterIdx.clusterIdx")
+	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterNamespaceDto.ResListDto toResListDto(NamespaceEntity node);
 	
 	
-	@Mapping(target = "clusterIdx" , source = "clusterIdx.clusterIdx")
+	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterNamespaceDto.ResDetailDto toResDetailDto(NamespaceEntity node);

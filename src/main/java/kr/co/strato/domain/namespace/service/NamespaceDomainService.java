@@ -12,9 +12,6 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
-import kr.co.strato.domain.node.model.NodeEntity;
-import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -58,7 +55,7 @@ public class NamespaceDomainService {
 	
     public ClusterEntity getCluster(Long id){
     	NamespaceEntity entity = getDetail(id);
-        ClusterEntity cluster =  entity.getClusterIdx();
+        ClusterEntity cluster =  entity.getCluster();
         return cluster;
     }
     

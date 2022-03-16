@@ -73,7 +73,7 @@ public class ReplicaSetService {
 	 */
 	public ReplicaSetDto.Detail getReplicaSet(Long replicaSetIdx) throws Exception {
 		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
-		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
 		String replicaSetName	= replicaSetEntity.getReplicaSetName();
 		
@@ -129,7 +129,7 @@ public class ReplicaSetService {
 	public List<Long> updateReplicaSet(Long replicaSetIdx, ReplicaSetDto replicaSetDto) throws Exception {
 		// get clusterId(kubeConfigId)
 		ReplicaSetEntity replicaSet = replicaSetDomainService.get(replicaSetIdx);
-		ClusterEntity cluster = replicaSet.getNamespace().getClusterIdx();
+		ClusterEntity cluster = replicaSet.getNamespace().getCluster();
 		
 		// k8s - post replica set
 		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
@@ -163,7 +163,7 @@ public class ReplicaSetService {
 	 */
 	public void deleteReplicaSet(Long replicaSetIdx) throws Exception {
 		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
-		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
         String replicaSetName	= replicaSetEntity.getReplicaSetName();
         
@@ -228,7 +228,7 @@ public class ReplicaSetService {
 	 */
 	public String getReplicaSetYaml(Long replicaSetIdx) throws Exception {
 		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
-		Long clusterId			= replicaSetEntity.getNamespace().getClusterIdx().getClusterId();
+		Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
         String replicaSetName	= replicaSetEntity.getReplicaSetName();
         

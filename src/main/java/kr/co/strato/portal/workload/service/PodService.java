@@ -130,7 +130,7 @@ public class PodService {
     	if (resourceType.equals(ResourceType.statefulSet.get())) {
     		StatefulSetEntity entity = podDomainService.getPodStatefulSet(podId);
     		
-    		Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+    		Long clusterId = entity.getNamespace().getCluster().getClusterId();
     		String namespace = entity.getNamespace().getName();
     		String statefulSetName = entity.getPodStatefulSets().get(0).getStatefulSet().getStatefulSetName();
     		

@@ -25,7 +25,6 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDtoMapper;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -58,7 +57,7 @@ public class ClusterNamespaceService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteClusterNamespace(Long id){
     	NamespaceEntity n = namespaceDomainService.getDetail(id.longValue());
-        Long clusterId = n.getClusterIdx().getClusterId();
+        Long clusterId = n.getCluster().getClusterId();
         String resourceName = n.getName();
 
         boolean isDeleted = namespaceAdapterService.deleteNamespace(clusterId.intValue(), resourceName);
@@ -169,7 +168,7 @@ public class ClusterNamespaceService {
 
 			NamespaceEntity namespace = NamespaceEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))
-					.clusterIdx(clusterEntity)
+					.cluster(clusterEntity)
 					.annotation(annotations).label(label)
 					.build();
 
