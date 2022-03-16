@@ -3,6 +3,8 @@ package kr.co.strato.portal.networking.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.fabric8.kubernetes.api.model.*;
 import kr.co.strato.adapter.k8s.endpoint.EndpointAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
@@ -158,24 +160,29 @@ public class K8sServiceService {
 
 
     private ServiceEntity toEntity(Service s) throws JsonProcessingException{
-        ObjectMapper mapper = new ObjectMapper();
-
+//        ObjectMapper mapper = new ObjectMapper();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String uid = s.getMetadata().getUid();
         String name = s.getMetadata().getName();
         LocalDateTime createAt = DateUtil.strToLocalDateTime(s.getMetadata().getCreationTimestamp());
         String type = s.getSpec().getType();
         String clusterIp = s.getSpec().getClusterIP();
         String sessionAffinity = s.getSpec().getSessionAffinity();
-        String selector = mapper.writeValueAsString(s.getSpec().getSelector());
-        String annotation = mapper.writeValueAsString(s.getMetadata().getAnnotations());
-        String label = mapper.writeValueAsString(s.getMetadata().getLabels());
+//        String selector = mapper.writeValueAsString(s.getSpec().getSelector());
+//        String annotation = mapper.writeValueAsString(s.getMetadata().getAnnotations());
+//        String label = mapper.writeValueAsString(s.getMetadata().getLabels());
+        String selector = gson.toJson(s.getSpec().getSelector());
+        String annotation = gson.toJson(s.getMetadata().getAnnotations());
+        String label = gson.toJson(s.getMetadata().getLabels());
         String internalEndPoint = null;
         String externalEndPoint = null;
 
         if(ServiceType.NodePort.get().equals(type)){
-            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
+            internalEndPoint = gson.toJson(s.getSpec().getPorts());
+//            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
         }else{
-            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
+            internalEndPoint = gson.toJson(s.getSpec().getPorts());
+//            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
         }
 
         ServiceEntity service = ServiceEntity.builder()
