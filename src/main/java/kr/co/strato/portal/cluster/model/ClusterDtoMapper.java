@@ -19,7 +19,7 @@ public interface ClusterDtoMapper {
 
 	ClusterDtoMapper INSTANCE = Mappers.getMapper(ClusterDtoMapper.class);
 	
-	public ClusterEntity toEntity(ClusterDto dto);
+	public ClusterEntity toEntity(ClusterDto.Form dto);
 	
 	public ClusterDto toDto(ClusterEntity cluster);
 	
@@ -27,7 +27,9 @@ public interface ClusterDtoMapper {
     @Mapping(target = "problem",	source = "c.problem",		qualifiedByName = "jsonToMap")
 	public ClusterDto.List toList(ClusterEntity c);
 	
-    @Mapping(target = "problem",	source = "c.problem",		qualifiedByName = "jsonToMap")
+	@Mapping(target = "kubeConfig",		source = "c.kubeConfig")
+	@Mapping(target = "description",	source = "c.description")
+    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToMap")
 	public ClusterDto.Detail toDetail(ClusterEntity c);
 	
 	@Named("nodeCount")

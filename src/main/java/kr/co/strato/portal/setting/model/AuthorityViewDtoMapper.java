@@ -22,6 +22,7 @@ public interface AuthorityViewDtoMapper {
 		@Mapping(source = "id", target = "userRoleIdx"),
 		@Mapping(source = "parentUserRoleIdx", target = "parentUserRoleIdx"),
 		@Mapping(source = "groupYn", target = "groupYn"),
+		@Mapping(source = "userDefinedYn", target = "userDefinedYn"),
 		@Mapping(source = "userRoleMenus", target = "menuList", qualifiedByName = "toAuthorityViewDtoInnerMenu"),
 		@Mapping(source = "users", target = "userList", qualifiedByName = "toAuthorityViewDtoInnerUser")
 	})

@@ -71,8 +71,25 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
+	public Long createCluster(ClusterDto.Form clusterDto) throws Exception {
+		if (!StringUtils.isEmpty(clusterDto.getKubeConfig())) {
+			// k8s를 통한 cluster 등록
+			return createK8sCluster(clusterDto);
+		} else {
+			// kubespray를 통한 cluster 생성 및 등록
+			return createKubesprayCluster(clusterDto);
+		}
+	}
+	
+	/**
+	 * (K8s) Cluster 등록
+	 * 
+	 * @param clusterDto
+	 * @return
+	 * @throws Exception
+	 */
 	@Transactional(rollbackFor = Exception.class)
-	public Long registerCluster(ClusterDto clusterDto) throws Exception {
+	private Long createK8sCluster(ClusterDto.Form clusterDto) throws Exception {
 		// k8s - post cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
@@ -118,7 +135,19 @@ public class ClusterService {
 		
 		return clusterEntity.getClusterIdx();
 	}
-
+	
+	/**
+	 * (Kubespray) Cluster 등록
+	 * TODO : 구현 필요
+	 * 
+	 * @param clusterDto
+	 * @return
+	 * @throws Exception
+	 */
+	private Long createKubesprayCluster(ClusterDto.Form clusterDto) throws Exception {
+		return null;
+	}
+	
 	/**
 	 * Cluster 수정
 	 * 
@@ -127,11 +156,15 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Long updateCluster(Long clusterIdx, ClusterDto clusterDto) throws Exception {
+	public Long updateCluster(Long clusterIdx, ClusterDto.Form clusterDto) throws Exception {
+		// db - get cluster
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		// k8s - update cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
 				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
-				.kubeConfigId(clusterDto.getClusterId())
+				.kubeConfigId(clusterEntity.getClusterId())
 				.build();
 		
 		boolean isUpdated = clusterAdapterService.updateCluster(clusterAdapterDto);
@@ -139,12 +172,14 @@ public class ClusterService {
 			throw new PortalException("Cluster modification failed");
 		}
 		
-		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
-		clusterEntity.setClusterIdx(clusterIdx);
+		// db - update cluster
+		clusterEntity.setClusterName(clusterDto.getClusterName());
+		clusterEntity.setKubeConfig(clusterDto.getKubeConfig());
+		clusterEntity.setDescription(clusterDto.getDescription());
 		
 		clusterDomainService.update(clusterEntity);
 		
-		return clusterEntity.getClusterIdx();
+		return clusterIdx;
 	}
 
 	/**

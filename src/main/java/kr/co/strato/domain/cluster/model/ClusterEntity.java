@@ -79,6 +79,7 @@ public class ClusterEntity {
 	@Lob
 	private String problem;
 	
+	@Builder.Default
 	@OneToMany(mappedBy = "cluster")
 	private List<NodeEntity> nodes = new ArrayList<>();
 	

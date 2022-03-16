@@ -3,6 +3,10 @@ package kr.co.strato.adapter.k8s.service.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import feign.FeignException;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
@@ -35,15 +39,15 @@ public class ServiceAdapterService {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(clusterId).yaml(yaml).build();
         try{
             String results = commonProxy.apply(param);
-
             ObjectMapper mapper = new ObjectMapper();
-            List<Service> services = mapper.readValue(results, new TypeReference<List<Service>>() {});
 
+            Gson gson = new GsonBuilder().create();
+            List<Service> services = gson.fromJson(results, new TypeToken<List<Service>>(){}.getType());
             return services;
         }catch(FeignException e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
-        }catch(JsonProcessingException e){
+        }catch(JsonParseException e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("json 파싱 에러");
         }catch (Exception e){
@@ -136,10 +140,10 @@ public class ServiceAdapterService {
     public String getYaml(Long clusterId, String namespaceName, String serviceName){
         try{
             String yaml = inNamespaceProxy.getResourceYaml(ResourceType.service.get(), clusterId, namespaceName, serviceName);
-            System.out.println("clusterId:"+clusterId);
-            System.out.println("namespaceName:"+namespaceName);
-            System.out.println("serviceName:"+serviceName);
-            System.out.println("yaml:"+yaml);
+//            System.out.println("clusterId:"+clusterId);
+//            System.out.println("namespaceName:"+namespaceName);
+//            System.out.println("serviceName:"+serviceName);
+//            System.out.println("yaml:"+yaml);
             return yaml;
         }catch (Exception e){
             log.error(e.getMessage(), e);

@@ -3,6 +3,9 @@ package kr.co.strato.portal.networking.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import io.fabric8.kubernetes.api.model.*;
 import kr.co.strato.adapter.k8s.endpoint.EndpointAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
@@ -79,7 +82,7 @@ public class K8sServiceService {
                 Long serviceId = serviceDomainService.register(serviceEntity, serviceEndpoints, clusterEntity, namespaceName);
 
                 return serviceId;
-            } catch (JsonProcessingException e) {
+            } catch (JsonParseException e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
@@ -107,7 +110,7 @@ public class K8sServiceService {
                 List<ServiceEndpointEntity> serviceEndpoints = toEntities(endpoints);
 
                 return serviceDomainService.update(serviceId, serviceEntity, serviceEndpoints);
-            } catch (JsonProcessingException e) {
+            } catch (JsonParseException e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
@@ -157,25 +160,24 @@ public class K8sServiceService {
     }
 
 
-    private ServiceEntity toEntity(Service s) throws JsonProcessingException{
-        ObjectMapper mapper = new ObjectMapper();
-
+    private ServiceEntity toEntity(Service s) throws JsonParseException {
+        Gson gson = new GsonBuilder().create();
         String uid = s.getMetadata().getUid();
         String name = s.getMetadata().getName();
         LocalDateTime createAt = DateUtil.strToLocalDateTime(s.getMetadata().getCreationTimestamp());
         String type = s.getSpec().getType();
         String clusterIp = s.getSpec().getClusterIP();
         String sessionAffinity = s.getSpec().getSessionAffinity();
-        String selector = mapper.writeValueAsString(s.getSpec().getSelector());
-        String annotation = mapper.writeValueAsString(s.getMetadata().getAnnotations());
-        String label = mapper.writeValueAsString(s.getMetadata().getLabels());
+        String selector = gson.toJson(s.getSpec().getSelector());
+        String annotation = gson.toJson(s.getMetadata().getAnnotations());
+        String label = gson.toJson(s.getMetadata().getLabels());
         String internalEndPoint = null;
         String externalEndPoint = null;
 
         if(ServiceType.NodePort.get().equals(type)){
-            externalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
+            internalEndPoint = gson.toJson(s.getSpec().getPorts());
         }else{
-            internalEndPoint = mapper.writeValueAsString(s.getSpec().getPorts());
+            internalEndPoint = gson.toJson(s.getSpec().getPorts());
         }
 
         ServiceEntity service = ServiceEntity.builder()
@@ -199,8 +201,6 @@ public class K8sServiceService {
         if(endpoints == null){
             return null;
         }
-
-        ObjectMapper mapper = new ObjectMapper();
         List<ServiceEndpointEntity> entities = new ArrayList<>();
         List<EndpointSubset> subsets = endpoints.getSubsets();
         String name = endpoints.getMetadata().getName();
