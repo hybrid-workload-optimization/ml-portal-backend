@@ -38,6 +38,8 @@ public class AuthorityViewDto {
 		private String viewableYn;
 		private String writableYn;
 		
+		private String role;	//viewableYn 과 writableYn를 기준으로 데이터를 만들어서 넣어주는 용도
+		
 		private List<Menu> subMenuList;
 	}
 	

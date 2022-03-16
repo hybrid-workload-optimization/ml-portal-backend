@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.auth.AUTH;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,16 +63,29 @@ public class AuthorityService {
 	// 권한 전체 조회 (for front-end)
 	public List<AuthorityViewDto> getAllListAuthorityToDto() {
 		List<UserRoleEntity> userRoleList = userRoleDomainService.getAllListAuthority();
-		List<AuthorityViewDto> authorityList = new ArrayList<>();
+		List<AuthorityViewDto> authorityList = new ArrayList<AuthorityViewDto>();
 		
-		if ( userRoleList.size() > 0 ) {
+		if ( !CollectionUtils.isEmpty(userRoleList) ) {
 			authorityList = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDtoList(userRoleList);
+		}else {
+			return new ArrayList<>();
 		}
 		
-		System.out.println("####userRoleList ::  " + userRoleList.toString());
-		System.out.println("####authorityList ::  " + authorityList.toString());
-		
-		if ( authorityList.size() > 0 ) {
+		if ( !CollectionUtils.isEmpty(authorityList) ) {
+			for ( AuthorityViewDto auth : authorityList ) {
+				if ( !CollectionUtils.isEmpty(auth.getMenuList()) ) {
+					for ( AuthorityViewDto.Menu menu : auth.getMenuList() ) {
+						if ( StringUtils.equals("Y", menu.getViewableYn()) ) {
+							menu.setRole("view");
+						} else if ( StringUtils.equals("Y", menu.getWritableYn()) ) {
+							menu.setRole("edit");
+						} else {
+							menu.setRole("none");
+						}
+					}
+				}
+			}
+			
 			//트리형태로 변환
 			return getAuthorityTreeList(authorityList);
 		}else {
