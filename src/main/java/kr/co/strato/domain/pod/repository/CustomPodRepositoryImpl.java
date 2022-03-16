@@ -83,21 +83,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 
 		StatefulSetEntity result = 
 				jpaQueryFactory
-						.select(
-								Projections.fields(
-										StatefulSetEntity.class,
-										qStatefulSetEntity.statefulSetName,
-										qStatefulSetEntity.image,
-										qStatefulSetEntity.createdAt,
-										ExpressionUtils.as(
-												JPAExpressions
-													.select(qMappingEntity.pod.id.count())
-													.from(qStatefulSetEntity)
-													.leftJoin(qStatefulSetEntity.podStatefulSets, qMappingEntity),
-													"podCnt"
-										))
-								
-						)
+						.select(qStatefulSetEntity)
 						.from(qStatefulSetEntity)
 						.leftJoin(qStatefulSetEntity.podStatefulSets, qMappingEntity)
 						.leftJoin(qMappingEntity.pod, qPodEntity)

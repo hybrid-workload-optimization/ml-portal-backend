@@ -19,8 +19,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
+import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
@@ -39,6 +41,9 @@ public class PodService {
     
     @Autowired
     private PodAdapterService podAdapterService;
+    
+    @Autowired
+    private StatefulSetAdapterService statefulSetAdapterService;
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
@@ -124,7 +129,14 @@ public class PodService {
     	PodDto.ResOwnerDto dto = new PodDto.ResOwnerDto();
     	if (resourceType.equals(ResourceType.statefulSet.get())) {
     		StatefulSetEntity entity = podDomainService.getPodStatefulSet(podId);
-    		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, resourceType);
+    		
+    		Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+    		String namespace = entity.getNamespace().getName();
+    		String statefulSetName = entity.getPodStatefulSets().get(0).getStatefulSet().getStatefulSetName();
+    		
+    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, statefulSetName);
+    		
+    		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
     	}
     	
     	
@@ -138,10 +150,8 @@ public class PodService {
     	 * 1. k8s 인터페이스 pod list 조회
     	 * 2. pod list에서 kind 정보를 보고 어느 controller mapping 테이블에 저장할 지 판단 
     	 */
-    	Long clusterId = searchParam.getClusterId();
-    	String ownerUid = searchParam.getOwnerUid();
     	// get k8s -> ownerUid to Pod list
-    	List<Pod> pods = podAdapterService.getList(clusterId, ownerUid);
+    	List<Pod> pods = podAdapterService.getList(searchParam);
     	
     	// pod list에서 owner info의 kind 정보 추출
     	

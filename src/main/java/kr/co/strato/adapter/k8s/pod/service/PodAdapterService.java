@@ -1,6 +1,7 @@
 package kr.co.strato.adapter.k8s.pod.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,6 +22,7 @@ import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.adapter.k8s.common.proxy.PodProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.portal.workload.model.PodDto;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -145,9 +147,22 @@ public class PodAdapterService {
         }
     }
     
-    public List<Pod> getList(Long clusterId, String ownerUid) {
+    public List<Pod> getList(PodDto.OwnerSearchParam searchParam) {
     	try {
-    		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(clusterId).ownerUid(ownerUid).build();
+    		Long clusterId = searchParam.getClusterId();
+    		String nodeName = searchParam.getNodeName();
+    		String ownerUid = searchParam.getNodeName();
+    		String namespace = searchParam.getNamespace();
+    		Map<String, String> selector = searchParam.getSelector();
+    		String storageClass = searchParam.getStorageClass();
+    		ResourceListSearchInfo param = ResourceListSearchInfo.builder()
+    				.kubeConfigId(clusterId)
+    				.nodeName(nodeName)
+    				.ownerUid(ownerUid)
+    				.namespace(namespace)
+    				.selector(selector)
+    				.storageClass(storageClass)
+    				.build();
     		String results = inNamespaceProxy.getResourceList(ResourceType.pod.get(), param);
     		
     		ObjectMapper mapper = new ObjectMapper();
