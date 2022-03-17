@@ -211,4 +211,32 @@ public class PortalProjectController {
         
         return new ResponseWrapper<Boolean>(response);
     }
+    
+    /**
+     * Project Cluster 삭제
+     * @param 
+     * @return
+     */
+    @DeleteMapping("/api/v1/project/projects/{projectIdx}/cluster/{clusterIdx}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Boolean> deleteProjectCluster(@PathVariable("projectIdx") Long projectIdx, @PathVariable("clusterIdx") Long clusterIdx) {
+        
+    	Boolean response = portalProjectService.deleteProjectCluster(projectIdx, clusterIdx);
+        
+        return new ResponseWrapper<Boolean>(response);
+    }
+    
+    /**
+     * Project User 삭제
+     * @param 
+     * @return
+     */
+    @DeleteMapping("/api/v1/project/projects/{projectIdx}/user/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<Boolean> deleteProjectUser(@PathVariable("projectIdx") Long projectIdx, @PathVariable("userId") String userId) {
+        
+    	Boolean response = portalProjectService.deleteProjectUser(projectIdx, userId);
+        
+        return new ResponseWrapper<Boolean>(response);
+    }
 }

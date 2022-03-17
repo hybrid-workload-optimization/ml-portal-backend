@@ -435,4 +435,40 @@ System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@========================= " + 
     	
     	return result;
     }
+    
+    /**
+     * Project Cluster 삭제
+     * @param
+     * @return
+     */
+    public Boolean deleteProjectCluster(Long projectIdx, Long clusterIdx)  {
+    	
+    	Boolean result = false;
+    	
+    	//Project Cluster 삭제
+        int deleteResult = projectClusterDomainService.deleteProjectCluster(projectIdx, clusterIdx);
+        if(deleteResult > 0) {
+        	result = true;
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Project User 삭제
+     * @param
+     * @return
+     */
+    public Boolean deleteProjectUser(Long projectIdx, String userId)  {
+    	
+    	Boolean result = false;
+    	
+    	//Project User 삭제
+        int deleteResult = projectUserDomainService.deleteProjectUser(projectIdx, userId);
+        if(deleteResult > 0) {
+        	result = true;
+        }
+        
+        return result;
+    }
 }

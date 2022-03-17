@@ -83,4 +83,15 @@ public class ProjectUserDomainService {
 		
 		return projectUserRepository.deleteByProjectIdx(projectIdx);
 	}
+	
+	/**
+     * Project User 삭제
+     * @param projectIdx
+     * @param userId
+     * @return
+     */
+	public Integer deleteProjectUser(Long projectIdx, String userId) {
+		
+		return projectUserRepository.deleteByProjectIdxAndUserId(projectIdx, userId);
+	}
 }

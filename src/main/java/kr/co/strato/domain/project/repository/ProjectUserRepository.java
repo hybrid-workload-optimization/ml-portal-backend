@@ -7,4 +7,6 @@ import kr.co.strato.domain.project.model.ProjectUserEntity;
 public interface ProjectUserRepository extends JpaRepository<ProjectUserEntity, String>, ProjectUserRepositoryCustom {
 
 	public Integer deleteByProjectIdx(Long projectIdx);
+	
+	public Integer deleteByProjectIdxAndUserId(Long projectIdx, String userId);
 }

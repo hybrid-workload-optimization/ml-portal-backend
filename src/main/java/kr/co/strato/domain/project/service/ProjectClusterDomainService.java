@@ -84,4 +84,14 @@ public class ProjectClusterDomainService {
 		
 		return projectClusterRepository.findByClusterIdxAndProjectIdxNot(clusterIdx, projectIdx);
 	}
+	
+	/**
+     * Project Cluster 삭제
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteProjectCluster(Long projectIdx, Long clusterIdx) {
+		
+		return projectClusterRepository.deleteByProjectIdxAndClusterIdx(projectIdx, clusterIdx);
+	}
 }

@@ -1,8 +1,5 @@
 package kr.co.strato.portal.project.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
