@@ -10,20 +10,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
-import kr.co.strato.domain.user.repository.UserRepository;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.model.KeycloakRole;
-import kr.co.strato.global.model.KeycloakUser;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
+import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
 
 @Service
 public class UserService {
 	
 	@Autowired
 	UserDomainService userDomainService;
+	
+	@Autowired
+	UserRoleDomainService userRoleDomainservice;
 	
 	@Autowired
 	KeyCloakApiUtil	keyCloakApiUtil;
@@ -33,14 +37,14 @@ public class UserService {
 		
 		
 		//keycloak 연동
-//		try {
-//			System.out.println("keycloak 연동 >> 등록");
+		try {
+			System.out.println("keycloak 연동 >> 등록");
 //			keyCloakApiUtil.createSsoUser(param);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
-		userDomainService.saveUser(entity);
+		userDomainService.saveUser(entity, "post");
 		
 		return param.getUserId();
 	}
@@ -50,7 +54,7 @@ public class UserService {
 		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		
-		userDomainService.saveUser(entity);
+		userDomainService.saveUser(entity, "patch");
 		
 		//keycloak 연동
 		try {
@@ -103,6 +107,15 @@ public class UserService {
 		return userDto;
 	}
 
+	// User Role List
+	public List<UserRoleDto> getUserRoleList(){
+		List<UserRoleEntity> list =  userRoleDomainservice.getAllListAuthority();
+		List<UserRoleDto> roleList = list
+									.stream()
+									.map(r -> UserRoleDtoMapper.INSTANCE.toDto(r))
+									.collect(Collectors.toList());
+		return roleList;
+	}
 	
 	//테스트용
 	public void getTest() {
@@ -110,7 +123,7 @@ public class UserService {
 		try {
 			String token = keyCloakApiUtil.getTokenByManager();
 			//전체 ROLE 가져오기
-//			keyCloakApiUtil.getRoleList();
+			keyCloakApiUtil.getRoleList();
 			//유저 정보 가져오기
 			keyCloakApiUtil.getUserInfoByUserId("test05");
 

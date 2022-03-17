@@ -105,7 +105,7 @@ public class KeyCloakApiUtil {
 	// 유저 생성(회원가입)
 	private static final String URI_SET_USER = "/auth/admin/realms/sptek-cloud/users";
 
-	// 유저 수정 , 삭제
+	// 유저 수정, 삭제
 	private static final String URI_UPDATE_USER = "/auth/admin/realms/sptek-cloud/users/{id}";
 	
 	private static final String URI_UPDATE_PASSWORD = "/auth/admin/realms/sptek-cloud/users/{id}/reset-password";
@@ -336,10 +336,13 @@ public class KeyCloakApiUtil {
 			}
 			
 			
-			// 유저 생성시 무조건 프로젝트 멤버로 생성
-			KeycloakRole role = getRoleProjectMember();
+			/** 유저 생성 시 기본적으로 proj_member 로 등록된다고 함. 
+			 * 추후 유저 생성 시 추가해야 될 role 이 생기면 추가필요
+			 */
 			
-			//@TODO 하드코딩으로 해야 하나..? 
+			// 유저 생성시 무조건 프로젝트 멤버로 생성
+//			KeycloakRole role = getRoleProjectMember();
+			// 기본 Member
 //			KeycloakRole role = new KeycloakRole();
 //			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
 //			role.setName("proj_member");
@@ -347,8 +350,7 @@ public class KeyCloakApiUtil {
 //			role.setComposite(false);
 //			role.setClientRole(false);
 //			role.setContainerId("sptek-cloud");
-			
-			postUserRole(user, ssoUser, role);
+//			postUserRole(user, ssoUser, role);
 
 		} catch (Exception e) {
 			System.err.println(e.toString());
@@ -364,21 +366,20 @@ public class KeyCloakApiUtil {
 		
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
-		String uriUpdateUser = keycloakUrl + URI_SET_USER;
+		String uriUpdateUser = keycloakUrl + URI_UPDATE_USER;
+		
+		String URI = replaceUri(uriUpdateUser, "id", userId);
 		
 		String ssoToken = getTokenByManager();
 		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
 		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," 
 						+ " 'enabled' : true," 
-						+ " 'credentials' : ["
-							+ "{'type' : 'password'," 
-							+ " 'value': '" + pw + "'," 
-							+ " 'temporary': false}" + "]}";
+						+ " 'email' : '" + user.getEmail() + "'}";
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
 		try {
 
 			HttpClient httpClient = HttpClientBuilder.create().build();
-			HttpPut httpPut = new HttpPut(uriUpdateUser);
+			HttpPut httpPut = new HttpPut(URI);
 			httpPut.addHeader("Content-Type", "application/json");
 			httpPut.addHeader("Authorization", ssoToken);
 
@@ -389,7 +390,7 @@ public class KeyCloakApiUtil {
 
 			HttpResponse response = httpClient.execute(httpPut);
 
-			if (response.getStatusLine().getStatusCode() == 201) {
+			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
 				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
 			} else {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
@@ -448,7 +449,7 @@ public class KeyCloakApiUtil {
 
 			HttpResponse response = httpClient.execute(httpPut);
 
-			if (response.getStatusLine().getStatusCode() == 201) {
+			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
 				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
 			} else {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
@@ -675,20 +676,23 @@ public class KeyCloakApiUtil {
 	//유저 삭제
 	public void deleteSsoUser(UserDto user, String token) throws Exception {
 		
-		KeycloakUser kUser = new KeycloakUser();
+		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
-		String uriDeleteUser = keycloakUrl + URI_SET_USER + "/" + kUser.getId();
+		String uriDeleteUser = keycloakUrl + URI_UPDATE_USER;
+		
+		String URI = replaceUri(uriDeleteUser, "id", userId);
+		
 		String ssoToken = getTokenByManager();
 		
 		try {
 			HttpClient httpClient = HttpClientBuilder.create().build();
-			HttpDelete httpDelete = new HttpDelete(uriDeleteUser);
+			HttpDelete httpDelete = new HttpDelete(URI);
 			httpDelete.addHeader("Content-Type", "application/json");
 			httpDelete.addHeader("Authorization", ssoToken);
 			
 			HttpResponse response = httpClient.execute(httpDelete);
 			
-			if (response.getStatusLine().getStatusCode() == 201) {
+			if (response.getStatusLine().getStatusCode() == 204) {
 				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
 			} else {
 				System.out.println("response is error : " + response.getStatusLine().getStatusCode());

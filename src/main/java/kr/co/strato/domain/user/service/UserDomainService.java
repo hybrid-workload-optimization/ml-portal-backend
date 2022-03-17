@@ -8,8 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.repository.UserRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
+import kr.co.strato.global.util.KeyCloakApiUtil;
 
 /**
  * @author tmdgh
@@ -24,20 +26,51 @@ public class UserDomainService {
 	@Autowired
 	UserRoleRepository userRoleRepository;
 	
+	@Autowired
+	KeyCloakApiUtil	keyCloakApiUtil;
+	
 	/**
 	 * 유저 등록/수정
 	 * @param entity
 	 */
-	public void saveUser(UserEntity entity) {
+	public void saveUser(UserEntity entity, String mode) {
 
+		System.out.println("saveuser >>> ");
+		System.out.println(entity.toString());
+		
 		String roleCode = entity.getUserRole().getUserRoleCode();
+		if(roleCode == null || "".equals(roleCode)) {
+			roleCode = "PROJECT_MEMBER";
+		}
+		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+		
+		// 기존 ROLE와 업데이트할 ROLE이 다르면, keycloak Update
+		if(!roleCode.equals(role.getUserRoleCode())) {
+			// keycloak Role Update 필요
+		}
+		
 		//권한 매핑 
-		entity.getUserRole().setId(userRoleRepository.findTop1BByUserRoleCode(roleCode).getId());
-		//DB 저장
-		userRepository.save(entity);
+		entity.getUserRole().setId(role.getId());
+		
+		// @TODO createUser / updateUser 매핑 필요
+		
+		// 등록
+		if("post".equals(mode)) {
+			//DB 저장
+			System.out.println("유저 등록 === ");
+			userRepository.save(entity);	
+		}else {
+		// 수정
+			UserEntity pUser = userRepository.findByUserId(entity.getUserId());
+			pUser.setContact(entity.getContact());
+			pUser.setOrganization(entity.getOrganization());
+			pUser.getUserRole().setId(entity.getUserRole().getId());
+			System.out.println("==================유저 수정");
+			System.out.println(pUser.toString());
+			System.out.println("==================유저 수정");
+			userRepository.save(pUser);
+		}
 	}
-	
-	
 	
 	/**
 	 * 유저 삭제
@@ -47,8 +80,6 @@ public class UserDomainService {
 	public String deleteUser(UserEntity user) {
 		
 		//@TODO 유저 삭제에 대한 정책 확정 필요
-		// useYn 플래그만 변경할지 ? 모든 정보 날린 뒤 useYn 플래그만 N으로 할지.
-
 		Optional<UserEntity> entity =  userRepository.findById(user.getUserId());
 		
 		if(entity.isPresent()) {
@@ -59,22 +90,14 @@ public class UserDomainService {
 		return user.getUserId();
 	}
 	
-	
-	
 	/**
 	 * 모든 유저 정보
 	 * @return
 	 */
 	public Page<UserEntity> getAllUserList(Pageable pageable){
-		System.out.println("========= UserDomainSErvice. getAllUSerList");
-		System.out.println(pageable.toString());
-		System.out.println(pageable.getSort());
 		Page<UserEntity> list =  userRepository.findByUseYn("Y", pageable);
-		if(list != null) System.out.println(list.toString());
 		return list;
-		
 	}
-	
 	
 	/**
 	 * Email로 유저 정보 검색 > 단일
@@ -84,7 +107,6 @@ public class UserDomainService {
 	public UserEntity getUserInfoByEmail(String email) {
 		return userRepository.findByEmail(email);
 	}
-	
 	
 	/**
 	 * UserId로 검색 > 단일

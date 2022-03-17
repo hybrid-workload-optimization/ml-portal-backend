@@ -1,10 +1,12 @@
 package kr.co.strato.portal.setting.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDto.UserRole;
+import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 
 @RestController
@@ -47,11 +51,12 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> patchUser(@RequestBody UserDto param, HttpSession session){
 		
+		
 		System.out.println("================ 수정 ===========");
 		System.out.println(param.toString());
 		System.out.println("================ 수정 ===========");
 	
-		param.setUseYn("Y");;
+		param.setUseYn("Y");
 		userService.patchUser(param);
 		
 		return new ResponseWrapper<>(param.getUserId());
@@ -87,12 +92,6 @@ public class UserController {
 		} finally {
 		}
 		
-		System.out.println("=====전체 목록=====");
-		if(list != null) System.out.println(list.toString());
-		for (UserDto userDto : list) {
-			System.out.println(userDto.toString());
-		}
-		
 		return new ResponseWrapper<>(list);
 	}
 	
@@ -113,6 +112,15 @@ public class UserController {
 		System.out.println(userDto);
 		
 		return new ResponseWrapper<>(userDto);
+	}
+	
+	//유저 Role List
+	@GetMapping("/users/roles")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<List<UserRoleDto>> getUserRoleList(){
+		List<UserRoleDto> list = userService.getUserRoleList();
+		
+		return new ResponseWrapper<>(list);
 	}
 	
 	@GetMapping("/test")

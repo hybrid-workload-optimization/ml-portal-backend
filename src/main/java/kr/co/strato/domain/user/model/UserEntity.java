@@ -1,14 +1,17 @@
 package kr.co.strato.domain.user.model;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.sun.istack.NotNull;
 
@@ -42,8 +45,9 @@ public class UserEntity {
 	@Column(name = "contact")
 	private String contact;
 	
+	@UpdateTimestamp
 	@Column(name ="updated_at")
-	private String updatedAt;
+	private LocalDateTime updatedAt = LocalDateTime.now();
 	
 	@Column(name = "update_user_id")
 	private String updateUserId;
@@ -57,8 +61,9 @@ public class UserEntity {
 	@Column(name = "create_user_name")
 	private String createUserName;
 	
+	@CreationTimestamp
 	@Column(name = "created_at")
-	private String createdAt;
+	private LocalDateTime createdAt = LocalDateTime.now();
 
 //	@Column(name = "user_role_idx")
 //	private Long userRoleIdx;
