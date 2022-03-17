@@ -130,12 +130,12 @@ public class ClusterNamespaceService {
     }
 	
 	
-	public List<Long> synClusterNamespaceSave(List<Namespace> clusterNamespaces, Long kubeConfigId) {
+	public List<Long> synClusterNamespaceSave(List<Namespace> clusterNamespaces, Long clusterIdx) {
 		List<Long> ids = new ArrayList<>();
 		
 		for (Namespace n : clusterNamespaces) {
 			try {
-				NamespaceEntity namespace = toEntity(n,kubeConfigId);
+				NamespaceEntity namespace = toEntity(n, clusterIdx);
 				// save
 				Long id = namespaceDomainService.register(namespace);
 				ids.add(id);
@@ -148,7 +148,7 @@ public class ClusterNamespaceService {
 		return ids;
 	}
 	
-	 private NamespaceEntity toEntity(Namespace	n, Long clusterId) throws JsonProcessingException {
+	 private NamespaceEntity toEntity(Namespace	n, Long clusterIdx) throws JsonProcessingException {
 	        ObjectMapper mapper = new ObjectMapper();
 	     // k8s Object -> Entity
 	       
@@ -164,7 +164,7 @@ public class ClusterNamespaceService {
 			String label = mapper.writeValueAsString(n.getMetadata().getLabels());
 
 			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(clusterId);
+			clusterEntity.setClusterIdx(clusterIdx);
 
 			NamespaceEntity namespace = NamespaceEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))

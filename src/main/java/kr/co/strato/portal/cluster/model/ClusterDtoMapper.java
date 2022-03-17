@@ -1,5 +1,6 @@
 package kr.co.strato.portal.cluster.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,12 +25,12 @@ public interface ClusterDtoMapper {
 	public ClusterDto toDto(ClusterEntity cluster);
 	
 	@Mapping(target = "nodeCount", 	source = "c.nodes",			qualifiedByName = "nodeCount")
-    @Mapping(target = "problem",	source = "c.problem",		qualifiedByName = "jsonToMap")
+    @Mapping(target = "problem",	source = "c.problem",		qualifiedByName = "jsonToList")
 	public ClusterDto.List toList(ClusterEntity c);
 	
 	@Mapping(target = "kubeConfig",		source = "c.kubeConfig")
 	@Mapping(target = "description",	source = "c.description")
-    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToMap")
+    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
 	public ClusterDto.Detail toDetail(ClusterEntity c);
 	
 	@Named("nodeCount")
@@ -46,4 +47,15 @@ public interface ClusterDtoMapper {
 			return new HashMap<>();
 		}
     }
+	
+	@Named("jsonToList")
+    default ArrayList<String> jsonToList(String json) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.readValue(json, ArrayList.class);
+		} catch (Exception e) {
+			return new ArrayList<>();
+		}
+    }
+    
 }

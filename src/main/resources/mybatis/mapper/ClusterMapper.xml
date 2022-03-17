@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="kr.co.strato.domain.cluster.mapper.ClusterMapper">
+ 
+ 	<delete id="deleteClusterAll">
+ 	<!-- pod_replica_set -->
+	delete from pod_replica_set where replica_set_idx in
+	(
+		select replica_set_idx from replica_set where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- deployment -->
+	delete from deployment where deployment_idx in 
+	( 
+		select deployment_idx from replica_set where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- replica_set  -->
+	delete from replica_set where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- pod_stateful_set -->
+	delete from pod_stateful_set where stateful_set_idx in
+	(
+		select stateful_set_idx from stateful_set where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- stateful_set -->
+	delete from stateful_set where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- pod_daemon_set -->
+	delete from pod_daemon_set where daemon_set_idx in
+	(
+		select daemon_set_idx from daemon_set where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- daemon_set -->
+	delete from daemon_set where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- pod_job -->
+	delete from pod_job where job_idx in
+	(
+		select job_idx from job where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- cron_job -->
+	delete from cron_job where cron_job_idx in
+	(
+		select cron_job_idx from job where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- job -->
+	delete from job where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- pod_persistent_volume_claim -->
+	delete from pod_persistent_volume_claim where persistent_volume_claim_idx in
+	(
+		select persistent_volume_claim_idx from persistent_volume_claim where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- pod -->
+	delete from pod where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- persistent_volume_claim -->
+	delete from persistent_volume_claim where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- config_map -->
+	delete from config_map where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- secret -->
+	delete from secret where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- ingress_rule -->
+	delete from ingress_rule where ingress_idx in
+	(
+		select ingress_idx from ingress where ingress_controller_idx in
+		(
+			select ingress_controller_idx from ingress_controller where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- ingress -->
+	delete from ingress where ingress_controller_idx in
+	(
+		select ingress_controller_idx from ingress_controller where cluster_idx = #{clusterIdx}
+	);
+	
+	<!-- ingress_controller -->
+	delete  from ingress_controller where cluster_idx = #{clusterIdx};
+	
+	<!-- service_endpoint -->
+	delete from service_endpoint where service_idx in
+	(
+		select service_idx from service where namespace_idx in
+		(
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+		)
+	);
+	
+	<!-- service -->
+	delete from service where namespace_idx in
+	(
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+ 	
+ 	<!-- storage_class -->
+	delete from storage_class where cluster_idx = #{clusterIdx};
+	
+	<!-- persistent_volume -->
+	delete from persistent_volume where cluster_idx = #{clusterIdx};
+		
+	<!-- node -->
+	delete from node where cluster_idx = #{clusterIdx};
+	
+	<!--namespace -->
+	delete from namespace where cluster_idx = #{clusterIdx};
+	</delete>
+	
+ </mapper>

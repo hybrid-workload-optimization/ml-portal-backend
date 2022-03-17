@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import kr.co.strato.domain.project.model.ProjectClusterEntity;
-import kr.co.strato.domain.project.model.ProjectEntity;
-import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.domain.cluster.mapper.ClusterMapper;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
+import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -24,6 +24,9 @@ public class ClusterDomainService {
 
 	@Autowired
 	ProjectClusterRepository projectClusterRepository;
+	
+	@Autowired
+    ClusterMapper clusterMapper;
 	
 	public void register(ClusterEntity clusterEntity) {
 		clusterRepository.save(clusterEntity);
@@ -36,10 +39,6 @@ public class ClusterDomainService {
 		} else {
 			throw new NotFoundResourceException("cluster_idx : " + clusterEntity.getClusterIdx());
 		}
-	}
-	
-	public void delete(ClusterEntity clusterEntity) {
-		clusterRepository.delete(clusterEntity);
 	}
 	
 	public ClusterEntity get(Long clusterIdx) {
@@ -82,4 +81,11 @@ public class ClusterDomainService {
 
 		return clusters;
 	}
+	
+
+	public void delete(ClusterEntity clusterEntity) {
+		//clusterRepository.delete(clusterEntity);
+		clusterMapper.deleteClusterAll(clusterEntity.getClusterIdx());
+	}
+	
 }

@@ -1,9 +1,7 @@
 package kr.co.strato.portal.cluster.service;
 
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,11 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.k8s.namespace.service.NamespaceAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
+import kr.co.strato.adapter.k8s.persistentVolume.service.PersistentVolumeAdapterService;
+import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -60,8 +64,26 @@ public class ClusterService {
 	NodeAdapterService nodeAdapterService;
 	
 	@Autowired
+	NamespaceAdapterService namespaceAdapterService;
+	
+	@Autowired
+	PersistentVolumeAdapterService persistentVolumeAdapterService;
+	
+	@Autowired
+	StorageClassAdapterService storageClassAdapterService;
+	
+	@Autowired
 	ClusterNodeService clusterNodeService;
 
+	@Autowired
+	ClusterNamespaceService clusterNamespaceService;
+	
+	@Autowired
+	ClusterPersistentVolumeService clusterPersistentVolumeService;
+	
+	@Autowired
+	ClusterStorageClassService clusterStorageClassService;
+	
 	
 	/**
 	 * Cluster 목록 조회
@@ -127,14 +149,8 @@ public class ClusterService {
 		// for test
 		//List<String> clusterProblem	= Arrays.asList("problem1", "problem12", "problem3");
 		
-		Map<String, Object> clusterProblemMap = new HashMap<>();
-		clusterProblemMap.put(ClusterEntity.DATA_KEY_PROBLEM, clusterProblem);
-		
 		ObjectMapper mapper = new ObjectMapper();
-		String clusterProblemString = mapper.writeValueAsString(clusterProblemMap);
-		
-		// k8s - get cluster's nodes
-		List<Node> nodeList = nodeAdapterService.getNodeList(clusterId);
+		String clusterProblemString = mapper.writeValueAsString(clusterProblem);
 		
 		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
@@ -146,8 +162,9 @@ public class ClusterService {
 		
 		clusterDomainService.register(clusterEntity);
 		
-		// db - insert cluster's nodes
-		clusterNodeService.synClusterNodeSave(nodeList, clusterEntity.getClusterIdx());
+		// sync k8s cluster
+		log.info("Cluster Synchronization started.");
+		syncCluster(clusterId, clusterEntity.getClusterIdx());
 		
 		return clusterEntity.getClusterIdx();
 	}
@@ -162,6 +179,33 @@ public class ClusterService {
 	 */
 	private Long createKubesprayCluster(ClusterDto.Form clusterDto) throws Exception {
 		return null;
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	private void syncCluster(Long clusterId, Long clusterIdx) throws Exception {
+		// k8s - get namespace
+		List<Namespace> namespaces = namespaceAdapterService.getNamespaceList(clusterId);
+				
+		// k8s - get node
+		List<Node> nodes = nodeAdapterService.getNodeList(clusterId);
+		
+		// k8s - get pv
+		List<PersistentVolume> persistentVolumes = persistentVolumeAdapterService.getPersistentVolumeList(clusterId);
+		
+		// k8s - get storage class
+		List<StorageClass> storageClasses = storageClassAdapterService.getStorageClassList(clusterId);
+		
+		// db - insert namespace
+		clusterNamespaceService.synClusterNamespaceSave(namespaces, clusterIdx);
+				
+		// db - insert node
+		clusterNodeService.synClusterNodeSave(nodes, clusterIdx);
+		
+		// db - insert pv
+		clusterPersistentVolumeService.synClusterPersistentVolumeSave(persistentVolumes, clusterIdx);
+		
+		// db - storage class
+		clusterStorageClassService.synClusterStorageClassSave(storageClasses, clusterIdx);
 	}
 	
 	/**

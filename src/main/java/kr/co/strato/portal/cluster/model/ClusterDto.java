@@ -1,7 +1,6 @@
 package kr.co.strato.portal.cluster.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -17,6 +16,7 @@ public class ClusterDto {
 	
 	@Getter
 	@Setter
+	@NoArgsConstructor
 	@ToString
 	public static class Form {
 		private Long clusterIdx;
@@ -34,6 +34,7 @@ public class ClusterDto {
 
 	@Getter
 	@Setter
+	@NoArgsConstructor
 	@ToString
 	public static class Node {
 		private String name;
@@ -43,6 +44,7 @@ public class ClusterDto {
 	
 	@Getter
 	@Setter
+	@NoArgsConstructor
 	public static class List {
 		private Long clusterIdx;
 		private String clusterName;
@@ -52,11 +54,12 @@ public class ClusterDto {
 		private String provider;
 		private String providerVersion;
 		private String createdAt;
-		private HashMap<String, Object> problem;
+		private ArrayList<String> problem;
 	}
 	
 	@Getter
 	@Setter
+	@NoArgsConstructor
 	public static class Detail {
 		private Long clusterIdx;
 		private String clusterName;
@@ -68,7 +71,7 @@ public class ClusterDto {
 		
 		// status
 		private String status;
-		private HashMap<String, Object> problem;
+		private ArrayList<String> problem;
 		
 		// master/worker
 		private int masterCount;

@@ -30,8 +30,6 @@ import lombok.ToString;
 @Table(name = "cluster")
 public class ClusterEntity {
 	
-	public final static String DATA_KEY_PROBLEM = "problem";
-	
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cluster_idx", unique = true)
