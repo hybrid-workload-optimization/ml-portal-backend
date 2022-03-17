@@ -15,11 +15,17 @@ public interface IngressDtoMapper {
 	IngressDtoMapper INSTANCE = Mappers.getMapper(IngressDtoMapper.class);
 	
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
+	@Mapping(target = "namespace" , source = "namespace.name")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
+	@Mapping(target = "address" , source = "ingressController.address")
+	@Mapping(target = "host" , source = "ingressController.name")
 	public IngressDto.ResListDto toResListDto(IngressEntity ingressEntity);
 	
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
+	@Mapping(target = "namespace" , source = "namespace.name")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
+	@Mapping(target = "address" , source = "ingressController.address")
+	@Mapping(target = "host" , source = "ingressController.name")
 	public IngressDto.ResDetailDto toResDetailDto(IngressEntity ingressEntity);
 	
 	

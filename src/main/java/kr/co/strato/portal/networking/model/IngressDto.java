@@ -33,6 +33,9 @@ public class IngressDto {
 		private String ingressClass;
 		private LocalDateTime createdAt;
 		private Long namespaceIdx;
+		private String namespace;
+		private String address;
+		private String host;
 		private Long ingressControllerIdx;
 	}
 
@@ -47,6 +50,9 @@ public class IngressDto {
     	private String ingressClass;
     	private LocalDateTime createdAt;
     	private Long namespaceIdx;
+    	private String namespace;
+		private String address;
+		private String host;
     	private Long ingressControllerIdx;
     	private List<RuleList> ruleList;
     }
