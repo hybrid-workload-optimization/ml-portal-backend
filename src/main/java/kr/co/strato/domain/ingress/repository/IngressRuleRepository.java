@@ -8,5 +8,5 @@ import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 
 public interface IngressRuleRepository extends JpaRepository<IngressRuleEntity, Long>  {
-	List<IngressRuleEntity> findByIngressId(IngressEntity ingressEntity);
+	List<IngressRuleEntity> findByIngressId(Long id);
 }

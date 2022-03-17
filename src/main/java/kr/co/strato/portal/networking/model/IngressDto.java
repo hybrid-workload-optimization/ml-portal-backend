@@ -1,6 +1,7 @@
 package kr.co.strato.portal.networking.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,7 @@ public class IngressDto {
     	private LocalDateTime createdAt;
     	private Long namespaceIdx;
     	private Long ingressControllerIdx;
+    	private List<RuleList> ruleList;
     }
 	
 	@Getter
@@ -56,5 +58,19 @@ public class IngressDto {
 	public static class SearchParam{
 	    private Long namespaceIdx;
 	    private String name;
+	}
+	
+	@Getter
+	@Setter
+	@ToString
+	public static class RuleList {
+		private String host;
+		private String protocol;
+		private String path;
+		private String pathType;
+		private String service;
+		private String port;
+		
+		
 	}
 }

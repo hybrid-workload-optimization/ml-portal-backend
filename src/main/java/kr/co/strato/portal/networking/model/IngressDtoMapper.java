@@ -5,7 +5,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import kr.co.strato.domain.ingress.model.IngressEntity;
+import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IngressDtoMapper {
@@ -19,5 +21,8 @@ public interface IngressDtoMapper {
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
 	public IngressDto.ResDetailDto toResDetailDto(IngressEntity ingressEntity);
+	
+	
+	public IngressDto.RuleList toRuleListDto(IngressRuleEntity ingressRuleEntity);
 	
 }

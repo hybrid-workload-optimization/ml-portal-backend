@@ -24,8 +24,8 @@ public class IngressRuleDomainService {
 	private IngressControllerRepository ingressControllerRepository;
 
 	
-	public List<IngressRuleEntity> findByIngressId(IngressEntity ingressEntity) {
-		return ingressRuleRepository.findByIngressId(ingressEntity);
+	public List<IngressRuleEntity> findByIngressId(Long id) {
+		return ingressRuleRepository.findByIngressId(id);
 	}
 	
 	public Long register(IngressRuleEntity ingressEntity) {
