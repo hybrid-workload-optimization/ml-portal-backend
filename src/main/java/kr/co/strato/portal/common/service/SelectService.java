@@ -13,6 +13,8 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
+import kr.co.strato.domain.user.model.UserRoleEntity;
+import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.portal.common.model.SelectDto;
 import kr.co.strato.portal.common.model.SelectDtoMapper;
 
@@ -26,7 +28,10 @@ public class SelectService {
 
     @Autowired
     private NamespaceDomainService namespaceDomainService;
-
+    
+    @Autowired
+    private UserRoleDomainService userRoleDomainService;
+    
     public List<SelectDto> getSelectProjects(){
         List<ProjectEntity> projects = projectDomainService.getProjects();
         List<SelectDto> selectProjects =  projects.stream().map( e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
@@ -50,5 +55,11 @@ public class SelectService {
         List<SelectDto> selectNamespaces = namespaces.stream().map(e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
         return selectNamespaces;
     }
+
+	public List<SelectDto> getUserRoles() {
+		List<UserRoleEntity> roles = userRoleDomainService.getAllListAuthority();
+		List<SelectDto> selectRoles = roles.stream().map(e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
+		return selectRoles;
+	}
 
 }

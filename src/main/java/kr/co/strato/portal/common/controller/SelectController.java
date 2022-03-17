@@ -41,4 +41,12 @@ public class SelectController {
 
         return new ResponseWrapper<>(results);
     }
+    
+    @GetMapping("api/v1/select/user/roles")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<SelectDto>> getUserRoles(){
+        List<SelectDto> results = selectService.getUserRoles();
+
+        return new ResponseWrapper<>(results);
+    }
 }

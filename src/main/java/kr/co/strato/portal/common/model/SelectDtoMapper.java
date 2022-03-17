@@ -1,12 +1,14 @@
 package kr.co.strato.portal.common.model;
 
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
-import kr.co.strato.domain.project.model.ProjectEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SelectDtoMapper {
@@ -26,5 +28,10 @@ public interface SelectDtoMapper {
     @Mapping(target = "text", source = "name")
     @Mapping(target = "value", source = "id")
     public SelectDto toDto(NamespaceEntity entity);
+    
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "text", source = "userRoleName")
+    @Mapping(target = "value", source = "userRoleCode")
+    public SelectDto toDto(UserRoleEntity entity);
 
 }
