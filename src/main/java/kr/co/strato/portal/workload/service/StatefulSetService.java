@@ -1,8 +1,12 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,6 +44,8 @@ public class StatefulSetService {
     @Autowired
     private ClusterDomainService clusterDomainService;
 
+    @Autowired
+    private NamespaceDomainService namespaceDomainService;
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
@@ -71,9 +77,31 @@ public class StatefulSetService {
     }
 
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
-        Page<StatefulSetEntity> statefulSets = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId());
-        List<StatefulSetDto.ResListDto> dtos = statefulSets.stream().map(e -> StatefulSetDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
-        Page<StatefulSetDto.ResListDto> page = new PageImpl<>(dtos, pageable, statefulSets.getTotalElements());
+        Long clusterId = searchParam.getClusterId();
+        Long namespaceId = searchParam.getNamespaceId();
+        List<StatefulSet> statefulSets = new ArrayList<>();
+
+        if(namespaceId == null || namespaceId == 0){
+            statefulSets = statefulSetAdapterService.getList(clusterId);
+        }else{
+            NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceId);
+            statefulSets = statefulSetAdapterService.getList(clusterId, namespaceEntity.getName());
+        }
+        Map<String, StatefulSet> maps = statefulSets.stream().collect(Collectors.toMap(
+                e1 -> e1.getMetadata().getUid(),
+                e2-> e2
+        ));
+
+        Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), clusterId, namespaceId);
+        List<StatefulSetDto.ResListDto> dtos = statefulSetEntities.stream().map(
+                e -> {
+                    String uid = e.getStatefulSetUid();
+                    if(maps.containsKey(uid)){
+                        return StatefulSetDtoMapper.INSTANCE.toResListDto(e, maps.get(uid));
+                    }
+                    return StatefulSetDtoMapper.INSTANCE.toResListDto(e);
+                }).collect(Collectors.toList());
+        Page<StatefulSetDto.ResListDto> page = new PageImpl<>(dtos, pageable, statefulSetEntities.getTotalElements());
 
         return page;
     }

@@ -2,6 +2,7 @@ package kr.co.strato.adapter.k8s.statefulset.service;
 
 import java.util.List;
 
+import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -145,6 +146,54 @@ public class StatefulSetAdapterService {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - statefulSet yaml 조회 에러");
+        }
+    }
+
+    /**
+     * 스테이트풀셋 리스트 조회
+     * @param clusterId
+     * @return
+     */
+   public List<StatefulSet> getList(Long clusterId){
+       try{
+           ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(clusterId).build();
+            String result = inNamespaceProxy.getResourceList(ResourceType.statefulSet.get(), param);
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<StatefulSet> statefulSets = mapper.readValue(result, new TypeReference<List<StatefulSet>>(){});
+
+            return statefulSets;
+       }catch (JsonProcessingException e){
+           log.error(e.getMessage(), e);
+           throw new InternalServerException("json 파싱 에러");
+       }catch (Exception e){
+           log.error(e.getMessage(), e);
+           throw new InternalServerException("k8s interface 통신 에러 - statefulSet list 조회 에러");
+       }
+    }
+
+    /**
+     * 스테이트풀셋 리스트 조회
+     * @param clusterId
+     * @param namespaceName
+     * @return
+     */
+    public List<StatefulSet> getList(Long clusterId, String namespaceName){
+        try{
+            ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(clusterId)
+                    .namespace(namespaceName).build();
+            String result = inNamespaceProxy.getResourceList(ResourceType.statefulSet.get(), param);
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<StatefulSet> statefulSets = mapper.readValue(result, new TypeReference<List<StatefulSet>>(){});
+
+            return statefulSets;
+        }catch (JsonProcessingException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - statefulSet list 조회 에러");
         }
     }
 }

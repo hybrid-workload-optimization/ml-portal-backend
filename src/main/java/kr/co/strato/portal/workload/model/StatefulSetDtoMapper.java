@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,14 @@ public interface StatefulSetDtoMapper {
     @Mapping(target = "age", source = "createdAt")
     @Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
     public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity);
+
+    @Mapping(target = "name", source = "entity.statefulSetName")
+    @Mapping(target = "namespace", source = "entity.namespace.name")
+    @Mapping(target = "age", source = "entity.createdAt")
+    @Mapping(target = "label", source = "entity.label", qualifiedByName = "labelToMap")
+    @Mapping(target = "replicas", source = "k8s.status.replicas")
+    @Mapping(target = "readyReplicas", source = "k8s.status.readyReplicas")
+    public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity, StatefulSet k8s);
 
     @Named("getDayAgo")
     default String getDayAgo(LocalDateTime createdAt){
