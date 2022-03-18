@@ -77,29 +77,27 @@ public class PodService {
     }
     
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
-    	if (searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
-    		// clusterId만 파라미터로 보낸 경우 저장
-    		Long clusterId = searchParam.getClusterId();
-    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
-    		
-    		// TODO Pod 삭제 (mapping table은 Cascade로...)
-    		
-    		// TODO 왜 건너뛰는거지
-    		List<Long> ids = k8sPods.stream().map( s -> {
-    			try {
-    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-    				String namespaceName = pod.getNamespace().getName();
-    				String kind = pod.getKind();
-    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind);
-    				return id;
-    			} catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    throw new InternalServerException("pod register error");
-                }
-    		}).collect(Collectors.toList());
-    	}
+//    	if (searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
+//    		// clusterId만 파라미터로 보낸 경우 저장
+//    		Long clusterId = searchParam.getClusterId();
+//    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
+//    		
+//    		// TODO Pod 삭제 (mapping table은 Cascade로...)
+//    		
+//    		List<Long> ids = k8sPods.stream().map( s -> {
+//    			try {
+//    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+//    				String namespaceName = pod.getNamespace().getName();
+//    				String kind = pod.getKind();
+//    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind);
+//    				return id;
+//    			} catch (Exception e) {
+//                    log.error(e.getMessage(), e);
+//                    throw new InternalServerException("pod register error");
+//                }
+//    		}).collect(Collectors.toList());
+//    	}
     	// TODO k8s 데이터 저장
-    	
     	
     	
     	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId(), searchParam.getNodeId());
