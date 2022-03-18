@@ -1,6 +1,7 @@
 package kr.co.strato.domain.persistentVolume.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,10 @@ public class PersistentVolumeDomainService {
 
         return cluster;
     }
+    
+    public List<PersistentVolumeEntity> findByStorageClassIdx(Long storageClassIdx){
+		return persistentVolumeRepository.findByStorageClassIdx(storageClassIdx);
+	}
 
 	
 }

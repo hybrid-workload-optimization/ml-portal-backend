@@ -18,12 +18,13 @@ import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
+import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ public class ClusterStorageClassService {
 	@Autowired
 	private StorageClassDomainService storageClassDomainService;
 	
+	@Autowired
+	private PersistentVolumeDomainService persistentVolumeDomainService;
 	
 	public Page<ClusterStorageClassDto.ResListDto> getClusterStorageClassList(Pageable pageable, ClusterStorageClassDto.SearchParam searchParam) {
 		Page<StorageClassEntity> storageClassPage = storageClassDomainService.getStorageClassList(pageable, searchParam.getClusterIdx(), searchParam.getName());
@@ -90,9 +93,13 @@ public class ClusterStorageClassService {
 	
     public ClusterStorageClassDto.ResDetailDto getClusterStorageClassDetail(Long id){
     	StorageClassEntity storageClassEntity = storageClassDomainService.getDetail(id); 
+    	List<PersistentVolumeEntity> pvList = persistentVolumeDomainService.findByStorageClassIdx(id);
 
     	ClusterStorageClassDto.ResDetailDto clusterStorageClassDto = ClusterStorageClassDtoMapper.INSTANCE.toResDetailDto(storageClassEntity);
-        return clusterStorageClassDto;
+        List<ClusterStorageClassDto.PvList> pvListDto = pvList.stream().map(c -> ClusterStorageClassDtoMapper.INSTANCE.toPvListDto(c)).collect(Collectors.toList());
+        clusterStorageClassDto.setPvList(pvListDto);
+    	
+    	return clusterStorageClassDto;
     }
 	
 	

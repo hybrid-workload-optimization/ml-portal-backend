@@ -2,7 +2,9 @@ package kr.co.strato.portal.cluster.model;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 
+import kr.co.strato.portal.networking.model.IngressDto.RuleList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,6 +55,7 @@ public class ClusterStorageClassDto {
     	private Long clusterIdx;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
+    	private List<PvList> pvList;
     }
 	
 	@Getter
@@ -64,5 +67,19 @@ public class ClusterStorageClassDto {
 	    private String name;
 	}
 	
+	
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class PvList{
+    	private Long id;
+    	private String name;
+    	private String status;
+		private String accessMode;
+		private int size;
+		private String reclaimPolicy;
+		private String claim;
+		private LocalDateTime createdAt;
+    }
 	
 }

@@ -11,6 +11,7 @@ import org.mapstruct.factory.Mappers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -27,6 +28,8 @@ public interface ClusterStorageClassDtoMapper {
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterStorageClassDto.ResDetailDto toResDetailDto(StorageClassEntity storageClass);
+
+	public ClusterStorageClassDto.PvList toPvListDto(PersistentVolumeEntity persistentVolumeEntity);
 
 	
 	@Named("labelToMap")
