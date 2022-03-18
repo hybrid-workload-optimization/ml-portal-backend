@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +54,24 @@ public class ReplicaSetService {
 	 * @throws Exception
 	 */
 	public Page<ReplicaSetDto.List> getReplicaSetList(Pageable pageable, Search search) throws Exception {
+		// get clusterId(kubeConfigId)
+		ClusterEntity cluster = clusterDomainService.get(search.getClusterIdx());
+				
+		// k8s - get replica set list
+		List<ReplicaSet> replicaSets = replicaSetAdapterService.getList(cluster.getClusterId());
+		Map<String, ReplicaSet> replicaSetMaps = replicaSets.stream()
+				.collect(Collectors.toMap(r1 -> r1.getMetadata().getUid(), r2 -> r2));
+		
+		// db - get replica set list
 		Page<ReplicaSetEntity> replicaSetPage = replicaSetDomainService.getList(pageable, search.getProjectIdx(), search.getClusterIdx(), search.getNamespaceIdx());
         
 		List<ReplicaSetDto.List> replicaSetList = replicaSetPage.stream()
-				.map(r -> ReplicaSetDtoMapper.INSTANCE.toList(r))
+				.map(r -> {
+					if (replicaSetMaps.containsKey(r.getReplicaSetUid())) {
+						return ReplicaSetDtoMapper.INSTANCE.toList(r, replicaSetMaps.get(r.getReplicaSetUid()));
+					}
+					return ReplicaSetDtoMapper.INSTANCE.toList(r);
+				})
 				.collect(Collectors.toList());
 		
         Page<ReplicaSetDto.List> pages = new PageImpl<>(replicaSetList, pageable, replicaSetPage.getTotalElements());

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
@@ -26,14 +27,13 @@ public class ReplicaSetAdapterService {
 	@Autowired
     private InNamespaceProxy inNamespaceProxy;
 	
-	public List<ReplicaSet> getList(Long clusterId, String yaml) throws Exception {
-		YamlApplyParam body = YamlApplyParam.builder()
+	public List<ReplicaSet> getList(Long clusterId) throws Exception {
+		ResourceListSearchInfo body = ResourceListSearchInfo.builder()
 				.kubeConfigId(clusterId)
-				.yaml(yaml)
 				.build();
 		
 		log.debug("[Get Replica Set List] request : {}", body.toString());
-		String response = commonProxy.apply(body);
+		String response = inNamespaceProxy.getResourceList(ResourceType.replicaSet.get(), body);
 		log.debug("[Get Replica Set List] response : {}", response);
 		
 		ObjectMapper mapper = new ObjectMapper(); 

@@ -26,8 +26,8 @@ public class ReplicaSetDto {
 		private String name;
 		private String namespace;
 		private HashMap<String, Object> label;
-		private int podCount;
-		private int podTotalCount;
+		private int runningPod;
+		private int desiredPod;
 		private String image;
 		private String age;
 	}
