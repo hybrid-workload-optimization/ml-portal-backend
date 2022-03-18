@@ -39,7 +39,7 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
                 jpaQueryFactory
                         .select(qNamespaceEntity)
                         .from(qNamespaceEntity)
-                        .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                        .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qNamespaceEntity.id.desc())
                         .offset(pageable.getOffset())
@@ -66,7 +66,7 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
                 jpaQueryFactory
                         .select(qNamespaceEntity)
                         .from(qNamespaceEntity)
-                        .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                        .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qNamespaceEntity.id.desc())
                         .fetchResults();
@@ -90,7 +90,7 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
                 jpaQueryFactory
                         .select(qNamespaceEntity)
                         .from(qNamespaceEntity)
-                        .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                        .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qNamespaceEntity.id.desc())
                         .fetchResults();

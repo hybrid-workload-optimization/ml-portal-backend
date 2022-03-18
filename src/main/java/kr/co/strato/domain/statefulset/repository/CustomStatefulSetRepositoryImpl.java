@@ -47,7 +47,7 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
                         .select(qStatefulSetEntity)
                         .from(qStatefulSetEntity)
                         .leftJoin(qStatefulSetEntity.namespace, qNamespaceEntity)
-                        .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                        .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qStatefulSetEntity.id.desc())
                         .offset(pageable.getOffset())

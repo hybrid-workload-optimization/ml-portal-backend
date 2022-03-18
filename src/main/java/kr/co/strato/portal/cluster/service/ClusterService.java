@@ -23,7 +23,14 @@ import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
+import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
@@ -36,6 +43,15 @@ public class ClusterService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
+	
+	@Autowired
+	NamespaceDomainService namespaceDomainService;
+	
+	@Autowired
+	PodDomainService podDomainService;
+	
+	@Autowired
+	PersistentVolumeClaimDomainService persistentVolumeClaimDomainService;
 	
 	@Autowired
 	ClusterAdapterService clusterAdapterService;
@@ -190,22 +206,51 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	public ClusterDto.Detail getCluster(Long clusterIdx) throws Exception {
+		// cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		ClusterDto.Detail detail = ClusterDtoMapper.INSTANCE.toDetail(clusterEntity);
-		// TODO : 추가 정보 설정 필요
-		/*
-		// Master 가동률
-		float availablePercentMaster;
-		// Worker 가동률
-		float availablePercentWorker;
-		// Master 수량
-		int masterCount;
-		// Worker 수량
-		int workerCount;
-		// move to monitoring service
-		String monitoringServiceUrl;
-		*/
+		
+		PageRequest pageRequest = new PageRequest();
+		
+		// node
+		List<NodeEntity> nodes = clusterEntity.getNodes();
+		
+		// namespace
+		List<NamespaceEntity> namespaces = namespaceDomainService.getNamespaceList(pageRequest.of(), clusterIdx, null).getContent();
+		
+		// pod
+		List<PodEntity> pods = podDomainService.getPods(pageRequest.of(), null, clusterIdx, null, null).getContent();
+		
+		// TODO : pvc list
+		
+		log.debug("[getCluster] nodes/namespaces/pods size = {}/{}/{}", nodes.size(), namespaces.size(), pods.size());
+		
+		List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
+		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker")).collect(Collectors.toList());
+		
+		List<NodeEntity> availableMasterNodes = masterNodes.stream().filter(n -> n.getStatus().equals("true")).collect(Collectors.toList());
+		List<NodeEntity> availableworkerNodes = workerNodes.stream().filter(n -> n.getStatus().equals("true")).collect(Collectors.toList());
+		
+		log.debug("[getCluster] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
+		log.debug("[getCluster] availableMasterNodes/availableworkerNodes size = {}/{}", availableMasterNodes.size(), availableworkerNodes.size());
+		
+		// Master/Worker 수량
+		int masterCount = masterNodes.size();
+		int workerCount = workerNodes.size();
+		
+		// Master/Worker 가동률
+		float availableMasterPercent = masterCount > 0 ? (availableMasterNodes.size() * 100 / masterCount) : 0;
+		float availableWorkerPercent = workerCount > 0 ? (availableworkerNodes.size() * 100 / workerCount) : 0;
+		
+		detail.setMasterCount(masterCount);
+		detail.setWorkerCount(workerCount);
+		detail.setAvailableMasterPercent(availableMasterPercent);
+		detail.setAvailableWorkerPercent(availableWorkerPercent);
+		detail.setNamespaceCount(namespaces.size());
+		detail.setPodCount(pods.size());
+		detail.setPvcCount(0); // TODO : pvc count
+		
 		return detail;
 	}
 

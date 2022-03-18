@@ -71,7 +71,7 @@ public class ServiceDomainService {
     public ClusterEntity getClusterEntity(Long serviceId){
         ServiceEntity serviceEntity = get(serviceId);
 
-        return serviceEntity.getNamespace().getClusterIdx();
+        return serviceEntity.getNamespace().getCluster();
     }
 
     public ServiceEntity get(Long serviceId){

@@ -65,15 +65,21 @@ public class ClusterDto {
 		private String createdAt;
 		private String kubeConfig;
 		private String description;
+		
 		// status
 		private String status;
 		private HashMap<String, Object> problem;
+		
 		// master/worker
-		private float availablePercentMaster;
-		private float availablePercentWorker;
 		private int masterCount;
 		private int workerCount;
-		// move to monitoring service
+		private float availableMasterPercent;
+		private float availableWorkerPercent;
+		
+		private int namespaceCount;
+		private int podCount;
+		private int pvcCount;
+		
 		private String monitoringServiceUrl;
 	}
 }

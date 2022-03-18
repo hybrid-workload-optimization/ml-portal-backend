@@ -1,24 +1,8 @@
 package kr.co.strato.portal.workload.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
-import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
-import kr.co.strato.domain.namespace.service.NamespaceDomainService;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
-import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
-import kr.co.strato.global.error.exception.InternalServerException;
-import kr.co.strato.global.util.Base64Util;
-import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
-import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
-import kr.co.strato.portal.workload.model.StatefulSetDetailDtoMapper;
-import kr.co.strato.portal.workload.model.StatefulSetDto;
-import kr.co.strato.portal.workload.model.StatefulSetDtoMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,9 +10,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
+import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
+import kr.co.strato.portal.workload.model.StatefulSetDetailDtoMapper;
+import kr.co.strato.portal.workload.model.StatefulSetDto;
+import kr.co.strato.portal.workload.model.StatefulSetDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -83,7 +81,7 @@ public class StatefulSetService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteStatefulSet(Long id){
         StatefulSetEntity statefulSetEntity = statefulSetDomainService.get(id);
-        Long clusterId = statefulSetEntity.getNamespace().getClusterIdx().getClusterId();
+        Long clusterId = statefulSetEntity.getNamespace().getCluster().getClusterId();
         String namespaceName = statefulSetEntity.getNamespace().getName();
         String statefulSetName = statefulSetEntity.getStatefulSetName();
 
@@ -129,7 +127,7 @@ public class StatefulSetService {
         //get k8s statefulSet model
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
-        Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+        Long clusterId = entity.getNamespace().getCluster().getClusterId();
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
         StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet);
@@ -144,7 +142,7 @@ public class StatefulSetService {
         //get k8s statefulSet model
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
-        Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
+        Long clusterId = entity.getNamespace().getCluster().getClusterId();
 
         String yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
         yaml = Base64Util.encode(yaml);

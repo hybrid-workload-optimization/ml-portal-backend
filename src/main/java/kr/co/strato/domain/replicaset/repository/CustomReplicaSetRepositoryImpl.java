@@ -44,7 +44,7 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
         		.select(qReplicaSetEntity)
                 .from(qReplicaSetEntity)
                 .leftJoin(qReplicaSetEntity.namespace, qNamespaceEntity)
-                .leftJoin(qNamespaceEntity.clusterIdx, qClusterEntity)
+                .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
                 .where(builder)
                 .orderBy(qReplicaSetEntity.replicaSetIdx.desc())
                 .offset(pageable.getOffset())

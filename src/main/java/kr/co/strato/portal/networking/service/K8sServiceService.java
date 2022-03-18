@@ -1,12 +1,27 @@
 package kr.co.strato.portal.networking.service;
 
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import io.fabric8.kubernetes.api.model.*;
+
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
+import io.fabric8.kubernetes.api.model.EndpointSubset;
+import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Service;
 import kr.co.strato.adapter.k8s.endpoint.EndpointAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
@@ -21,16 +36,6 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.networking.model.K8sServiceDto;
 import kr.co.strato.portal.networking.model.K8sServiceDtoMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @Slf4j
@@ -125,7 +130,7 @@ public class K8sServiceService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteService(Long id){
         ServiceEntity serviceEntity = serviceDomainService.get(id);
-        Long clusterId = serviceEntity.getNamespace().getClusterIdx().getClusterId();
+        Long clusterId = serviceEntity.getNamespace().getCluster().getClusterId();
         String namespaceName = serviceEntity.getNamespace().getName();
         String serviceName = serviceEntity.getServiceName();
 
@@ -142,7 +147,7 @@ public class K8sServiceService {
 
         String serviceName = serviceEntity.getServiceName();
         String namespaceName = serviceEntity.getNamespace().getName();
-        Long clusterId = serviceEntity.getNamespace().getClusterIdx().getClusterId();
+        Long clusterId = serviceEntity.getNamespace().getCluster().getClusterId();
 
         String yaml = serviceAdapterService.getYaml(clusterId, namespaceName, serviceName);
         yaml = Base64Util.encode(yaml);

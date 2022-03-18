@@ -1,4 +1,6 @@
 package kr.co.strato.domain.pod.repository;
+
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -75,7 +77,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
                         .from(qPodEntity)
                         .leftJoin(qPodEntity.namespace, qNamespaceEntity)
                         .leftJoin(qPodEntity.node, qNodeEntity)
-                        .leftJoin(qNodeEntity.cluster, qClusterEntity)
+                        .innerJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qPodEntity.id.desc())
                         .offset(pageable.getOffset())
