@@ -42,6 +42,7 @@ public interface PodMapper {
             String nodeName = spec.getNodeName();
             String uid = metadata.getUid();
             String ip = status.getPodIP();
+            String statusStr = status.getPhase();
             
             Integer restart = containerStatus.getRestartCount();
             
@@ -90,6 +91,7 @@ public interface PodMapper {
                     .ip(ip)
                     .label(label)
                     .restart(restart)
+                    .status(statusStr)
 //                    .cpu(cpu)
 //                    .memory(memory)
                     .kind(ownerKind)
