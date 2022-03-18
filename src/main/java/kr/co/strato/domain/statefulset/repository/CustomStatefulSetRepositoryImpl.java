@@ -1,17 +1,20 @@
 package kr.co.strato.domain.statefulset.repository;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import kr.co.strato.domain.cluster.model.QClusterEntity;
-import kr.co.strato.domain.namespace.model.QNamespaceEntity;
-import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.model.QNamespaceEntity;
+import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetRepository{
     private final JPAQueryFactory jpaQueryFactory;
@@ -55,5 +58,27 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
         long total = results.getTotal();
 
         return new PageImpl<>(content, pageable, total);
+    }
+    
+    @Override
+    public StatefulSetEntity findByUidAndNamespaceIdx(String statefulSetUid, NamespaceEntity namespaceEntity){
+        QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+        QStatefulSetEntity qStatefulSetEntity = QStatefulSetEntity.statefulSetEntity;
+        
+        // required condition
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qNamespaceEntity.id.eq(namespaceEntity.getId()));
+        builder.and(qStatefulSetEntity.statefulSetUid.eq(statefulSetUid));
+
+        StatefulSetEntity results =
+                jpaQueryFactory
+                        .select(qStatefulSetEntity)
+                        .from(qStatefulSetEntity)
+                        .leftJoin(qStatefulSetEntity.namespace, qNamespaceEntity)
+                        .where(builder)
+                        .orderBy(qStatefulSetEntity.id.desc())
+                        .fetchOne();
+
+		return results;
     }
 }

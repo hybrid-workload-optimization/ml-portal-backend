@@ -61,6 +61,13 @@ public class PodController {
     	return new ResponseWrapper<>(result);
     }
     
+    @GetMapping("api/v1/pod/owner/podList")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<PodDto.ResListDto>> getPodOwnerPodList(@RequestParam("clusterId") Long clusterId, PodDto.OwnerSearchParam searchParam) {
+    	List<PodDto.ResListDto> result = podService.getPodOwnerPodList(clusterId, searchParam);
+    	return new ResponseWrapper<>(result);
+    }
+    
     @GetMapping("api/v1/pod//log/download")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ByteArrayResource> getPodLogDownload(@RequestParam("clusterId") Long clusterId, @RequestParam("namespace") String namespace, @RequestParam("name") String name) {

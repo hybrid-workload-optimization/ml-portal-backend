@@ -1,4 +1,5 @@
 package kr.co.strato.domain.pod.repository;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,8 +14,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.node.model.QNodeEntity;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
+import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.QPodEntity;
+import kr.co.strato.domain.pod.model.QPodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
 import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
@@ -26,6 +30,24 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 	
+	
+//	@Override
+//	public PodEntity getPodDetail(Long podId) {
+//		QPodEntity qPodEntity = QPodEntity.podEntity;
+//		QPodPersistentVolumeClaimEntity qPodPersistentVolumeClaimEntity = QPodPersistentVolumeClaimEntity.podPersistentVolumeClaimEntity;
+//		QPersistentVolumeClaimEntity qPersistentVolumeClaimEntity = QPersistentVolumeClaimEntity.persistentVolumeClaimEntity;
+//		
+//		QueryResults<PersistentVolumeClaimEntity> results =
+//                jpaQueryFactory
+//                        .select(qPersistentVolumeClaimEntity)
+//                        .from(qPodPersistentVolumeClaimEntity)
+//                        .leftJoin(qPodPersistentVolumeClaimEntity.pod, qPodEntity)
+//                        .leftJoin(qPodPersistentVolumeClaimEntity.persistentVolumeClaim, qPersistentVolumeClaimEntity)
+//                        .where(qPodEntity.id.eq(podId))
+//                        .fetchResults();
+//		
+//		return new PodEntity();
+//	}
 	@Override
     public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
 
@@ -70,7 +92,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 	
 	@Override
 	public StatefulSetEntity getPodStatefulSet(Long podId) {
-		QPodStatefulSetEntity qMappingEntity = QPodStatefulSetEntity.podStatefulSetEntity;
+		QPodStatefulSetEntity qPodStatefulSetEntity = QPodStatefulSetEntity.podStatefulSetEntity;
 		QStatefulSetEntity qStatefulSetEntity = QStatefulSetEntity.statefulSetEntity;
 		QPodEntity qPodEntity = QPodEntity.podEntity;
 
@@ -78,8 +100,8 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 				jpaQueryFactory
 						.select(qStatefulSetEntity)
 						.from(qStatefulSetEntity)
-						.leftJoin(qStatefulSetEntity.podStatefulSets, qMappingEntity)
-						.leftJoin(qMappingEntity.pod, qPodEntity)
+						.leftJoin(qStatefulSetEntity.podStatefulSets, qPodStatefulSetEntity)
+						.leftJoin(qPodStatefulSetEntity.pod, qPodEntity)
 						.where(qPodEntity.id.eq(podId))
 						.fetchOne();
 		

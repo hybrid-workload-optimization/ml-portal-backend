@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -74,6 +77,31 @@ public class PodService {
     }
     
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
+    	if (searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
+    		// clusterId만 파라미터로 보낸 경우 저장
+    		Long clusterId = searchParam.getClusterId();
+    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
+    		
+    		// TODO Pod 삭제 (mapping table은 Cascade로...)
+    		
+    		// TODO 왜 건너뛰는거지
+    		List<Long> ids = k8sPods.stream().map( s -> {
+    			try {
+    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+    				String namespaceName = pod.getNamespace().getName();
+    				String kind = pod.getKind();
+    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind);
+    				return id;
+    			} catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    throw new InternalServerException("pod register error");
+                }
+    		}).collect(Collectors.toList());
+    	}
+    	// TODO k8s 데이터 저장
+    	
+    	
+    	
     	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId(), searchParam.getNodeId());
         List<PodDto.ResListDto> dtos = pods.stream().map(e -> PodDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
         Page<PodDto.ResListDto> pages = new PageImpl<>(dtos, pageable, pods.getTotalElements());
@@ -114,13 +142,6 @@ public class PodService {
     	// get pod entity
     	PodEntity entity = podDomainService.get(podId);
     	
-    	// get k8s pod model
-//    	String podName = entity.getPodName();
-//    	String namespaceName = entity.getNamespace().getName();
-//    	Long clusterId = entity.getNamespace().getClusterIdx().getClusterId();
-//    	Pod k8sPod = podAdapterService.get(clusterId, namespaceName, podName);
-//    	
-//    	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity, k8sPod);
     	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity);
     	return dto;
     }
@@ -143,42 +164,25 @@ public class PodService {
     	return dto;
     }
     
-    public List<Pod> getOwnerToPodList(Long mappingId, PodDto.OwnerSearchParam searchParam) {
-    	/**
-    	 * TODO
-    	 * 0. 파라미터 세팅(owner 정보, ownerUid)
-    	 * 1. k8s 인터페이스 pod list 조회
-    	 * 2. pod list에서 kind 정보를 보고 어느 controller mapping 테이블에 저장할 지 판단 
-    	 */
-    	// get k8s -> ownerUid to Pod list
-    	List<Pod> pods = podAdapterService.getList(searchParam);
-    	
-    	// pod list에서 owner info의 kind 정보 추출
-    	
-//    	for(Pod pod : pods) {
-//    		try {
-//    			String uid = pod.getMetadata().getUid();
-//    			String namespaceName = pod.getMetadata().getNamespace();
-//        		String kind = pod.getMetadata().getOwnerReferences().get(0).getKind();
-//        		
-//        		PodEntity podEntity = toEntity(pod);
-//        		
-//        		// save
-//        		Long id = podDomainService.register(podEntity, clusterId, namespaceName);
-//			} catch (JsonProcessingException e) {
-//				// TODO: handle exception
-//				throw new InternalServerException("json 파싱 에러");
-//            } catch (Exception e) {
-//                log.error(e.getMessage(), e);
-//                throw new InternalServerException("pod save error");
-//            }
-//    	}
-    	
-    	return pods;
-    }
-    
     public ResponseEntity<ByteArrayResource> getLogDownloadFile(Long clusterId, String namespaceName, String podName) {
     	ResponseEntity<ByteArrayResource> result = podAdapterService.getLogDownloadFile(clusterId, namespaceName, podName);
     	return result;
+    }
+    
+    public List<PodDto.ResListDto> getPodOwnerPodList(Long clusterId, PodDto.OwnerSearchParam searchParam) {
+		String nodeName = searchParam.getNodeName();
+		String ownerUid = searchParam.getOwnerUid();
+		String namespace = searchParam.getNamespaceName();
+    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace);
+    	List<PodDto.ResListDto> dtoList = new ArrayList<>();
+    	
+    	for(Pod k8sPod : k8sPods) {
+    		PodEntity podEntity = PodMapper.INSTANCE.toEntity(k8sPod);
+    		
+    		PodDto.ResListDto dto = PodDtoMapper.INSTANCE.toResK8sListDto(podEntity);
+    		dtoList.add(dto);
+    	}
+    	
+    	return dtoList;
     }
 }

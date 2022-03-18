@@ -1,5 +1,7 @@
 package kr.co.strato.domain.node.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,5 +12,7 @@ public interface CustomNodeRepository {
     public Page<NodeEntity> getNodeList(Pageable pageable, Long clusterId,String name);
     
     public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity, Pageable pageable);//clusterIdx 조회(Page 객체 반환)
+    
+    public List<NodeEntity> findByNameAndClusterIdx(String nodeName, ClusterEntity clusterEntity);
 
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,7 +48,6 @@ public class PodDto {
         private Long clusterId;
         private Long namespaceId;
         private Long nodeId;
-        private String ownerUid;
     }
     
     @Getter
@@ -89,12 +89,11 @@ public class PodDto {
     @Setter
     @NoArgsConstructor
     public static class OwnerSearchParam{
-        private Long clusterId;
         private String nodeName;
-        private String namespace;
-        private String storageClass;
-        private Map<String, String> selector;
-        private String ownerName;
+        private String namespaceName;
+//        private String storageClass;
+//        private Map<String, String> selector;
+//        private String ownerName;
         private String ownerUid;
     }
 }
