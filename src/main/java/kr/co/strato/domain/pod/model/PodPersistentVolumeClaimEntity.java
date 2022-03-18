@@ -26,12 +26,12 @@ import lombok.Setter;
 public class PodPersistentVolumeClaimEntity {
     
 	@Id
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pod_idx")
     private PodEntity pod;
 
 	@Id
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "persistent_volume_claim_idx")
     private PersistentVolumeClaimEntity persistentVolumeClaim;
 	

@@ -12,6 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.node.model.QNodeEntity;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.QPodEntity;
@@ -27,24 +28,24 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 	
-	@Override
-	public PodEntity getPodDetail(Long podId) {
-		QPodEntity qPodEntity = QPodEntity.podEntity;
-		QPodPersistentVolumeClaimEntity qPodPersistentVolumeClaimEntity = QPodPersistentVolumeClaimEntity.podPersistentVolumeClaimEntity;
-		QPersistentVolumeClaimEntity qPersistentVolumeClaimEntity = QPersistentVolumeClaimEntity.persistentVolumeClaimEntity;
-		
-		PodEntity results =
-                jpaQueryFactory
-                        .select(qPodEntity)
-                        .from(qPodEntity)
-                        .leftJoin(qPodEntity.podPersistentVolumeClaims , qPodPersistentVolumeClaimEntity)
-                        .leftJoin(qPodPersistentVolumeClaimEntity.persistentVolumeClaim, qPersistentVolumeClaimEntity)
-                        .where(qPodEntity.id.eq(podId))
-                        .fetchOne();
-		
-		return results;
-	}
 	
+//	@Override
+//	public PodEntity getPodDetail(Long podId) {
+//		QPodEntity qPodEntity = QPodEntity.podEntity;
+//		QPodPersistentVolumeClaimEntity qPodPersistentVolumeClaimEntity = QPodPersistentVolumeClaimEntity.podPersistentVolumeClaimEntity;
+//		QPersistentVolumeClaimEntity qPersistentVolumeClaimEntity = QPersistentVolumeClaimEntity.persistentVolumeClaimEntity;
+//		
+//		QueryResults<PersistentVolumeClaimEntity> results =
+//                jpaQueryFactory
+//                        .select(qPersistentVolumeClaimEntity)
+//                        .from(qPodPersistentVolumeClaimEntity)
+//                        .leftJoin(qPodPersistentVolumeClaimEntity.pod, qPodEntity)
+//                        .leftJoin(qPodPersistentVolumeClaimEntity.persistentVolumeClaim, qPersistentVolumeClaimEntity)
+//                        .where(qPodEntity.id.eq(podId))
+//                        .fetchResults();
+//		
+//		return new PodEntity();
+//	}
 	@Override
     public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
 
@@ -59,7 +60,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
             //TODO 프로젝트 조회 조건 추가 필요
         }
         if(clusterId != null && clusterId > 0L){
-            builder.and(qClusterEntity.clusterId.eq(clusterId));
+            builder.and(qClusterEntity.clusterIdx.eq(clusterId));
         }
         if(namespaceId != null && namespaceId > 0L){
             builder.and(qNamespaceEntity.id.eq(namespaceId));
@@ -74,6 +75,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
                         .from(qPodEntity)
                         .leftJoin(qPodEntity.namespace, qNamespaceEntity)
                         .leftJoin(qPodEntity.node, qNodeEntity)
+                        .leftJoin(qNodeEntity.cluster, qClusterEntity)
                         .where(builder)
                         .orderBy(qPodEntity.id.desc())
                         .offset(pageable.getOffset())

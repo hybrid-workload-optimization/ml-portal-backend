@@ -1,11 +1,8 @@
 package kr.co.strato.portal.workload.model;
 
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,8 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
-import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -38,17 +35,25 @@ public interface PodDtoMapper {
     public PodDto.ResListDto toResListDto(PodEntity entity);
     
     @Mappings({
-    	@Mapping(target = "name", source = "entity.podName"),
-        @Mapping(target = "namespace", source = "entity.namespace.name"),
-        @Mapping(target = "uid", source = "entity.podUid"),
-        @Mapping(target = "node", source = "entity.node.name"),
-        @Mapping(target = "label", source = "entity.label", qualifiedByName = "dataToMap"),
-        @Mapping(target = "annotation", source = "entity.annotation", qualifiedByName = "dataToMap"),
-        @Mapping(target = "condition", source = "entity.condition", qualifiedByName = "dataToList"),
-        @Mapping(target = "persistentVolumeClaims", source = "entity.podPersistentVolumeClaims", qualifiedByName = "pvcToList"),
+    	@Mapping(target = "name", source = "podName"),
+        @Mapping(target = "namespace", source = "namespace.name"),
+        @Mapping(target = "node", source = "node.name"),
+        @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
+//        @Mapping(target = "cpu", source = "cpu", qualifiedByName = "getCpu"),
+//        @Mapping(target = "memory", source = "memory", qualifiedByName = "getMemory"),
+    })
+    public PodDto.ResListDto toResK8sListDto(PodEntity entity);
+    
+    @Mappings({
+    	@Mapping(target = "name", source = "podName"),
+        @Mapping(target = "namespace", source = "namespace.name"),
+        @Mapping(target = "uid", source = "podUid"),
+        @Mapping(target = "node", source = "node.name"),
+        @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
+        @Mapping(target = "annotation", source = "annotation", qualifiedByName = "dataToMap"),
+        @Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
-    // TODO Detail 정보에 k8s 정보 추가
     
     @Mappings({
     	@Mapping(target = "name", source = "entity.statefulSetName"),
@@ -92,7 +97,7 @@ public interface PodDtoMapper {
     }
     
     @Named("pvcToList")
-    default List<HashMap<String, Object>> pvcToList(List<PodPersistentVolumeClaimEntity> pvcEntity) {
+    default List<HashMap<String, Object>> pvcToList(PersistentVolumeClaimEntity pvcEntity) {
         try{
         	return new ArrayList<>();
 //            List<HashMap<String, Object>> list = pvcEntity.stream().map(e => {

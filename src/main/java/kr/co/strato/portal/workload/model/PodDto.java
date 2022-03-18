@@ -48,7 +48,6 @@ public class PodDto {
         private Long clusterId;
         private Long namespaceId;
         private Long nodeId;
-        private String ownerUid;
     }
     
     @Getter
@@ -73,7 +72,6 @@ public class PodDto {
         private String kind;
         
         private List<HashMap<String, Object>> condition;
-        private List<HashMap<String, Object>> persistentVolumeClaims;
     }
     
     @Getter
@@ -91,12 +89,11 @@ public class PodDto {
     @Setter
     @NoArgsConstructor
     public static class OwnerSearchParam{
-        private Long clusterId;
         private String nodeName;
-        private String namespace;
-        private String storageClass;
-        private Map<String, String> selector;
-        private String ownerName;
+        private String namespaceName;
+//        private String storageClass;
+//        private Map<String, String> selector;
+//        private String ownerName;
         private String ownerUid;
     }
 }

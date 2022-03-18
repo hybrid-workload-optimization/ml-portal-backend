@@ -147,21 +147,13 @@ public class PodAdapterService {
         }
     }
     
-    public List<Pod> getList(PodDto.OwnerSearchParam searchParam) {
+    public List<Pod> getList(Long clusterId, String nodeName, String ownerUid, String namespace) {
     	try {
-    		Long clusterId = searchParam.getClusterId();
-    		String nodeName = searchParam.getNodeName();
-    		String ownerUid = searchParam.getNodeName();
-    		String namespace = searchParam.getNamespace();
-    		Map<String, String> selector = searchParam.getSelector();
-    		String storageClass = searchParam.getStorageClass();
     		ResourceListSearchInfo param = ResourceListSearchInfo.builder()
     				.kubeConfigId(clusterId)
     				.nodeName(nodeName)
     				.ownerUid(ownerUid)
     				.namespace(namespace)
-    				.selector(selector)
-    				.storageClass(storageClass)
     				.build();
     		String results = inNamespaceProxy.getResourceList(ResourceType.pod.get(), param);
     		

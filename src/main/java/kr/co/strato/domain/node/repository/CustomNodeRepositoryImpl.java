@@ -1,5 +1,6 @@
 package kr.co.strato.domain.node.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -69,5 +70,28 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
 		long total = results.getTotal();
 
 		return new PageImpl<>(content, pageable, total);
+	}
+	
+	@Override
+	public List<NodeEntity> findByNameAndClusterIdx(String name, ClusterEntity clusterEntity) {
+		QNodeEntity qNodeEntity = QNodeEntity.nodeEntity;
+        QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
+        
+        // required condition
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qClusterEntity.clusterIdx.eq(clusterEntity.getClusterIdx()));
+        builder.and(qNodeEntity.name.eq(name));
+
+        QueryResults<NodeEntity> results =
+                jpaQueryFactory
+                        .select(qNodeEntity)
+                        .from(qNodeEntity)
+                        .leftJoin(qNodeEntity.cluster, qClusterEntity)
+                        .where(builder)
+                        .orderBy(qNodeEntity.id.desc())
+                        .fetchResults();
+
+        List<NodeEntity> content = results.getResults();
+		return new ArrayList<>(content);
 	}
 }
