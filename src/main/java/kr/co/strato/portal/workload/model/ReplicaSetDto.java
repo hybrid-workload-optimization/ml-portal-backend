@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import lombok.Getter;
@@ -46,6 +47,9 @@ public class ReplicaSetDto {
 		private String image;
 		private int runningPod;
 		private int desiredPod;
+		private Long clusterId;
+		
+		private ArrayList<PodDto.ResListDto> pods;
 	}
 	
 	@Getter
