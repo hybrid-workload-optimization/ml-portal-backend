@@ -5,6 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -157,6 +160,26 @@ public class AuthorityService {
 	//권한 수정
 	@Transactional
 	public Long modifyUserRole(AuthorityRequestDto.ReqModifyDto param) {
+		//flatmap으로 변경
+		List<AuthorityRequestDto.Menu> menuList = convertToFlatList(param.getMenuList());
+		if ( !CollectionUtils.isEmpty(menuList) ) {
+			// flatmap 처리하면서 남은 subMenuList 비우기 & role에 따른 viewableYn, writeableYn 세팅
+			for (AuthorityRequestDto.Menu menu : menuList) {
+				menu.setSubMenuList(null);
+				if ( StringUtils.equals(menu.getRole(), "edit") ) {
+					menu.setWritableYn("Y");
+					menu.setViewableYn("N");
+				} else if ( StringUtils.equals(menu.getRole(), "view") ) {
+					menu.setWritableYn("N");
+					menu.setViewableYn("Y");
+				} else {
+					menu.setWritableYn("N");
+					menu.setViewableYn("N");
+				}
+			}
+			param.setMenuList(menuList);
+		}
+		
 		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(param.getUserRoleIdx());
 		UserRoleEntity defaultUserRole = userRoleDomainService.getUserRoleByCode("PROJECT_MEMBER"); // 기본권한 조회
 		if ( ObjectUtils.isEmpty(defaultUserRole) ) {
@@ -166,6 +189,11 @@ public class AuthorityService {
 		// 권한 명 변경
 		if ( StringUtils.isNotEmpty(param.getUserRoleName()) ) {
 			userRole.setUserRoleName(param.getUserRoleName());
+		}
+		
+		// 권한 설명 변경
+		if ( StringUtils.isNotEmpty(param.getDescription()) ) {
+			userRole.setDescription(param.getDescription());
 		}
 		
 		// 권한별 메뉴 사용여부 변경
@@ -182,7 +210,7 @@ public class AuthorityService {
 		if ( !CollectionUtils.isEmpty(param.getUserList()) ) {
 			param.getUserList().stream().forEach(userParam -> {
 				if ( StringUtils.equals(userParam.getType(), "N") ) {
-					//신규
+					//신규 -> 기존 권한 변경 됨 
 					UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
 					newUserEntity.setUserRole(userRole);
 				}else if (  StringUtils.equals(userParam.getType(), "D")  ) {
@@ -198,7 +226,7 @@ public class AuthorityService {
 		}
 		
 		userRoleDomainService.saveUserRole(userRole);
-		
+
 		return userRole.getId();
 	}
 	
@@ -294,5 +322,19 @@ public class AuthorityService {
 		}
 
 		return parentList;
+	}
+	
+	/**
+	 * 트리 구조의 메뉴 목록을 flat list로 변경
+	 * @param menuList
+	 * @return
+	 */
+	private List<AuthorityRequestDto.Menu> convertToFlatList(List<AuthorityRequestDto.Menu> menuList) {
+		return menuList.stream().flatMap(menu -> {
+				if ( Objects.nonNull(menu.getSubMenuList()) ) {
+					return Stream.concat(Stream.of(menu), convertToFlatList(menu.getSubMenuList()).stream());
+				}
+				return Stream.of(menu);
+			}).collect(Collectors.toList());
 	}
 }

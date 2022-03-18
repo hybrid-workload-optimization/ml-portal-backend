@@ -2,6 +2,7 @@ package kr.co.strato.portal.setting.model;
 
 import java.util.List;
 
+import kr.co.strato.portal.setting.model.AuthorityViewDto.Menu;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -44,8 +45,11 @@ public class AuthorityRequestDto {
 	public static class ReqModifyDto {
 		private Long userRoleIdx;
 		private String userRoleName;
+		private String description;
 		private List<Menu> menuList;
 		private List<User> userList;
+		
+		private List<AuthorityViewDto> subRoleList;
 	}
 	
 	@Getter
@@ -62,6 +66,10 @@ public class AuthorityRequestDto {
 		
 		private String viewableYn;
 		private String writableYn;
+		
+		private String role;	//viewableYn 과 writableYn를 기준으로 데이터를 만들어서 넣어주는 용도
+		
+		private List<Menu> subMenuList;
 	}
 	
 	@Getter

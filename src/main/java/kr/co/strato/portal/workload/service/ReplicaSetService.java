@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.ReplicaSetDto;
 import kr.co.strato.portal.workload.model.ReplicaSetDto.Search;
 import kr.co.strato.portal.workload.model.ReplicaSetDtoMapper;
@@ -44,6 +46,9 @@ public class ReplicaSetService {
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
+	
+	@Autowired
+	PodService podService;
 	
 	/**
 	 * Replica Set 목록 조회
@@ -92,9 +97,19 @@ public class ReplicaSetService {
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
 		String replicaSetName	= replicaSetEntity.getReplicaSetName();
 		
+		// k8s - get replica set
 		ReplicaSet replicaSet = replicaSetAdapterService.get(clusterId, namespaceName, replicaSetName);
 		
 		ReplicaSetDto.Detail result = ReplicaSetDtoMapper.INSTANCE.toDetail(replicaSetEntity, replicaSet);
+		
+		// k8s - get pod list by replica set
+		PodDto.OwnerSearchParam searchParam = new PodDto.OwnerSearchParam();
+		searchParam.setOwnerUid(result.getUid());
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<PodDto.ResListDto> pods = (ArrayList)podService.getPodOwnerPodList(clusterId, searchParam);
+		
+		result.setPods(pods);
 		
 		return result;
 	}
