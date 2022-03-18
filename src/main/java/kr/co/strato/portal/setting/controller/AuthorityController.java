@@ -70,6 +70,7 @@ public class AuthorityController {
 	//권한 수정
 	@PatchMapping("/authorities")
 	public ResponseWrapper<Long> patchAuthority(@RequestBody AuthorityRequestDto.ReqModifyDto param) {
+		System.out.println("####param :: " + param.toString());
 		Long idx = authorityService.modifyUserRole(param);
 		return new ResponseWrapper<>(idx);
 	}
