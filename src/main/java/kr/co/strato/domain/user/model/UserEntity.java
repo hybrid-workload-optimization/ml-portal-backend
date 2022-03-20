@@ -36,6 +36,9 @@ public class UserEntity {
 	@Column(name = "user_name")
 	private String userName;
 	
+	@Column(name = "user_password")
+	private String userPassword;
+	
 	@Column(name = "email")
 	private String email;
 	

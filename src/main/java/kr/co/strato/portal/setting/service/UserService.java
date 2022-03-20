@@ -39,7 +39,7 @@ public class UserService {
 		//keycloak 연동
 		try {
 			System.out.println("keycloak 연동 >> 등록");
-//			keyCloakApiUtil.createSsoUser(param);
+			keyCloakApiUtil.createSsoUser(param);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
@@ -58,7 +58,7 @@ public class UserService {
 		
 		//keycloak 연동
 		try {
-//			keyCloakApiUtil.updateSsoUser(param, null);
+			keyCloakApiUtil.updateSsoUser(param, null);
 			System.out.println("keycloak 연동 >> 수정");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -76,7 +76,7 @@ public class UserService {
 
 		//keycloak 연동
 		try {
-//			keyCloakApiUtil.updateSsoUser(param, null);
+			keyCloakApiUtil.updateSsoUser(param, null);
 			System.out.println("keycloak 연동 >> 삭제");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -117,35 +117,72 @@ public class UserService {
 		return roleList;
 	}
 	
+	// 비밀번호 변경
+	public void patchUserPassword(UserDto param) {
+
+		try {
+			keyCloakApiUtil.updatePasswordSsoUser(param, null);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
 	//테스트용
 	public void getTest() {
 
 		try {
+			//0. 관리자 토큰 생성
 			String token = keyCloakApiUtil.getTokenByManager();
+			
+			/** USER **/
+			//0. 테스트용 유저 생성
+			UserDto.UserRole role = new UserDto.UserRole(null, "PROJECT MEMBER", null, null, null, null);
+			UserDto user = new UserDto("test1", "test1@test.com", "test1@test.com", null, null, role);
+			
+			//1. 유저 생성
+			keyCloakApiUtil.createSsoUser(user);
+			
+			//2. 유저 비밀번호 수정
+			user.setUserPassword("test123");
+			keyCloakApiUtil.updatePasswordSsoUser(user, token);
+			
+			//3. 유저 정보 조회
+			keyCloakApiUtil.getUserInfoByUserId(user.getUserId());
+			
+			//4. 유저 토큰 생성
+			
+			//5. 유저 토큰 Refresh
+			
+			/** ROLE **/
 			//전체 ROLE 가져오기
 			keyCloakApiUtil.getRoleList();
-			//유저 정보 가져오기
-			keyCloakApiUtil.getUserInfoByUserId("test05");
+			
 
-			UserDto user = new UserDto("test05", null, null, null, null, null);
+			
 			// 유저 ROLE 추가하기
-			KeycloakRole role = new KeycloakRole();
-			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
-			role.setName("proj_member");
-			role.setDescription("프로젝트 멤버");
-			role.setComposite(false);
-			role.setClientRole(false);
-			role.setContainerId("sptek-cloud");
-			keyCloakApiUtil.postUserRole(user, token, role);
+//			KeycloakRole role = new KeycloakRole();
+//			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
+//			role.setName("proj_member");
+//			role.setDescription("프로젝트 멤버");
+//			role.setComposite(false);
+//			role.setClientRole(false);
+//			role.setContainerId("Strato-Cloud");
+//			keyCloakApiUtil.postUserRole(user, token, role);
 			
 			//유저의  ROLE 가져오기
 			keyCloakApiUtil.getUserRoleInfo(user, token);
 			
-			//유저 ROLE 삭제
-			keyCloakApiUtil.deleteUserRole(user, token, role);
+			//유저 ROLE 추가
+			
+//			//유저 ROLE 삭제
+//			keyCloakApiUtil.deleteUserRole(user, token, role);
 			
 			//유저의  ROLE 가져오기
 			keyCloakApiUtil.getUserRoleInfo(user, token);
+			
+			
+			// User 삭제
 		
 			
 			
@@ -153,6 +190,7 @@ public class UserService {
 			e.printStackTrace();
 		}
 	}
+
 
 	
 	

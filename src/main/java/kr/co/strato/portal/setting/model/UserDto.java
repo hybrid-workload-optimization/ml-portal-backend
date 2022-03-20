@@ -20,7 +20,7 @@ import lombok.ToString;
 public class UserDto {
 	
 	private String userId;
-	private String password;
+	private String userPassword;
 	private String userName;
 	private String email;
 	private String organization;
@@ -37,6 +37,7 @@ public class UserDto {
 	@Getter
 	@Setter
 	@ToString
+	@AllArgsConstructor
 	public static class UserRole {
 		private Long userRoleIdx;
 		private String userRoleCode;
@@ -54,4 +55,13 @@ public class UserDto {
 		this.useYn = userId;
 		this.userRole = userRole;
 	}
+	
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @ToString
+    public static class SearchParam{
+        private Long projectId;
+        private Long authorityId;
+    }
 }

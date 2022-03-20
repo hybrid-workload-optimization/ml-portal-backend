@@ -88,33 +88,37 @@ public class KeyCloakApiUtil {
 	@Value("${service.keycloak.manager.client.secret}")
 	private String keycloakManagerClientSecret;
 	
+	@Value("${service.keycloak.temp.pw}")
+	private String keycloakTempPw;
+	
 
 	// 토큰 발급 API
-	private static final String URI_GET_TOKEN = "/auth/realms/sptek-cloud/protocol/openid-connect/token";
+	private static final String URI_GET_TOKEN = "/auth/realms/Strato-Cloud/protocol/openid-connect/token";
 	
 	// 관리자 토큰 발급 API
-	private static final String UTI_GET_TOKEN_MANAGER = "/auth/realms/master/protocol/openid-connect/token";
+	private static final String URI_GET_TOKEN_MANAGER = "/auth/realms/master/protocol/openid-connect/token";
 
 	// 유저 정보 조회 API(모든 유저 조회)
-	private static final String URI_GET_USERS_INFO = "/auth/admin/realms/sptek-cloud/users";
+	private static final String URI_GET_USERS_INFO = "/auth/admin/realms/Strato-Cloud/users";
 
 	// 유저 정보 조회 API(단일 유저 조회-username)
-//	private static final String URI_GET_USER_INFO = "/auth/admin/realms/sptek-cloud/users?username=";
-	private static final String URI_GET_USER_INFO = "/auth/admin/realms/sptek-cloud/users?briefRepresentation=true&search=";
+//	private static final String URI_GET_USER_INFO = "/auth/admin/realms/Strato-Cloud/users?username=";
+	private static final String URI_GET_USER_INFO = "/auth/admin/realms/Strato-Cloud/users?briefRepresentation=true&search=";
 
 	// 유저 생성(회원가입)
-	private static final String URI_SET_USER = "/auth/admin/realms/sptek-cloud/users";
+	private static final String URI_SET_USER = "/auth/admin/realms/Strato-Cloud/users";
 
 	// 유저 수정, 삭제
-	private static final String URI_UPDATE_USER = "/auth/admin/realms/sptek-cloud/users/{id}";
+	private static final String URI_UPDATE_USER = "/auth/admin/realms/Strato-Cloud/users/{id}";
 	
-	private static final String URI_UPDATE_PASSWORD = "/auth/admin/realms/sptek-cloud/users/{id}/reset-password";
+	// 유저 비밀번호 변경
+	private static final String URI_UPDATE_PASSWORD = "/auth/admin/realms/Strato-Cloud/users/{id}/reset-password";
 	
 	// 사용자 ROLE 조회(GET) / 추가(POST) / 삭제
-	private static final String URI_USER_ROLE = "/auth/admin/realms/sptek-cloud/users/{id}/role-mappings/realm";
+	private static final String URI_USER_ROLE = "/auth/admin/realms/Strato-Cloud/users/{id}/role-mappings/realm";
 	
 	// 전체 ROLE 조회
-	private static final String URI_GET_ROLE = "/auth/admin/realms/sptek-cloud/roles";
+	private static final String URI_GET_ROLE = "/auth/admin/realms/Strato-Cloud/roles";
 	
 	// 사용자 정보 조회
 		
@@ -125,7 +129,7 @@ public class KeyCloakApiUtil {
 	public String getTokenByManager() throws Exception {
 //		System.out.println("관리자 토큰 생성 >>>> ");
 
-		String uriGetToken = keycloakUrl + UTI_GET_TOKEN_MANAGER;
+		String uriGetToken = keycloakUrl + URI_GET_TOKEN_MANAGER;
 		String token = null;
 
 		try {
@@ -169,11 +173,12 @@ public class KeyCloakApiUtil {
 	
 	// 토큰 생성 - 유저
 	@SuppressWarnings("unchecked")
-	public String getTokenByUser() throws Exception {
+	public String getTokenByUser(UserDto dto) throws Exception {
 
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
-
+		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
+		
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -183,8 +188,8 @@ public class KeyCloakApiUtil {
 
 			Map<String, String> tokenMap = new HashMap<String, String>();
 			tokenMap.put("client_id", keycloakClientId);
-			tokenMap.put("username", keycloakManagerId);
-			tokenMap.put("password", keycloakManagerPw);
+			tokenMap.put("username", dto.getUserId());
+			tokenMap.put("password", pw);
 			tokenMap.put("grant_type", "password");
 			tokenMap.put("client_secret", keycloakClientSecret);
 
@@ -199,7 +204,6 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
-			System.out.println(res.toString());
 			System.out.println(res.get("access_token"));
 
 			token = (String) res.get("access_token");
@@ -282,7 +286,7 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			KeycloakUser[] user = objectMapper.readValue(response.getBody(), KeycloakUser[].class);
 
-			if (user != null) {
+			if (user.length > 0) {
 				System.out.println(user[0]);
 				return user[0];
 			} else {
@@ -305,9 +309,14 @@ public class KeyCloakApiUtil {
 		System.out.println("유저 생성 --");
 		String uriCreateUser = keycloakUrl + URI_SET_USER;
 		String ssoToken = getTokenByManager();
-		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," + " 'enabled' : true," + " 'credentials' : ["
-				+ "{'type' : 'password'," + " 'value': '" + pw + "'," + " 'temporary': false}" + "]}";
+//		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
+		// 최초 가입시에는 임시 비밀번호로 생성
+		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
+		String ssoUser = "{ 'username' : '" + user.getUserName() + "',"
+				+ " 'email' : '" + user.getEmail() + "',"
+				+ " 'enabled' : true," + ""
+				+ " 'credentials' : ["
+						+ "{'type' : 'password'," + " 'value': '" + pw + "'," + " 'temporary': false}" + "]}";
 		
 		System.out.println(ssoUser);
 		System.out.println(uriCreateUser);
@@ -337,7 +346,7 @@ public class KeyCloakApiUtil {
 			
 			
 			/** 유저 생성 시 기본적으로 proj_member 로 등록된다고 함. 
-			 * 추후 유저 생성 시 추가해야 될 role 이 생기면 추가필요
+			 * 추후 유저 생성 시 추가해야 될 기본 role 이 생기면 추가필요
 			 */
 			
 			// 유저 생성시 무조건 프로젝트 멤버로 생성
@@ -349,7 +358,7 @@ public class KeyCloakApiUtil {
 //			role.setDescription("프로젝트 멤버");
 //			role.setComposite(false);
 //			role.setClientRole(false);
-//			role.setContainerId("sptek-cloud");
+//			role.setContainerId("Strato-Cloud");
 //			postUserRole(user, ssoUser, role);
 
 		} catch (Exception e) {
@@ -371,8 +380,8 @@ public class KeyCloakApiUtil {
 		String URI = replaceUri(uriUpdateUser, "id", userId);
 		
 		String ssoToken = getTokenByManager();
-		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," 
+		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
+		String ssoUser = "{ 'username' : '" + user.getUserName() + "'," 
 						+ " 'enabled' : true," 
 						+ " 'email' : '" + user.getEmail() + "'}";
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
@@ -399,14 +408,14 @@ public class KeyCloakApiUtil {
 			
 			
 			//@TODO ROLE 수정
-			KeycloakRole role = getRoleProjectMember();
+			KeycloakRole role = getRoleByUserRole(user);
 //			KeycloakRole role = new KeycloakRole();
 //			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
 //			role.setName("proj_member");
 //			role.setDescription("프로젝트 멤버");
 //			role.setComposite(false);
 //			role.setClientRole(false);
-//			role.setContainerId("sptek-cloud");
+//			role.setContainerId("Strato-Cloud");
 			
 			postUserRole(user, ssoUser, role);
 
@@ -424,7 +433,7 @@ public class KeyCloakApiUtil {
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
 		String URI = replaceUri(uriUpdateUser, "id", userId);
 		String ssoToken = getTokenByManager();
-		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
+		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
 		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," 
 						+ " 'enabled' : true," 
 						+ " 'credentials' : ["
@@ -554,26 +563,6 @@ public class KeyCloakApiUtil {
 		System.out.println("URI : " + URI);
 		System.out.println("ssoRole : " + ssoRole.toString());
 		
-		/***
-		 *  
-		 *   	{
-			        "id": "a6a72f0e-4bf2-446a-a02c-180bc5038d5a",
-			        "name": "proj_admin",
-			        "description": "프로젝트 관리자",
-			        "composite": false,
-			        "clientRole": false,
-			        "containerId": "sptek-cloud"
-			    },
-		 *     {
-		        "id": "d1f29139-d14e-42c5-9025-a36a02026336",
-		        "name": "proj_member",
-		        "description": "프로젝트 멤버",
-		        "composite": false,
-		        "clientRole": false,
-		        "containerId": "sptek-cloud"
-		    }
-		 */
-		
 		org.json.JSONArray ssoRoleInfo = new org.json.JSONArray(ssoRole);
 //		org.json.JSONObject ssoRoleInfo = new org.json.JSONObject(ssoRole);
 		try {
@@ -622,27 +611,7 @@ public class KeyCloakApiUtil {
 		System.out.println("token : " + token);
 		System.out.println("URI : " + URI);
 		System.out.println("ssoRole : " + ssoRole.toString());
-		
-		/***
-		 *  
-		 *   	{
-			        "id": "a6a72f0e-4bf2-446a-a02c-180bc5038d5a",
-			        "name": "proj_admin",
-			        "description": "프로젝트 관리자",
-			        "composite": false,
-			        "clientRole": false,
-			        "containerId": "sptek-cloud"
-			    },
-		 *     {
-		        "id": "d1f29139-d14e-42c5-9025-a36a02026336",
-		        "name": "proj_member",
-		        "description": "프로젝트 멤버",
-		        "composite": false,
-		        "clientRole": false,
-		        "containerId": "sptek-cloud"
-		    }
-		 */
-		
+			
 		org.json.JSONArray ssoRoleInfo = new org.json.JSONArray(ssoRole);
 //		org.json.JSONObject ssoRoleInfo = new org.json.JSONObject(ssoRole);
 		try {
@@ -703,16 +672,24 @@ public class KeyCloakApiUtil {
 	}
 	
 	
-	public KeycloakRole getRoleProjectMember() throws Exception {
+	public KeycloakRole getRoleByUserRole(UserDto user) throws Exception {
 		KeycloakRole result = null;
+		
+		String userRole = user.getUserRole().getUserRoleCode();
 		
 		List<KeycloakRole> roles = getRoleList();
 		
-		result = roles.stream()
-				.filter(r -> r.getName().equals("proj_member"))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException());
-				
+		if("PROJECT ADMIN".equals(userRole)) {
+			result = roles.stream()
+					.filter(r -> r.getName().equals("proj_admin"))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException());
+		}else{
+			result = roles.stream()
+					.filter(r -> r.getName().equals("proj_member"))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException());
+		}
 		
 		return result;
 	}
@@ -823,6 +800,10 @@ public class KeyCloakApiUtil {
 			restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 			restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
 			restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
+			
+			System.out.println("================ requestPostEntity");
+			System.out.println(requestEntity);
+			System.out.println("================ requestPostEntity");
 			
 			return restTemplate.postForEntity(uri, requestEntity, JsonNode.class);
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);

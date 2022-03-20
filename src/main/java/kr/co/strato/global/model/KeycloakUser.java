@@ -17,6 +17,9 @@ public class KeycloakUser {
 	private String id;
 	private long createdTimestamp;
 	private String username;
+	private String email;
+	private String firstName;
+	private String lastName;
 	private boolean enabled;
 	private boolean emailVerified;
 	private KeycloakAccess access;

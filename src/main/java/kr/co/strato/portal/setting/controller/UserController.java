@@ -80,9 +80,12 @@ public class UserController {
 	//목록
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<UserDto>> getUserList(PageRequest pageRequest){
+	public ResponseWrapper<Page<UserDto>> getUserList(PageRequest pageRequest, UserDto.SearchParam searchParam){
 		
 		if(pageRequest.getProperty() == null) pageRequest.setProperty("userId");
+		
+		System.out.println("============= users..");
+		System.out.println(searchParam.toString());
 		
 		Page<UserDto> list = null;
 		try {
@@ -122,6 +125,19 @@ public class UserController {
 		
 		return new ResponseWrapper<>(list);
 	}
+	
+	// 비밀번호 변경
+	@PatchMapping("/users/password")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> patchUserPassword(@RequestBody UserDto param, HttpSession session){
+		
+		System.out.println("==== 비밀번호 수정");
+		
+		userService.patchUserPassword(param);
+		
+		return new ResponseWrapper<>(param.getUserId());
+	}
+	
 	
 	@GetMapping("/test")
 	@ResponseStatus(HttpStatus.OK)

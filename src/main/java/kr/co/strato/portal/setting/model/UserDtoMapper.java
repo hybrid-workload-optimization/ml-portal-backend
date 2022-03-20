@@ -19,6 +19,7 @@ public interface UserDtoMapper {
 	@Mappings({
 		@Mapping(source = "userId",  target = "userId"),
 		@Mapping(source = "userName",  target = "userName"),
+		@Mapping(source = "userPassword",  target = "userPassword"),
 		@Mapping(source = "organization",  target = "organization"),
 		@Mapping(source = "email",  target = "email"),
 		@Mapping(source = "contact",  target = "contact"),
