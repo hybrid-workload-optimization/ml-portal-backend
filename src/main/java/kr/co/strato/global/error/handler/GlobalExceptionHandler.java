@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CreateProjectFailException.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleCreateProjectFailException(CreateProjectFailException e) {
         e.printStackTrace();
     	ProjectErrorType errorType = ProjectErrorType.FAIL_PROJECT_CREATE;
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(UpdateProjectFailException.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleUpdateProjectFailException(UpdateProjectFailException e) {
     	e.printStackTrace();
     	ProjectErrorType errorType = ProjectErrorType.FAIL_PROJECT_UPDATE;
@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(DeleteProjectFailException.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleDeleteProjectFailException(DeleteProjectFailException e) {
     	e.printStackTrace();
     	ProjectErrorType errorType = ProjectErrorType.FAIL_PROJECT_DELETE;
@@ -122,14 +122,14 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(NotFoundProjectException.class)
-    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleNotFoundProjectException(NotFoundProjectException e) {
         ProjectErrorType errorType = ProjectErrorType.NOT_FOUND_PROJECT;
         return getResponse(errorType);
     }
     
     @ExceptionHandler(AleadyUserClusterException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleAleadyUserClusterException(AleadyUserClusterException e) {
         ProjectErrorType errorType = ProjectErrorType.ALEADY_USE_CLUSTER;
         return getResponse(errorType);
