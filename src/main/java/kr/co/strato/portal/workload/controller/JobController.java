@@ -30,28 +30,28 @@ public class JobController {
 	JobService jobService;
 	
 
-	@GetMapping("/jobs")
+	@GetMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Page<JobDto>> getList(PageRequest pageRequest, JobArgDto args) {
 		Page<JobDto> result = jobService.getList(pageRequest, args);
 		return new ResponseWrapper<Page<JobDto>>(result);
 	}
 	
-	@GetMapping("/jobs/{idx}")
+	@GetMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<JobDto> get(@PathVariable(name = "idx") Long idx) {
 		JobDto result = jobService.get(idx);
 		return new ResponseWrapper<JobDto>(result);
 	}
 	
-	@GetMapping("/jobs/{idx}/yaml")
+	@GetMapping("/cron-jobs/{idx}/yaml")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> getYaml(@PathVariable(name = "idx") Long idx) {
 		String result = jobService.getYaml(idx);
 		return new ResponseWrapper<String>(result);
 	}
 	
-	@PostMapping("/jobs")
+	@PostMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<JobDto> post(@RequestBody JobArgDto jobArgDto) {
 		ResponseWrapper<JobDto> result = null;
@@ -59,7 +59,7 @@ public class JobController {
 		return result;
 	}
 	
-	@PutMapping("/jobs/{idx}")
+	@PutMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<JobDto> put(@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
 		jobArgDto.setJobIdx(idx);
@@ -67,7 +67,7 @@ public class JobController {
 		return new ResponseWrapper<JobDto>();
 	}
 	
-	@DeleteMapping("/jobs/{idx}")
+	@DeleteMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<JobDto> delete(@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
 		jobArgDto.setJobIdx(idx);

@@ -20,7 +20,7 @@ public class CronJobDomainService {
 		return cronJobRepository.findAll();
 	}
 	
-	public CronJobEntity getByIdx(Long idx){
+	public CronJobEntity getById(Long idx){
 		Optional<CronJobEntity> job = cronJobRepository.findById(idx);
 		if (job.isPresent())
 			return job.get();
