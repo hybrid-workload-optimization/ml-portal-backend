@@ -48,6 +48,7 @@ public class K8sServiceDto {
     @Setter
     @NoArgsConstructor
     public static class ReqUpdateDto{
+        @K8sKind(value = K8sKindType.Service)
         private String yaml;
     }
 
