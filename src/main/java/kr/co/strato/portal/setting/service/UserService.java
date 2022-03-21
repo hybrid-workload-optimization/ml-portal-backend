@@ -86,7 +86,7 @@ public class UserService {
 		return 0L;
 	}
 	
-	//목록
+	//목록 > Page 만, 
 	public Page<UserDto> getAllUserList(Pageable pageable) throws Exception{
 		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable);
 		List<UserDto> userDtoList = userEntityList
@@ -97,6 +97,19 @@ public class UserService {
 		
 		return new PageImpl<>(userDtoList, pageable, userEntityList.getTotalElements());
 	}
+	
+	// 목록 > param(projectId, authorityId)
+	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param) throws Exception{
+		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable, param);
+		List<UserDto> userDtoList = userEntityList
+										.getContent()
+										.stream()
+										.map(u -> UserDtoMapper.INSTANCE.toDto(u))
+										.collect(Collectors.toList());
+		
+		return new PageImpl<>(userDtoList, pageable, userEntityList.getTotalElements());
+	}
+	
 	
 	//상세
 	public UserDto getUserInfo(String userId) {

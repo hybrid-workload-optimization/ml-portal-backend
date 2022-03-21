@@ -85,11 +85,12 @@ public class UserController {
 		if(pageRequest.getProperty() == null) pageRequest.setProperty("userId");
 		
 		System.out.println("============= users..");
+		System.out.println(pageRequest.toString());
 		System.out.println(searchParam.toString());
 		
 		Page<UserDto> list = null;
 		try {
-			list = userService.getAllUserList(pageRequest.of());
+			list = userService.getAllUserList(pageRequest.of(), searchParam);
 		}catch (Exception e) {
 			e.printStackTrace();
 		} finally {

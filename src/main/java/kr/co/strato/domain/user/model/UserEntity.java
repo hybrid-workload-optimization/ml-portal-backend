@@ -1,6 +1,7 @@
 package kr.co.strato.domain.user.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.sun.istack.NotNull;
 
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -77,4 +80,9 @@ public class UserEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_role_idx")
 	private UserRoleEntity userRole;
+	
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name ="user_id")
+	private List<ProjectUserEntity> projectUser;
+	
 }

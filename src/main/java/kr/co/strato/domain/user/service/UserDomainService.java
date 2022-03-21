@@ -12,6 +12,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.repository.UserRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.global.util.KeyCloakApiUtil;
+import kr.co.strato.portal.setting.model.UserDto.SearchParam;
 
 /**
  * @author tmdgh
@@ -99,6 +100,12 @@ public class UserDomainService {
 		return list;
 	}
 	
+	public Page<UserEntity> getAllUserList(Pageable pageable, SearchParam param) {
+		Page<UserEntity> list =  userRepository.getListUserWithParam(pageable, param);
+		return list;
+	}
+
+	
 	/**
 	 * Email로 유저 정보 검색 > 단일
 	 * @param email
@@ -128,6 +135,8 @@ public class UserDomainService {
 		
 		return userRepository.findByUserName(userName, pageable);
 	}
+
+
 
 	
 	

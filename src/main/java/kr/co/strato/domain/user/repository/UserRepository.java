@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import kr.co.strato.domain.user.model.UserEntity;
 
-public interface UserRepository extends JpaRepository<UserEntity, String> {
+public interface UserRepository extends JpaRepository<UserEntity, String>, CustomUserRepository {
 	
 	UserEntity findByEmail(String email);
 	

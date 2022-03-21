@@ -59,9 +59,10 @@ public class UserDto {
     @Getter
     @Setter
     @NoArgsConstructor
+    @AllArgsConstructor
     @ToString
     public static class SearchParam{
         private Long projectId;
-        private Long authorityId;
+        private String authorityId;
     }
 }
