@@ -12,16 +12,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "job")
 public class JobEntity {
 	
