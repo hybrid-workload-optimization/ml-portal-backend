@@ -24,22 +24,23 @@ public interface StatefulSetDetailDtoMapper {
     @Mapping(target = "namespace", source = "entity.namespace.name")
     @Mapping(target = "uid", source = "entity.statefulSetUid")
     @Mapping(target = "createdAt", source = "entity.createdAt", qualifiedByName = "creatdAtToString")
-    @Mapping(target = "label", source = "entity.label", qualifiedByName = "labelToMap")
-    @Mapping(target = "annotation", source = "entity.annotation", qualifiedByName = "annotationToMap")
-    @Mapping(target = "runningReplicas", source = "k8s.status.readyReplicas")
-    @Mapping(target = "desiredReplicas", source = "k8s.status.replicas")
-    public StatefulSetDetailDto.ResDetailDto toResDetailDto(StatefulSetEntity entity, StatefulSet k8s);
+    @Mapping(target = "label", source = "entity.label", qualifiedByName = "jsonStringToMap")
+    @Mapping(target = "annotation", source = "entity.annotation", qualifiedByName = "jsonStringToMap")
+    @Mapping(target = "replicas", source = "k8s.status.readyReplicas")
+    @Mapping(target = "readyReplicas", source = "k8s.status.replicas")
+    @Mapping(target = "clusterId", source = "clusterId")
+    public StatefulSetDetailDto.ResDetailDto toResDetailDto(StatefulSetEntity entity, StatefulSet k8s, Long clusterId);
 
     @Named("creatdAtToString")
     default String creatdAtToString(LocalDateTime createdAt){
         return DateUtil.localDateTimeToStr(createdAt, "yyyy-MM-dd HH:mm:ss");
     }
 
-    @Named("labelToMap")
-    default HashMap<String, Object> labelToMap(String label) {
+    @Named("jsonStringToMap")
+    default HashMap<String, Object> jsonStringToMap(String jsonString) {
         try{
             ObjectMapper mapper = new ObjectMapper();
-            HashMap<String, Object> map = mapper.readValue(label, HashMap.class);
+            HashMap<String, Object> map = mapper.readValue(jsonString, HashMap.class);
 
             return map;
         }catch (JsonProcessingException e){
@@ -47,15 +48,5 @@ public interface StatefulSetDetailDtoMapper {
         }
     }
 
-    @Named("annotationToMap")
-    default HashMap<String, Object> annotationToMap(String annotation) {
-        try{
-            ObjectMapper mapper = new ObjectMapper();
-            HashMap<String, Object> map = mapper.readValue(annotation, HashMap.class);
 
-            return map;
-        }catch (JsonProcessingException e){
-            return new HashMap<>();
-        }
-    }
 }

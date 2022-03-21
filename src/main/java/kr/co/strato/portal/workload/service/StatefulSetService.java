@@ -77,14 +77,16 @@ public class StatefulSetService {
     }
 
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
-        Long clusterId = searchParam.getClusterId();
-        Long namespaceId = searchParam.getNamespaceId();
-        List<StatefulSet> statefulSets = new ArrayList<>();
+        Long clusterIdx = searchParam.getClusterIdx();
+        Long namespaceIdx = searchParam.getNamespaceIdx();
+        ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+        Long clusterId = clusterEntity.getClusterId();
 
-        if(namespaceId == null || namespaceId == 0){
+        List<StatefulSet> statefulSets = new ArrayList<>();
+        if(namespaceIdx == null || namespaceIdx == 0){
             statefulSets = statefulSetAdapterService.getList(clusterId);
         }else{
-            NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceId);
+            NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
             statefulSets = statefulSetAdapterService.getList(clusterId, namespaceEntity.getName());
         }
         Map<String, StatefulSet> maps = statefulSets.stream().collect(Collectors.toMap(
@@ -92,7 +94,7 @@ public class StatefulSetService {
                 e2-> e2
         ));
 
-        Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, searchParam.getProjectId(), clusterId, namespaceId);
+        Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, clusterIdx, clusterId, namespaceIdx);
         List<StatefulSetDto.ResListDto> dtos = statefulSetEntities.stream().map(
                 e -> {
                     String uid = e.getStatefulSetUid();
@@ -158,7 +160,7 @@ public class StatefulSetService {
         Long clusterId = entity.getNamespace().getCluster().getClusterId();
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
-        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet);
+        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId);
 
         return dto;
     }
