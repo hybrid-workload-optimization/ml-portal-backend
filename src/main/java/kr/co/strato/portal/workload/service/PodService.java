@@ -19,12 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
@@ -50,6 +52,7 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
+    	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
         Long clusterId = reqCreateDto.getClusterId();
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
@@ -61,8 +64,11 @@ public class PodService {
                 String namespaceName = s.getMetadata().getNamespace();
                 // ownerReferences 추가
                 PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+                // TODO pvc
+            //  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
+				PersistentVolumeClaimEntity pvcEntity = null;
 
-                Long id = podDomainService.register(pod, clusterId, namespaceName, null);
+                Long id = podDomainService.register(pod, clusterId, namespaceName, null, pvcEntity);
 
                 return id;
             } catch (Exception e) {
@@ -88,13 +94,14 @@ public class PodService {
     		List<Long> ids = k8sPods.stream().map( s -> {
     			try {
     				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+                    // TODO pvc
+    				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
+    				PersistentVolumeClaimEntity pvcEntity = null;
     				String namespaceName = pod.getNamespace().getName();
     				String kind = pod.getKind();
     				
-    	    		// TODO Pod 삭제 (mapping table은 Cascade로...)
-//    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind);
-//    				return id;
-    				return 0L;
+    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind, pvcEntity);
+    				return id;
     			} catch (Exception e) {
                     log.error(e.getMessage(), e);
                     throw new InternalServerException("pod register error");

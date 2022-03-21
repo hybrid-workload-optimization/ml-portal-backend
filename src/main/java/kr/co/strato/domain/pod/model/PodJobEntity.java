@@ -9,7 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.domain.job.model.JobEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,17 +22,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "pod_stateful_set")
-public class PodStatefulSetEntity {
+@Table(name = "pod_job")
+public class PodJobEntity {
 	
 	@Id
 	@GeneratedValue
-	@Column(name = "pod_stateful_set_idx")
-	private Long podStatefulSetIdx;
+	@Column(name = "pod_job_idx")
+	private Long podJobIdx;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "stateful_set_idx")
-	private StatefulSetEntity statefulSet;
+	@JoinColumn(name = "job_idx")
+	private JobEntity job;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pod_idx")

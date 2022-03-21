@@ -11,9 +11,12 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
+import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepository {
 
@@ -57,4 +60,25 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
         return new PageImpl<>(content, pageable, total);
 	}
 
+	@Override
+    public ReplicaSetEntity findByUidAndNamespaceIdx(String replicaSetUid, NamespaceEntity namespaceEntity){
+        QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+        QReplicaSetEntity qReplicaSetEntity = QReplicaSetEntity.replicaSetEntity;
+        
+        // required condition
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qNamespaceEntity.id.eq(namespaceEntity.getId()));
+        builder.and(qReplicaSetEntity.replicaSetUid.eq(replicaSetUid));
+
+        ReplicaSetEntity results =
+                jpaQueryFactory
+                        .select(qReplicaSetEntity)
+                        .from(qReplicaSetEntity)
+                        .leftJoin(qReplicaSetEntity.namespace, qNamespaceEntity)
+                        .where(builder)
+                        .orderBy(qReplicaSetEntity.replicaSetIdx.desc())
+                        .fetchOne();
+
+		return results;
+    }
 }

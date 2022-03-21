@@ -73,9 +73,28 @@ public interface PodMapper {
     				.filter(quantity -> quantity != null)				
     				.collect(Collectors.toList());
 
-            // TODO CPU + Memory 계산 작업 필요 (Mi, Gi 등...)
-//            Long cpu = cpuLimits.stream().mapToLong(mapper::intValue).sum();
-//            Long memory = 0;
+            // TODO CPU + Memory 계산 작업 필요 (Mi, Gi 외의 값...)
+            Long cpu = 0L;
+            for (Quantity cpuLimit : cpuLimits) {
+            	Long amount = Long.parseLong(cpuLimit.getAmount().replaceAll("[^0-9]", ""));
+            	String format = cpuLimit.getFormat().replaceAll("[^a-zA-Z]", "");
+            	if (format.equals("m")) {
+            		cpu += amount / 100;
+            	} else if (format.equals("G")) {
+            		cpu += amount;
+            	}
+            }
+            Long memory = 0L;
+            for (Quantity memoryLimit : memLimits) {
+            	Long amount = Long.parseLong(memoryLimit.getAmount().replaceAll("[^0-9]", ""));
+            	String format = memoryLimit.getFormat().replaceAll("[^a-zA-Z]", "");
+        		if (format.equals("Mi")) {
+            		memory += amount / 1024;
+            	} else if (format.equals("Gi")) {
+            		memory += amount;
+            	}
+            }
+    		
             String ownerUid = ownerReference.getUid();
             String ownerKind = ownerReference.getKind();
             String label = mapper.writeValueAsString(metadata.getLabels());

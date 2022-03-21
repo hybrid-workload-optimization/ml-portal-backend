@@ -11,16 +11,23 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.repository.NodeRepository;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.pod.model.PodJobEntity;
+import kr.co.strato.domain.pod.model.PodReplicaSetEntity;
 import kr.co.strato.domain.pod.model.PodStatefulSetEntity;
+import kr.co.strato.domain.pod.repository.PodJobRepository;
 import kr.co.strato.domain.pod.repository.PodPersistentVolumeClaimRepository;
+import kr.co.strato.domain.pod.repository.PodReplicaSetRepository;
 import kr.co.strato.domain.pod.repository.PodRepository;
 import kr.co.strato.domain.pod.repository.PodStatefulSetRepository;
+import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.repository.ReplicaSetRepository;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
@@ -59,7 +66,11 @@ public class PodDomainService {
     @Autowired
     private PodStatefulSetRepository podStatefulSetRepository;
     
-
+    @Autowired
+    private PodReplicaSetRepository podReplicaSetRepository;
+    
+    @Autowired
+    private PodJobRepository podJobRepository;
 
     public PodEntity get(Long podId) {
     	PodEntity pod = PodEntity.builder().id(podId).build();
@@ -101,7 +112,7 @@ public class PodDomainService {
      * @param kind : resourceType
      * @return
      */
-    public Long register(PodEntity pod, Long clusterId, String namespaceName, String kind) {
+    public Long register(PodEntity pod, Long clusterId, String namespaceName, String kind, PersistentVolumeClaimEntity pvcEntity) {
     	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
     	String nodeName = pod.getNode().getName();
 
@@ -115,23 +126,27 @@ public class PodDomainService {
             	if((namespaces != null && namespaces.size() > 0) && (node != null && node.size() > 0)){
                 	pod.setNamespace(namespaces.get(0));
                 	pod.setNode(node.get(0));
+                	podRepository.save(pod);
+                	
+                	// TODO pvcEntity save
+                	if (pvcEntity != null) {
+                		addPersistentVolumeClaim(pod, pvcEntity);
+                	}
                 	
                 	if (!kind.isEmpty()) {
                     	// 첫글자 소문자
                         kind = kind.substring(0, 1).toLowerCase() + kind.substring(1);
                         
-                    	if (kind.equals(ResourceType.statefulSet)) {
+                    	if (kind.equals(ResourceType.statefulSet.get())) {
                     		addStatefulSet(pod);
-                    	} else if (kind.equals(ResourceType.replicaSet)) {
+                    	} else if (kind.equals(ResourceType.replicaSet.get())) {
                     		addReplicaSet(pod);
-//                    	} else if (kind.toLowerCase().equals(ResourceType.daemonSet)) {
-//                    		addDeamonSet(pod, clusterId, namespaceName);
-                    	} else if (kind.equals(ResourceType.job)) {
-                    		addJobSet(pod);
+                    	} else if (kind.equals(ResourceType.daemonSet.get())) {
+//                    		addDeamonSet(pod);
+                    	} else if (kind.equals(ResourceType.job.get())) {
+                    		addJob(pod);
                     	}
                     }
-                	podRepository.save(pod);
-                	log.info("COMMIT::");
                 }
             } catch (Exception e) {
 				// TODO: handle exception
@@ -139,17 +154,16 @@ public class PodDomainService {
 			}
             
         }
-        // TODO pod_persistent_volume_claim
         return pod.getId();
     }
     
     
     private void addStatefulSet(PodEntity pod){
 
-        String statefulSetUid = pod.getOwnerUid();
+        String ownerUid = pod.getOwnerUid();
         NamespaceEntity namespace = pod.getNamespace();
-        // node 찾는 Repository 필요
-        StatefulSetEntity statefulSet = statefulSetRepository.findByUidAndNamespaceIdx(statefulSetUid, namespace);
+        
+        StatefulSetEntity statefulSet = statefulSetRepository.findByUidAndNamespaceIdx(ownerUid, namespace);
         PodStatefulSetEntity podStatefulSet = new PodStatefulSetEntity();
 
         if(statefulSet != null){
@@ -160,34 +174,59 @@ public class PodDomainService {
         }
     }
     private void addReplicaSet(PodEntity pod){
+    	String ownerUid = pod.getOwnerUid();
+        NamespaceEntity namespace = pod.getNamespace();
+        
+        ReplicaSetEntity replicaSet = replicaSetRepository.findByUidAndNamespaceIdx(ownerUid, namespace);
+        PodReplicaSetEntity podReplicaSet = new PodReplicaSetEntity();
 
-            // node 찾는 Repository 필요
-//            List<NamespaceEntity> namespaces = nodeRepository.findByName(nodeName);
-//
-//            if(namespaces != null && namespaces.size() > 0){
-//            	pod.setNamespace(namespaces.get(0));
-//            }
+        if(replicaSet != null){
+        	podReplicaSet.setPod(pod);
+        	podReplicaSet.setReplicaSet(replicaSet);
+        	
+        	podReplicaSetRepository.save(podReplicaSet);
+        }
     }
-//    private void addDeamonSet(PodEntity pod, Long clusterId, String nodeName){
-//        Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
-//
-//        if(optCluster.isPresent()){
-//            ClusterEntity cluster = optCluster.get();
-//            // node 찾는 Repository 필요
-////            List<NamespaceEntity> namespaces = nodeRepository.findByName(nodeName);
-////
-////            if(namespaces != null && namespaces.size() > 0){
-////            	pod.setNamespace(namespaces.get(0));
-////            }
-//        }
-//    }
-    private void addJobSet(PodEntity pod){
 
-            // node 찾는 Repository 필요
-//            List<NamespaceEntity> namespaces = nodeRepository.findByName(nodeName);
+    private void addDeamonSet(PodEntity pod){
+
+    	String ownerUid = pod.getOwnerUid();
+        NamespaceEntity namespace = pod.getNamespace();
+        // TODO Daemon Set
+        
+//        DaemonSetEntity daemonSet = daemonSetRepository.findByUidAndNamespaceIdx(ownerUid, namespace);
+//        PodDaemonSetEntity podDaemonSet = new PodDaemonSetEntity();
 //
-//            if(namespaces != null && namespaces.size() > 0){
-//            	pod.setNamespace(namespaces.get(0));
-//            }
+//        if(daemonSet != null){
+//        	podDaemonSet.setPod(pod);
+//        	podDaemonSet.setDaemonSet(daemonSet);
+//        	
+//        	podDaemonSetRepository.save(podDaemonSet);
+//        }
+    }
+    private void addJob(PodEntity pod){
+
+    	String ownerUid = pod.getOwnerUid();
+        NamespaceEntity namespace = pod.getNamespace();
+        
+        JobEntity job = jobRepository.findByUidAndNamespaceIdx(ownerUid, namespace);
+        PodJobEntity podJob = new PodJobEntity();
+
+        if(job != null){
+        	podJob.setPod(pod);
+        	podJob.setJob(job);
+        	
+        	podJobRepository.save(podJob);
+        }
+    }
+    
+    private void addPersistentVolumeClaim(PodEntity pod, PersistentVolumeClaimEntity pvcEntity){
+        NamespaceEntity namespace = pod.getNamespace();
+        // TODO 
+        /**
+         *  1. pvc 찾기
+         *  2. pvc mapping table에 넣기
+         *  3. save
+         */
     }
 }
