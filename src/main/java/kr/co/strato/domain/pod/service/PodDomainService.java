@@ -82,6 +82,19 @@ public class PodDomainService {
     	}
     }
     
+    public ClusterEntity getClusterEntity(Long podId){
+    	PodEntity entity = get(podId);
+
+        return entity.getNamespace().getCluster();
+    }
+    
+    public Long update(Long podId, PodEntity updateEntity) {
+    	PodEntity oldEntity = get(podId);
+        changeToNewData(oldEntity, updateEntity);
+        podRepository.save(oldEntity);
+        return oldEntity.getId();
+    }
+    
     public Page<PodEntity> getPods(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
         return podRepository.getPodList(pageable, projectId, clusterId, namespaceId, nodeId);
     }
@@ -236,5 +249,15 @@ public class PodDomainService {
          *  2. pvc mapping table에 넣기
          *  3. save
          */
+    }
+    
+    private void changeToNewData(PodEntity oldEntity, PodEntity newEntity){
+        oldEntity.setOwnerUid(newEntity.getOwnerUid());
+        oldEntity.setCreatedAt(newEntity.getCreatedAt());
+        oldEntity.setCpu(newEntity.getCpu());
+        oldEntity.setMemory(newEntity.getMemory());
+        oldEntity.setLabel(newEntity.getLabel());
+        oldEntity.setAnnotation(newEntity.getAnnotation());
+        oldEntity.setLabel(newEntity.getLabel());
     }
 }

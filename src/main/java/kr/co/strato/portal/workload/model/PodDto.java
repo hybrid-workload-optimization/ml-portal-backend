@@ -23,6 +23,13 @@ public class PodDto {
         private Long clusterId;
         private String yaml;
     }
+    
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ReqUpdateDto{
+        private String yaml;
+    }
 
     @Getter
     @Setter

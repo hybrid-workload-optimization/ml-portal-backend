@@ -48,7 +48,6 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
-    	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
         Long clusterId = reqCreateDto.getClusterId();
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
@@ -65,7 +64,32 @@ public class PodService {
 				PersistentVolumeClaimEntity pvcEntity = null;
 
                 Long id = podDomainService.register(pod, clusterId, namespaceName, null, pvcEntity);
+                return id;
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                throw new InternalServerException("pod register error");
+            }
+        }).collect(Collectors.toList());
 
+        return ids;
+    }
+    
+    @Transactional(rollbackFor = Exception.class)
+    public List<Long> updatePod(Long podId, PodDto.ReqUpdateDto reqUpdateDto){
+        String yaml = Base64Util.decode(reqUpdateDto.getYaml());
+        ClusterEntity cluster = podDomainService.getClusterEntity(podId);
+        Long clusterId = cluster.getClusterId();
+
+        List<Pod> pods = podAdapterService.update(clusterId, yaml);
+        
+        // k8s data insert
+        List<Long> ids = pods.stream().map( s -> {
+        	try {
+                String namespaceName = s.getMetadata().getNamespace();
+                // ownerReferences 추가
+                PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+
+				Long id = podDomainService.update(podId, pod);
                 return id;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -78,6 +102,7 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
+    	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
     	Long clusterIdx = searchParam.getClusterIdx();
 
     	if (clusterIdx != null && searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
@@ -149,8 +174,9 @@ public class PodService {
 		String nodeName = searchParam.getNodeName();
 		String ownerUid = searchParam.getOwnerUid();
 		String namespace = searchParam.getNamespaceName();
-		Map<String, String> selector = searchParam.getSelector();
-    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, selector);
+//		Map<String, String> selector = searchParam.getSelector();
+    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, null);
+//    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, selector);
     	List<PodDto.ResListDto> dtoList = new ArrayList<>();
     	
     	for(Pod k8sPod : k8sPods) {
