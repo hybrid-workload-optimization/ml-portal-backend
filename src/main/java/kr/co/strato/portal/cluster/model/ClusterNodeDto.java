@@ -61,7 +61,7 @@ public class ClusterNodeDto {
 		private String kubeletVersion;
 		private String kubeproxyVersion;
 		private Long clusterIdx;
-		
+		private Long clusterId;
 		private HashMap<String, Object> annotation;
 		private HashMap<String, Object> label;
 		private List<HashMap<String, Object>> condition;

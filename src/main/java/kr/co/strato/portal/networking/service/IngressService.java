@@ -118,7 +118,7 @@ public class IngressService {
      }
     
 	
-	public List<Long> registerIngress(YamlApplyParam yamlApplyParam, Long clusterId) {
+	public List<Long> registerIngress(YamlApplyParam yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Ingress> ingressList = ingressAdapterService.registerIngress(yamlApplyParam.getKubeConfigId(), yamlDecode);
@@ -127,7 +127,7 @@ public class IngressService {
 		for (Ingress i : ingressList) {
 			try {
 				// k8s Object -> Entity
-				IngressEntity ingress = toEntity(i,clusterId);
+				IngressEntity ingress = toEntity(i,yamlApplyParam.getKubeConfigId());
 				// save
 				Long id = ingressDomainService.register(ingress);
 				

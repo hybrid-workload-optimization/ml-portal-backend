@@ -26,6 +26,7 @@ public interface ClusterNodeDtoMapper {
 	public ClusterNodeDto.ResListDto toResListDto(NodeEntity node);
 
 	@Mapping(target = "clusterIdx", source = "cluster.clusterIdx")
+	@Mapping(target = "clusterId", source = "cluster.clusterId")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	@Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList")

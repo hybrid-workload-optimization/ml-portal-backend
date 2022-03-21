@@ -74,11 +74,11 @@ public class ClusterPersistentVolumeController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterPersistentVolume")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam) {
 		List<Long> results = null;
 		
 		try {
-			results = persistentVolumeService.registerClusterPersistentVolume(yamlApplyParam,kubeConfigId);
+			results = persistentVolumeService.registerClusterPersistentVolume(yamlApplyParam);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

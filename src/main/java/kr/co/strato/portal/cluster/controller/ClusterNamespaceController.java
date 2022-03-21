@@ -74,11 +74,11 @@ public class ClusterNamespaceController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterNamespace")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = namespaceService.registerClusterNamespace(yamlApplyParam,kubeConfigId);
+			 ids = namespaceService.registerClusterNamespace(yamlApplyParam);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

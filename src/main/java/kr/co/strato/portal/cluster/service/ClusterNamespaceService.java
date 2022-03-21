@@ -81,14 +81,14 @@ public class ClusterNamespaceService {
         return namespaceYaml;
     }
    
-	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam, Long kubeConfigId) {
+	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);
 		List<Long> ids = new ArrayList<>();
 		for (Namespace n : clusterNamespaces) {
 			try {
-				NamespaceEntity namespace = toEntity(n,kubeConfigId);
+				NamespaceEntity namespace = toEntity(n,yamlApplyParam.getKubeConfigId());
 				// save
 				Long id = namespaceDomainService.register(namespace);
 				ids.add(id);

@@ -74,11 +74,11 @@ public class ClusterStorageClassController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterStorageClass")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = storageClassService.registerClusterStorageClass(yamlApplyParam,kubeConfigId);
+			 ids = storageClassService.registerClusterStorageClass(yamlApplyParam);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

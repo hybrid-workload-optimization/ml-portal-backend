@@ -70,6 +70,7 @@ public class ClusterPersistentVolumeDto {
 		private String resourceName;
 		private int size;
     	private Long clusterIdx;
+    	private Long clusterId;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
     }

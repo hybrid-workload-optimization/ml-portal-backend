@@ -25,6 +25,7 @@ public interface ClusterNamespaceDtoMapper {
 	
 	
 	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
+	@Mapping(target = "clusterId" , source = "cluster.clusterId")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterNamespaceDto.ResDetailDto toResDetailDto(NamespaceEntity node);

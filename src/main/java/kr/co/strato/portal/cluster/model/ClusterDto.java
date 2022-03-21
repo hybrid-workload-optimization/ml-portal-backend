@@ -62,6 +62,7 @@ public class ClusterDto {
 	@NoArgsConstructor
 	public static class Detail {
 		private Long clusterIdx;
+		private Long clusterId;
 		private String clusterName;
 		private String provider;
 		private String providerVersion;

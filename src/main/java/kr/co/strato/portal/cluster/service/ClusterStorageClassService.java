@@ -109,7 +109,7 @@ public class ClusterStorageClassService {
      }
     
 	
-	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam, Long clusterId) {
+	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
@@ -118,7 +118,7 @@ public class ClusterStorageClassService {
 		for (StorageClass sc : storageClassList) {
 			try {
 				// k8s Object -> Entity
-				StorageClassEntity clusterStorageClass = toEntity(sc,clusterId);
+				StorageClassEntity clusterStorageClass = toEntity(sc,yamlApplyParam.getKubeConfigId());
 
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);

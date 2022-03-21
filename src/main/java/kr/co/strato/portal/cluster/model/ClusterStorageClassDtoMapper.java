@@ -25,6 +25,7 @@ public interface ClusterStorageClassDtoMapper {
 	public ClusterStorageClassDto.ResListDto toResListDto(StorageClassEntity storageClass);
 
 	@Mapping(target = "clusterIdx" , source = "cluster.clusterIdx")
+	@Mapping(target = "clusterId" , source = "cluster.clusterId")
 	@Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
 	@Mapping(target = "annotation", source = "annotation", qualifiedByName = "labelToMap")
 	public ClusterStorageClassDto.ResDetailDto toResDetailDto(StorageClassEntity storageClass);

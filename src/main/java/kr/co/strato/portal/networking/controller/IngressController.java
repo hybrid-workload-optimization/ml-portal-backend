@@ -76,11 +76,11 @@ public class IngressController {
 	
 	@PostMapping("/api/v1/networking/registerIngress")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerIngress(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerIngress(@RequestBody YamlApplyParam yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = ingressService.registerIngress(yamlApplyParam,kubeConfigId);
+			 ids = ingressService.registerIngress(yamlApplyParam);
 		} catch (Exception e) {
 			log.error("Error has occured", e);
 			throw new PortalException(e.getMessage());

@@ -99,11 +99,11 @@ public class ClusterNodeService {
     }
 	
 	
-	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam, Long clusterId) {
+	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam) {
 		String decodeYaml = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),decodeYaml);
-		List<Long> ids = synClusterNodeSave(clusterNodes,clusterId);
+		List<Long> ids = synClusterNodeSave(clusterNodes,yamlApplyParam.getKubeConfigId());
 		return ids;
 	}
 	

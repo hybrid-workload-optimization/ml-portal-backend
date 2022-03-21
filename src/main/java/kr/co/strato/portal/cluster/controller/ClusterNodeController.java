@@ -57,11 +57,11 @@ public class ClusterNodeController {
 
 	@PostMapping("/api/v1/cluster/registerClusterNode")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam ,@RequestParam Long kubeConfigId) {
+	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {
-			 ids = nodeService.registerClusterNode(yamlApplyParam,kubeConfigId);
+			 ids = nodeService.registerClusterNode(yamlApplyParam);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

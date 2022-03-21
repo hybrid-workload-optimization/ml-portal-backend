@@ -55,7 +55,9 @@ public class CustomStorageClassRepositoryImpl implements CustomStorageClassRepos
 	public StorageClassEntity findByName(String name) {
 		QStorageClassEntity qStorageClassEntity = QStorageClassEntity.storageClassEntity;
 		BooleanBuilder builder = new BooleanBuilder();
-       
+		if(name != null && !name.equals("")){
+            builder.and(qStorageClassEntity.name.eq(name));
+        }
 		StorageClassEntity result = jpaQueryFactory
                 .select(qStorageClassEntity)
                 .from(qStorageClassEntity)
