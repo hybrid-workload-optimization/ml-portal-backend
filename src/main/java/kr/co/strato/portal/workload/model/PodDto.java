@@ -45,7 +45,7 @@ public class PodDto {
     @NoArgsConstructor
     public static class SearchParam{
         private Long projectId;
-        private Long clusterId;
+        private Long clusterIdx;
         private Long namespaceId;
         private Long nodeId;
     }
@@ -92,7 +92,7 @@ public class PodDto {
         private String nodeName;
         private String namespaceName;
 //        private String storageClass;
-//        private Map<String, String> selector;
+        private Map<String, String> selector;
 //        private String ownerName;
         private String ownerUid;
     }

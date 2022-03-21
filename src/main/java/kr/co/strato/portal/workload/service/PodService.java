@@ -1,12 +1,10 @@
 package kr.co.strato.portal.workload.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hibernate.engine.jdbc.connections.spi.DataSourceBasedMultiTenantConnectionProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -16,24 +14,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
-import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
-import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.PodDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class PodService {
+	@Autowired
+    private ClusterDomainService clusterDomainService;
     @Autowired
     private PodDomainService podDomainService;
     
@@ -82,10 +78,13 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
-    	if (searchParam.getClusterId() != null && searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
+    	Long clusterIdx = searchParam.getClusterIdx();
+
+    	if (clusterIdx != null && searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
     		// clusterId만 파라미터로 보낸 경우 저장
-    		Long clusterId = searchParam.getClusterId();
-    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
+    		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+            Long clusterId = clusterEntity.getClusterId();
+    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
     		
             // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
     		podDomainService.deleteByClusterId(clusterId);
@@ -109,7 +108,7 @@ public class PodService {
     		}).collect(Collectors.toList());
     	}
     	
-    	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId(), searchParam.getNodeId());
+    	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterIdx(), searchParam.getNamespaceId(), searchParam.getNodeId());
         List<PodDto.ResListDto> dtos = pods.stream().map(e -> PodDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
         Page<PodDto.ResListDto> pages = new PageImpl<>(dtos, pageable, pods.getTotalElements());
         
@@ -150,7 +149,8 @@ public class PodService {
 		String nodeName = searchParam.getNodeName();
 		String ownerUid = searchParam.getOwnerUid();
 		String namespace = searchParam.getNamespaceName();
-    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace);
+		Map<String, String> selector = searchParam.getSelector();
+    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, selector);
     	List<PodDto.ResListDto> dtoList = new ArrayList<>();
     	
     	for(Pod k8sPod : k8sPods) {
