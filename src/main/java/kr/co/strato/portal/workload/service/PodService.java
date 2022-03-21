@@ -88,7 +88,7 @@ public class PodService {
     		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
     		
             // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
-    		podDomainService.delete(clusterId);
+    		podDomainService.deleteByClusterId(clusterId);
     		
             // k8s data insert
     		List<Long> ids = k8sPods.stream().map( s -> {
@@ -161,5 +161,18 @@ public class PodService {
     	}
     	
     	return dtoList;
+    }
+    
+    public Boolean deletePod(Long podId) {
+    	Boolean result = false;
+    	try {
+    		PodEntity entity = podDomainService.get(podId);
+        	podDomainService.delete(entity);
+        	result = true;
+    	} catch (Exception e) {
+    		log.error(e.getMessage(), e);
+    		throw new InternalServerException("pod deleted fail");
+    	}
+    	return result;
     }
 }

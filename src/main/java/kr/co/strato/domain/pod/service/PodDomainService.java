@@ -31,6 +31,7 @@ import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.repository.ReplicaSetRepository;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
+import kr.co.strato.global.error.exception.NotFoundResourceException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -73,9 +74,12 @@ public class PodDomainService {
     private PodJobRepository podJobRepository;
 
     public PodEntity get(Long podId) {
-    	PodEntity pod = PodEntity.builder().id(podId).build();
-//    	List<PodPersistentVolumeClaimEntity> result = podPersistentVolumeClaimRepository.findByPod(pod);
-    	return pod;
+    	Optional<PodEntity> pod = podRepository.findById(podId.longValue());
+    	if (pod.isPresent()) {
+    		return pod.get();
+    	} else {
+    		throw new NotFoundResourceException("pod_idx : " + podId);
+    	}
     }
     
     public Page<PodEntity> getPods(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
@@ -86,7 +90,11 @@ public class PodDomainService {
     	return podRepository.getPodStatefulSet(podId);
     }
     
-    public void delete(Long clusterId) {
+    public void delete(PodEntity pod) {
+		podRepository.delete(pod);
+    }
+    
+    public void deleteByClusterId(Long clusterId) {
     	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
     	
     	if(optCluster.isPresent()){
