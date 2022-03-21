@@ -44,6 +44,13 @@ public class JobController {
 		return new ResponseWrapper<JobDto>(result);
 	}
 	
+	@GetMapping("/jobs/{idx}/yaml")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> getYaml(@PathVariable(name = "idx") Long idx) {
+		String result = jobService.getYaml(idx);
+		return new ResponseWrapper<String>(result);
+	}
+	
 	@PostMapping("/jobs")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<JobDto> post(@RequestBody JobArgDto jobArgDto) {

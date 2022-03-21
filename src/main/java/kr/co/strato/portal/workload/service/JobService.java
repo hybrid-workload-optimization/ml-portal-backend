@@ -12,23 +12,20 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.Job;
-import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
-import kr.co.strato.portal.workload.model.DeploymentArgDto;
-import kr.co.strato.portal.workload.model.DeploymentDto;
-import kr.co.strato.portal.workload.model.DeploymentDtoMapper;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;
 import kr.co.strato.portal.workload.model.JobDtoMapper;
 import lombok.extern.slf4j.Slf4j;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.global.model.PageRequest;
+import kr.co.strato.global.util.Base64Util;
 
 
 @Slf4j
@@ -61,6 +58,32 @@ public class JobService {
 		return dto;
 	}
 	
+	//yaml 조회
+	public String getYaml(Long idx){
+		
+		String jobName = null;
+		String namespaceName = null;
+		Long clusterId = null;
+		
+		
+		JobEntity entitiy = jobDomainService.getById(idx);
+		if(entitiy != null) {
+			jobName = entitiy.getJobName();
+			NamespaceEntity namespaceEntity = entitiy.getNamespaceEntity();
+			if(namespaceEntity != null) {
+				namespaceName = namespaceEntity.getName();
+				
+				ClusterEntity cluster = namespaceEntity.getCluster();
+				if(cluster != null)
+					clusterId = cluster.getClusterId(); 
+			}
+		}
+		String yaml = jobAdapterService.getYaml(clusterId, namespaceName, jobName);
+		if(yaml != null)
+			yaml = Base64Util.encode(yaml);
+		return yaml;
+	}
+	
 	//생성
 	public void create(JobArgDto jobArgDto){
 		save(jobArgDto);
@@ -75,9 +98,8 @@ public class JobService {
 		Long clusterId = jobArgDto.getClusterId();
 		String yaml = jobArgDto.getYaml();
 		
-		
 		List<Job> jobs = jobAdapterService.create(clusterId, yaml);
-		//deployment 저장.
+		//job 저장.
 		List<JobEntity> eneities = jobs.stream().map(j -> {
 			JobEntity jobEntity = null;
 			try {
