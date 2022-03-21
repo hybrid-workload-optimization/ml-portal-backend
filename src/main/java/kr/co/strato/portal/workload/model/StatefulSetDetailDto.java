@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
+import kr.co.strato.global.validation.annotation.K8sKind;
+import kr.co.strato.global.validation.model.K8sKindType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +16,7 @@ public class StatefulSetDetailDto {
     @Setter
     @NoArgsConstructor
     public static class ReqUpdateDto{
+        @K8sKind(value = K8sKindType.StatefulSet)
         private String yaml;
     }
 
