@@ -1,4 +1,6 @@
 package kr.co.strato.domain.pod.repository;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,5 +12,9 @@ public interface CustomPodRepository {
 	
 	public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId);
 	
+	public List<PodEntity> findAllByNamespaceIdx(Long namespaceId);
+	
 	public StatefulSetEntity getPodStatefulSet(Long podId);
+	
+//	public void deleteByOwnerUidAndKind(String ownerUid, String kind);
 }

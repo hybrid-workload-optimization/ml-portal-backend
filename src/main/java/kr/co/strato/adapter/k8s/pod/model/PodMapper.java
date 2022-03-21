@@ -43,6 +43,7 @@ public interface PodMapper {
             String uid = metadata.getUid();
             String ip = status.getPodIP();
             String statusStr = status.getPhase();
+            String qosClass = status.getQosClass();
             
             Integer restart = containerStatus.getRestartCount();
             
@@ -80,6 +81,7 @@ public interface PodMapper {
             String label = mapper.writeValueAsString(metadata.getLabels());
             String annotations = mapper.writeValueAsString(metadata.getAnnotations());
             String createAt = metadata.getCreationTimestamp();
+            String conditions = mapper.writeValueAsString(status.getConditions());
 
             NamespaceEntity namespaceEntity = NamespaceEntity.builder().name(namespace).build();
             NodeEntity nodeEntity = NodeEntity.builder().name(nodeName).build();
@@ -92,11 +94,13 @@ public interface PodMapper {
                     .label(label)
                     .restart(restart)
                     .status(statusStr)
+                    .qosClass(qosClass)
 //                    .cpu(cpu)
 //                    .memory(memory)
                     .kind(ownerKind)
                     .ownerUid(ownerUid)
                     .annotation(annotations)
+                    .condition(conditions)
                     .createdAt(DateUtil.strToLocalDateTime(createAt))
                     .build();
 

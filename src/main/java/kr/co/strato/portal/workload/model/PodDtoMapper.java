@@ -76,10 +76,11 @@ public interface PodDtoMapper {
     @Named("dataToMap")
     default HashMap<String, Object> dataToMap(String data) {
         try{
-            ObjectMapper mapper = new ObjectMapper();
-            HashMap<String, Object> map = mapper.readValue(data, HashMap.class);
-
-            return map;
+        	if (data != null) {
+	            ObjectMapper mapper = new ObjectMapper();
+	            HashMap<String, Object> map = mapper.readValue(data, HashMap.class);
+	            return map;
+        	} else return new HashMap<>();
         }catch (JsonProcessingException e){
             return new HashMap<>();
         }

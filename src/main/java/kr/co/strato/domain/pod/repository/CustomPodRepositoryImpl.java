@@ -31,23 +31,6 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
     }
 	
 	
-//	@Override
-//	public PodEntity getPodDetail(Long podId) {
-//		QPodEntity qPodEntity = QPodEntity.podEntity;
-//		QPodPersistentVolumeClaimEntity qPodPersistentVolumeClaimEntity = QPodPersistentVolumeClaimEntity.podPersistentVolumeClaimEntity;
-//		QPersistentVolumeClaimEntity qPersistentVolumeClaimEntity = QPersistentVolumeClaimEntity.persistentVolumeClaimEntity;
-//		
-//		QueryResults<PersistentVolumeClaimEntity> results =
-//                jpaQueryFactory
-//                        .select(qPersistentVolumeClaimEntity)
-//                        .from(qPodPersistentVolumeClaimEntity)
-//                        .leftJoin(qPodPersistentVolumeClaimEntity.pod, qPodEntity)
-//                        .leftJoin(qPodPersistentVolumeClaimEntity.persistentVolumeClaim, qPersistentVolumeClaimEntity)
-//                        .where(qPodEntity.id.eq(podId))
-//                        .fetchResults();
-//		
-//		return new PodEntity();
-//	}
 	@Override
     public Page<PodEntity> getPodList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId, Long nodeId) {
 
@@ -107,4 +90,40 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 		
 		return result;
 	}
+	
+	@Override
+	public List<PodEntity> findAllByNamespaceIdx(Long namespaceId) {
+		QPodEntity qPodEntity = QPodEntity.podEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qPodEntity.namespace.id.eq(namespaceId));
+		QueryResults<PodEntity> results =
+                jpaQueryFactory
+                        .select(qPodEntity)
+                        .from(qPodEntity)
+                        .where(builder)
+                        .fetchResults();
+		
+		List<PodEntity> content = results.getResults();
+		return content;
+	}
+	
+//	@Override
+//    public void deleteByOwnerUidAndKind(String ownerUid, String kind) {
+//		// TODO 테스트 필요
+//		QPodEntity qPodEntity = QPodEntity.podEntity;
+//		BooleanBuilder builder = new BooleanBuilder();
+//		builder.and(qPodEntity.kind.eq(kind));
+//		builder.and(qPodEntity.ownerUid.eq(ownerUid));
+//		
+//		QueryResults<PodEntity> pods = jpaQueryFactory.selectFrom(qPodEntity).where(builder).fetchResults();
+//		List<PodEntity> podEntities = pods.getResults();
+//		podEntities.stream().forEach(e -> e.removePodStatefulSet());
+//
+//    	Long result =
+//    			jpaQueryFactory
+//    				.delete(qPodEntity)
+//    				.where(builder)
+//    				.execute();
+//    }
 }

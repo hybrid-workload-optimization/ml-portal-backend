@@ -54,19 +54,17 @@ public class PodService {
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
         List<Pod> pods = podAdapterService.create(clusterId, yaml);
-
+        
+        // k8s data insert
         List<Long> ids = pods.stream().map( s -> {
         	try {
                 String namespaceName = s.getMetadata().getNamespace();
                 // ownerReferences 추가
-                PodEntity pod = toEntity(s);
+                PodEntity pod = PodMapper.INSTANCE.toEntity(s);
 
                 Long id = podDomainService.register(pod, clusterId, namespaceName, null);
 
                 return id;
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage(), e);
-                throw new InternalServerException("json 파싱 에러");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("pod register error");
@@ -76,29 +74,33 @@ public class PodService {
         return ids;
     }
     
+    @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
-//    	if (searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
-//    		// clusterId만 파라미터로 보낸 경우 저장
-//    		Long clusterId = searchParam.getClusterId();
-//    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
-//    		
-//    		// TODO Pod 삭제 (mapping table은 Cascade로...)
-//    		
-//    		List<Long> ids = k8sPods.stream().map( s -> {
-//    			try {
-//    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-//    				String namespaceName = pod.getNamespace().getName();
-//    				String kind = pod.getKind();
+    	if (searchParam.getClusterId() != null && searchParam.getNamespaceId() == null && searchParam.getNodeId() == null) {
+    		// clusterId만 파라미터로 보낸 경우 저장
+    		Long clusterId = searchParam.getClusterId();
+    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null);
+    		
+            // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
+    		podDomainService.delete(clusterId);
+    		
+            // k8s data insert
+    		List<Long> ids = k8sPods.stream().map( s -> {
+    			try {
+    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+    				String namespaceName = pod.getNamespace().getName();
+    				String kind = pod.getKind();
+    				
+    	    		// TODO Pod 삭제 (mapping table은 Cascade로...)
 //    				Long id = podDomainService.register(pod, clusterId, namespaceName, kind);
 //    				return id;
-//    			} catch (Exception e) {
-//                    log.error(e.getMessage(), e);
-//                    throw new InternalServerException("pod register error");
-//                }
-//    		}).collect(Collectors.toList());
-//    	}
-    	// TODO k8s 데이터 저장
-    	
+    				return 0L;
+    			} catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    throw new InternalServerException("pod register error");
+                }
+    		}).collect(Collectors.toList());
+    	}
     	
     	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterId(), searchParam.getNamespaceId(), searchParam.getNodeId());
         List<PodDto.ResListDto> dtos = pods.stream().map(e -> PodDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
@@ -106,36 +108,7 @@ public class PodService {
         
     	return pages;
     }
-    
-    /**
-     * k8s pod model -> pod entity
-     * @param pod
-     * @return
-     * @throws JsonProcessingException
-     */
-    @Transactional(rollbackFor = Exception.class)
-    private PodEntity toEntity(Pod pod) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
 
-        String name = pod.getMetadata().getName();
-        String uid = pod.getMetadata().getUid();
-        String label = mapper.writeValueAsString(pod.getMetadata().getLabels());
-        String annotations = mapper.writeValueAsString(pod.getMetadata().getAnnotations());
-        String createAt = pod.getMetadata().getCreationTimestamp();
-        String ownerUid = pod.getMetadata().getOwnerReferences().get(0).getUid();
-
-        PodEntity podEntity = PodEntity.builder()
-                .podName(name)
-                .podUid(uid)
-                .label(label)
-                .ownerUid(ownerUid)
-                .annotation(annotations)
-                .createdAt(DateUtil.strToLocalDateTime(createAt))
-                .build();
-
-        return podEntity;
-    }
-    
     public PodDto.ResDetailDto getPodDetail(Long podId){
     	// get pod entity
     	PodEntity entity = podDomainService.get(podId);
@@ -157,7 +130,6 @@ public class PodService {
     		
     		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
     	}
-    	
     	
     	return dto;
     }
