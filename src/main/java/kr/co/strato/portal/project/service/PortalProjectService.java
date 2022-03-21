@@ -406,7 +406,9 @@ System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@========================= " + 
 		//Project 삭제시 삭제를 원하는 cluster 확인
     	List<ProjectClusterDto> clusterList = param.getClusterList();
     	if(clusterList != null) {
+    		System.out.println("삭제 대상 Cluster 총 개수 === " + clusterList.size());
     		for(ProjectClusterDto dto : clusterList) {
+    			System.out.println("삭제 대상 Cluster Idx === " + dto.getClusterIdx());
     			//cluster 삭제시 다른 프로젝트에서 해당 클러스터를 사용하는 확인
     			List<ProjectClusterEntity> returnProjectList = projectClusterDomainService.getUseProjectByCluster(dto.getClusterIdx(), projectInfo.get().getId());
     			if(returnProjectList != null && returnProjectList.size() > 0) {

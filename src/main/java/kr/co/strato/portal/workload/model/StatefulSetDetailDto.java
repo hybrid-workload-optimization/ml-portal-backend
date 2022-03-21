@@ -29,8 +29,9 @@ public class StatefulSetDetailDto {
         private String image;
         private HashMap<String, Object> annotation;
         private HashMap<String, Object> label;
-        private Integer runningReplicas;
-        private Integer desiredReplicas;
+        private Integer replicas;
+        private Integer readyReplicas;
+        private String clusterId;
     }
 
     @Getter

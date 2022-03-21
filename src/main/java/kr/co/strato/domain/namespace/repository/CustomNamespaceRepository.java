@@ -12,4 +12,6 @@ public interface CustomNamespaceRepository {
     public Page<NamespaceEntity> getNamespaceList(Pageable pageable, Long clusterId,String name);
     List<NamespaceEntity> findByNameAndClusterIdx(String name, ClusterEntity clusterEntity);//name clusterEntity 조회
 	List<NamespaceEntity> findByClusterIdx(ClusterEntity clusterIdx);
+	
+	public void deleteNamespace(Long namespaceId);
 }

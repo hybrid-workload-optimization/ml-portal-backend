@@ -47,8 +47,8 @@ public class StatefulSetDto {
     @NoArgsConstructor
     @ToString
     public static class SearchParam{
-        private Long projectId;
-        private Long clusterId;
-        private Long namespaceId;
+        private Long projectIdx;
+        private Long clusterIdx;
+        private Long namespaceIdx;
     }
 }

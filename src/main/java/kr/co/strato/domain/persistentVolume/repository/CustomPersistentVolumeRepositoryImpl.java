@@ -1,7 +1,5 @@
 package kr.co.strato.domain.persistentVolume.repository;
 
-import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
