@@ -225,6 +225,12 @@ public class IngressService {
 							String pathType = rulePath.getPathType();
 							String protocol = "http";
 
+							if(host == null) {
+								//빈값 임시 디폴트값
+								IngressControllerEntity ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
+								host = ingressControllerEntity.getAddress();
+							}
+							
 							IngressBackend backend = rulePath.getBackend();
 							IngressServiceBackend serviceBackend = backend.getService();
 							String serviceName = serviceBackend.getName();

@@ -32,11 +32,7 @@ public class NamespaceDomainService {
 	}
 	
 	public boolean delete(Long id) {
-		Optional<NamespaceEntity> opt = namespaceRepository.findById(id);
-		if (opt.isPresent()) {
-			NamespaceEntity entity = opt.get();
-			namespaceRepository.delete(entity);
-		}
+		namespaceRepository.deleteNamespace(id);
 		return true;
 	}
 	
