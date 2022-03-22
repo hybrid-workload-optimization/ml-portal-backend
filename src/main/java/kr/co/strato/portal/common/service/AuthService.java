@@ -1,9 +1,12 @@
 package kr.co.strato.portal.common.service;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.global.util.KeyCloakApiUtil;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 public class AuthService {
@@ -12,9 +15,9 @@ public class AuthService {
 	KeyCloakApiUtil keyCloakApiUtil;
 	
 	//token 요청(로그인)
-	public void doLogin() {
+	public void doLogin(UserDto dto, HttpSession session) throws Exception {
 		System.out.println("로그인");
-//		keyCloakApiUtil.getTokenByUser(null);
+		String token = keyCloakApiUtil.getTokenByUser(dto);
 	}
 	
 	//token refresh 요청

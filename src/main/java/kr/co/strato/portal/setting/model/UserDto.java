@@ -38,6 +38,8 @@ public class UserDto {
 	@Setter
 	@ToString
 	@AllArgsConstructor
+	@NoArgsConstructor
+	@Builder
 	public static class UserRole {
 		private Long userRoleIdx;
 		private String userRoleCode;
@@ -52,7 +54,7 @@ public class UserDto {
 		this.userName = userName;
 		this.email = email;
 		this.organization = organization;
-		this.useYn = userId;
+		this.useYn = useYn;
 		this.userRole = userRole;
 	}
 	

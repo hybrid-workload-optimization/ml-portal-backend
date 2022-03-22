@@ -36,40 +36,49 @@ public class UserDomainService {
 	 */
 	public void saveUser(UserEntity entity, String mode) {
 
-		System.out.println("saveuser >>> ");
-		System.out.println(entity.toString());
-		
-		String roleCode = entity.getUserRole().getUserRoleCode();
-		if(roleCode == null || "".equals(roleCode)) {
-			roleCode = "PROJECT_MEMBER";
-		}
-		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-		
-		// 기존 ROLE와 업데이트할 ROLE이 다르면, keycloak Update
-		if(!roleCode.equals(role.getUserRoleCode())) {
-			// keycloak Role Update 필요
-		}
-		
-		//권한 매핑 
-		entity.getUserRole().setId(role.getId());
-		
-		// @TODO createUser / updateUser 매핑 필요
-		
 		// 등록
 		if("post".equals(mode)) {
 			//DB 저장
-			System.out.println("유저 등록 === ");
+		
+			//PROJECT MEMBER의 RoleCode 가져오기
+			String roleCode = "PROJECT_MEMBER";
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+			
+			//권한 매핑 
+			entity.getUserRole().setId(role.getId());
+			
 			userRepository.save(entity);	
 		}else {
-		// 수정
+			
+			// 수정할 유저의 roleCode > 변경했다면 코드값이 있고, 없다면 값이 없음
+			String roleCode = entity.getUserRole().getUserRoleCode();
+
+			// 수정
 			UserEntity pUser = userRepository.findByUserId(entity.getUserId());
-			pUser.setContact(entity.getContact());
-			pUser.setOrganization(entity.getOrganization());
-			pUser.getUserRole().setId(entity.getUserRole().getId());
+			if(entity.getContact() != null && !"".equals(entity.getContact())) {
+				pUser.setContact(entity.getContact());
+			}
+			if(entity.getOrganization() != null && !"".equals(entity.getOrganization())) {
+				pUser.setOrganization(entity.getOrganization());
+			}
+			if(entity.getUserRole().getUserRoleCode() != null && !"".equals(entity.getUserRole().getUserRoleCode())) {
+				UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+//				pUser.getUserRole().setId(role.getId());
+				pUser.setUserRole(role);
+				
+			}
 			System.out.println("==================유저 수정");
 			System.out.println(pUser.toString());
 			System.out.println("==================유저 수정");
 			userRepository.save(pUser);
+			
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+			
+			// 기존 ROLE와 업데이트할 ROLE이 다르면, keycloak Update
+			if(roleCode != null && !"".equals(roleCode) && !roleCode.equals(role.getUserRoleCode())) {
+				// keycloak Role Update 필요
+			}
+			
 		}
 	}
 	

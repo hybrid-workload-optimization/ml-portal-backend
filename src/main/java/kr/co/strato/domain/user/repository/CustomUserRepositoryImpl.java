@@ -44,6 +44,8 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		
 		builder.and(qUserEntity.useYn.eq("Y"));
 		
+
+		
 		if(param.getProjectId() != null && param.getProjectId() > 0L) {
 			builder.and(qProjectUserEntity.projectIdx.eq(param.getProjectId()));
 		}
@@ -51,25 +53,39 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		if(param.getAuthorityId()!= null && !"".equals(param.getAuthorityId())) {
 			builder.and(qUserRoleEntity.userRoleCode.eq(param.getAuthorityId()));
 		}
-		System.out.println("page : " + pageable.toString());
-		System.out.println("builde: " + builder.toString());
+		QueryResults<UserEntity> results = null;
 		
-		QueryResults<UserEntity> results = 
-				jpaQueryFactory
-						.select(qUserEntity)
-						.from(qUserEntity)
-						.where(builder)
-						.join(qUserEntity.projectUser, qProjectUserEntity)
-						.join(qUserEntity.userRole, qUserRoleEntity)
-						.where(builder)
-						.offset(pageable.getOffset())
-						.groupBy(qUserEntity.userId)
-						.fetchResults();
+		if(param.getProjectId() == null || param.getProjectId() == 0) {
+			results = jpaQueryFactory
+					.select(qUserEntity)
+					.from(qUserEntity)
+					.where(builder)
+					.join(qUserEntity.userRole, qUserRoleEntity)
+					.where(builder)
+					.offset(pageable.getOffset())
+					.groupBy(qUserEntity.userId)
+					.fetchResults();
+			
+		}else {
+			results = jpaQueryFactory
+					.select(qUserEntity)
+					.from(qUserEntity)
+					.where(builder)
+					.join(qUserEntity.projectUser, qProjectUserEntity)
+					.join(qUserEntity.userRole, qUserRoleEntity)
+					.where(builder)
+					.offset(pageable.getOffset())
+					.groupBy(qUserEntity.userId)
+					.fetchResults();	
+		}
+		
+		
 	
 		List<UserEntity> list = results.getResults();
 		long total = results.getTotal();
 		
 		return new PageImpl<>(list, pageable, total);
+
 	}
 
 }

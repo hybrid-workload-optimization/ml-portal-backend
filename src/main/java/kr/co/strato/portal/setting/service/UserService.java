@@ -14,6 +14,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.model.KeycloakRole;
+import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
@@ -34,7 +35,6 @@ public class UserService {
 	
 	//등록
 	public String postUser(UserDto param) {
-		
 		
 		//keycloak 연동
 		try {
@@ -58,7 +58,7 @@ public class UserService {
 		
 		//keycloak 연동
 		try {
-			keyCloakApiUtil.updateSsoUser(param, null);
+//			keyCloakApiUtil.updateSsoUser(param, null);
 			System.out.println("keycloak 연동 >> 수정");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -76,7 +76,7 @@ public class UserService {
 
 		//keycloak 연동
 		try {
-			keyCloakApiUtil.updateSsoUser(param, null);
+			keyCloakApiUtil.deleteSsoUser(param);
 			System.out.println("keycloak 연동 >> 삭제");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -101,6 +101,9 @@ public class UserService {
 	// 목록 > param(projectId, authorityId)
 	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param) throws Exception{
 		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable, param);
+		for (UserEntity userEntity : userEntityList) {
+			System.out.println(userEntity.toString());
+		}
 		List<UserDto> userDtoList = userEntityList
 										.getContent()
 										.stream()
@@ -134,7 +137,7 @@ public class UserService {
 	public void patchUserPassword(UserDto param) {
 
 		try {
-			keyCloakApiUtil.updatePasswordSsoUser(param, null);
+			keyCloakApiUtil.updatePasswordSsoUser(param);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,27 +149,42 @@ public class UserService {
 
 		try {
 			//0. 관리자 토큰 생성
-			String token = keyCloakApiUtil.getTokenByManager();
+//			System.out.println("==== 관리자 토큰 생성 TEST");
+//			String token = keyCloakApiUtil.getTokenByManager();
 			
 			/** USER **/
 			//0. 테스트용 유저 생성
+			
 			UserDto.UserRole role = new UserDto.UserRole(null, "PROJECT MEMBER", null, null, null, null);
-			UserDto user = new UserDto("test1", "test1@test.com", "test1@test.com", null, null, role);
+			UserDto user = new UserDto("test1@test.com", "test1@test.com", "test1@test.com", null, null, role);
 			
 			//1. 유저 생성
-			keyCloakApiUtil.createSsoUser(user);
+			System.out.println("==== 유저 생성 TEST");
+//			keyCloakApiUtil.createSsoUser(user);
 			
+			System.out.println("==== 유저 비밀번호 변경 TEST");
 			//2. 유저 비밀번호 수정
-			user.setUserPassword("test123");
-			keyCloakApiUtil.updatePasswordSsoUser(user, token);
+			user.setUserPassword("test1234");
+//			keyCloakApiUtil.updatePasswordSsoUser(user);
 			
+			
+			System.out.println("==== 유저 정보 조회 TEST");
 			//3. 유저 정보 조회
 			keyCloakApiUtil.getUserInfoByUserId(user.getUserId());
 			
+			
+			System.out.println("==== 유저 토큰 생성 TEST");
 			//4. 유저 토큰 생성
+			String userToken = keyCloakApiUtil.getTokenByUser(user);
 			
+			KeycloakToken tk = new KeycloakToken();
+			tk.setRefreshToken(userToken);
+			
+			System.out.println("==== 유저 토큰 갱신 TEST");
 			//5. 유저 토큰 Refresh
+			keyCloakApiUtil.refreshTokenByUser(user, tk);
 			
+			System.out.println("==== 전체 ROLE 조회 TEST");
 			/** ROLE **/
 			//전체 ROLE 가져오기
 			keyCloakApiUtil.getRoleList();
@@ -183,8 +201,9 @@ public class UserService {
 //			role.setContainerId("Strato-Cloud");
 //			keyCloakApiUtil.postUserRole(user, token, role);
 			
+			System.out.println("==== 특정 유저 ROLE 조회 TEST");
 			//유저의  ROLE 가져오기
-			keyCloakApiUtil.getUserRoleInfo(user, token);
+//			keyCloakApiUtil.getUserRoleInfo(user, token);
 			
 			//유저 ROLE 추가
 			
@@ -192,11 +211,13 @@ public class UserService {
 //			keyCloakApiUtil.deleteUserRole(user, token, role);
 			
 			//유저의  ROLE 가져오기
-			keyCloakApiUtil.getUserRoleInfo(user, token);
+//			keyCloakApiUtil.getUserRoleInfo(user, token);
 			
 			
+			System.out.println("==== 유저 삭제 TEST");
 			// User 삭제
-		
+			keyCloakApiUtil.deleteSsoUser(user);
+			
 			
 			
 		} catch (Exception e) {

@@ -60,6 +60,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.global.model.KeycloakRole;
+import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.model.KeycloakUser;
 import kr.co.strato.portal.setting.model.UserDto;
 
@@ -92,7 +93,7 @@ public class KeyCloakApiUtil {
 	private String keycloakTempPw;
 	
 
-	// 토큰 발급 API
+	// 토큰 발급 / 갱신 API / 
 	private static final String URI_GET_TOKEN = "/auth/realms/Strato-Cloud/protocol/openid-connect/token";
 	
 	// 관리자 토큰 발급 API
@@ -156,7 +157,11 @@ public class KeyCloakApiUtil {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
+			
+			KeycloakToken ktk = convertMapToToken(res);
 
+			System.out.println(response.getBody());
+			
 			token = (String) res.get("access_token");
 
 		} catch (HttpClientErrorException e) {
@@ -175,28 +180,34 @@ public class KeyCloakApiUtil {
 	@SuppressWarnings("unchecked")
 	public String getTokenByUser(UserDto dto) throws Exception {
 
+		System.out.println(dto.toString());
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
 		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
+//		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
 		
+		System.out.println("== 토큰생성 PW : " + pw);
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//			headers.add("Content-Type", "application/x-www-form-urlencoded");
 			logger.info("request uri_userInfo:" + uriGetToken);
 			logger.info("request headers" + headers);
-
-			Map<String, String> tokenMap = new HashMap<String, String>();
-			tokenMap.put("client_id", keycloakClientId);
-			tokenMap.put("username", dto.getUserId());
-			tokenMap.put("password", pw);
-			tokenMap.put("grant_type", "password");
-			tokenMap.put("client_secret", keycloakClientSecret);
+			
+			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
+			
+			tokenMap.add("client_id", keycloakClientId);
+			tokenMap.add("username", dto.getUserId());
+			tokenMap.add("password", pw);
+			tokenMap.add("grant_type", "password");
+			tokenMap.add("client_secret", keycloakClientSecret);
+			
+			HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(tokenMap, headers);
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
 
-			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
+//			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
+			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
 
 			logger.info("status code:" + response.getStatusCode());
 			logger.info("response body:" + response.getBody());
@@ -204,6 +215,10 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
+			KeycloakToken ktk = convertMapToToken(res);
+			System.out.println(ktk.toString());
+			
+			System.out.println(res.toString());
 			System.out.println(res.get("access_token"));
 
 			token = (String) res.get("access_token");
@@ -251,6 +266,10 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
+			KeycloakToken ktk = convertMapToToken(res);
+			System.out.println("---- ktk");
+			System.out.println(ktk.toString());
+			
 			System.out.println(res.toString());
 			System.out.println(res.get("access_token"));
 
@@ -266,6 +285,61 @@ public class KeyCloakApiUtil {
 		}
 
 		return token;
+	}
+	
+	// 토큰 재발급(refresh) - User
+	@SuppressWarnings("unchecked")
+	public String refreshTokenByUser(UserDto dto, KeycloakToken token) throws Exception {
+
+		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
+		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
+		String result = null;
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//			headers.add("Content-Type", "application/x-www-form-urlencoded");
+			logger.info("request uri_userInfo:" + uriGetToken);
+			logger.info("request headers" + headers);
+
+			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
+			tokenMap.add("client_id", keycloakClientId);
+			tokenMap.add("client_secret", keycloakClientSecret);
+			tokenMap.add("grant_type", "password");
+			tokenMap.add("refresh_token", token.getRefreshToken());
+			tokenMap.add("username", dto.getUserId());
+			tokenMap.add("password", pw);
+			
+			HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(tokenMap, headers);
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
+
+			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
+
+			logger.info("status code:" + response.getStatusCode());
+			logger.info("response body:" + response.getBody());
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
+
+			System.out.println(response.getBody());
+			
+			System.out.println(res.toString());
+			
+			System.out.println(res.get("access_token"));
+
+			result = (String) res.get("access_token");
+
+		} catch (HttpClientErrorException e) {
+			HttpStatus status = e.getStatusCode();
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+//					return false;
+			} else {
+				throw new Exception(e);
+			}
+		}
+		
+		return result;
 	}
 	
 	
@@ -309,19 +383,14 @@ public class KeyCloakApiUtil {
 		System.out.println("유저 생성 --");
 		String uriCreateUser = keycloakUrl + URI_SET_USER;
 		String ssoToken = getTokenByManager();
-//		String pw = CryptoUtil.encryptAES256(user.getPassword(), MASTER_KEY);
 		// 최초 가입시에는 임시 비밀번호로 생성
-		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserName() + "',"
+//		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
+		String ssoUser = "{ 'username' : '" + user.getUserId() + "',"
 				+ " 'email' : '" + user.getEmail() + "',"
 				+ " 'enabled' : true," + ""
 				+ " 'credentials' : ["
-						+ "{'type' : 'password'," + " 'value': '" + pw + "'," + " 'temporary': false}" + "]}";
+						+ "{'type' : 'password'," + " 'value': '" + keycloakTempPw + "'," + " 'temporary': false}" + "]}";
 		
-		System.out.println(ssoUser);
-		System.out.println(uriCreateUser);
-		System.out.println(ssoToken);
-
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
 
 		try {
@@ -380,8 +449,8 @@ public class KeyCloakApiUtil {
 		String URI = replaceUri(uriUpdateUser, "id", userId);
 		
 		String ssoToken = getTokenByManager();
-		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserName() + "'," 
+//		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
+		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," 
 						+ " 'enabled' : true," 
 						+ " 'email' : '" + user.getEmail() + "'}";
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
@@ -426,20 +495,18 @@ public class KeyCloakApiUtil {
 	}
 	
 	// 비밀번호 수정
-	public void updatePasswordSsoUser(UserDto user, String token) throws Exception {
+	public void updatePasswordSsoUser(UserDto user) throws Exception {
 		System.out.println("비밀번호 수정..");
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
 		String URI = replaceUri(uriUpdateUser, "id", userId);
 		String ssoToken = getTokenByManager();
-		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserId() + "'," 
-						+ " 'enabled' : true," 
-						+ " 'credentials' : ["
-							+ "{'type' : 'password'," 
-							+ " 'value': '" + pw + "'," 
-							+ " 'temporary': false}" + "]}";
+//		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
+		String ssoUser = "{ 'type' : 'password' , " 
+						+	"'temporary' : false , " 
+						+ "'value' : '"+ user.getUserPassword()  + "'}";
+						
 
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
 		
@@ -447,7 +514,7 @@ public class KeyCloakApiUtil {
 		try {
 
 			HttpClient httpClient = HttpClientBuilder.create().build();
-			HttpPut httpPut = new HttpPut(uriUpdateUser);
+			HttpPut httpPut = new HttpPut(URI);
 			httpPut.addHeader("Content-Type", "application/json");
 			httpPut.addHeader("Authorization", ssoToken);
 
@@ -643,9 +710,11 @@ public class KeyCloakApiUtil {
 
 	
 	//유저 삭제
-	public void deleteSsoUser(UserDto user, String token) throws Exception {
+	public void deleteSsoUser(UserDto user) throws Exception {
 		
-		String userId = getUserInfoByUserId(user.getUserId()).getId();;
+		System.out.println("==== delete User ..");
+		
+		String userId = getUserInfoByUserId(user.getUserId()).getId();
 		
 		String uriDeleteUser = keycloakUrl + URI_UPDATE_USER;
 		
@@ -801,10 +870,6 @@ public class KeyCloakApiUtil {
 			restTemplate.getMessageConverters().add(new FormHttpMessageConverter());
 			restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 			
-			System.out.println("================ requestPostEntity");
-			System.out.println(requestEntity);
-			System.out.println("================ requestPostEntity");
-			
 			return restTemplate.postForEntity(uri, requestEntity, JsonNode.class);
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
@@ -858,7 +923,20 @@ public class KeyCloakApiUtil {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	private KeycloakToken convertMapToToken(Map<String, Object> tokenMap) {
+		KeycloakToken token = new KeycloakToken();
+		token.setAccessToken((String)tokenMap.get("access_token"));
+		token.setExpiresIn((Integer)tokenMap.get("expires_in"));
+		token.setNotBeforePolicy((Integer)tokenMap.get("not-before-policy"));
+		token.setRefreshExpiresIn((Integer)tokenMap.get("refresh_expires_in"));
+		token.setRefreshToken((String) tokenMap.get("refresh_token"));
+		token.setScope((String) tokenMap.get("scope"));
+		token.setSessionState((String) tokenMap.get("session_state"));
 		
+		
+		return token;
 	}
 	
 		
