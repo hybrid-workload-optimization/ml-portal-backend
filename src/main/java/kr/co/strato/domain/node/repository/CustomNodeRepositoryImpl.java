@@ -32,7 +32,7 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
 
         BooleanBuilder builder = new BooleanBuilder();
         if(clusterId != null && clusterId > 0L){
-            builder.and(qClusterEntity.clusterIdx.eq(clusterId));
+            builder.and(qClusterEntity.clusterId.eq(clusterId));
         }
 
         QueryResults<NodeEntity> results =
