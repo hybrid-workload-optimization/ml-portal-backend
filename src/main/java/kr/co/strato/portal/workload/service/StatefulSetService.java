@@ -114,13 +114,13 @@ public class StatefulSetService {
         Long clusterId = statefulSetEntity.getNamespace().getCluster().getClusterId();
         String namespaceName = statefulSetEntity.getNamespace().getName();
         String statefulSetName = statefulSetEntity.getStatefulSetName();
-
-        boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, statefulSetName);
-        if(isDeleted){
-            return statefulSetDomainService.delete(id);
-        }else{
-            throw new InternalServerException("Fail to delete the k8s statefulSet");
-        }
+        return statefulSetDomainService.delete(id);
+//        boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, statefulSetName);
+//        if(isDeleted){
+//            return statefulSetDomainService.delete(id);
+//        }else{
+//            throw new InternalServerException("Fail to delete the k8s statefulSet");
+//        }
     }
 
     @Transactional(rollbackFor = Exception.class)

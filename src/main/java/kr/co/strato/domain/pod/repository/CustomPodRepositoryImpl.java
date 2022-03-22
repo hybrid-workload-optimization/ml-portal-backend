@@ -1,6 +1,5 @@
 package kr.co.strato.domain.pod.repository;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -12,14 +11,17 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.job.model.JobEntity;
+import kr.co.strato.domain.job.model.QJobEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.node.model.QNodeEntity;
-import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
-import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.QPodEntity;
-import kr.co.strato.domain.pod.model.QPodPersistentVolumeClaimEntity;
+import kr.co.strato.domain.pod.model.QPodJobEntity;
+import kr.co.strato.domain.pod.model.QPodReplicaSetEntity;
 import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
+import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
+import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
@@ -91,6 +93,60 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 		return result;
 	}
 	
+//	@Override
+//	public StatefulSetEntity getPodDaemonSet(Long podId) {
+//		QPodDaemonSetEntity qPodDaemonSetEntity = QPodDaemonSetEntity.podDaemonSetEntity;
+//		QDaemonSetEntity qDaemonSetEntity = QDaemonSetEntity.daemonSetEntity;
+//		QPodEntity qPodEntity = QPodEntity.podEntity;
+//
+//		StatefulSetEntity result = 
+//				jpaQueryFactory
+//						.select(qStatefulSetEntity)
+//						.from(qStatefulSetEntity)
+//						.leftJoin(qStatefulSetEntity.podStatefulSets, qPodStatefulSetEntity)
+//						.leftJoin(qPodStatefulSetEntity.pod, qPodEntity)
+//						.where(qPodEntity.id.eq(podId))
+//						.fetchOne();
+//		
+//		return result;
+//	}
+	
+	@Override
+	public ReplicaSetEntity getPodReplicaSet(Long podId) {
+		QPodReplicaSetEntity qPodReplicaSetEntity = QPodReplicaSetEntity.podReplicaSetEntity;
+		QReplicaSetEntity qReplicaSetEntity = QReplicaSetEntity.replicaSetEntity;
+		QPodEntity qPodEntity = QPodEntity.podEntity;
+
+		ReplicaSetEntity result = 
+				jpaQueryFactory
+						.select(qReplicaSetEntity)
+						.from(qReplicaSetEntity)
+						.leftJoin(qReplicaSetEntity.podReplicaSets, qPodReplicaSetEntity)
+						.leftJoin(qPodReplicaSetEntity.pod, qPodEntity)
+						.where(qPodEntity.id.eq(podId))
+						.fetchOne();
+		
+		return result;
+	}
+	
+	@Override
+	public JobEntity getPodJob(Long podId) {
+		QPodJobEntity qPodJobEntity = QPodJobEntity.podJobEntity;
+		QJobEntity qJobEntity = QJobEntity.jobEntity;
+		QPodEntity qPodEntity = QPodEntity.podEntity;
+
+		JobEntity result = 
+				jpaQueryFactory
+						.select(qJobEntity)
+						.from(qJobEntity)
+						.leftJoin(qJobEntity.podJobs, qPodJobEntity)
+						.leftJoin(qPodJobEntity.pod, qPodEntity)
+						.where(qPodEntity.id.eq(podId))
+						.fetchOne();
+		
+		return result;
+	}
+	
 	@Override
 	public List<PodEntity> findAllByNamespaceIdx(Long namespaceId) {
 		QPodEntity qPodEntity = QPodEntity.podEntity;
@@ -108,22 +164,4 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 		return content;
 	}
 	
-//	@Override
-//    public void deleteByOwnerUidAndKind(String ownerUid, String kind) {
-//		// TODO 테스트 필요
-//		QPodEntity qPodEntity = QPodEntity.podEntity;
-//		BooleanBuilder builder = new BooleanBuilder();
-//		builder.and(qPodEntity.kind.eq(kind));
-//		builder.and(qPodEntity.ownerUid.eq(ownerUid));
-//		
-//		QueryResults<PodEntity> pods = jpaQueryFactory.selectFrom(qPodEntity).where(builder).fetchResults();
-//		List<PodEntity> podEntities = pods.getResults();
-//		podEntities.stream().forEach(e -> e.removePodStatefulSet());
-//
-//    	Long result =
-//    			jpaQueryFactory
-//    				.delete(qPodEntity)
-//    				.where(builder)
-//    				.execute();
-//    }
 }

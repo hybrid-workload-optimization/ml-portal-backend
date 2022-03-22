@@ -1,5 +1,7 @@
 package kr.co.strato.domain.replicaset.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,9 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.pod.model.PodReplicaSetEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,4 +69,6 @@ public class ReplicaSetEntity {
     @Column(name = "deployment_idx")
     private Long deploymentIdx;
     
+    @OneToMany(mappedBy = "replicaSet")
+    private List<PodReplicaSetEntity> podReplicaSets;
 }

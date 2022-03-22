@@ -79,9 +79,9 @@ public interface PodMapper {
             	Long amount = Long.parseLong(cpuLimit.getAmount().replaceAll("[^0-9]", ""));
             	String format = cpuLimit.getFormat().replaceAll("[^a-zA-Z]", "");
             	if (format.equals("m")) {
-            		cpu += amount / 100;
+            		cpu = (long) ((cpu + amount) / 100.0);
             	} else if (format.equals("G")) {
-            		cpu += amount;
+            		cpu = (long) (cpu + amount);
             	}
             }
             Long memory = 0L;
@@ -89,9 +89,9 @@ public interface PodMapper {
             	Long amount = Long.parseLong(memoryLimit.getAmount().replaceAll("[^0-9]", ""));
             	String format = memoryLimit.getFormat().replaceAll("[^a-zA-Z]", "");
         		if (format.equals("Mi")) {
-            		memory += amount / 1024;
+            		memory = (long) ((memory + amount) / 1024.0);
             	} else if (format.equals("Gi")) {
-            		memory += amount;
+            		memory = (long) memory + amount;
             	}
             }
             String kind = ownerReference.getKind();

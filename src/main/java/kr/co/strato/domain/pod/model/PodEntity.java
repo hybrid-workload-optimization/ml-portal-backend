@@ -93,7 +93,4 @@ public class PodEntity {
     @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
     private List<PodPersistentVolumeClaimEntity> podPersistentVolumeClaim;
     
-    public void removePodStatefulSet() {
-    	this.podStatefulSet = null;
-    }
 }

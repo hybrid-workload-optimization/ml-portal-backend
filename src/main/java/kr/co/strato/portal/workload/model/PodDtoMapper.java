@@ -16,8 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -61,6 +63,27 @@ public interface PodDtoMapper {
     	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
     })
     public PodDto.ResOwnerDto toResStatefulSetOwnerInfoDto(StatefulSetEntity entity, StatefulSet k8s,  String resourceType);
+    
+//    @Mappings({
+//    	@Mapping(target = "name", source = "entity.statefulSetName"),
+//    	@Mapping(target = "type", source = "resourceType"),
+//    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
+//    })
+//    public PodDto.ResOwnerDto toResDaemonSetOwnerInfoDto(DaemonSetEntity entity, StatefulSet k8s,  String resourceType);
+    
+    @Mappings({
+    	@Mapping(target = "name", source = "entity.replicaSetName"),
+    	@Mapping(target = "type", source = "resourceType"),
+    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
+    })
+    public PodDto.ResOwnerDto toResReplicaSetOwnerInfoDto(ReplicaSetEntity entity, StatefulSet k8s,  String resourceType);
+    
+    @Mappings({
+    	@Mapping(target = "name", source = "entity.jobName"),
+    	@Mapping(target = "type", source = "resourceType"),
+    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
+    })
+    public PodDto.ResOwnerDto toResJobOwnerInfoDto(JobEntity entity, StatefulSet k8s,  String resourceType);
 
  
     @Named("getCpu")

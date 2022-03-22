@@ -4,7 +4,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 public interface CustomPodRepository {
@@ -15,6 +17,7 @@ public interface CustomPodRepository {
 	public List<PodEntity> findAllByNamespaceIdx(Long namespaceId);
 	
 	public StatefulSetEntity getPodStatefulSet(Long podId);
-	
-//	public void deleteByOwnerUidAndKind(String ownerUid, String kind);
+//	public DaemonSetEntity getPodDaemonSet(Long podId);
+	public ReplicaSetEntity getPodReplicaSet(Long podId);
+	public JobEntity getPodJob(Long podId);
 }

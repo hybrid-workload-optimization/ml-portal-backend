@@ -99,10 +99,6 @@ public class PodDomainService {
         return podRepository.getPodList(pageable, projectId, clusterId, namespaceId, nodeId);
     }
     
-    public StatefulSetEntity getPodStatefulSet(Long podId) {
-    	return podRepository.getPodStatefulSet(podId);
-    }
-    
     public void delete(PodEntity pod) {
 		podRepository.delete(pod);
     }
@@ -123,6 +119,22 @@ public class PodDomainService {
     			}
     		}
     	}
+    }
+    
+    public StatefulSetEntity getPodStatefulSet(Long podId) {
+    	return podRepository.getPodStatefulSet(podId);
+    }
+    
+//    public DaemonSetEntity getPodDaemonSet(Long podId) {
+//    	return podRepository.getPodDaemonSet(podId);
+//    }
+    
+    public ReplicaSetEntity getPodReplicaSet(Long podId) {
+    	return podRepository.getPodReplicaSet(podId);
+    }
+    
+    public JobEntity getPodJob(Long podId) {
+    	return podRepository.getPodJob(podId);
     }
     
     /**

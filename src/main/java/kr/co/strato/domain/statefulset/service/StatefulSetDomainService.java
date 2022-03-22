@@ -1,24 +1,29 @@
 package kr.co.strato.domain.statefulset.service;
 
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
-import kr.co.strato.domain.namespace.repository.NamespaceRepository;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
-import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
-import kr.co.strato.global.error.exception.NotFoundResourceException;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.repository.NamespaceRepository;
+import kr.co.strato.domain.pod.repository.PodRepository;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
+import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
+import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
 public class StatefulSetDomainService {
     @Autowired
     private StatefulSetRepository statefulSetRepository;
-
+    
+    @Autowired
+    private PodRepository podRepository;
 
     @Autowired
     private NamespaceRepository namespaceRepository;
@@ -47,6 +52,7 @@ public class StatefulSetDomainService {
         Optional<StatefulSetEntity> opt = statefulSetRepository.findById(statefulSetId);
         if(opt.isPresent()){
             StatefulSetEntity entity = opt.get();
+            podRepository.deleteByOwnerUidAndKind(entity.getStatefulSetUid(), ResourceType.statefulSet.get());
             statefulSetRepository.delete(entity);
         }
         return true;

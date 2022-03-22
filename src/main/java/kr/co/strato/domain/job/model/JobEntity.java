@@ -1,6 +1,7 @@
 package kr.co.strato.domain.job.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,9 +11,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.pod.model.PodJobEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,4 +66,7 @@ public class JobEntity {
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "namespace_idx")
 	private NamespaceEntity namespaceEntity;
+	
+	@OneToMany(mappedBy = "job")
+    private List<PodJobEntity> podJobs;
 }
