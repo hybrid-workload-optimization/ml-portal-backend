@@ -87,8 +87,9 @@ public class ClusterPersistentVolumeService {
 	
 	
     public String getClusterPersistentVolumeYaml(Long kubeConfigId,String name){
-     	String persistentVolumeYaml = persistentVolumeAdapterService.getPersistentVolumeYaml(kubeConfigId,name); 
-         return persistentVolumeYaml;
+     	String yaml = persistentVolumeAdapterService.getPersistentVolumeYaml(kubeConfigId,name); 
+     	yaml = Base64Util.encode(yaml);
+     	return yaml;
      }
     
 	
@@ -111,8 +112,7 @@ public class ClusterPersistentVolumeService {
         List<Long> ids = persistentVolumes.stream().map( pv -> {
             try {
                 PersistentVolumeEntity updatePersistentVolume = toEntity(pv,clusterId);
-
-                Long id = persistentVolumeDomainService.update(updatePersistentVolume, PersistentVolumeId, clusterId);
+                Long id = persistentVolumeDomainService.update(updatePersistentVolume, PersistentVolumeId);
 
                 return id;
             } catch (JsonProcessingException e) {

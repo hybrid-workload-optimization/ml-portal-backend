@@ -104,8 +104,9 @@ public class ClusterStorageClassService {
 	
 	
     public String getClusterStorageClassYaml(Long kubeConfigId,String name){
-     	String storageClassYaml = storageClassAdapterService.getStorageClassYaml(kubeConfigId,name); 
-         return storageClassYaml;
+     	String yaml = storageClassAdapterService.getStorageClassYaml(kubeConfigId,name); 
+     	yaml = Base64Util.encode(yaml);
+         return yaml;
      }
     
 	
@@ -143,7 +144,7 @@ public class ClusterStorageClassService {
             try {
             	StorageClassEntity updatestorageClass = toEntity(sc,clusterId);
 
-                Long id = storageClassDomainService.update(updatestorageClass, storageClassId, clusterId);
+                Long id = storageClassDomainService.update(updatestorageClass, storageClassId);
 
                 return id;
             } catch (JsonProcessingException e) {

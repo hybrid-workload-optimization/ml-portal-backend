@@ -51,6 +51,9 @@ public class CustomPersistentVolumeRepositoryImpl implements CustomPersistentVol
 	public List<PersistentVolumeEntity> findByStorageClassIdx(Long storageClassIdx) {
 		QPersistentVolumeEntity qPersistentVolumeEntity = QPersistentVolumeEntity.persistentVolumeEntity;
 		BooleanBuilder builder = new BooleanBuilder();
+		if (storageClassIdx != null && storageClassIdx > 0L) {
+			builder.and(qPersistentVolumeEntity.storageClass.id.eq(storageClassIdx));
+		}
 
 		QueryResults<PersistentVolumeEntity> results = jpaQueryFactory.select(qPersistentVolumeEntity)
 				.from(qPersistentVolumeEntity).where(builder).orderBy(qPersistentVolumeEntity.id.desc()).fetchResults();

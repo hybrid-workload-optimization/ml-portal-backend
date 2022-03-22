@@ -16,6 +16,7 @@ import kr.co.strato.domain.ingress.repository.IngressControllerRepository;
 import kr.co.strato.domain.ingress.repository.IngressRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
+import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -60,9 +61,11 @@ public class IngressDomainService {
 		}
 	}
 	
-    public Long update(IngressEntity ingressEntity,Long namespaceId, Long clusterId) {
-    	ingressRepository.save(ingressEntity);
-		return ingressEntity.getId();
+    public Long update(IngressEntity updateEntity,Long ingressId) {
+    	IngressEntity oldEntity = get(ingressId);
+        changeToNewData(oldEntity, updateEntity);
+    	ingressRepository.save(oldEntity);
+		return oldEntity.getId();
 	}
     
 	public IngressControllerEntity findByDefaultYn(String defaultYn) {
@@ -79,5 +82,18 @@ public class IngressDomainService {
 		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
 		return namespaceRepository.findByClusterIdx(cluster);
 	}
-    
+	public IngressEntity get(Long ingressId) {
+		IngressEntity namespaceEntity = ingressRepository.findById(ingressId)
+				.orElseThrow(() -> new NotFoundResourceException("ingress id:" + ingressId));
+
+		return namespaceEntity;
+	}
+
+	private void changeToNewData(IngressEntity oldEntity, IngressEntity newEntity) {
+		oldEntity.setUid(newEntity.getUid());
+		oldEntity.setCreatedAt(newEntity.getCreatedAt());
+		oldEntity.setIngressClass(newEntity.getIngressClass());
+	}
+	
+	
 }

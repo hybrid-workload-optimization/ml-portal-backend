@@ -24,7 +24,9 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.QPodEntity;
+import kr.co.strato.domain.pod.model.QPodJobEntity;
 import kr.co.strato.domain.pod.model.QPodPersistentVolumeClaimEntity;
+import kr.co.strato.domain.pod.model.QPodReplicaSetEntity;
 import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
 import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
 import kr.co.strato.domain.service.model.QServiceEndpointEntity;
@@ -119,6 +121,8 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
     @Transactional(rollbackFor = Exception.class)
     public void deleteNamespace(Long namespaceId) {
         QPodStatefulSetEntity podStatefulSetEntity = QPodStatefulSetEntity.podStatefulSetEntity;
+        QPodReplicaSetEntity podReplicaSetEntity = QPodReplicaSetEntity.podReplicaSetEntity;
+        QPodJobEntity podJobEntity = QPodJobEntity.podJobEntity;
         QPodPersistentVolumeClaimEntity podPersistentVolumeClaimEntity = QPodPersistentVolumeClaimEntity.podPersistentVolumeClaimEntity;
         QPodEntity pod = QPodEntity.podEntity;
         QJobEntity job = QJobEntity.jobEntity;
@@ -133,7 +137,16 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
         QStatefulSetEntity statefulSet = QStatefulSetEntity.statefulSetEntity;
         QNamespaceEntity namespace = QNamespaceEntity.namespaceEntity;
 
-        //pod_replica_set
+        //pod_replica_set 
+        jpaQueryFactory.delete(podReplicaSetEntity)
+        .where(podReplicaSetEntity.pod.eq(
+                JPAExpressions
+                        .select(pod)
+                        .from(pod)
+                        .join(pod.namespace, namespace)
+                        .where(namespace.id.eq(namespaceId))
+        ))
+        .execute();
 
         //pod_stateful_set
         jpaQueryFactory.delete(podStatefulSetEntity)
@@ -146,9 +159,19 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
                 ))
                 .execute();
 
-        //pod_daemon_set
+        //pod_daemon_set 
 
-        //pod_job
+        //pod_job 
+        jpaQueryFactory.delete(podJobEntity)
+        .where(podJobEntity.pod.eq(
+                JPAExpressions
+                        .select(pod)
+                        .from(pod)
+                        .join(pod.namespace, namespace)
+                        .where(namespace.id.eq(namespaceId))
+        ))
+        .execute();
+        
 
         //pod_persistent_volume_claim
         jpaQueryFactory.delete(podPersistentVolumeClaimEntity)
