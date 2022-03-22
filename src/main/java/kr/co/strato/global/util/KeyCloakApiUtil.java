@@ -178,9 +178,10 @@ public class KeyCloakApiUtil {
 	
 	// 토큰 생성 - 유저
 	@SuppressWarnings("unchecked")
-	public String getTokenByUser(UserDto dto) throws Exception {
+	public KeycloakToken getTokenByUser(UserDto dto) throws Exception {
 
-		System.out.println(dto.toString());
+		KeycloakToken ktk = new KeycloakToken();
+		
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
 		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
@@ -215,11 +216,7 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
-			KeycloakToken ktk = convertMapToToken(res);
-			System.out.println(ktk.toString());
-			
-			System.out.println(res.toString());
-			System.out.println(res.get("access_token"));
+			ktk = convertMapToToken(res);
 
 			token = (String) res.get("access_token");
 
@@ -232,13 +229,14 @@ public class KeyCloakApiUtil {
 			}
 		}
 
-		return token;
+		return ktk;
 	}
 
 	// 토큰 재발급(refresh)
 	@SuppressWarnings("unchecked")
-	public String refreshToken() throws Exception {
+	public KeycloakToken refreshToken() throws Exception {
 
+		KeycloakToken ktk = new KeycloakToken();
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
 
@@ -266,12 +264,7 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
-			KeycloakToken ktk = convertMapToToken(res);
-			System.out.println("---- ktk");
-			System.out.println(ktk.toString());
-			
-			System.out.println(res.toString());
-			System.out.println(res.get("access_token"));
+			ktk = convertMapToToken(res);
 
 			token = (String) res.get("access_token");
 
@@ -284,7 +277,7 @@ public class KeyCloakApiUtil {
 			}
 		}
 
-		return token;
+		return ktk;
 	}
 	
 	// 토큰 재발급(refresh) - User

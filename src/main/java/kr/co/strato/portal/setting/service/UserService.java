@@ -175,10 +175,10 @@ public class UserService {
 			
 			System.out.println("==== 유저 토큰 생성 TEST");
 			//4. 유저 토큰 생성
-			String userToken = keyCloakApiUtil.getTokenByUser(user);
+			KeycloakToken userToken = keyCloakApiUtil.getTokenByUser(user);
 			
 			KeycloakToken tk = new KeycloakToken();
-			tk.setRefreshToken(userToken);
+			tk.setRefreshToken(userToken.getRefreshToken());
 			
 			System.out.println("==== 유저 토큰 갱신 TEST");
 			//5. 유저 토큰 Refresh

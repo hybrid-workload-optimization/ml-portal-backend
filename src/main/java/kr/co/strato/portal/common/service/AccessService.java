@@ -5,19 +5,23 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
-public class AuthService {
+public class AccessService {
 	
 	@Autowired
 	KeyCloakApiUtil keyCloakApiUtil;
 	
 	//token 요청(로그인)
-	public void doLogin(UserDto dto, HttpSession session) throws Exception {
+	public KeycloakToken doLogin(UserDto dto) throws Exception {
 		System.out.println("로그인");
-		String token = keyCloakApiUtil.getTokenByUser(dto);
+		
+		KeycloakToken token = keyCloakApiUtil.getTokenByUser(dto);
+		
+		return token;
 	}
 	
 	//token refresh 요청
