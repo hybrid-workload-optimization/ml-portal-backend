@@ -53,11 +53,7 @@ public class StorageClassDomainService {
 	}
 	
 	public boolean delete(Long id) {
-		Optional<StorageClassEntity> opt = storageClassRepository.findById(id);
-		if (opt.isPresent()) {
-			StorageClassEntity entity = opt.get();
-			storageClassRepository.delete(entity);
-		}
+		storageClassRepository.deleteStorageClass(id);
 		return true;
 	}
 	
