@@ -77,8 +77,10 @@ public class ClusterNamespaceService {
     
 	
    public String getClusterNamespaceYaml(Long kubeConfigId,String name){
-    	String namespaceYaml = namespaceAdapterService.getNamespaceYaml(kubeConfigId,name); 
-        return namespaceYaml;
+    	String yaml = namespaceAdapterService.getNamespaceYaml(kubeConfigId,name); 
+    	
+    	yaml = Base64Util.encode(yaml);
+        return yaml;
     }
    
 	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam) {
@@ -113,7 +115,7 @@ public class ClusterNamespaceService {
             try {
             	NamespaceEntity updatePersistentVolume = toEntity(n,clusterId);
 
-                Long id = namespaceDomainService.update(updatePersistentVolume, namespaceId, clusterId);
+                Long id = namespaceDomainService.update(updatePersistentVolume, namespaceId);
 
                 return id;
             } catch (JsonProcessingException e) {

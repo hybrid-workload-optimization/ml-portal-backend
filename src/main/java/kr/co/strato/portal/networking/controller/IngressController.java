@@ -99,10 +99,10 @@ public class IngressController {
 	}
 	
 	@PutMapping("/api/v1/networking/updateIngress/{id}")
-    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam,Long kubeConfigId){
+    public ResponseWrapper<Long> updateIngress(@PathVariable Long id, @RequestBody YamlApplyParam yamlApplyParam){
         Long result = null;
         try {
-        	ingressService.updateIngress(id, kubeConfigId,yamlApplyParam);  
+        	ingressService.updateIngress(id, yamlApplyParam);  
         	result = id;
 		} catch (Exception e) {
 			log.error("Error has occured", e);

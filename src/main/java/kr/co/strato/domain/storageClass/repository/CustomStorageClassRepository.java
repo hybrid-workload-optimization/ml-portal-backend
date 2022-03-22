@@ -8,4 +8,5 @@ import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 public interface CustomStorageClassRepository {
     public Page<StorageClassEntity> getStorageClassList(Pageable pageable, Long clusterId,String name);
     StorageClassEntity findByName(String name);	
+    public void deleteStorageClass(Long storageClassId);
 }

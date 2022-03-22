@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -55,14 +56,31 @@ public class NamespaceDomainService {
         return cluster;
     }
     
-    public Long update(NamespaceEntity namespaceEntity,Long namespaceId, Long clusterId) {
-    	namespaceRepository.save(namespaceEntity);
-		return namespaceEntity.getId();
+    public Long update(NamespaceEntity updateEntity,Long namespaceId) {
+    	NamespaceEntity oldEntity = get(namespaceId);
+        changeToNewData(oldEntity, updateEntity);
+    	namespaceRepository.save(oldEntity);
+		return oldEntity.getId();
 	}
 
 	public List<NamespaceEntity> findByClusterIdx(Long clusterIdx){
 		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
 		return namespaceRepository.findByClusterIdx(cluster);
+	}
+	
+	public NamespaceEntity get(Long namespaceId) {
+		NamespaceEntity namespaceEntity = namespaceRepository.findById(namespaceId)
+				.orElseThrow(() -> new NotFoundResourceException("namespace id:" + namespaceId));
+
+		return namespaceEntity;
+	}
+
+	private void changeToNewData(NamespaceEntity oldEntity, NamespaceEntity newEntity) {
+		oldEntity.setUid(newEntity.getUid());
+		oldEntity.setCreatedAt(newEntity.getCreatedAt());
+		oldEntity.setStatus(newEntity.getStatus());
+		oldEntity.setAnnotation(newEntity.getAnnotation());
+		oldEntity.setLabel(newEntity.getLabel());
 	}
 	
 }

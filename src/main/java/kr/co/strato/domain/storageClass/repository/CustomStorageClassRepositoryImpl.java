@@ -6,12 +6,31 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.cronjob.model.QCronJobEntity;
+import kr.co.strato.domain.deployment.model.QDeploymentEntity;
+import kr.co.strato.domain.ingress.model.QIngressEntity;
+import kr.co.strato.domain.ingress.model.QIngressRuleEntity;
+import kr.co.strato.domain.job.model.QJobEntity;
+import kr.co.strato.domain.namespace.model.QNamespaceEntity;
+import kr.co.strato.domain.persistentVolume.model.QPersistentVolumeEntity;
+import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
+import kr.co.strato.domain.pod.model.QPodEntity;
+import kr.co.strato.domain.pod.model.QPodJobEntity;
+import kr.co.strato.domain.pod.model.QPodPersistentVolumeClaimEntity;
+import kr.co.strato.domain.pod.model.QPodReplicaSetEntity;
+import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
+import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
+import kr.co.strato.domain.service.model.QServiceEndpointEntity;
+import kr.co.strato.domain.service.model.QServiceEntity;
+import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
 import kr.co.strato.domain.storageClass.model.QStorageClassEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 
@@ -66,6 +85,25 @@ public class CustomStorageClassRepositoryImpl implements CustomStorageClassRepos
                 .fetchOne();
 		return result;
 	}
+
+	
+	@Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteStorageClass(Long storageClassId) {
+		QStorageClassEntity qStorageClassEntity = QStorageClassEntity.storageClassEntity;
+        QPersistentVolumeEntity persistentVolumeEntity = QPersistentVolumeEntity.persistentVolumeEntity;
+        
+      //persistent_volume
+        jpaQueryFactory.update(persistentVolumeEntity)
+                .where(persistentVolumeEntity.storageClass.id.eq(storageClassId))
+                .setNull(persistentVolumeEntity.storageClass)
+                .execute();
+        
+        //storage_class
+        jpaQueryFactory.delete(qStorageClassEntity)
+                .where(qStorageClassEntity.id.eq(storageClassId))
+                .execute();
+    }
 
 
 

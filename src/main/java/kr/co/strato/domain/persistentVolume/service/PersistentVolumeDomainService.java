@@ -13,6 +13,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.repository.PersistentVolumeRepository;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.domain.storageClass.repository.StorageClassRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
@@ -41,9 +42,11 @@ public class PersistentVolumeDomainService {
 	}
 	
 	
-	public Long update(PersistentVolumeEntity persistentVolumeEntity,Long persistentVolumeId, Long clusterId) {
-		persistentVolumeRepository.save(persistentVolumeEntity);
-		return persistentVolumeEntity.getId();
+	public Long update(PersistentVolumeEntity updateEntity,Long persistentVolumeId) {
+		PersistentVolumeEntity oldEntity = get(persistentVolumeId);
+	    changeToNewData(oldEntity, updateEntity);
+	    persistentVolumeRepository.save(oldEntity);
+		return oldEntity.getId();
 	}
 
 	public void delete(PersistentVolumeEntity persistentVolumeEntity) {
@@ -74,6 +77,29 @@ public class PersistentVolumeDomainService {
     public List<PersistentVolumeEntity> findByStorageClassIdx(Long storageClassIdx){
 		return persistentVolumeRepository.findByStorageClassIdx(storageClassIdx);
 	}
+    
+    public PersistentVolumeEntity get(Long persistentVolumeId){
+    	PersistentVolumeEntity persistentVolumeEntity = persistentVolumeRepository.findById(persistentVolumeId)
+                .orElseThrow(() -> new NotFoundResourceException("persistentVolumeId id:"+persistentVolumeId));
+        return persistentVolumeEntity;
+    }
+
+    
+    private void changeToNewData(PersistentVolumeEntity oldEntity, PersistentVolumeEntity newEntity){
+        oldEntity.setUid(newEntity.getUid());
+        oldEntity.setStatus(newEntity.getStatus());
+        oldEntity.setAccessMode(newEntity.getAccessMode());
+        oldEntity.setClaim(newEntity.getClaim());
+        oldEntity.setReclaim(newEntity.getReclaim());
+        oldEntity.setReclaimPolicy(newEntity.getReclaimPolicy());
+        oldEntity.setResourceName(newEntity.getResourceName());
+        oldEntity.setSize(newEntity.getSize());
+        oldEntity.setType(newEntity.getType());
+        oldEntity.setPath(newEntity.getPath());
+        oldEntity.setCreatedAt(newEntity.getCreatedAt());
+        oldEntity.setAnnotation(newEntity.getAnnotation());
+        oldEntity.setLabel(newEntity.getLabel());
+    }
 
 	
 }

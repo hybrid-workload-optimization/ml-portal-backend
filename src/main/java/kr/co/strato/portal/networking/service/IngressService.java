@@ -112,10 +112,11 @@ public class IngressService {
     }
 	
 	
-    public String getIngressYaml(Long kubeConfigId,String name,String namespace){
-     	String ingressYaml = ingressAdapterService.getIngressYaml(kubeConfigId,name,namespace); 
-         return ingressYaml;
-     }
+	public String getIngressYaml(Long kubeConfigId, String name, String namespace) {
+		String yaml = ingressAdapterService.getIngressYaml(kubeConfigId, name, namespace);
+		yaml = Base64Util.encode(yaml);
+		return yaml;
+	}
     
 	
 	public List<Long> registerIngress(YamlApplyParam yamlApplyParam) {
@@ -144,16 +145,16 @@ public class IngressService {
 		return ids;
 	}
 	
-	public List<Long> updateIngress(Long ingressId,Long clusterId, YamlApplyParam yamlApplyParam){
+	public List<Long> updateIngress(Long ingressId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
 
-        List<Ingress> ingress = ingressAdapterService.registerIngress(clusterId, yaml);
+        List<Ingress> ingress = ingressAdapterService.registerIngress(yamlApplyParam.getKubeConfigId(), yaml);
 
         List<Long> ids = ingress.stream().map( i -> {
             try {
-            	IngressEntity updateIngress = toEntity(i,clusterId);
+            	IngressEntity updateIngress = toEntity(i,yamlApplyParam.getKubeConfigId());
 
-                Long id = ingressDomainService.update(updateIngress, ingressId, clusterId);
+                Long id = ingressDomainService.update(updateIngress, ingressId);
                 
                 ingressRuleDomainService.delete(id);
                 //ingress rule save
