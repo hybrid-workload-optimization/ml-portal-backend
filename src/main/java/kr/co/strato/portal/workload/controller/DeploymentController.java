@@ -28,21 +28,21 @@ public class DeploymentController {
 
 	@GetMapping("/deployments")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<DeploymentDto>> getList(PageRequest pageRequest, DeploymentArgDto args) {
+	public ResponseWrapper<Page<DeploymentDto>> getDeploymentList(PageRequest pageRequest, DeploymentArgDto args) {
 		Page<DeploymentDto> result = deploymentService.getList(pageRequest, args);
 		return new ResponseWrapper<Page<DeploymentDto>>(result);
 	}
 	
 	@GetMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> get(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<DeploymentDto> getDeployment(@PathVariable(name = "idx") Long idx) {
 		DeploymentDto result = deploymentService.get(idx);
 		return new ResponseWrapper<DeploymentDto>(result);
 	}
 	
 	@PostMapping("/deployments")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<DeploymentDto> post(@RequestBody DeploymentArgDto deploymentArgDto) {
+	public ResponseWrapper<DeploymentDto> postDeployment(@RequestBody DeploymentArgDto deploymentArgDto) {
 		ResponseWrapper<DeploymentDto> result = null;
 		deploymentService.create(deploymentArgDto);
 		return result;
@@ -50,7 +50,7 @@ public class DeploymentController {
 	
 	@PutMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> put(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
+	public ResponseWrapper<DeploymentDto> putDeployment(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
 		deploymentArgDto.setDeploymentIdx(idx);
 		deploymentService.update(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();
@@ -58,7 +58,7 @@ public class DeploymentController {
 	
 	@DeleteMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> delete(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
+	public ResponseWrapper<DeploymentDto> deleteDeployment(@PathVariable(name = "idx") Long idx, @RequestBody DeploymentArgDto deploymentArgDto) {
 		deploymentArgDto.setDeploymentIdx(idx);
 		deploymentService.delete(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();

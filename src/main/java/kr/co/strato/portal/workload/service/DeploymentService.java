@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,7 +41,10 @@ public class DeploymentService {
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
-	
+
+	@Autowired
+	ClusterDomainService clusterDomainService;
+
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -67,11 +72,11 @@ public class DeploymentService {
 	}
 	
 	private void save(DeploymentArgDto deploymentArgDto){
-		Long clusterId = deploymentArgDto.getClusterId();
+		Long clusterIdx = deploymentArgDto.getClusterIdx();
 		String yaml = deploymentArgDto.getYaml();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
-		
-		List<Deployment> deployments = deploymentAdapterService.create(clusterId, yaml);
+		List<Deployment> deployments = deploymentAdapterService.create(clusterEntity.getClusterId(), yaml);
 		//deployment 저장.
 		List<DeploymentEntity> eneities = deployments.stream().map(d -> {
 			DeploymentEntity deploymentEntity = null;
@@ -82,9 +87,10 @@ public class DeploymentService {
 			}
 			
 			if(deploymentEntity != null) {
-				NamespaceEntity namespaceEntity = new NamespaceEntity();
-				namespaceEntity.setId(deploymentArgDto.getNamespaceIdx());
-				deploymentEntity.setNamespaceEntity(namespaceEntity);
+				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(d.getMetadata().getNamespace(), clusterEntity);
+				if(namespaceEntities != null && namespaceEntities.size() > 0){
+					deploymentEntity.setNamespaceEntity(namespaceEntities.get(0));
+				}
 				
 				//수정시
 				if(deploymentArgDto.getDeploymentIdx() != null)
