@@ -32,28 +32,28 @@ public class JobController {
 
 	@GetMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<JobDto>> getList(PageRequest pageRequest, JobArgDto args) {
+	public ResponseWrapper<Page<JobDto>> getJobList (PageRequest pageRequest, JobArgDto args) {
 		Page<JobDto> result = jobService.getList(pageRequest, args);
 		return new ResponseWrapper<Page<JobDto>>(result);
 	}
 	
 	@GetMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<JobDto> get(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<JobDto> getJob (@PathVariable(name = "idx") Long idx) {
 		JobDto result = jobService.get(idx);
 		return new ResponseWrapper<JobDto>(result);
 	}
 	
 	@GetMapping("/cron-jobs/{idx}/yaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getYaml(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<String> getJobYaml (@PathVariable(name = "idx") Long idx) {
 		String result = jobService.getYaml(idx);
 		return new ResponseWrapper<String>(result);
 	}
 	
 	@PostMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<JobDto> post(@RequestBody JobArgDto jobArgDto) {
+	public ResponseWrapper<JobDto> postJob (@RequestBody JobArgDto jobArgDto) {
 		ResponseWrapper<JobDto> result = null;
 		jobService.create(jobArgDto);
 		return result;
@@ -61,7 +61,7 @@ public class JobController {
 	
 	@PutMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<JobDto> put(@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
+	public ResponseWrapper<JobDto> putJob (@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
 		jobArgDto.setJobIdx(idx);
 		jobService.update( jobArgDto);
 		return new ResponseWrapper<JobDto>();
@@ -69,7 +69,7 @@ public class JobController {
 	
 	@DeleteMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<JobDto> delete(@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
+	public ResponseWrapper<JobDto> deleteJob (@PathVariable(name = "idx") Long idx, @RequestBody JobArgDto jobArgDto) {
 		jobArgDto.setJobIdx(idx);
 		jobService.delete(jobArgDto);
 		return new ResponseWrapper<JobDto>();

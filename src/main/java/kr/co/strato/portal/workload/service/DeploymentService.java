@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
 import kr.co.strato.portal.workload.model.DeploymentDto;
@@ -23,9 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.deployment.service.DeploymentDomainService;
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.pod.repository.PodRepository;
+import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
+import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.model.PageRequest;
+import kr.co.strato.global.util.Base64Util;
 
 @Slf4j
 @Service
@@ -44,7 +50,12 @@ public class DeploymentService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
-
+	
+	@Autowired
+	ReplicaSetDomainService replicaSetDomainService;
+	
+	@Autowired
+	PodRepository podRepository;
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -61,22 +72,56 @@ public class DeploymentService {
 		return dto;
 	}
 	
+	// yaml 조회
+	public String getYaml(Long idx) {
+
+		String name = null;
+		String namespaceName = null;
+		Long clusterId = null;
+
+		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(idx);
+		if (entitiy != null) {
+			name = entitiy.getDeploymentName();
+			NamespaceEntity namespaceEntity = entitiy.getNamespaceEntity();
+			if (namespaceEntity != null) {
+				namespaceName = namespaceEntity.getName();
+
+				ClusterEntity cluster = namespaceEntity.getCluster();
+				if (cluster != null)
+					clusterId = cluster.getClusterId();
+			}
+		}
+		String yaml = deploymentAdapterService.getYaml(clusterId, namespaceName, name);
+		if (yaml != null)
+			yaml = Base64Util.encode(yaml);
+		return yaml;
+	}
+			
+	
 	//생성
 	public void create(DeploymentArgDto deploymentArgDto){
-		save(deploymentArgDto);
+		Long clusterIdx = deploymentArgDto.getClusterIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		deploymentArgDto.setClusterId(clusterIdx);
+		
+		save(deploymentArgDto, clusterEntity);
 	}
 	
 	//수정
 	public void update(DeploymentArgDto deploymentArgDto){
-		save(deploymentArgDto);
+		Long deploymentIdx = deploymentArgDto.getDeploymentIdx();
+		DeploymentEntity deploymentEntity  = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
+		NamespaceEntity namespaceEntity = deploymentEntity.getNamespaceEntity();
+		ClusterEntity clusterEntity = namespaceDomainService.getCluster(namespaceEntity.getId());
+
+		save(deploymentArgDto, clusterEntity);
 	}
 	
-	private void save(DeploymentArgDto deploymentArgDto){
-		Long clusterIdx = deploymentArgDto.getClusterIdx();
+	private void save(DeploymentArgDto deploymentArgDto, ClusterEntity clusterEntity){
 		String yaml = deploymentArgDto.getYaml();
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		List<Deployment> deployments = deploymentAdapterService.create(clusterEntity.getClusterId(), yaml);
+		
 		//deployment 저장.
 		List<DeploymentEntity> eneities = deployments.stream().map(d -> {
 			DeploymentEntity deploymentEntity = null;
@@ -103,9 +148,7 @@ public class DeploymentService {
 		}).collect(Collectors.toList());
 		
 		//TODO replicatset 저장.
-		//TODO pod 저장.
 	}
-	
 	
 	//삭제
 	public void delete(DeploymentArgDto deploymentArgDto){
@@ -119,6 +162,16 @@ public class DeploymentService {
 		if(namespaceEntity != null)
 			namespaceName = namespaceEntity.getName();
 		
+		List<ReplicaSetEntity> replicasets = replicaSetDomainService.getByDeplymentIdx(deploymentIdx);
+		replicasets.forEach((e)->{
+			//pod/podReplicatSet 삭제
+			//도메인 레이어 무시하고 접근하고 되나? 
+			podRepository.deleteByOwnerUidAndKind(e.getReplicaSetUid(), ResourceType.replicaSet.get());
+			
+			//replicaSet 삭제.
+			replicaSetDomainService.delete(e);
+		});
+		
 		DeploymentEntity deploymentEntity = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
 		if(deploymentEntity != null)
 			deploymentName = deploymentEntity.getDeploymentName();
@@ -126,7 +179,6 @@ public class DeploymentService {
 		deploymentAdapterService.delete(clusterId, namespaceName, deploymentName);
 		deploymentDomainService.delete(deploymentIdx);
 	}
-	
 	
     private DeploymentEntity toEntity(Deployment d) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();

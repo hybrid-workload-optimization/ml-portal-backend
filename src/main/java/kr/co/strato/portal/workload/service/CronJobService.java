@@ -21,6 +21,7 @@ import kr.co.strato.portal.workload.model.CronJobDto;
 import kr.co.strato.portal.workload.model.CronJobDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.repository.CronJobRepository;
 import kr.co.strato.domain.cronjob.service.CronJobDomainService;
@@ -37,6 +38,9 @@ import kr.co.strato.global.util.Base64Util;
 public class CronJobService {
 	@Autowired
 	CronJobDomainService cronJobDomainService;
+	
+	@Autowired
+	ClusterDomainService clusterDomainService;
 	
 	@Autowired
 	CronJobAdapterService cronJobAdapterService;
@@ -89,46 +93,49 @@ public class CronJobService {
 	}
 	
 	//생성
-	public void create(CronJobArgDto CronJobArgDto){
-		save(CronJobArgDto);
+	public void create(CronJobArgDto cronJobArgDto){
+		save(cronJobArgDto);
 	}
 	
 	//수정
-	public void update(CronJobArgDto CronJobArgDto){
-		save(CronJobArgDto);
+	public void update(CronJobArgDto cronJobArgDto){
+		save(cronJobArgDto);
 	}
 	
-	private void save(CronJobArgDto CronJobArgDto){
-		Long clusterId = CronJobArgDto.getClusterId();
-		String yaml = CronJobArgDto.getYaml();
+	private void save(CronJobArgDto cronJobArgDto){
+		Long clusterIdx = cronJobArgDto.getClusterIdx();
+		String yaml = cronJobArgDto.getYaml();
+		
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		Long clusterId = clusterEntity.getClusterId();
 		
 		List<CronJob> jobs = cronJobAdapterService.create(clusterId, yaml);
 		//job 저장.
 		List<CronJobEntity> eneities = jobs.stream().map(e -> {
-			CronJobEntity CronJobEntity = null;
+			CronJobEntity cronJobEntity = null;
 			try {
-				CronJobEntity = toEntity(e);
+				cronJobEntity = toEntity(e);
 			} catch (JsonProcessingException ex) {
 				log.debug(yaml);
 			}
 			
-			if(CronJobEntity != null) {
-				NamespaceEntity namespaceEntity = new NamespaceEntity();
-				namespaceEntity.setId(CronJobArgDto.getNamespaceIdx());
-				CronJobEntity.setNamespaceEntity(namespaceEntity);
+			if(cronJobEntity != null) {
+				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(e.getMetadata().getNamespace(), clusterEntity);
+				if(namespaceEntities != null && namespaceEntities.size() > 0){
+					cronJobEntity.setNamespaceEntity(namespaceEntities.get(0));
+				}
 				
 				//수정시
-				if(CronJobArgDto.getJobIdx() != null)
-					CronJobEntity.setCronJobIdx(CronJobArgDto.getJobIdx());
+				if(cronJobArgDto.getJobIdx() != null)
+					cronJobEntity.setCronJobIdx(cronJobArgDto.getJobIdx());
 				
-				cronJobDomainService.save(CronJobEntity);
+				cronJobDomainService.save(cronJobEntity);
 			}
 			
-			return CronJobEntity;
+			return cronJobEntity;
 		}).collect(Collectors.toList());
 		
-		//TODO replicatset 저장.
-		//TODO pod 저장.
+		//TODO 이어지는 작업 확인
 	}
 	
 	

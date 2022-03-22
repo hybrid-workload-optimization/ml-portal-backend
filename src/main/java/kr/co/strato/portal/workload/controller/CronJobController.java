@@ -29,28 +29,28 @@ public class CronJobController {
 
 	@GetMapping("/jobs")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<CronJobDto>> getList(PageRequest pageRequest, CronJobArgDto args) {
+	public ResponseWrapper<Page<CronJobDto>> getCronJobList(PageRequest pageRequest, CronJobArgDto args) {
 		Page<CronJobDto> result = cronJobService.getList(pageRequest, args);
 		return new ResponseWrapper<Page<CronJobDto>>(result);
 	}
 	
 	@GetMapping("/jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<CronJobDto> get(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<CronJobDto> getCronJob (@PathVariable(name = "idx") Long idx) {
 		CronJobDto result = cronJobService.get(idx);
 		return new ResponseWrapper<CronJobDto>(result);
 	}
 	
 	@GetMapping("/jobs/{idx}/yaml")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> getYaml(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<String> getCronJobYaml (@PathVariable(name = "idx") Long idx) {
 		String result = cronJobService.getYaml(idx);
 		return new ResponseWrapper<String>(result);
 	}
 	
 	@PostMapping("/jobs")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<CronJobDto> post(@RequestBody CronJobArgDto CronJobArgDto) {
+	public ResponseWrapper<CronJobDto> postCronJob (@RequestBody CronJobArgDto CronJobArgDto) {
 		ResponseWrapper<CronJobDto> result = null;
 		cronJobService.create(CronJobArgDto);
 		return result;
@@ -58,7 +58,7 @@ public class CronJobController {
 	
 	@PutMapping("/jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<CronJobDto> put(@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
+	public ResponseWrapper<CronJobDto> putCronJob (@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
 		CronJobArgDto.setJobIdx(idx);
 		cronJobService.update( CronJobArgDto);
 		return new ResponseWrapper<CronJobDto>();
@@ -66,7 +66,7 @@ public class CronJobController {
 	
 	@DeleteMapping("/jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<CronJobDto> delete(@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
+	public ResponseWrapper<CronJobDto> deleteCronJob (@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
 		CronJobArgDto.setJobIdx(idx);
 		cronJobService.delete(CronJobArgDto);
 		return new ResponseWrapper<CronJobDto>();

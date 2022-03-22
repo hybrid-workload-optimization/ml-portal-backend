@@ -19,6 +19,7 @@ import kr.co.strato.portal.workload.model.JobDto;
 import kr.co.strato.portal.workload.model.JobDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.job.service.JobDomainService;
@@ -33,6 +34,9 @@ import kr.co.strato.global.util.Base64Util;
 public class JobService {
 	@Autowired
 	JobDomainService jobDomainService;
+	
+	@Autowired
+	ClusterDomainService clusterDomainService;
 	
 	@Autowired
 	JobAdapterService jobAdapterService;
@@ -95,23 +99,26 @@ public class JobService {
 	}
 	
 	private void save(JobArgDto jobArgDto){
-		Long clusterId = jobArgDto.getClusterId();
+		Long clusterIdx = jobArgDto.getClusterIdx();
 		String yaml = jobArgDto.getYaml();
 		
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		Long clusterId = clusterEntity.getClusterId();
 		List<Job> jobs = jobAdapterService.create(clusterId, yaml);
 		//job 저장.
-		List<JobEntity> eneities = jobs.stream().map(j -> {
+		List<JobEntity> eneities = jobs.stream().map(e -> {
 			JobEntity jobEntity = null;
 			try {
-				jobEntity = toEntity(j);
-			} catch (JsonProcessingException e) {
+				jobEntity = toEntity(e);
+			} catch (JsonProcessingException ex) {
 				log.debug(yaml);
 			}
 			
 			if(jobEntity != null) {
-				NamespaceEntity namespaceEntity = new NamespaceEntity();
-				namespaceEntity.setId(jobArgDto.getNamespaceIdx());
-				jobEntity.setNamespaceEntity(namespaceEntity);
+				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(e.getMetadata().getNamespace(), clusterEntity);
+				if(namespaceEntities != null && namespaceEntities.size() > 0){
+					jobEntity.setNamespaceEntity(namespaceEntities.get(0));
+				}
 				
 				//수정시
 				if(jobArgDto.getJobIdx() != null)
@@ -123,8 +130,7 @@ public class JobService {
 			return jobEntity;
 		}).collect(Collectors.toList());
 		
-		//TODO replicatset 저장.
-		//TODO pod 저장.
+		//TODO 이어지는 작업 확인
 	}
 	
 	

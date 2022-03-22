@@ -1,5 +1,6 @@
 package kr.co.strato.domain.replicaset.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,10 @@ public class ReplicaSetDomainService {
 		} else {
 			throw new NotFoundResourceException("cluster_idx : " + replicaSetIdx.toString());
 		}
+	}
+	
+	public List<ReplicaSetEntity> getByDeplymentIdx(Long deploymentIdx){
+		return replicaSetRepository.getByDeploymentIdx(deploymentIdx);
 	}
 	
 }
