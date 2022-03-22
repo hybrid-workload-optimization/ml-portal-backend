@@ -201,4 +201,19 @@ public class PodService {
     	}
     	return result;
     }
+    
+    public String getPodtYaml(Long podId) {
+    	//get statefulSet entity
+        PodEntity entity = podDomainService.get(podId);
+
+        //get k8s statefulSet model
+        String podName = entity.getPodName();
+        String namespaceName = entity.getNamespace().getName();
+        Long clusterId = entity.getNamespace().getCluster().getClusterId();
+
+        String yaml = podAdapterService.getYaml(clusterId, namespaceName, podName);
+        yaml = Base64Util.encode(yaml);
+
+        return yaml;
+    }
 }

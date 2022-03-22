@@ -83,11 +83,20 @@ public class PodController {
     	return new ResponseWrapper<>(result);
     }
     
-    @GetMapping("api/v1/pod//log/download")
+    @GetMapping("api/v1/pod/log/download")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ByteArrayResource> getPodLogDownload(@RequestParam("clusterId") Long clusterId, @RequestParam("namespace") String namespace, @RequestParam("name") String name) {
     	ResponseEntity<ByteArrayResource> result = podService.getLogDownloadFile(clusterId, namespace, name);	
     	return result;
+
+    }
+    
+    @GetMapping("api/v1/pod/{id}/yaml")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<String> getPodYaml(@PathVariable Long id) {
+    	String result = podService.getPodtYaml(id);
+
+        return new ResponseWrapper<>(result);
 
     }
 }

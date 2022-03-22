@@ -94,9 +94,11 @@ public interface PodMapper {
             		memory += amount;
             	}
             }
+            String kind = ownerReference.getKind();
+            String ownerKind = (kind != null) ? kind.substring(0, 1).toLowerCase() + kind.substring(1) : null;
     		
             String ownerUid = ownerReference.getUid();
-            String ownerKind = ownerReference.getKind();
+            
             String label = mapper.writeValueAsString(metadata.getLabels());
             String annotations = mapper.writeValueAsString(metadata.getAnnotations());
             String createAt = metadata.getCreationTimestamp();
