@@ -37,13 +37,22 @@ public class UserController {
 	@PostMapping("/users")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<String> postUser(@RequestBody UserDto param, HttpSession session){
+		String result = "N";
 		//@TODO session 에서 로그인한 사용자 추가
 		System.out.println("================ 등록 ===========");
 		System.out.println(param.toString());
 		System.out.println("================ 등록 ===========");
-		param.setUseYn("Y");
-		userService.postUser(param);
-		return new ResponseWrapper<>(param.getUserId());
+		
+		// 등록 전 중복 체크
+		UserDto user = userService.getUserInfo(param.getUserId());
+		
+		if(user != null) {
+			param.setUseYn("Y");
+			userService.postUser(param);
+			result = param.getUserId();
+		}
+		
+		return new ResponseWrapper<>(result);
 	}
 	
 	//수정
@@ -51,11 +60,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> patchUser(@RequestBody UserDto param, HttpSession session){
 		
-		
-		System.out.println("================ 수정 ===========");
-		System.out.println(param.toString());
-		System.out.println("================ 수정 ===========");
-	
 		param.setUseYn("Y");
 		userService.patchUser(param);
 		
@@ -67,9 +71,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> deleteUser(@RequestParam(value = "userId") String userId, HttpSession session){
 		
-		System.out.println("================ 삭제 ===========");
-		System.out.println(userId);
-		System.out.println("================ 삭제 ===========");
 		UserDto param = new UserDto();
 		param.setUserId(userId);
 		userService.deleteUser(param);
@@ -108,8 +109,6 @@ public class UserController {
 		} finally {
 			
 		}
-		System.out.println("============= 유저 상세정보");
-		System.out.println(userDto);
 		
 		return new ResponseWrapper<>(userDto);
 	}
@@ -135,6 +134,20 @@ public class UserController {
 		return new ResponseWrapper<>(param.getUserId());
 	}
 	
+	// UserId 회원가입 여부 확인
+	@GetMapping("/users/dupl/{userId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> checkDuplUser(@PathVariable String userId){
+		String result = "N";
+		UserDto user = userService.getUserInfo(userId);
+		
+		if(user != null) {
+			result ="Y";
+		}
+		
+		return new ResponseWrapper<>(result);
+		
+	}
 	
 	@GetMapping("/test")
 	@ResponseStatus(HttpStatus.OK)
