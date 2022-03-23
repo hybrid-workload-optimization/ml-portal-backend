@@ -3,10 +3,12 @@ package kr.co.strato.portal.common.service;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
+import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
@@ -15,29 +17,30 @@ public class AccessService {
 	@Autowired
 	KeyCloakApiUtil keyCloakApiUtil;
 	
+	@Autowired
+	TokenValidator tokenValidator;
+	
 	//token 요청(로그인)
-	public KeycloakToken doLogin(UserDto dto) throws Exception {
-		System.out.println("로그인");
-		
-		KeycloakToken token = keyCloakApiUtil.getTokenByUser(dto);
-		
-		return token;
+	public ResponseEntity<KeycloakToken> doLogin(UserDto dto) throws Exception {
+		return keyCloakApiUtil.getTokenByUser(dto);
 	}
 	
 	//token refresh 요청
-	public void tokenRefresh() {
-		System.out.println("token refresh..");
+	public ResponseEntity<KeycloakToken> tokenRefresh(String refreshToken) throws Exception {
+		return keyCloakApiUtil.refreshToken(refreshToken);
 	}
 	
 	//token 유효성 검증
-	public void tokenVerify() {
+	public void tokenVerify(String accessToken) {
 		System.out.println("토큰 검증..");
+		System.out.println(accessToken);
+		tokenValidator.validateToken(accessToken);
 	}
 	
 	
 	//token 삭제 요청(로그아웃)
-	public void doLogout() {
-		System.out.println("do Logout..");
+	public void doLogout(String userId) throws Exception {
+		keyCloakApiUtil.logoutUser(userId);
 	}
 
 }

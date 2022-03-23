@@ -23,6 +23,7 @@ public class TokenValidator {
 								.parseClaimsJws(token)
 								.getBody();
 			
+			
 			result = claims;
 			System.out.println(claims.toString());
 			System.out.println(result.toString());

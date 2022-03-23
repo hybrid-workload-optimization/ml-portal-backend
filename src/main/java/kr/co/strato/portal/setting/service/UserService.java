@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
-import kr.co.strato.global.model.KeycloakRole;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
@@ -180,7 +180,10 @@ public class UserService {
 			
 			System.out.println("==== 유저 토큰 생성 TEST");
 			//4. 유저 토큰 생성
-			KeycloakToken userToken = keyCloakApiUtil.getTokenByUser(user);
+			ResponseEntity<KeycloakToken> data = keyCloakApiUtil.getTokenByUser(user);
+//			KeycloakToken userToken = keyCloakApiUtil.getTokenByUser(user);
+			
+			KeycloakToken userToken = data.getBody();
 			
 			KeycloakToken tk = new KeycloakToken();
 			tk.setRefreshToken(userToken.getRefreshToken());
@@ -190,7 +193,7 @@ public class UserService {
 			
 			System.out.println("==== 유저 토큰 갱신 TEST");
 			//5. 유저 토큰 Refresh
-			keyCloakApiUtil.refreshTokenByUser(user, tk);
+			keyCloakApiUtil.refreshTokenByUser(tk);
 			
 			System.out.println("==== 전체 ROLE 조회 TEST");
 			/** ROLE **/

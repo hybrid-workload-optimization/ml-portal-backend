@@ -1,16 +1,22 @@
 package kr.co.strato.portal.common.controller;
 
-import javax.servlet.http.Cookie;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
+import kr.co.strato.global.error.type.AuthErrorType;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.model.LoginDto;
@@ -34,34 +40,43 @@ public class AccessController {
 		
 		LoginDto result = new LoginDto();
 		
-		System.out.println("로그인");
-			
-		KeycloakToken token = accessService.doLogin(dto);
-
-		// @TODO 위 키클락 로그인 성공시 하는 것으로 변경 필요
-		UserDto user = userService.getUserInfo(dto.getUserId());
-		
-		result.setToken(token);
-		result.setUser(user);
-		
-		
-		return new ResponseWrapper<>(result);
+		try {
+			ResponseEntity<KeycloakToken> data = accessService.doLogin(dto);
+			if(data.getStatusCode() == HttpStatus.OK) {
+				KeycloakToken token = data.getBody();
+				UserDto user = userService.getUserInfo(dto.getUserId());
+				result.setToken(token);
+				result.setUser(user);	
+				return new ResponseWrapper<>(result);
+			}else {
+				return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
+			}	
+		}catch (HttpClientErrorException e) {
+			e.printStackTrace();
+			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
+		}
 	}
 	
 	//token refresh 요청
-	@GetMapping("/token-refresh")
-	public void tokenRefresh() {
-		System.out.println("token refresh..");
+	@PostMapping("/token-refresh")
+	public ResponseWrapper<KeycloakToken> tokenRefresh(@RequestBody Map<String, String> refreshToken) throws Exception {
+		ResponseEntity<KeycloakToken> data = accessService.tokenRefresh(refreshToken.get("refresh_token"));
+		return new ResponseWrapper<>(data.getBody());
 	}
 	
 	//token 유효성 검증
-	public void tokenVerify() {
+	@PostMapping("/token-verify")
+	public void tokenVerify(@RequestBody Map<String, String> token) {
+		
 		System.out.println("토큰 검증..");
+		System.out.println(token.toString());
+		accessService.tokenVerify(token.get("access_token"));
 	}
 	
 	
 	//token 삭제 요청(로그아웃)
-	public void doLogout() {
-		System.out.println("do Logout..");
+	@GetMapping("/logout/{userId}")
+	public void doLogout(@PathVariable String userId) throws Exception {
+		accessService.doLogout(userId);
 	}
 }

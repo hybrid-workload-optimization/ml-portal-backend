@@ -3,14 +3,21 @@ package kr.co.strato.global.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
@@ -59,6 +66,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.co.strato.global.error.type.AuthErrorType;
 import kr.co.strato.global.model.KeycloakRole;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.model.KeycloakUser;
@@ -121,6 +129,9 @@ public class KeyCloakApiUtil {
 	// 전체 ROLE 조회
 	private static final String URI_GET_ROLE = "/auth/admin/realms/Strato-Cloud/roles";
 	
+	// 유저 로그아웃(SSO 서버 내 모든 세션 제거)
+	private static final String URI_LOGOUT = "/auth/admin/realms/Strato-Cloud/users/{id}/logout";
+	
 	// 사용자 정보 조회
 		
 	private static final String MASTER_KEY = "stratoEncryptionqwer1234!@#$";
@@ -136,8 +147,6 @@ public class KeyCloakApiUtil {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//			logger.info("request uri_userInfo:" + uriGetToken);
-//			logger.info("request headers" + headers);
 
 			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
 			tokenMap.add("grant_type", "client_credentials");
@@ -149,18 +158,13 @@ public class KeyCloakApiUtil {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
 
-//			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
 			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
-
-//			logger.info("status code:" + response.getStatusCode());
-//			logger.info("response body:" + response.getBody());
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 			
 			KeycloakToken ktk = convertMapToToken(res);
 
-			System.out.println(response.getBody());
 			
 			token = (String) res.get("access_token");
 
@@ -178,16 +182,23 @@ public class KeyCloakApiUtil {
 	
 	// 토큰 생성 - 유저
 	@SuppressWarnings("unchecked")
-	public KeycloakToken getTokenByUser(UserDto dto) throws Exception {
+	public ResponseEntity<KeycloakToken> getTokenByUser(UserDto dto)  {
 
 		KeycloakToken ktk = new KeycloakToken();
+		HttpStatus status = HttpStatus.UNAUTHORIZED;
 		
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
 		String token = null;
-		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
+		String pw;
+		try {
+			pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
+			System.out.println("== 토큰생성 PW : " + pw);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(null);
+		}
 //		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
 		
-		System.out.println("== 토큰생성 PW : " + pw);
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -207,66 +218,87 @@ public class KeyCloakApiUtil {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
 
-//			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
+//				try {
+//					ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
+//					ObjectMapper objectMapper = new ObjectMapper();
+//					Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
+//
+//					if(res != null) {
+//						System.out.println("res is not null");
+//						System.out.println(res);
+//						ktk = convertMapToToken(res);
+//						status = HttpStatus.OK;
+//					}
+//				}catch (HttpClientErrorException he) {
+//					System.out.println("hhhheeee");
+//					he.printStackTrace();
+//					status = he.getStatusCode();
+//				}
+//				catch (Exception e) {
+//					System.out.println("eeeee");
+//					status = HttpStatus.INTERNAL_SERVER_ERROR;
+//					e.printStackTrace();
+//				}
+//			logger.info("status code:" + response.getStatusCode());
+//			logger.info("response body:" + response.getBody());
+			
 			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
-
-			logger.info("status code:" + response.getStatusCode());
-			logger.info("response body:" + response.getBody());
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
-			ktk = convertMapToToken(res);
-
-			token = (String) res.get("access_token");
-
-		} catch (HttpClientErrorException e) {
-			HttpStatus status = e.getStatusCode();
-			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-//					return false;
-			} else {
-				throw new Exception(e);
+			if(res != null) {
+				System.out.println("res is not null");
+				System.out.println(res);
+				ktk = convertMapToToken(res);
+				status = HttpStatus.OK;
 			}
+			
+		} catch (HttpClientErrorException e) {
+			System.out.println("===== error");
+			e.printStackTrace();
+			status = e.getStatusCode();
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+				return new ResponseEntity<>(null, status);
+			} else {
+				e.printStackTrace();
+				return new ResponseEntity<>(null, e.getStatusCode());
+			}
+		} catch (Exception e) {
+			System.out.println("에러.");
+			e.printStackTrace();
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		return ktk;
+		return new ResponseEntity<>(ktk, status);
 	}
 
 	// 토큰 재발급(refresh)
 	@SuppressWarnings("unchecked")
-	public KeycloakToken refreshToken() throws Exception {
+	public ResponseEntity<KeycloakToken> refreshToken(String refreshToken) throws Exception {
 
 		KeycloakToken ktk = new KeycloakToken();
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
-		String token = null;
 
 		try {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Content-Type", "application/x-www-form-urlencoded");
-			logger.info("request uri_userInfo:" + uriGetToken);
-			logger.info("request headers" + headers);
 
-			Map<String, String> tokenMap = new HashMap<String, String>();
-			tokenMap.put("client_id", keycloakClientId);
-			tokenMap.put("username", keycloakManagerId);
-			tokenMap.put("password", keycloakManagerPw);
-			tokenMap.put("grant_type", "password");
-			tokenMap.put("client_secret", keycloakClientSecret);
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
+			tokenMap.add("client_id", keycloakClientId);
+			tokenMap.add("client_secret", keycloakClientSecret);
+			tokenMap.add("grant_type", "refresh_token");
+			tokenMap.add("refresh_token", refreshToken);
+			
+			HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(tokenMap, headers);
+			
 
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
+			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
 
-			ResponseEntity<JsonNode> response = requestJsonNode(uriGetToken, HttpMethod.POST, headers, reqBody);
-
-			logger.info("status code:" + response.getStatusCode());
-			logger.info("response body:" + response.getBody());
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
-
+			
 			ktk = convertMapToToken(res);
 
-			token = (String) res.get("access_token");
 
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
@@ -277,16 +309,16 @@ public class KeyCloakApiUtil {
 			}
 		}
 
-		return ktk;
+		return new ResponseEntity<>(ktk, HttpStatus.OK);
 	}
 	
 	// 토큰 재발급(refresh) - User
 	@SuppressWarnings("unchecked")
-	public String refreshTokenByUser(UserDto dto, KeycloakToken token) throws Exception {
+	public KeycloakToken refreshTokenByUser(KeycloakToken token) throws Exception {
 
 		String uriGetToken = keycloakUrl + URI_GET_TOKEN;
-		String pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
 		String result = null;
+		KeycloakToken ktk = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -297,10 +329,8 @@ public class KeyCloakApiUtil {
 			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
 			tokenMap.add("client_id", keycloakClientId);
 			tokenMap.add("client_secret", keycloakClientSecret);
-			tokenMap.add("grant_type", "password");
+			tokenMap.add("grant_type", "refresh_token");
 			tokenMap.add("refresh_token", token.getRefreshToken());
-			tokenMap.add("username", dto.getUserId());
-			tokenMap.add("password", pw);
 			
 			HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(tokenMap, headers);
 
@@ -315,13 +345,9 @@ public class KeyCloakApiUtil {
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
+			ktk = convertMapToToken(res);
+			
 			System.out.println(response.getBody());
-			
-			System.out.println(res.toString());
-			
-			System.out.println(res.get("access_token"));
-
-			result = (String) res.get("access_token");
 
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
@@ -332,9 +358,46 @@ public class KeyCloakApiUtil {
 			}
 		}
 		
-		return result;
+		return ktk;
 	}
 	
+	//로그아웃 
+	@SuppressWarnings("unchecked")
+	public String logoutUser(String userId) throws Exception {
+
+		String uriLogout = keycloakUrl + URI_LOGOUT;
+		String result = null;
+		
+		
+		String token = getTokenByManager();
+		KeycloakUser user = getUserInfoByUserId(userId);
+		String URI = replaceUri(uriLogout, "id", user.getId());
+		System.out.println("URI : " + URI);
+		try {
+			HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpPost httpPost = new HttpPost(URI);
+			httpPost.addHeader("Authorization", token);
+
+			HttpResponse response = httpClient.execute(httpPost);
+
+			if (response.getStatusLine().getStatusCode() == 201) {
+				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+			} else {
+				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+				System.out.println(response);
+			}
+
+		} catch (HttpClientErrorException e) {
+			HttpStatus status = e.getStatusCode();
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+//						return false;
+			} else {
+				throw new Exception(e);
+			}
+		}
+		
+		return result;
+	}
 	
 	// 유저 정보 가져오기 - 유저 ID
 	public KeycloakUser getUserInfoByUserId(String userId) throws Exception {
@@ -847,7 +910,7 @@ public class KeyCloakApiUtil {
 	}
 	
 	
-	public ResponseEntity<JsonNode> requestPostEntity(String uri, HttpEntity<MultiValueMap<String, String>> requestEntity) throws Exception {
+	public ResponseEntity<JsonNode> requestPostEntity(String uri, HttpEntity<MultiValueMap<String, String>> requestEntity) throws HttpClientErrorException, Exception {
 
 //		HttpEntity<JsonNode> requestEntity = null;
 
@@ -866,7 +929,12 @@ public class KeyCloakApiUtil {
 			return restTemplate.postForEntity(uri, requestEntity, JsonNode.class);
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
-		} catch (HttpStatusCodeException reste) {
+		}catch (HttpClientErrorException e) {
+			logger.warn("[request]{}, request={}", uri, requestEntity.toString());
+			logger.warn("[request]", e);
+//			return new ResponseEntity<>(null, e.getStatusCode());
+			throw new HttpClientErrorException(e.getStatusCode());
+		}catch (HttpStatusCodeException reste) {
 			logger.warn("[request]{}, request={}", uri, requestEntity.toString());
 			logger.warn("[request]", reste);
 			throw new Exception(reste);
