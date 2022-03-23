@@ -74,7 +74,7 @@ public class ClusterNamespaceController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterNamespace")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody YamlApplyParam yamlApplyParam) {
+	public ResponseWrapper<List<Long>> registerClusterNamespace(@RequestBody ClusterNamespaceDto.ReqCreateDto yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {

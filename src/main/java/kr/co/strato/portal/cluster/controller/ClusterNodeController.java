@@ -57,7 +57,7 @@ public class ClusterNodeController {
 
 	@PostMapping("/api/v1/cluster/registerClusterNode")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody YamlApplyParam yamlApplyParam) {
+	public ResponseWrapper<List<Long>> registerClusterNodes(@RequestBody ClusterNodeDto.ReqCreateDto yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {

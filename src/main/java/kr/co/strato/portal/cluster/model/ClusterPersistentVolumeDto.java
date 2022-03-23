@@ -3,6 +3,8 @@ package kr.co.strato.portal.cluster.model;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
+import kr.co.strato.global.validation.annotation.K8sKind;
+import kr.co.strato.global.validation.model.K8sKindType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +20,8 @@ public class ClusterPersistentVolumeDto {
 	@NoArgsConstructor
 	public static class ReqCreateDto{
 	    //TODO validation체크
-	    private Long clusterIdx;
+	    private Long kubeConfigId;
+	    @K8sKind(value = K8sKindType.PersistentVolume)
 	    private String yaml;
 	}
 

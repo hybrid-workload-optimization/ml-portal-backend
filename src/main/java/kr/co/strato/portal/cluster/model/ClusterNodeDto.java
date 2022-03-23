@@ -19,7 +19,7 @@ public class ClusterNodeDto {
 	@NoArgsConstructor
 	public static class ReqCreateDto{
 	    //TODO validation체크
-	    private Long clusterIdx;
+	    private Long kubeConfigId;
 	    private String yaml;
 	}
 
@@ -66,6 +66,8 @@ public class ClusterNodeDto {
 		private HashMap<String, Object> label;
 		private List<HashMap<String, Object>> condition;
 		private List<String>  role;
+		
+		ResDetailChartDto chartDto;
     }
 	
 	@Getter
@@ -77,5 +79,23 @@ public class ClusterNodeDto {
 	    private String name;
 	}
 	
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ResDetailChartDto{
+    	private double allocatedPods;
+    	private double podCapacity;
+    	private double podFraction;
+    	private double cpuCapacity;
+    	private double cpuLimits;
+    	private double cpuLimitsFraction;
+    	private double cpuRequests;
+    	private double cpuRequestsFraction;
+    	private double memoryCapacity;
+    	private double memoryLimits;
+    	private double memoryLimitsFraction;
+    	private double memoryRequests;
+    	private double memoryRequestsFraction;
+    }
 }
 

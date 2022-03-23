@@ -74,7 +74,7 @@ public class ClusterPersistentVolumeController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterPersistentVolume")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody YamlApplyParam yamlApplyParam) {
+	public ResponseWrapper<List<Long>> registerClusterPersistentVolume(@RequestBody ClusterPersistentVolumeDto.ReqCreateDto yamlApplyParam) {
 		List<Long> results = null;
 		
 		try {

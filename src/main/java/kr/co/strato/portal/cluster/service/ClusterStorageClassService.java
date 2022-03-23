@@ -110,7 +110,7 @@ public class ClusterStorageClassService {
      }
     
 	
-	public List<Long> registerClusterStorageClass(YamlApplyParam yamlApplyParam) {
+	public List<Long> registerClusterStorageClass(ClusterStorageClassDto.ReqCreateDto yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);

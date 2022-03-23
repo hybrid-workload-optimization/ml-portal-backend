@@ -8,7 +8,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 
+import feign.FeignException;
 import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.k8s.common.model.ClusterResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
@@ -50,6 +55,36 @@ public class NodeAdapterService {
 			log.error(e.getMessage(), e);
 			throw new InternalServerException("json 파싱 에러");
 		}
+	}
+    
+    
+    
+    public Node getNodeDetail(Long kubeConfigId,String name) {
+		// 요청 파라미터 객체 생성
+		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).name(name).build();
+
+		// 조회 요청
+		String result = nonNamespaceProxy.getResource(ResourceType.node.get(), param.getKubeConfigId(),param.getName());
+		log.debug("[Get Node List] response : {}", result);
+		try {
+			// json -> fabric8 k8s 오브젝트 파싱
+			ObjectMapper mapper = new ObjectMapper();
+			Gson gson = new GsonBuilder().create();
+
+			Node clusterNode = gson.fromJson(result, Node.class);
+			//Node clusterNode = mapper.readValue(result, Node.class);
+
+			return clusterNode;
+		}catch(FeignException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - 에러");
+        }catch(JsonParseException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 -  에러");
+        }
 	}
     
     

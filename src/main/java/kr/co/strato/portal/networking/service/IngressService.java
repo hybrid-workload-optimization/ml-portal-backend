@@ -119,7 +119,7 @@ public class IngressService {
 	}
     
 	
-	public List<Long> registerIngress(YamlApplyParam yamlApplyParam) {
+	public List<Long> registerIngress(IngressDto.ReqCreateDto yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Ingress> ingressList = ingressAdapterService.registerIngress(yamlApplyParam.getKubeConfigId(), yamlDecode);

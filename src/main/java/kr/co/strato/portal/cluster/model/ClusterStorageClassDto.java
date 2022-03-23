@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
+import kr.co.strato.global.validation.annotation.K8sKind;
+import kr.co.strato.global.validation.model.K8sKindType;
 import kr.co.strato.portal.networking.model.IngressDto.RuleList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +21,10 @@ public class ClusterStorageClassDto {
 	@NoArgsConstructor
 	public static class ReqCreateDto{
 	    //TODO validation체크
-	    private Long clusterIdx;
-	    private String yaml;
+		private Long kubeConfigId;
+
+		@K8sKind(value = K8sKindType.StorageClass)
+		private String yaml;
 	}
 
 

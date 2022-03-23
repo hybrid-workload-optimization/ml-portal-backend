@@ -93,7 +93,7 @@ public class ClusterPersistentVolumeService {
      }
     
 	
-	public List<Long> registerClusterPersistentVolume(YamlApplyParam yamlApplyParam) {
+	public List<Long> registerClusterPersistentVolume(ClusterPersistentVolumeDto.ReqCreateDto yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.registerPersistentVolume(yamlApplyParam.getKubeConfigId(),	yamlDecode);
 		

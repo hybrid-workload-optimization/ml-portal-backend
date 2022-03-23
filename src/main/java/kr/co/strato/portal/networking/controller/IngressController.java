@@ -76,7 +76,7 @@ public class IngressController {
 	
 	@PostMapping("/api/v1/networking/registerIngress")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerIngress(@RequestBody YamlApplyParam yamlApplyParam) {
+	public ResponseWrapper<List<Long>> registerIngress(@RequestBody IngressDto.ReqCreateDto yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {

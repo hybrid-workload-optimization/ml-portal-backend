@@ -1,5 +1,7 @@
 package kr.co.strato.portal.cluster.service;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,16 +18,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeCondition;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
+import kr.co.strato.adapter.k8s.pod.model.PodMapper;
+import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
+import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
+import kr.co.strato.portal.workload.model.PodDtoMapper;
 
 @Service
 public class ClusterNodeService {
@@ -35,6 +43,8 @@ public class ClusterNodeService {
 	@Autowired
 	private NodeDomainService 	nodeDomainService;
 	
+	@Autowired
+    private PodAdapterService podAdapterService;
 	
 
 	/**
@@ -93,13 +103,28 @@ public class ClusterNodeService {
 	
     public ClusterNodeDto.ResDetailDto getClusterNodeDetail(Long id){
     	NodeEntity nodeEntity = nodeDomainService.getDetail(id); 
-
+    	
+    	Node node = nodeAdapterService.getNodeDetail(nodeEntity.getCluster().getClusterId(), nodeEntity.getName());
+    	
+    	List<Pod> k8sPods = podAdapterService.getList(nodeEntity.getCluster().getClusterId(), nodeEntity.getName(), null, null, null);
+    	
+    	List<PodEntity> pods =  k8sPods.stream().map( s -> {
+    		PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+    		return pod;
+    	}).collect(Collectors.toList());
+    	
+    	ClusterNodeDto.ResDetailChartDto chartNode = new ClusterNodeDto.ResDetailChartDto();
+    	
+    	setUsage(node,pods,chartNode);
+    	
     	ClusterNodeDto.ResDetailDto clusterNodeDto = ClusterNodeDtoMapper.INSTANCE.toResDetailDto(nodeEntity);
-        return clusterNodeDto;
+    	clusterNodeDto.setChartDto(chartNode);
+    	
+    	return clusterNodeDto;
     }
 	
 	
-	public List<Long> registerClusterNode(YamlApplyParam yamlApplyParam) {
+	public List<Long> registerClusterNode(ClusterNodeDto.ReqCreateDto yamlApplyParam) {
 		String decodeYaml = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Node> clusterNodes = nodeAdapterService.registerNode(yamlApplyParam.getKubeConfigId(),decodeYaml);
@@ -145,7 +170,6 @@ public class ClusterNodeService {
 		String k8sVersion = n.getApiVersion();
 		String podCidr = n.getSpec().getPodCIDR();
 
-		String podCapacity = n.getStatus().getCapacity().get("pods").getAmount().replaceAll("[^0-9]", "");
 		float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
 		float memoryCapacity = Float.parseFloat(n.getStatus().getCapacity().get("memory").getAmount().replaceAll("[^0-9]", ""));
 		String image = n.getStatus().getNodeInfo().getOsImage();
@@ -182,5 +206,71 @@ public class ClusterNodeService {
      	String nodeYaml = nodeAdapterService.getNodeYaml(kubeConfigId,name); 
          return nodeYaml;
      }
+    
+    private void setUsage(Node node , List<PodEntity> pods, ClusterNodeDto.ResDetailChartDto chartNode) {
+		int allocatedPods = pods.size();
+		BigDecimal podCapacity = Quantity.getAmountInBytes(node.getStatus().getCapacity().get("pods"));
+		BigDecimal cpuCapacity = Quantity.getAmountInBytes(node.getStatus().getCapacity().get("cpu"));
+		BigDecimal memoryCapacity = Quantity.getAmountInBytes(node.getStatus().getCapacity().get("memory"));
+		
+		
+		BigDecimal sumCpuRequests = new BigDecimal(0);
+		BigDecimal sumCpuLimits = new BigDecimal(0);
+		BigDecimal sumMemoryRequests = new BigDecimal(0);
+		BigDecimal sumMemoryLimits = new BigDecimal(0);
+		for(PodEntity pod : pods) {
+			List<Quantity> cpuRequests = pod.getCpuRequests();
+			List<Quantity> cpuLimits = pod.getCpuLimits();
+			List<Quantity> memoryRequests = pod.getMemoryRequests();
+			List<Quantity> memoryLimits = pod.getMemoryLimits();
+			
+			
+			sumCpuRequests = sumCpuRequests.add(sum(cpuRequests));
+			sumCpuLimits = sumCpuLimits.add(sum(cpuLimits));
+			sumMemoryRequests = sumMemoryRequests.add(sum(memoryRequests));
+			sumMemoryLimits = sumMemoryLimits.add(sum(memoryLimits));
+		}
+		
+		cpuCapacity = cpuCapacity.multiply(new BigDecimal(1000));
+		sumCpuRequests = sumCpuRequests.multiply(new BigDecimal(1000));
+		sumCpuLimits = sumCpuLimits.multiply(new BigDecimal(1000));
+		
+		
+		BigDecimal cpuRequestsFraction = sumCpuRequests.divide(cpuCapacity, MathContext.DECIMAL32).multiply(new BigDecimal(100));
+		BigDecimal cpuLimitsFraction = sumCpuLimits.divide(cpuCapacity, MathContext.DECIMAL32).multiply(new BigDecimal(100));
+		
+		BigDecimal memoryRequestsFraction = sumMemoryRequests.divide(memoryCapacity, MathContext.DECIMAL32).multiply(new BigDecimal(100));
+		BigDecimal memoryLimitsFraction = sumMemoryLimits.divide(memoryCapacity, MathContext.DECIMAL32).multiply(new BigDecimal(100));
+		
+		BigDecimal podFraction = new BigDecimal(allocatedPods).divide(podCapacity, MathContext.DECIMAL32).multiply(new BigDecimal(100));
+		
+		
+		chartNode.setPodCapacity(podCapacity.doubleValue());
+		chartNode.setAllocatedPods(allocatedPods);
+		chartNode.setPodFraction(podFraction.doubleValue());
+		
+		chartNode.setCpuCapacity(cpuCapacity.doubleValue());
+		chartNode.setCpuLimits(sumCpuLimits.doubleValue());
+		chartNode.setCpuLimitsFraction(cpuLimitsFraction.doubleValue());
+		chartNode.setCpuRequests(sumCpuRequests.doubleValue());
+		chartNode.setCpuRequestsFraction(cpuRequestsFraction.doubleValue());
+		
+		chartNode.setMemoryCapacity(memoryCapacity.doubleValue());
+		chartNode.setMemoryLimits(sumMemoryLimits.doubleValue());
+		chartNode.setMemoryLimitsFraction(memoryLimitsFraction.doubleValue());
+		chartNode.setMemoryRequests(sumMemoryRequests.doubleValue());
+		chartNode.setMemoryRequestsFraction(memoryRequestsFraction.doubleValue());
+	}
+	
+	public static BigDecimal sum(List<Quantity> list) {
+		BigDecimal val = new BigDecimal(0);
+		for(Quantity value : list) {			
+			if(value != null) {
+				BigDecimal v = Quantity.getAmountInBytes(value);
+				val = val.add(v);
+			}
+		}
+		return val;
+	}
     
 }

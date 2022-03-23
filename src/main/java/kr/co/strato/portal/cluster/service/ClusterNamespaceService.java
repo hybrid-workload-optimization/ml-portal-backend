@@ -83,7 +83,7 @@ public class ClusterNamespaceService {
         return yaml;
     }
    
-	public List<Long> registerClusterNamespace(YamlApplyParam yamlApplyParam) {
+	public List<Long> registerClusterNamespace(ClusterNamespaceDto.ReqCreateDto yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
 		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);

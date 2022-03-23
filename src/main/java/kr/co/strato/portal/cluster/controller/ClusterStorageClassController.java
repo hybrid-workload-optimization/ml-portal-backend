@@ -21,6 +21,7 @@ import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.service.ClusterStorageClassService;
@@ -74,7 +75,7 @@ public class ClusterStorageClassController {
 	
 	@PostMapping("/api/v1/cluster/registerClusterStorageClass")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody YamlApplyParam yamlApplyParam) {
+	public ResponseWrapper<List<Long>> registerClusterStorageClass(@RequestBody ClusterStorageClassDto.ReqCreateDto yamlApplyParam) {
 		List<Long> ids = null;
 		
 		try {
