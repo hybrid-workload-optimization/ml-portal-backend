@@ -72,7 +72,7 @@ public interface PodMapper {
     				.filter(quantity -> quantity != null)
     				.map(map -> {
     					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
-    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^a-zA-Z]", ""));
     					return map;
     				})
     				.collect(Collectors.toList());
@@ -83,7 +83,7 @@ public interface PodMapper {
     				.filter(quantity -> quantity != null)
     				.map(map -> {
     					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
-    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^a-zA-Z]", ""));
     					return map;
     				})
     				.collect(Collectors.toList());
