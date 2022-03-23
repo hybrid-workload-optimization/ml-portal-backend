@@ -143,6 +143,7 @@ public class ClusterNodeService {
 		String createdAt = n.getMetadata().getCreationTimestamp();
 
 		String k8sVersion = n.getApiVersion();
+		String podCidr = n.getSpec().getPodCIDR();
 
 		String podCapacity = n.getStatus().getCapacity().get("pods").getAmount().replaceAll("[^0-9]", "");
 		float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
@@ -168,7 +169,7 @@ public class ClusterNodeService {
 		NodeEntity clusterNode = NodeEntity.builder().name(name).uid(uid).ip(ip).status(String.valueOf(status))
 				.k8sVersion(k8sVersion).allocatedCpu(cpuCapacity).allocatedMemory(memoryCapacity)
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
-				.podCidr(podCapacity).osImage(image)
+				.podCidr(podCidr).osImage(image)
 				.kernelVersion(kernelVersion).architecture(architecture).kubeletVersion(kubeletVersion)
 				.cluster(clusterEntity)
 				.annotation(annotations).label(label).condition(condition)
