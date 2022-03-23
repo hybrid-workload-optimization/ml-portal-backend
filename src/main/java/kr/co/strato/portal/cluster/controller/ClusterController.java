@@ -151,6 +151,7 @@ public class ClusterController {
 						.meta(workMetadata)
 						.result(workResult)
 						.message(workMessage)
+						.workJobIdx(result)
 						.build());
 			} catch (Exception e) {
 				// ignore

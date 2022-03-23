@@ -1,6 +1,6 @@
 package kr.co.strato.adapter.cloud.cluster.model;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +27,7 @@ public class ClusterCloudDto {
 	
 	private Long workJobIdx;
 	
-	private List<Node> nodes;
+	private ArrayList<Node> nodes;
 	
 	
 	@Getter
@@ -38,7 +38,7 @@ public class ClusterCloudDto {
 		
 		private String ip;
 		
-		private List<String> nodeTypes;
+		private ArrayList<String> nodeTypes;
 		
 	}
 }

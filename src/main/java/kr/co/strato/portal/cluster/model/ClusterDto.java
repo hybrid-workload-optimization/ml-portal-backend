@@ -26,6 +26,7 @@ public class ClusterDto {
 		private String provider;
 		private String description;
 		private Long clusterId;
+		private String provisioningType;
 		// k8s
 		private String kubeConfig;
 		// kubespray

@@ -5,8 +5,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicUpdate;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +20,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 @Table(name = "work_job")
 public class WorkJobEntity {
 
@@ -26,15 +33,20 @@ public class WorkJobEntity {
 	@Column(name = "work_job_type")
 	private String workJobType;
 	
+	@Column(name = "work_job_target")
+	private String workJobTarget;
+		
 	@Column(name = "work_job_status")
 	private String workJobStatus;
 	
 	@Column(name = "work_job_message")
 	private String workJobMessage;
 	
+	@Lob
 	@Column(name = "work_job_data_request")
 	private String workJobDataRequest;
 	
+	@Lob
 	@Column(name = "work_job_data_response")
 	private String workJobDataResponse;
 	
@@ -52,5 +64,8 @@ public class WorkJobEntity {
 	
 	@Column(name = "create_user_name")
 	private String createUserName;
+	
+	@Column(name = "work_job_reference_idx")
+	private Long workJobReferenceIdx;
 	
 }

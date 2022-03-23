@@ -23,6 +23,15 @@ import lombok.ToString;
 @ToString
 @Table(name = "setting")
 public class SettingEntity {
+	
+	// Type
+	public static final String TYPE_GENERAL	= "GENERAL"; 
+	public static final String TYPE_TOOLS	= "TOOLS";
+	
+	// Key
+	public static final String KEY_GENERAL_HOME_DIRECTORY	= "HOME_DIRECTORY";
+	public static final String KEY_TOOLS_KUBESPRAY			= "KUBESPRAY";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "setting_idx")

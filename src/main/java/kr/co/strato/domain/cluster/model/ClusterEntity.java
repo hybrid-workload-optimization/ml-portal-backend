@@ -30,6 +30,18 @@ import lombok.ToString;
 @Table(name = "cluster")
 public class ClusterEntity {
 	
+	public static enum ProvisioningType {
+		KUBECONFIG,
+		KUBESPRAY
+	}
+	
+	public static enum ProvisioningStatus {
+		READY,
+		STARTED,
+		FINISHED,
+		FAILED
+	}
+	
 	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cluster_idx", unique = true)
@@ -81,4 +93,13 @@ public class ClusterEntity {
 	@OneToMany(mappedBy = "cluster")
 	private List<NodeEntity> nodes = new ArrayList<>();
 	
+	@Column(name = "provisioning_type")
+	private String provisioningType;
+	
+	@Column(name = "provisioning_status")
+	private String provisioningStatus;
+	
+	@Lob
+	@Column(name = "provisioning_log")
+	private String provisioningLog;
 }

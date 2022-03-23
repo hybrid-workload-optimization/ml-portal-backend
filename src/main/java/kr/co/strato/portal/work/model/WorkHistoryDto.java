@@ -37,6 +37,7 @@ public class WorkHistoryDto {
 	
 	private String createdAt;
 	
+	private Long workJobIdx;
 	
 	public String getWorkMenu1() {
 		return workMenu1;
@@ -129,13 +130,21 @@ public class WorkHistoryDto {
 	public static Builder builder() {
 		return new WorkHistoryDto().new Builder();
 	}
-		
+	
+	public Long getWorkJobIdx() {
+		return workJobIdx;
+	}
+
+	public void setWorkJobIdx(Long workJobIdx) {
+		this.workJobIdx = workJobIdx;
+	}
+
 	@Override
 	public String toString() {
 		return "WorkHistoryDto [workMenu1=" + workMenu1 + ", workMenu2=" + workMenu2 + ", workMenu3=" + workMenu3
 				+ ", workAction=" + workAction + ", target=" + target + ", metadata=" + metadata + ", result=" + result
 				+ ", message=" + message + ", createUserId=" + createUserId + ", createUserName=" + createUserName
-				+ ", createdAt=" + createdAt + "]";
+				+ ", createdAt=" + createdAt + ", workJobIdx=" + workJobIdx + "]";
 	}
 
 	public class Builder {
@@ -152,6 +161,7 @@ public class WorkHistoryDto {
 		private String createUserId;
 		private String createUserName;
 		private String createdAt;
+		private Long workJobIdx;
 		
 		public Builder workMenu1(WorkMenu1 workMenu1) {
 			this.workMenu1 = workMenu1;
@@ -221,6 +231,11 @@ public class WorkHistoryDto {
 			return this;
 		}
 		
+		public Builder workJobIdx(Long workJobIdx) {
+			this.workJobIdx = workJobIdx;
+			return this;
+		}
+		
 		public WorkHistoryDto build() {
 			WorkHistoryDto dto = new WorkHistoryDto();
 			dto.setWorkMenu1(workMenu1.getMenuName());
@@ -240,6 +255,7 @@ public class WorkHistoryDto {
 			dto.setCreateUserId(createUserId);
 			dto.setCreateUserName(createUserName);
 			dto.setCreatedAt(createdAt);
+			dto.setWorkJobIdx(workJobIdx);
 			
 			return dto;
 		}

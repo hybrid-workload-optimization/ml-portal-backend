@@ -60,9 +60,7 @@ public class WorkHistoryEntity {
 	@Column(name = "created_at")
 	private String createdAt;
 	
-	/*
 	@Column(name = "work_job_idx")
 	private Long workJobIdx;
-	*/
 	
 }

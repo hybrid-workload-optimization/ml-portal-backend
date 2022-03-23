@@ -1,8 +1,14 @@
 package kr.co.strato.portal.work.model;
 
+import java.util.HashMap;
+
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.domain.work.model.WorkHistoryEntity;
 

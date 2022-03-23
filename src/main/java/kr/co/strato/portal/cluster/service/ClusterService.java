@@ -1,11 +1,14 @@
 package kr.co.strato.portal.cluster.service;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +21,8 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.storage.StorageClass;
+import kr.co.strato.adapter.cloud.cluster.model.ClusterCloudDto;
+import kr.co.strato.adapter.cloud.cluster.service.ClusterCloudService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
@@ -26,19 +31,28 @@ import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.persistentVolume.service.PersistentVolumeAdapterService;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.setting.model.SettingEntity;
+import kr.co.strato.domain.setting.service.SettingDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
+import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
+import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
+import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
+import kr.co.strato.portal.work.model.WorkJobDto;
+import kr.co.strato.portal.work.service.WorkJobService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -47,6 +61,9 @@ public class ClusterService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
+	
+	@Autowired
+	NodeDomainService nodeDomainService;
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
@@ -84,6 +101,21 @@ public class ClusterService {
 	@Autowired
 	ClusterStorageClassService clusterStorageClassService;
 	
+	@Autowired
+	WorkJobService workJobService;
+	
+	@Autowired
+	ClusterCloudService clusterCloudService;
+	
+	@Autowired
+	SettingDomainService settingDomainService;
+	
+	@Value("${portal.backend.service.url}")
+	String portalBackendServiceUrl;
+	
+	@Value("${server.port}")
+	Integer portalBackendServicePort;
+	
 	
 	/**
 	 * Cluster 목록 조회
@@ -110,12 +142,17 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	public Long createCluster(ClusterDto.Form clusterDto) throws Exception {
-		if (!StringUtils.isEmpty(clusterDto.getKubeConfig())) {
+		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterDto.getProvisioningType());
+		
+		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			// k8s를 통한 cluster 등록
 			return createK8sCluster(clusterDto);
-		} else {
+		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
 			// kubespray를 통한 cluster 생성 및 등록
 			return createKubesprayCluster(clusterDto);
+		} else {
+			// aks, eks.. - not supported
+			return null;
 		}
 	}
 	
@@ -159,6 +196,7 @@ public class ClusterService {
 		clusterEntity.setProblem(clusterProblemString);
 		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
+		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
 		
 		clusterDomainService.register(clusterEntity);
 		
@@ -166,26 +204,96 @@ public class ClusterService {
 		log.info("Cluster Synchronization started.");
 		syncCluster(clusterId, clusterEntity.getClusterIdx());
 		
-		return clusterEntity.getClusterIdx();
+		return null;
 	}
 	
 	/**
 	 * (Kubespray) Cluster 등록
-	 * TODO : 구현 필요
 	 * 
 	 * @param clusterDto
 	 * @return
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	private Long createKubesprayCluster(ClusterDto.Form clusterDto) throws Exception {
-		return null;
+		// callbackUrl
+		String callbackUrl  = "/api/v1/work-job/callback";
+		
+		// db - create work job
+		WorkJobDto workJobDto = WorkJobDto.builder().
+				workJobTarget(clusterDto.getClusterName())
+				.workJobType(WorkJobType.CLUSTER_CREATE)
+				.workJobStatus(WorkJobStatus.RUNNING)
+				.workJobStartAt(DateUtil.currentDateTime())
+				.workSyncYn("N")
+				.build();
+		
+		Long workJobIdx = workJobService.registerWorkJob(workJobDto);
+		log.info("[createKubesprayCluster] work job idx : {}", workJobIdx);
+		
+		// db - get kubespray version
+		SettingEntity settingParam = new SettingEntity();
+		settingParam.setSettingType(SettingEntity.TYPE_TOOLS);
+		settingParam.setSettingKey(SettingEntity.KEY_TOOLS_KUBESPRAY);
+		
+		SettingEntity settingEntity = settingDomainService.getSetting(settingParam);
+		
+		String kubesprayVersion = settingEntity.getSettingValue();
+		log.info("[createKubesprayCluster] kubespray version : {}", kubesprayVersion);
+		
+		// db - insert cluster
+		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
+		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
+		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.READY.name());
+		
+		clusterDomainService.register(clusterEntity);
+		log.info("[createKubesprayCluster] register cluster : {}", clusterEntity.toString());
+		
+		// db - insert cluster's node
+		for (ClusterDto.Node node : clusterDto.getNodes()) {
+			NodeEntity nodeEntity = new NodeEntity();
+			nodeEntity.setName(node.getName());
+			nodeEntity.setIp(node.getIp());
+			nodeEntity.setRole(new ObjectMapper().writeValueAsString(node.getNodeTypes()));
+			nodeEntity.setCluster(clusterEntity);
+			
+			nodeDomainService.register(nodeEntity);
+		}
+		
+		// kubespray - create cluster
+		ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
+		clusterCloudDto.setUserName("root");
+		clusterCloudDto.setKubesprayVersion(kubesprayVersion);
+		clusterCloudDto.setCallbackUrl(portalBackendServiceUrl + ":" + portalBackendServicePort + callbackUrl);
+		clusterCloudDto.setWorkJobIdx(workJobIdx);
+		{
+			// db - update work job
+			Map<String, Object> workJobDataRequest	= new HashMap<>();
+			workJobDataRequest.put(WorkJobData.BODY.name(), clusterCloudDto);
+			
+			String workJobRequest = new ObjectMapper().writeValueAsString(workJobDataRequest);
+			log.info("[createKubesprayCluster] work job request : {}", workJobRequest);
+			
+			workJobDto.setWorkJobIdx(workJobIdx);
+			workJobDto.setWorkJobDataRequest(workJobRequest);
+			workJobDto.setWorkJobReferenceIdx(clusterEntity.getClusterIdx());
+			
+			workJobService.updateWorkJob(workJobDto);
+		}
+		
+		boolean isCreated = clusterCloudService.createCluster(clusterCloudDto);
+		if (!isCreated) {
+			throw new PortalException("Cluster creation failed");
+		}
+		
+		return workJobIdx;
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
 	private void syncCluster(Long clusterId, Long clusterIdx) throws Exception {
 		// k8s - get namespace
 		List<Namespace> namespaces = namespaceAdapterService.getNamespaceList(clusterId);
-				
+		
 		// k8s - get node
 		List<Node> nodes = nodeAdapterService.getNodeList(clusterId);
 		

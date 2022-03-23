@@ -17,7 +17,7 @@ public interface ClusterCloudClient {
 	 * @return
 	 */
 	@PostMapping("/cluster/create")
-    public String createCluster(@RequestBody ClusterCloudDto clusterCloudDto);
+    public boolean createCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 
 	/**
 	 * kubespray cluster 삭제

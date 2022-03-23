@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+	
+    <springProperty name="logPath" source="logging.path" defaultValue="/log/portal"/>
+	
+	<appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logPath}/portal.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logPath}/portal_%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] | %-5level %logger{36} - %msg%n</Pattern>
@@ -9,19 +24,23 @@
 	<logger name="org.springframework.boot" additivity="false">
 		<level value="info"/>
 		<appender-ref ref="CONSOLE"/>
+		<!-- <appender-ref ref="ROLLING_FILE"/> -->
 	</logger>
 
     <logger name="org.hibernate.type" additivity="false">
 		<level value="info"/>
 		<appender-ref ref="CONSOLE"/>
+		<!-- <appender-ref ref="ROLLING_FILE"/> -->
 	</logger>
 	
 	<logger name="kr.co.strato" additivity="false">
 		<level value="debug"/>
 		<appender-ref ref="CONSOLE"/>
+		<!-- <appender-ref ref="ROLLING_FILE"/> -->
 	</logger>
 	
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
+        <!-- <appender-ref ref="ROLLING_FILE"/> -->
     </root>
 </configuration>

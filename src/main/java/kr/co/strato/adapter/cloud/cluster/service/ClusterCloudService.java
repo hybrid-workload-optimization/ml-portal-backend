@@ -13,9 +13,9 @@ public class ClusterCloudService {
 	@Autowired
 	ClusterCloudClient clusterCloudClient;
 	
-	public String createCluster(ClusterCloudDto clusterCloudDto) throws Exception {
+	public boolean createCluster(ClusterCloudDto clusterCloudDto) throws Exception {
 		log.debug("[Create Cluster] request : {}", clusterCloudDto.toString());
-		String response = clusterCloudClient.createCluster(clusterCloudDto);
+		boolean response = clusterCloudClient.createCluster(clusterCloudDto);
 		log.debug("[Create Cluster] response : {}", response);
 		
 		return response;
