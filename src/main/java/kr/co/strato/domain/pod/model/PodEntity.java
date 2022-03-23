@@ -1,7 +1,9 @@
 package kr.co.strato.domain.pod.model;
 
 
+import javax.persistence.Transient;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -17,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import lombok.AllArgsConstructor;
@@ -92,5 +95,18 @@ public class PodEntity {
     
     @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
     private List<PodPersistentVolumeClaimEntity> podPersistentVolumeClaim;
+    
+    // cpu & memory limit 용량 관련
+    @Transient
+    private List<Quantity> cpuRequests;
+
+    @Transient
+    private List<Quantity> cpuLimits;
+
+    @Transient
+    private List<Quantity> memoryRequests;
+
+    @Transient
+    private List<Quantity> memoryLimits;
     
 }

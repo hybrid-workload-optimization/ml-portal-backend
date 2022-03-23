@@ -49,10 +49,12 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
-        Long clusterId = reqCreateDto.getClusterId();
+        Long clusterIdx = reqCreateDto.getClusterIdx();
+        ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
-        List<Pod> pods = podAdapterService.create(clusterId, yaml);
+        List<Pod> pods = podAdapterService.create(cluster.getClusterId(), yaml);
         
         // k8s data insert
         List<Long> ids = pods.stream().map( s -> {
@@ -64,7 +66,7 @@ public class PodService {
             //  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
 				PersistentVolumeClaimEntity pvcEntity = null;
 
-                Long id = podDomainService.register(pod, clusterId, namespaceName, null, pvcEntity);
+                Long id = podDomainService.register(pod, cluster, namespaceName, null, pvcEntity);
                 return id;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -101,7 +103,6 @@ public class PodService {
         return ids;
     }
     
-    @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
     	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
     	Long projectId = searchParam.getProjectId();
@@ -114,33 +115,7 @@ public class PodService {
     			&& clusterIdx != null 
     			&& searchParam.getNamespaceId() == null 
     			&& searchParam.getNodeId() == null) {
-//    		List<ClusterEntity> clusters = clusterDomainService.getListAll();
-//    		for(ClusterEntity clusterEntity : clusters) {
-    			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-                Long clusterId = clusterEntity.getClusterId();
-        		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
-        		
-                // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
-        		podDomainService.deleteByClusterId(clusterId);
-        		
-                // k8s data insert
-        		List<Long> ids = k8sPods.stream().map( s -> {
-        			try {
-        				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-                        // TODO pvc
-        				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
-        				PersistentVolumeClaimEntity pvcEntity = null;
-        				String namespaceName = pod.getNamespace().getName();
-        				String kind = pod.getKind();
-        				
-        				Long id = podDomainService.register(pod, clusterId, namespaceName, kind, pvcEntity);
-        				return id;
-        			} catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                        throw new InternalServerException("pod register error");
-                    }
-        		}).collect(Collectors.toList());
-//    		}
+    		updatePodList(clusterIdx);
     	}
     	
     	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterIdx(), searchParam.getNamespaceId(), searchParam.getNodeId());
@@ -148,6 +123,38 @@ public class PodService {
         Page<PodDto.ResListDto> pages = new PageImpl<>(dtos, pageable, pods.getTotalElements());
         
     	return pages;
+    }
+    
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePodList(Long clusterIdx) {
+//		List<ClusterEntity> clusters = clusterDomainService.getListAll();
+//		for(ClusterEntity clusterEntity : clusters) {
+			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+            Long clusterId = clusterEntity.getClusterId();
+    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
+    		
+            // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
+    		// TODO idx로 해야되나???
+    		podDomainService.deleteByClusterIdx(clusterIdx);
+    		
+            // k8s data insert
+    		List<Long> ids = k8sPods.stream().map( s -> {
+    			try {
+    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+                    // TODO pvc
+    				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
+    				PersistentVolumeClaimEntity pvcEntity = null;
+    				String namespaceName = pod.getNamespace().getName();
+    				String kind = pod.getKind();
+    				
+    				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind, pvcEntity);
+    				return id;
+    			} catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    throw new InternalServerException("pod register error");
+                }
+    		}).collect(Collectors.toList());
+//		}
     }
 
     public PodDto.ResDetailDto getPodDetail(Long podId){

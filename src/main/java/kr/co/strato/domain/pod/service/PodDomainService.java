@@ -103,8 +103,8 @@ public class PodDomainService {
 		podRepository.delete(pod);
     }
     
-    public void deleteByClusterId(Long clusterId) {
-    	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
+    public void deleteByClusterIdx(Long clusterIdx) {
+    	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterIdx.longValue());
     	
     	if(optCluster.isPresent()){
     		ClusterEntity cluster = optCluster.get();
@@ -145,48 +145,44 @@ public class PodDomainService {
      * @param kind : resourceType
      * @return
      */
-    public Long register(PodEntity pod, Long clusterId, String namespaceName, String kind, PersistentVolumeClaimEntity pvcEntity) {
-    	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterId.longValue());
+    public Long register(PodEntity pod, ClusterEntity cluster, String namespaceName, String kind, PersistentVolumeClaimEntity pvcEntity) {
     	String nodeName = pod.getNode().getName();
 
-    	if(optCluster.isPresent()){
-            ClusterEntity cluster = optCluster.get();
-            List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
-            List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
-            
-            try {
-            	// namepsace와 node가 db에 없으면 저장 x
-            	if((namespaces != null && namespaces.size() > 0) && (node != null && node.size() > 0)){
-                	pod.setNamespace(namespaces.get(0));
-                	pod.setNode(node.get(0));
-                	podRepository.save(pod);
-                	
-                	// TODO pvcEntity save
-                	if (pvcEntity != null) {
-                		addPersistentVolumeClaim(pod, pvcEntity);
-                	}
-                	
-                	if (!kind.isEmpty()) {
-                    	// 첫글자 소문자
-                        kind = kind.substring(0, 1).toLowerCase() + kind.substring(1);
-                        
-                    	if (kind.equals(ResourceType.statefulSet.get())) {
-                    		addStatefulSet(pod);
-                    	} else if (kind.equals(ResourceType.replicaSet.get())) {
-                    		addReplicaSet(pod);
-                    	} else if (kind.equals(ResourceType.daemonSet.get())) {
+        List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
+        List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
+        
+        try {
+        	// namepsace와 node가 db에 없으면 저장 x
+        	if((namespaces != null && namespaces.size() > 0) && (node != null && node.size() > 0)){
+            	pod.setNamespace(namespaces.get(0));
+            	pod.setNode(node.get(0));
+            	podRepository.save(pod);
+            	
+            	// TODO pvcEntity save
+            	if (pvcEntity != null) {
+            		addPersistentVolumeClaim(pod, pvcEntity);
+            	}
+            	
+            	if (!kind.isEmpty()) {
+                	// 첫글자 소문자
+                    kind = kind.substring(0, 1).toLowerCase() + kind.substring(1);
+                    
+                	if (kind.equals(ResourceType.statefulSet.get())) {
+                		addStatefulSet(pod);
+                	} else if (kind.equals(ResourceType.replicaSet.get())) {
+                		addReplicaSet(pod);
+                	} else if (kind.equals(ResourceType.daemonSet.get())) {
 //                    		addDeamonSet(pod);
-                    	} else if (kind.equals(ResourceType.job.get())) {
-                    		addJob(pod);
-                    	}
-                    }
+                	} else if (kind.equals(ResourceType.job.get())) {
+                		addJob(pod);
+                	}
                 }
-            } catch (Exception e) {
-				// TODO: handle exception
-            	log.error(e.getMessage(), e);
-			}
+            }
+        } catch (Exception e) {
+			// TODO: handle exception
+        	log.error(e.getMessage(), e);
+		}
             
-        }
         return pod.getId();
     }
     

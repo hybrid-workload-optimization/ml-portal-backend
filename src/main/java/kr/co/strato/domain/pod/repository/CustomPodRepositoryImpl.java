@@ -64,7 +64,7 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
                         .leftJoin(qPodEntity.node, qNodeEntity)
                         .innerJoin(qNamespaceEntity.cluster, qClusterEntity)
                         .where(builder)
-                        .orderBy(qPodEntity.id.desc())
+                        .orderBy(qPodEntity.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetchResults();

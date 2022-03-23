@@ -33,8 +33,27 @@ public interface PodMapper {
             ObjectMeta metadata = pod.getMetadata();
             PodSpec spec = pod.getSpec();
             PodStatus status = pod.getStatus();
-            ContainerStatus containerStatus = status.getContainerStatuses().get(0);
-            OwnerReference ownerReference = metadata.getOwnerReferences().get(0);
+            
+            List<ContainerStatus> containerList = status.getContainerStatuses();
+            
+            List<OwnerReference> ownerList = metadata.getOwnerReferences(); 
+            
+            
+            String ownerKind = null;
+            String ownerUid = null;
+            Integer restart = 0;
+            ContainerStatus containerStatus = null;
+            if (!containerList.isEmpty()) {
+            	containerStatus = containerList.get(0);
+            	restart = containerStatus.getRestartCount();
+            }
+            if (!ownerList.isEmpty()) {
+            	OwnerReference ownerReference = ownerList.get(0);
+            	
+            	String kind = ownerReference.getKind();
+                ownerKind = (kind != null) ? kind.substring(0, 1).toLowerCase() + kind.substring(1) : null;
+                ownerUid = ownerReference.getUid();
+            }
 
             //k8s Object -> Entity
             String name = metadata.getName();
@@ -45,59 +64,81 @@ public interface PodMapper {
             String statusStr = status.getPhase();
             String qosClass = status.getQosClass();
             
-            Integer restart = containerStatus.getRestartCount();
             
-//            Integer cpuRequests = spec.getContainers().stream()
-//    				.map(container -> container.getResources().getRequests())
-//    				.filter(map -> map != null)
-//    				.map(map -> map.get("cpu"))
-//    				.filter(quantity -> quantity != null)				
-//    				.collect(Collectors.toList());
+            List<Quantity> cpuRequests = spec.getContainers().stream()
+    				.map(container -> container.getResources().getRequests())
+    				.filter(map -> map != null)
+    				.map(map -> map.get("cpu"))
+    				.filter(quantity -> quantity != null)
+    				.map(map -> {
+    					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					return map;
+    				})
+    				.collect(Collectors.toList());
     		List<Quantity> cpuLimits = spec.getContainers().stream()
     				.map(container -> container.getResources().getLimits())
     				.filter(map -> map != null)
     				.map(map -> map.get("cpu"))
-    				.filter(quantity -> quantity != null)				
+    				.filter(quantity -> quantity != null)
+    				.map(map -> {
+    					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					return map;
+    				})
     				.collect(Collectors.toList());
     		
-//    		List<Quantity> memRequests = spec.getContainers().stream()
-//    				.map(container -> container.getResources().getRequests())
-//    				.filter(map -> map != null)
-//    				.map(map -> map.get("memory"))
-//    				.filter(quantity -> quantity != null)				
-//    				.collect(Collectors.toList());	
+    		List<Quantity> memRequests = spec.getContainers().stream()
+    				.map(container -> container.getResources().getRequests())
+    				.filter(map -> map != null)
+    				.map(map -> map.get("memory"))
+    				.filter(quantity -> quantity != null)
+    				.map(map -> {
+    					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					return map;
+    				})
+    				.collect(Collectors.toList());	
     		List<Quantity> memLimits = spec.getContainers().stream()
     				.map(container -> container.getResources().getLimits())
     				.filter(map -> map != null)
     				.map(map -> map.get("memory"))
-    				.filter(quantity -> quantity != null)				
+    				.filter(quantity -> quantity != null)
+    				.map(map -> {
+    					map.setAmount(map.getAmount().replaceAll("[^0-9]", ""));
+    					map.setFormat(map.getFormat().replaceAll("[^0-9]", ""));
+    					return map;
+    				})
     				.collect(Collectors.toList());
 
             // TODO CPU + Memory 계산 작업 필요 (Mi, Gi 외의 값...)
-            Long cpu = 0L;
+    		// 기준은 GB 단위
+            Float cpu = 0F;
             for (Quantity cpuLimit : cpuLimits) {
-            	Long amount = Long.parseLong(cpuLimit.getAmount().replaceAll("[^0-9]", ""));
+            	Float amount = Float.parseFloat(cpuLimit.getAmount());
             	String format = cpuLimit.getFormat().replaceAll("[^a-zA-Z]", "");
             	if (format.equals("m")) {
-            		cpu = (long) ((cpu + amount) / 100.0);
-            	} else if (format.equals("G")) {
-            		cpu = (long) (cpu + amount);
+            		cpu = (float) ((cpu + amount) / 1000.0);
+            	} else {
+            		cpu = (float) (cpu + amount);
             	}
             }
-            Long memory = 0L;
+            Float memory = 0F;
             for (Quantity memoryLimit : memLimits) {
-            	Long amount = Long.parseLong(memoryLimit.getAmount().replaceAll("[^0-9]", ""));
+            	Float amount = Float.parseFloat(memoryLimit.getAmount().replaceAll("[^0-9]", ""));
             	String format = memoryLimit.getFormat().replaceAll("[^a-zA-Z]", "");
+            	Float coef = 1073741824F;
         		if (format.equals("Mi")) {
-            		memory = (long) ((memory + amount) / 1024.0);
+            		memory = (float) ((memory) + (amount * 1000000.0 / coef));
             	} else if (format.equals("Gi")) {
-            		memory = (long) memory + amount;
+            		memory = (float) (memory + (amount * 1000000000.0 / coef));
+            	} else if (format.equals("M")) {
+            		memory = (float) ((memory + amount) / 1000.0);
+            	} else if (format.equals("G")) {
+            		memory = (float) (memory + amount);
             	}
             }
-            String kind = ownerReference.getKind();
-            String ownerKind = (kind != null) ? kind.substring(0, 1).toLowerCase() + kind.substring(1) : null;
-    		
-            String ownerUid = ownerReference.getUid();
+            
             
             String label = mapper.writeValueAsString(metadata.getLabels());
             String annotations = mapper.writeValueAsString(metadata.getAnnotations());
@@ -118,6 +159,10 @@ public interface PodMapper {
                     .qosClass(qosClass)
                     .cpu(cpu)
                     .memory(memory)
+                    .cpuLimits(cpuLimits)
+                    .cpuRequests(cpuRequests)
+                    .memoryLimits(memLimits)
+                    .memoryRequests(memRequests)
                     .kind(ownerKind)
                     .ownerUid(ownerUid)
                     .annotation(annotations)

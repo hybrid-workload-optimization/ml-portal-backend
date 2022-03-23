@@ -76,7 +76,7 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
         
         // required condition
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(qClusterEntity.clusterIdx.eq(clusterEntity.getClusterId()));
+        builder.and(qClusterEntity.clusterIdx.eq(clusterEntity.getClusterIdx()));
         builder.and(qNamespaceEntity.name.eq(name));
 
         QueryResults<NamespaceEntity> results =
@@ -99,8 +99,8 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
 
 
         BooleanBuilder builder = new BooleanBuilder();
-        if(clusterIdx.getClusterId() != null && clusterIdx.getClusterId() > 0L){
-            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx.getClusterId()));
+        if(clusterIdx.getClusterIdx() != null && clusterIdx.getClusterIdx() > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx.getClusterIdx()));
         }
 
         QueryResults<NamespaceEntity> results =
