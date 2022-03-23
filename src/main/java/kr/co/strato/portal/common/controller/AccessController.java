@@ -5,8 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.KeycloakToken;
+import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.model.LoginDto;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/access-manage")
@@ -24,21 +25,27 @@ public class AccessController {
 	@Autowired
 	AccessService accessService;
 	
+	@Autowired
+	UserService userService;
+	
 	//token 요청(로그인)
 	@PostMapping("/login")
-	public ResponseEntity<?> doLogin(@RequestBody UserDto dto, HttpSession session, HttpServletResponse response) throws Exception {
+	public ResponseWrapper<LoginDto> doLogin(@RequestBody UserDto dto, HttpSession session, HttpServletResponse response) throws Exception {
+		
+		LoginDto result = new LoginDto();
+		
 		System.out.println("로그인");
-		
+			
 		KeycloakToken token = accessService.doLogin(dto);
+
+		// @TODO 위 키클락 로그인 성공시 하는 것으로 변경 필요
+		UserDto user = userService.getUserInfo(dto.getUserId());
 		
-		//Token 값 쿠키에 저장
-		Cookie tokenCookie = new Cookie("token", token.toString());
-		tokenCookie.setHttpOnly(true);
-		tokenCookie.setSecure(true);
+		result.setToken(token);
+		result.setUser(user);
 		
-		response.addCookie(tokenCookie);
 		
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseWrapper<>(result);
 	}
 	
 	//token refresh 요청

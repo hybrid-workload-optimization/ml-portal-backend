@@ -16,6 +16,7 @@ import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.model.KeycloakRole;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
+import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
@@ -32,6 +33,10 @@ public class UserService {
 	
 	@Autowired
 	KeyCloakApiUtil	keyCloakApiUtil;
+	
+	@Autowired
+	TokenValidator tokenValidator;
+	
 	
 	//등록
 	public String postUser(UserDto param) {
@@ -180,6 +185,9 @@ public class UserService {
 			KeycloakToken tk = new KeycloakToken();
 			tk.setRefreshToken(userToken.getRefreshToken());
 			
+			//4.1 토큰 유효성 검증
+			tokenValidator.validateToken(tk.getAccessToken());
+			
 			System.out.println("==== 유저 토큰 갱신 TEST");
 			//5. 유저 토큰 Refresh
 			keyCloakApiUtil.refreshTokenByUser(user, tk);
@@ -187,7 +195,7 @@ public class UserService {
 			System.out.println("==== 전체 ROLE 조회 TEST");
 			/** ROLE **/
 			//전체 ROLE 가져오기
-			keyCloakApiUtil.getRoleList();
+//			keyCloakApiUtil.getRoleList();
 			
 
 			
@@ -216,7 +224,7 @@ public class UserService {
 			
 			System.out.println("==== 유저 삭제 TEST");
 			// User 삭제
-			keyCloakApiUtil.deleteSsoUser(user);
+//			keyCloakApiUtil.deleteSsoUser(user);
 			
 			
 			

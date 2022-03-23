@@ -5,7 +5,9 @@ import kr.co.strato.global.model.ResponseType;
 public enum AuthErrorType implements ResponseType {
     FAIL_AUTH("11001", "인증에 실패하였습니다.", null),
     NOT_FOUND_USER("11002", "사용자 정보가 존재하지 않습니다.", null),
-    PERMISSION_DENY("11003", "권한이 없습니다.", null);
+    PERMISSION_DENY("11003", "권한이 없습니다.", null),
+	DUPLICATION_USER("11004", "이미 가입한 EMAIL입니다.", null),
+	EXPIRED_TOKEN("11010", "ACCESS_TOKEN이 만료되었습니다", null);
 
     private String code;
     private String message;
