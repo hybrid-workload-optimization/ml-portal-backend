@@ -146,16 +146,21 @@ public class PodDomainService {
      * @return
      */
     public Long register(PodEntity pod, ClusterEntity cluster, String namespaceName, String kind, PersistentVolumeClaimEntity pvcEntity) {
-    	String nodeName = pod.getNode().getName();
-
         List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
-        List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
         
         try {
         	// namepsace와 node가 db에 없으면 저장 x
-        	if((namespaces != null && namespaces.size() > 0) && (node != null && node.size() > 0)){
+        	if(namespaces != null && namespaces.size() > 0){
             	pod.setNamespace(namespaces.get(0));
-            	pod.setNode(node.get(0));
+            	
+            	if (pod.getNode() != null) {
+            		String nodeName = pod.getNode().getName();
+            		List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
+            		if (node != null && node.size() > 0 ) {
+                		pod.setNode(node.get(0));
+                	}
+            	}
+            	
             	podRepository.save(pod);
             	
             	// TODO pvcEntity save

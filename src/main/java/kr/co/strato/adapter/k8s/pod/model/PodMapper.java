@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ArrayBuilders.BooleanBuilder;
 
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -146,7 +147,11 @@ public interface PodMapper {
             String conditions = mapper.writeValueAsString(status.getConditions());
 
             NamespaceEntity namespaceEntity = NamespaceEntity.builder().name(namespace).build();
-            NodeEntity nodeEntity = NodeEntity.builder().name(nodeName).build();
+            NodeEntity nodeEntity = null;
+            if (nodeName != null) {
+            	nodeEntity = NodeEntity.builder().name(nodeName).build();	
+            }
+            
             PodEntity podEntity = PodEntity.builder()
             		.namespace(namespaceEntity)
             		.node(nodeEntity)

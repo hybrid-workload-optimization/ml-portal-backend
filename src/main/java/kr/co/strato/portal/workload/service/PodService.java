@@ -65,8 +65,14 @@ public class PodService {
                 // TODO pvc
             //  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
 				PersistentVolumeClaimEntity pvcEntity = null;
-
-                Long id = podDomainService.register(pod, cluster, namespaceName, null, pvcEntity);
+                
+                // node name 없어서 재조회해서 update
+                Pod k8sPodDetail = podAdapterService.get(cluster.getClusterId(), namespaceName, pod.getPodName());
+                
+                PodEntity podDetail = PodMapper.INSTANCE.toEntity(k8sPodDetail);
+                Long id = podDomainService.register(podDetail, cluster, namespaceName, null, pvcEntity);
+                podDomainService.update(id, podDetail);
+                
                 return id;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -103,19 +109,47 @@ public class PodService {
         return ids;
     }
     
+    @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
     	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
     	Long projectId = searchParam.getProjectId();
     	Long clusterIdx = searchParam.getClusterIdx();
     	Integer page = pageable.getPageNumber();
 
-    	if (page == 1
+    	if (page == 0
 //    			&& projectId == null 
 //    			&& clusterIdx == null 
     			&& clusterIdx != null 
     			&& searchParam.getNamespaceId() == null 
     			&& searchParam.getNodeId() == null) {
-    		updatePodList(clusterIdx);
+//    		List<ClusterEntity> clusters = clusterDomainService.getListAll();
+//    		for(ClusterEntity clusterEntity : clusters) {
+    			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+                Long clusterId = clusterEntity.getClusterId();
+        		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
+        		
+                // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
+        		// TODO idx로 해야되나???
+        		podDomainService.deleteByClusterIdx(clusterIdx);
+        		
+                // k8s data insert
+        		List<Long> ids = k8sPods.stream().map( s -> {
+        			try {
+        				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+                        // TODO pvc
+        				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
+        				PersistentVolumeClaimEntity pvcEntity = null;
+        				String namespaceName = pod.getNamespace().getName();
+        				String kind = pod.getKind();
+        				
+        				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind, pvcEntity);
+        				return id;
+        			} catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        throw new InternalServerException("pod register error");
+                    }
+        		}).collect(Collectors.toList());
+//    		}
     	}
     	
     	Page<PodEntity> pods = podDomainService.getPods(pageable, searchParam.getProjectId(), searchParam.getClusterIdx(), searchParam.getNamespaceId(), searchParam.getNodeId());
@@ -125,37 +159,6 @@ public class PodService {
     	return pages;
     }
     
-    @Transactional(rollbackFor = Exception.class)
-    public void updatePodList(Long clusterIdx) {
-//		List<ClusterEntity> clusters = clusterDomainService.getListAll();
-//		for(ClusterEntity clusterEntity : clusters) {
-			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-            Long clusterId = clusterEntity.getClusterId();
-    		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
-    		
-            // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
-    		// TODO idx로 해야되나???
-    		podDomainService.deleteByClusterIdx(clusterIdx);
-    		
-            // k8s data insert
-    		List<Long> ids = k8sPods.stream().map( s -> {
-    			try {
-    				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-                    // TODO pvc
-    				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
-    				PersistentVolumeClaimEntity pvcEntity = null;
-    				String namespaceName = pod.getNamespace().getName();
-    				String kind = pod.getKind();
-    				
-    				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind, pvcEntity);
-    				return id;
-    			} catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    throw new InternalServerException("pod register error");
-                }
-    		}).collect(Collectors.toList());
-//		}
-    }
 
     public PodDto.ResDetailDto getPodDetail(Long podId){
     	// get pod entity
@@ -170,14 +173,15 @@ public class PodService {
     	if (resourceType.equals(ResourceType.statefulSet.get())) {
     		StatefulSetEntity entity = podDomainService.getPodStatefulSet(podId);
     		
-    		Long clusterId = entity.getNamespace().getCluster().getClusterId();
-    		String namespace = entity.getNamespace().getName();
-    		
-    		String statefulSetName = entity.getPodStatefulSets().get(0).getStatefulSet().getStatefulSetName();
-    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, statefulSetName);
-    		
-    		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
-    		
+    		if (entity != null) {
+	    		Long clusterId = entity.getNamespace().getCluster().getClusterId();
+	    		String namespace = entity.getNamespace().getName();
+	    		
+	    		String statefulSetName = entity.getPodStatefulSets().get(0).getStatefulSet().getStatefulSetName();
+	    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, statefulSetName);
+	    		
+	    		dto = PodDtoMapper.INSTANCE.toResStatefulSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
+    		}
     	} else if (resourceType.equals(ResourceType.daemonSet.get())) {
 //    		DaemonSetEntity entity = podDomainService.getPodDaemonSet(podId);
 //    		
@@ -192,24 +196,28 @@ public class PodService {
     	} else if (resourceType.equals(ResourceType.replicaSet.get())) {
     		ReplicaSetEntity entity = podDomainService.getPodReplicaSet(podId);
     		
-    		Long clusterId = entity.getNamespace().getCluster().getClusterId();
-    		String namespace = entity.getNamespace().getName();
-    		
-    		String replicaSetName = entity.getPodReplicaSets().get(0).getReplicaSet().getReplicaSetName();
-    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, replicaSetName);
-    		
-    		dto = PodDtoMapper.INSTANCE.toResReplicaSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
+    		if (entity != null) {
+	    		Long clusterId = entity.getNamespace().getCluster().getClusterId();
+	    		String namespace = entity.getNamespace().getName();
+	    		
+	    		String replicaSetName = entity.getPodReplicaSets().get(0).getReplicaSet().getReplicaSetName();
+	    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, replicaSetName);
+	    		
+	    		dto = PodDtoMapper.INSTANCE.toResReplicaSetOwnerInfoDto(entity, k8sStatefulSet, resourceType);
+    		}
     		
     	} else if (resourceType.equals(ResourceType.job.get())) {
     		JobEntity entity = podDomainService.getPodJob(podId);
     		
-    		Long clusterId = entity.getNamespaceEntity().getCluster().getClusterId();
-    		String namespace = entity.getNamespaceEntity().getName();
-    		
-    		String statefulSetName = entity.getPodJobs().get(0).getJob().getJobName();
-    		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, statefulSetName);
-    		
-    		dto = PodDtoMapper.INSTANCE.toResJobOwnerInfoDto(entity, k8sStatefulSet, resourceType);
+    		if (entity != null) {
+    			Long clusterId = entity.getNamespaceEntity().getCluster().getClusterId();
+        		String namespace = entity.getNamespaceEntity().getName();
+        		
+        		String statefulSetName = entity.getPodJobs().get(0).getJob().getJobName();
+        		StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespace, statefulSetName);
+        		
+        		dto = PodDtoMapper.INSTANCE.toResJobOwnerInfoDto(entity, k8sStatefulSet, resourceType);
+    		}
     	}
     	
     	return dto;
