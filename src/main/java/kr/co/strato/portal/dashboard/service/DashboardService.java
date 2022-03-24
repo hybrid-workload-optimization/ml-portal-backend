@@ -56,7 +56,7 @@ public class DashboardService {
 		int restartWithinTenMinutes = 0;		
 		
 		List<NodeEntity> nodeEntitys = new ArrayList<>();
-		if(projectIdx != null) {
+		if(projectIdx == null) {
 			projectCount = selectService.getSelectProjects().size();		
 		} else {
 			projectCount = 1;	
