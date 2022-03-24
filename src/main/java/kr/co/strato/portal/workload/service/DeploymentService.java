@@ -1,11 +1,21 @@
 package kr.co.strato.portal.workload.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,6 +42,7 @@ import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -56,11 +67,45 @@ public class DeploymentService {
 	
 	@Autowired
 	PodRepository podRepository;
+
+	@Autowired
+	ReplicaSetAdapterService replicaSetAdapterService;
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
-		Page<DeploymentEntity> entities=  deploymentRepository.getDeploymentPageList(pageRequest.of(), args);
-		List<DeploymentDto> dtos = entities.getContent().stream().map(DeploymentDtoMapper.INSTANCE::toDto).collect(Collectors.toList());
+		Long clusterIdx = args.getClusterIdx();
+		Long namespaceIdx = args.getNamespaceIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+
+		Map<String, DeploymentStatus> maps = new HashMap<>();
+		try{
+			List<Deployment> deployments = new ArrayList<>();
+			if(namespaceIdx == null || namespaceIdx == 0){
+				deployments = deploymentAdapterService.retrieveList(clusterEntity.getClusterId(), null);
+			}else{
+				NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+				deployments = deploymentAdapterService.retrieveList(clusterEntity.getClusterId(), namespaceEntity.getName());
+			}
+			maps = deployments.stream().collect(Collectors.toMap(
+					e1 -> e1.getMetadata().getUid(),
+					e2 -> e2.getStatus()
+			));
+		}catch (Exception e){
+
+		}
+
+		Page<DeploymentEntity> entities =  deploymentRepository.getDeploymentPageList(pageRequest.of(), args);
+		Map<String, DeploymentStatus> finalMaps = maps;
+		List<DeploymentDto> dtos = entities.stream().map(
+				e -> {
+					String uid = e.getDeploymentUid();
+					if(finalMaps.containsKey(uid)){
+						return DeploymentDtoMapper.INSTANCE.toDto(e, finalMaps.get(uid));
+					}
+					return DeploymentDtoMapper.INSTANCE.toDto(e);
+				}
+		).collect(Collectors.toList());
+
 		Page<DeploymentDto> result = new PageImpl<>(dtos, pageRequest.of(), entities.getTotalElements());
 		return result;
 	}
@@ -68,7 +113,29 @@ public class DeploymentService {
 	//상세
 	public DeploymentDto get(Long idx){
 		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(idx);
-		DeploymentDto dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy);
+		Long clusterId = entitiy.getNamespaceEntity().getCluster().getClusterId();
+		String replicaSetUid = null;
+		Deployment deployment = null;
+		DeploymentDto dto = null;
+
+		List<ReplicaSetEntity> replicaSetEntities = replicaSetDomainService.getByDeplymentIdx(entitiy.getDeploymentIdx());
+		if(replicaSetEntities != null && replicaSetEntities.size() > 0){
+			replicaSetUid = replicaSetEntities.get(0).getReplicaSetUid();
+		}
+
+		try{
+			deployment = deploymentAdapterService.retrieve(clusterId, entitiy.getNamespaceEntity().getName(), entitiy.getDeploymentName());
+		}catch (Exception e){
+//			log.debug(e.getMessage(), e);
+		}
+
+		if(deployment != null && deployment.getStatus() != null){
+			DeploymentStatus status = deployment.getStatus();
+			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid, status);
+		}else{
+			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid);
+		}
+
 		return dto;
 	}
 	
@@ -112,7 +179,7 @@ public class DeploymentService {
 		Long deploymentIdx = deploymentArgDto.getDeploymentIdx();
 		DeploymentEntity deploymentEntity  = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
 		NamespaceEntity namespaceEntity = deploymentEntity.getNamespaceEntity();
-		ClusterEntity clusterEntity = namespaceDomainService.getCluster(namespaceEntity.getId());
+		ClusterEntity clusterEntity = namespaceEntity.getCluster();
 
 		save(deploymentArgDto, clusterEntity);
 	}
@@ -121,12 +188,21 @@ public class DeploymentService {
 		String yaml = deploymentArgDto.getYaml();
 		
 		List<Deployment> deployments = deploymentAdapterService.create(clusterEntity.getClusterId(), yaml);
-		
+
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			log.debug(e.getMessage(), e);
+//		}
+
 		//deployment 저장.
 		List<DeploymentEntity> eneities = deployments.stream().map(d -> {
 			DeploymentEntity deploymentEntity = null;
+			NamespaceEntity namespaceEntity = null;
+
 			try {
-				deploymentEntity = toEntity(d);
+				Deployment deployment = deploymentAdapterService.retrieve(clusterEntity.getClusterId(), d.getMetadata().getNamespace(), d.getMetadata().getName());
+				deploymentEntity = toEntity(deployment);
 			} catch (JsonProcessingException e) {
 				log.debug(yaml);
 			}
@@ -134,7 +210,8 @@ public class DeploymentService {
 			if(deploymentEntity != null) {
 				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(d.getMetadata().getNamespace(), clusterEntity);
 				if(namespaceEntities != null && namespaceEntities.size() > 0){
-					deploymentEntity.setNamespaceEntity(namespaceEntities.get(0));
+					namespaceEntity = namespaceEntities.get(0);
+					deploymentEntity.setNamespaceEntity(namespaceEntity);
 				}
 				
 				//수정시
@@ -143,7 +220,33 @@ public class DeploymentService {
 				
 				deploymentDomainService.save(deploymentEntity);
 			}
-			
+
+			//레플리카셋 저장
+			try{
+				List<ReplicaSet> replicaSets = replicaSetAdapterService.getListFromOwnerUid(clusterEntity.getClusterId(), deploymentEntity.getDeploymentUid());
+				NamespaceEntity finalNamespaceEntity = namespaceEntity;
+				DeploymentEntity finalDeploymentEntity = deploymentEntity;
+
+				replicaSets.stream().forEach(r -> {
+					ReplicaSetEntity replicaSetEntity = null;
+					try {
+						replicaSetEntity = toReplicaSetEntity(r, finalNamespaceEntity, finalDeploymentEntity);
+
+						//수정 시에는 기존 레플리카셋 삭제
+						if(deploymentArgDto.getDeploymentIdx() != null){
+							System.out.println("deploymentArgDto.getDeploymentIdx():"+deploymentArgDto.getDeploymentIdx());
+							deploymentDomainService.deleteReplicaSetFromDeploymentIdx(deploymentArgDto.getDeploymentIdx());
+						}
+						replicaSetDomainService.register(replicaSetEntity);
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						throw new InternalServerException(e.getMessage());
+					}
+				});
+			}catch (Exception e) {
+				log.error(e.getMessage(), e);
+				throw new InternalServerException("Error to save ReplicaSet");
+			}
 			return deploymentEntity;
 		}).collect(Collectors.toList());
 		
@@ -152,27 +255,20 @@ public class DeploymentService {
 	
 	//삭제
 	public void delete(DeploymentArgDto deploymentArgDto){
-		Long clusterId = deploymentArgDto.getClusterId();
-		Long namespaceIdx = deploymentArgDto.getNamespaceIdx();
 		Long deploymentIdx = deploymentArgDto.getDeploymentIdx();
+		DeploymentEntity deploymentEntity  = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
+		NamespaceEntity namespaceEntity = deploymentEntity.getNamespaceEntity();
+		ClusterEntity clusterEntity = namespaceEntity.getCluster();
 		String deploymentName = null;
 		String namespaceName = null;
-		
-		NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+		Long clusterId = null;
+
+		if(clusterEntity != null)
+			clusterId = clusterEntity.getClusterId();
+
 		if(namespaceEntity != null)
 			namespaceName = namespaceEntity.getName();
-		
-		List<ReplicaSetEntity> replicasets = replicaSetDomainService.getByDeplymentIdx(deploymentIdx);
-		replicasets.forEach((e)->{
-			//pod/podReplicatSet 삭제
-			//도메인 레이어 무시하고 접근하고 되나? 
-			podRepository.deleteByOwnerUidAndKind(e.getReplicaSetUid(), ResourceType.replicaSet.get());
-			
-			//replicaSet 삭제.
-			replicaSetDomainService.delete(e);
-		});
-		
-		DeploymentEntity deploymentEntity = deploymentDomainService.getDeploymentEntitiy(deploymentIdx);
+
 		if(deploymentEntity != null)
 			deploymentName = deploymentEntity.getDeploymentName();
 		
@@ -220,9 +316,12 @@ public class DeploymentService {
         		}
         		
         	}
-        	if(deploymentSpec.getSelector() != null)
-        		//
-        		selector = mapper.writeValueAsString(deploymentSpec.getSelector().getMatchLabels());
+        	if(deploymentSpec.getSelector() != null){
+				//
+				selector = mapper.writeValueAsString(deploymentSpec.getSelector().getMatchLabels());
+			}
+
+			image = deploymentSpec.getTemplate().getSpec().getContainers().get(0).getImage();
         }
         
         io.fabric8.kubernetes.api.model.apps.DeploymentStatus deploymentStatus = d.getStatus();
@@ -260,4 +359,30 @@ public class DeploymentService {
 
         return deploymentEntity;
     }
+
+	private ReplicaSetEntity toReplicaSetEntity(ReplicaSet r, NamespaceEntity namespace, DeploymentEntity deployment) throws PortalException, Exception {
+		ObjectMapper mapper = new ObjectMapper();
+
+		String name			= r.getMetadata().getName();
+		String uid			= r.getMetadata().getUid();
+		String image		= r.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
+		String selector		= mapper.writeValueAsString(r.getSpec().getSelector().getMatchLabels());
+		String label		= mapper.writeValueAsString(r.getMetadata().getLabels());
+		String annotations	= mapper.writeValueAsString(r.getMetadata().getAnnotations());
+		String createAt		= r.getMetadata().getCreationTimestamp();
+
+		ReplicaSetEntity result = ReplicaSetEntity.builder()
+				.replicaSetName(name)
+				.replicaSetUid(uid)
+				.image(image)
+				.selector(selector)
+				.label(label)
+				.annotation(annotations)
+				.createdAt(DateUtil.convertDateTime(createAt))
+				.namespace(namespace)
+				.deployment(deployment)
+				.build();
+
+		return result;
+	}
 }

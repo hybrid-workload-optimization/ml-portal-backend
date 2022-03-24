@@ -25,4 +25,6 @@ public class DeploymentDto {
 	private Long namespaceIdx;
 	private String namespaceName;
 	private String condition;
+	private String clusterId;
+	private String replicaSetUid;
 }

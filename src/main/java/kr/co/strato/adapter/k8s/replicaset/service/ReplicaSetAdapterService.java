@@ -90,5 +90,20 @@ public class ReplicaSetAdapterService {
 		
 		return response;
 	}
-	
+
+	public List<ReplicaSet> getListFromOwnerUid(Long clusterId, String ownerUid) throws Exception {
+		ResourceListSearchInfo body = ResourceListSearchInfo.builder()
+				.kubeConfigId(clusterId)
+				.ownerUid(ownerUid)
+				.build();
+
+		log.debug("[Get Replica Set List] request : {}", body.toString());
+		String response = inNamespaceProxy.getResourceList(ResourceType.replicaSet.get(), body);
+		log.debug("[Get Replica Set List] response : {}", response);
+
+		ObjectMapper mapper = new ObjectMapper();
+		List<ReplicaSet> result = mapper.readValue(response, new TypeReference<List<ReplicaSet>>(){});
+
+		return result;
+	}
 }

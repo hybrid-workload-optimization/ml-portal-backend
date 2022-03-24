@@ -63,4 +63,11 @@ public class DeploymentController {
 		deploymentService.delete(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();
 	}
+
+	@GetMapping("/deployments/{idx}/yaml")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> getDeploymentYaml(@PathVariable(name = "idx") Long idx) {
+		String result = deploymentService.getYaml(idx);
+		return new ResponseWrapper<String>(result);
+	}
 }
