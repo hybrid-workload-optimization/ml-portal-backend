@@ -1,6 +1,5 @@
 package kr.co.strato.portal.setting.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.setting.model.UserDto;
-import kr.co.strato.portal.setting.model.UserDto.UserRole;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 
@@ -44,9 +42,10 @@ public class UserController {
 		System.out.println("================ 등록 ===========");
 		
 		// 등록 전 중복 체크
-		UserDto user = userService.getUserInfo(param.getUserId());
+//			UserDto user = userService.getUserInfo(param.getUserId());
 		
-		if(user != null) {
+//		if(user != null) {
+		if(true) {
 			param.setUseYn("Y");
 			userService.postUser(param);
 			result = param.getUserId();

@@ -77,6 +77,10 @@ public class UserDomainService {
 			// 기존 ROLE와 업데이트할 ROLE이 다르면, keycloak Update
 			if(roleCode != null && !"".equals(roleCode) && !roleCode.equals(role.getUserRoleCode())) {
 				// keycloak Role Update 필요
+				/***
+				 * 키클락과 포탈의 권한 체계가 다른데 어떻게 하면 좋을지? 
+				 * 
+				 */
 			}
 			
 		}

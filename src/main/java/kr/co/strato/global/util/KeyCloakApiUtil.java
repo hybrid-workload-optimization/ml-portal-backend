@@ -192,7 +192,6 @@ public class KeyCloakApiUtil {
 		String pw;
 		try {
 			pw = CryptoUtil.encryptAES256(dto.getUserPassword(), MASTER_KEY);
-			System.out.println("== 토큰생성 PW : " + pw);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null);
@@ -218,43 +217,16 @@ public class KeyCloakApiUtil {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode reqBody = mapper.convertValue(tokenMap, JsonNode.class);
 
-//				try {
-//					ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
-//					ObjectMapper objectMapper = new ObjectMapper();
-//					Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
-//
-//					if(res != null) {
-//						System.out.println("res is not null");
-//						System.out.println(res);
-//						ktk = convertMapToToken(res);
-//						status = HttpStatus.OK;
-//					}
-//				}catch (HttpClientErrorException he) {
-//					System.out.println("hhhheeee");
-//					he.printStackTrace();
-//					status = he.getStatusCode();
-//				}
-//				catch (Exception e) {
-//					System.out.println("eeeee");
-//					status = HttpStatus.INTERNAL_SERVER_ERROR;
-//					e.printStackTrace();
-//				}
-//			logger.info("status code:" + response.getStatusCode());
-//			logger.info("response body:" + response.getBody());
-			
 			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
 			if(res != null) {
-				System.out.println("res is not null");
-				System.out.println(res);
 				ktk = convertMapToToken(res);
 				status = HttpStatus.OK;
 			}
 			
 		} catch (HttpClientErrorException e) {
-			System.out.println("===== error");
 			e.printStackTrace();
 			status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
@@ -264,7 +236,6 @@ public class KeyCloakApiUtil {
 				return new ResponseEntity<>(null, e.getStatusCode());
 			}
 		} catch (Exception e) {
-			System.out.println("에러.");
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -347,7 +318,6 @@ public class KeyCloakApiUtil {
 
 			ktk = convertMapToToken(res);
 			
-			System.out.println(response.getBody());
 
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
@@ -372,7 +342,6 @@ public class KeyCloakApiUtil {
 		String token = getTokenByManager();
 		KeycloakUser user = getUserInfoByUserId(userId);
 		String URI = replaceUri(uriLogout, "id", user.getId());
-		System.out.println("URI : " + URI);
 		try {
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPost httpPost = new HttpPost(URI);
@@ -436,7 +405,6 @@ public class KeyCloakApiUtil {
 	
 	// 유저 생성
 	public boolean createSsoUser(UserDto user) throws Exception {
-		System.out.println("유저 생성 --");
 		String uriCreateUser = keycloakUrl + URI_SET_USER;
 		String ssoToken = getTokenByManager();
 		// 최초 가입시에는 임시 비밀번호로 생성
@@ -496,7 +464,6 @@ public class KeyCloakApiUtil {
 	
 	//유저 정보 수정
 	public void updateSsoUser(UserDto user, String token) throws Exception {
-		System.out.println("유저 정보 수정");
 		
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
@@ -552,7 +519,6 @@ public class KeyCloakApiUtil {
 	
 	// 비밀번호 수정
 	public void updatePasswordSsoUser(UserDto user) throws Exception {
-		System.out.println("비밀번호 수정..");
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
@@ -566,7 +532,6 @@ public class KeyCloakApiUtil {
 
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
 		
-
 		try {
 
 			HttpClient httpClient = HttpClientBuilder.create().build();

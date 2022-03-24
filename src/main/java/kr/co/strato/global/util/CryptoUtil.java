@@ -150,32 +150,4 @@ public class CryptoUtil {
 		return new String(decryptedTextBytes);
 	}
 
-	/**
-	 * 클라이언트 인증 시 사용되는 해싱키 값을 만들어주는 함수
-	 * 클라이언트에서 Timestamp를 파라미터로 받고, 요청정보 중 url, method 추출
-	 * 생성된 key로 JWT 복호화 
-	 * @param timestamp
-	 * @param url
-	 * @param method
-	 * @return
-	 */
-	public static String generateKey(Long timestamp, String url, String method) {
-		String keyStr = "";
-		String message = new StringBuilder().append(url).append(method).append(timestamp).toString();
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA256");
-			md.update(message.getBytes());
-			byte byteData[] = md.digest();
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < byteData.length; i++) {
-				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-			}
-			keyStr = sb.toString();
-
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			keyStr = "";
-		}
-		return keyStr;
-	}
 }

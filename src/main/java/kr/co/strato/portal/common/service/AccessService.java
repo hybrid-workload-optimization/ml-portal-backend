@@ -31,10 +31,10 @@ public class AccessService {
 	}
 	
 	//token 유효성 검증
-	public void tokenVerify(String accessToken) {
-		System.out.println("토큰 검증..");
-		System.out.println(accessToken);
-		tokenValidator.validateToken(accessToken);
+	public boolean tokenVerify(String accessToken) {
+		boolean result = tokenValidator.validateToken(accessToken);
+		System.out.println(result);
+		return result;
 	}
 	
 	
