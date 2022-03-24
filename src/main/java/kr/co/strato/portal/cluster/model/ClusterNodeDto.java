@@ -37,6 +37,8 @@ public class ClusterNodeDto {
 		private float allocatedMemory;
 		private LocalDateTime createdAt;
 		private Long clusterIdx;
+		private String clusterName;
+		private String pod;
 		private List<String> role;
 	}
 

@@ -22,6 +22,7 @@ public interface ClusterNodeDtoMapper {
 	ClusterNodeDtoMapper INSTANCE = Mappers.getMapper(ClusterNodeDtoMapper.class);
 
 	@Mapping(target = "clusterIdx", source = "cluster.clusterIdx")
+	@Mapping(target = "clusterName", source = "cluster.clusterName")
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToList")
 	public ClusterNodeDto.ResListDto toResListDto(NodeEntity node);
 
