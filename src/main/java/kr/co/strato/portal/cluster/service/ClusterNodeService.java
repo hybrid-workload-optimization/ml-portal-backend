@@ -207,7 +207,7 @@ public class ClusterNodeService {
          return nodeYaml;
      }
     
-    private void setUsage(Node node , List<PodEntity> pods, ClusterNodeDto.ResDetailChartDto chartNode) {
+    public void setUsage(Node node , List<PodEntity> pods, ClusterNodeDto.ResDetailChartDto chartNode) {
 		int allocatedPods = pods.size();
 		BigDecimal podCapacity = Quantity.getAmountInBytes(node.getStatus().getCapacity().get("pods"));
 		BigDecimal cpuCapacity = Quantity.getAmountInBytes(node.getStatus().getCapacity().get("cpu"));
