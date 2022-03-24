@@ -24,15 +24,15 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
     }
 
     @Override
-    public Page<NodeEntity> getNodeList(Pageable pageable, Long clusterId,String name) {
+    public Page<NodeEntity> getNodeList(Pageable pageable, Long clusterIdx,String name) {
 
         QNodeEntity qNodeEntity = QNodeEntity.nodeEntity;
         QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
 
         BooleanBuilder builder = new BooleanBuilder();
-        if(clusterId != null && clusterId > 0L){
-            builder.and(qClusterEntity.clusterId.eq(clusterId));
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
         }
 
         QueryResults<NodeEntity> results =
