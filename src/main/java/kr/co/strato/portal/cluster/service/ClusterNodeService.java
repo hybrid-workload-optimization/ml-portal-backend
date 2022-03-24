@@ -151,7 +151,7 @@ public class ClusterNodeService {
 		return ids;
 	}
 	
-	private NodeEntity toEntity(Node n, Long clusterId) throws JsonProcessingException {
+	public NodeEntity toEntity(Node n, Long clusterId) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
      // k8s Object -> Entity
         List<NodeCondition> conditions = n.getStatus().getConditions();
