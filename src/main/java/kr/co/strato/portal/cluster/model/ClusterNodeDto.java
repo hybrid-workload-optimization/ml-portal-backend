@@ -38,7 +38,7 @@ public class ClusterNodeDto {
 		private LocalDateTime createdAt;
 		private Long clusterIdx;
 		private String clusterName;
-		private String pod;
+		private String podStatus;
 		private List<String> role;
 	}
 
