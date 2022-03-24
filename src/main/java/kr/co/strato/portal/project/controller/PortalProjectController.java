@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
@@ -87,15 +88,15 @@ public class PortalProjectController {
     }
     
     /**
-     * 로그인한 사용자가 생성한 Cluster 리스트 조회
+     * 프로젝트로 등록하지 않은 Cluster 리스트 조회
      * @param 
      * @return
      */
     @GetMapping("/api/v1/project/clusters")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ClusterDto.List>> getProjecClusterListByCreateUserId(ProjectRequestDto param) {
+    public ResponseWrapper<List<ClusterDto.List>> getProjecClusterListByNotUsedClusters(ProjectRequestDto param) {
         
-    	List<ClusterDto.List> response = portalProjectService.getProjecClusterListByCreateUserId(param.getLoginId());
+    	List<ClusterDto.List> response = portalProjectService.getProjecClusterListByNotUsedClusters();
         
         return new ResponseWrapper<List<ClusterDto.List>>(response);
     }
@@ -121,7 +122,7 @@ public class PortalProjectController {
      */
     @PostMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws Exception {
+    public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws AleadyProjectNameException,  Exception {
         
     	Long response = portalProjectService.createProject(param);
         

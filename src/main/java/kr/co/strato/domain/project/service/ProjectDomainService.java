@@ -94,4 +94,14 @@ public class ProjectDomainService {
     	
     	projectRepository.deleteById(projectIdx);
     }
+    
+    /**
+     * Project 조회
+     * @param
+     * @return
+     */
+    public Optional<ProjectEntity> getProjectByProjectName(String projectName) {
+    	
+    	return projectRepository.findByProjectName(projectName);
+    }
 }

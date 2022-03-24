@@ -64,4 +64,18 @@ public class ProjectClusterRepositoryCustomImpl implements ProjectClusterReposit
 		
 		return result;
 	}
+	
+	@Override
+	public List<ClusterEntity> getProjecClusterListByNotUsedClusters() {
+		
+		List<ClusterEntity> result = queryFactory
+				.select(clusterEntity)
+				  .from(clusterEntity)
+				  .where(clusterEntity.clusterIdx.notIn(
+						JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity)
+				  ))
+				  .fetch();
+		
+		return result;
+	}
 }
