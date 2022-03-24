@@ -15,7 +15,7 @@ public class DashboardController {
 	private DashboardService dashboardService;
 	
 	@GetMapping("/api/v1/dashboard/system-admin")
-    public DashboardSystemAdminDto getInfo(
+    public DashboardSystemAdminDto getDashboardSystemAdminInfo(
     		@RequestParam(required = false) Long projectIdx,
     		@RequestParam(required = false) Long clusterIdx) throws Exception {
 		return dashboardService.getDashboardInfoForSystemAdmin(projectIdx, clusterIdx);
