@@ -381,8 +381,8 @@ public class ClusterService {
 		List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
 		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker")).collect(Collectors.toList());
 		
-		List<NodeEntity> availableMasterNodes = masterNodes.stream().filter(n -> n.getStatus().equals("true")).collect(Collectors.toList());
-		List<NodeEntity> availableworkerNodes = workerNodes.stream().filter(n -> n.getStatus().equals("true")).collect(Collectors.toList());
+		List<NodeEntity> availableMasterNodes = masterNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
+		List<NodeEntity> availableworkerNodes = workerNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
 		
 		log.debug("[getCluster] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
 		log.debug("[getCluster] availableMasterNodes/availableworkerNodes size = {}/{}", availableMasterNodes.size(), availableworkerNodes.size());
