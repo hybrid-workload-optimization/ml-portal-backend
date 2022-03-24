@@ -35,13 +35,13 @@ public class ProjectClusterDomainService {
 	}
 	
 	/**
-     * 로그인한 사용자가 생성한 Cluster 리스트 조회
+     * 프로젝트로 등록하지 않은 Cluster 리스트 조회
      * @param loginId
      * @return
      */
-	public List<ClusterEntity> getProjecClusterListByCreateUserId(String loginId) {
+	public List<ClusterEntity> getProjecClusterListByNotUsedClusters() {
 		
-		return clusterRepository.findByCreateUserId(loginId);
+		return projectClusterRepository.getProjecClusterListByNotUsedClusters();
 	}
 	
 	/**

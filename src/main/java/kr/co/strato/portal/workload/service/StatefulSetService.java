@@ -66,7 +66,7 @@ public class StatefulSetService {
                 return id;
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("json 파싱 에러");
+                throw new InternalServerException("error parsing json");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("Error registering the updated statefulSet in the db");
@@ -83,12 +83,17 @@ public class StatefulSetService {
         Long clusterId = clusterEntity.getClusterId();
 
         List<StatefulSet> statefulSets = new ArrayList<>();
-        if(namespaceIdx == null || namespaceIdx == 0){
-            statefulSets = statefulSetAdapterService.getList(clusterId);
-        }else{
-            NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
-            statefulSets = statefulSetAdapterService.getList(clusterId, namespaceEntity.getName());
+        try {
+            if (namespaceIdx == null || namespaceIdx == 0) {
+                statefulSets = statefulSetAdapterService.getList(clusterId);
+            } else {
+                NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+                statefulSets = statefulSetAdapterService.getList(clusterId, namespaceEntity.getName());
+            }
+        }catch (Exception e){
+
         }
+
         Map<String, StatefulSet> maps = statefulSets.stream().collect(Collectors.toMap(
                 e1 -> e1.getMetadata().getUid(),
                 e2-> e2
@@ -109,15 +114,15 @@ public class StatefulSetService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteStatefulSet(Long id){
-        StatefulSetEntity statefulSetEntity = statefulSetDomainService.get(id);
+    public boolean deleteStatefulSet(Long statefulSetId){
+        StatefulSetEntity statefulSetEntity = statefulSetDomainService.get(statefulSetId);
         Long clusterId = statefulSetEntity.getNamespace().getCluster().getClusterId();
         String namespaceName = statefulSetEntity.getNamespace().getName();
         String statefulSetName = statefulSetEntity.getStatefulSetName();
 
         boolean isDeleted = statefulSetAdapterService.delete(clusterId, namespaceName, statefulSetName);
         if(isDeleted){
-            return statefulSetDomainService.delete(id);
+            return statefulSetDomainService.delete(statefulSetId);
         }else{
             throw new InternalServerException("Fail to delete the k8s statefulSet");
         }

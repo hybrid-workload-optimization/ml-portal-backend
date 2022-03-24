@@ -159,9 +159,9 @@ public class PodDomainService {
             		if (node != null && node.size() > 0 ) {
                 		pod.setNode(node.get(0));
                 	}
+            		
+            		podRepository.save(pod);
             	}
-            	
-            	podRepository.save(pod);
             	
             	// TODO pvcEntity save
             	if (pvcEntity != null) {

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.error.exception.AleadyUserClusterException;
 import kr.co.strato.global.error.exception.AlreadyExistResourceException;
 import kr.co.strato.global.error.exception.AuthFailException;
@@ -132,6 +133,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(code = HttpStatus.OK)
     ResponseWrapper unhandleAleadyUserClusterException(AleadyUserClusterException e) {
         ProjectErrorType errorType = ProjectErrorType.ALEADY_USE_CLUSTER;
+        return getResponse(errorType);
+    }
+    
+    @ExceptionHandler(AleadyProjectNameException.class)
+    @ResponseStatus(code = HttpStatus.CREATED)
+    ResponseWrapper unhandleAleadyProjectNameException(AleadyProjectNameException e) {
+        ProjectErrorType errorType = ProjectErrorType.ALEADY_PROJECT_NAME;
         return getResponse(errorType);
     }
     

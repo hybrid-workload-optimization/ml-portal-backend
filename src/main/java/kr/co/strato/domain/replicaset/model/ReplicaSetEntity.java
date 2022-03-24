@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.pod.model.PodReplicaSetEntity;
 import lombok.AllArgsConstructor;
@@ -60,14 +61,13 @@ public class ReplicaSetEntity {
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;
     
-    /*
+
     @ManyToOne
     @JoinColumn(name = "deployment_idx")
     private DeploymentEntity deployment;
-    */
+
     
-    @Column(name = "deployment_idx")
-    private Long deploymentIdx;
+
     
     @OneToMany(mappedBy = "replicaSet")
     private List<PodReplicaSetEntity> podReplicaSets;

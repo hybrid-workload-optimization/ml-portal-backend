@@ -2,6 +2,8 @@ package kr.co.strato.adapter.k8s.deployment.service;
 
 import java.util.List;
 
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,6 +104,29 @@ public class DeploymentAdapterService {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - Deployment yaml 조회 에러");
+        }
+    }
+
+    public List<Deployment> retrieveList(Long clusterId, String namespace){
+        try{
+            ResourceListSearchInfo param = null;
+            ResourceListSearchInfo.ResourceListSearchInfoBuilder builder = ResourceListSearchInfo.builder();
+            if(namespace != null){
+                param = builder.kubeConfigId(clusterId).namespace(namespace).build();
+            }else{
+                param = builder.kubeConfigId(clusterId).build();
+            }
+            String res = inNamespaceProxy.getResourceList(ResourceType.deployment.get(),  param);
+            ObjectMapper mapper = new ObjectMapper();
+            List<Deployment> deployments = mapper.readValue(res, new TypeReference<List<Deployment>>(){});
+
+            return deployments;
+        }catch (JsonProcessingException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - Deployment 조회 에러");
         }
     }
 }

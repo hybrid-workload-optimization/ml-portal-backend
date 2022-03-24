@@ -8,7 +8,8 @@ public enum ProjectErrorType implements ResponseType {
     FAIL_PROJECT_UPDATE("12002", "프로젝트를 수정하지 못했습니다.", null),
     FAIL_PROJECT_DELETE("12003", "프로젝트를 삭제하지 못했습니다.", null),
 	ALEADY_USE_CLUSTER("12004", "Cluster를 사용하고 있는 Poject가 있습니다.", null),
-	NOT_FOUND_PROJECT("12005", "Project가 존재하지 않습니다.", null);
+	NOT_FOUND_PROJECT("12005", "Project가 존재하지 않습니다.", null),
+	ALEADY_PROJECT_NAME("12006", "이미 등록된 Project Name 입니다.", null);
 
     private String code;
     private String message;

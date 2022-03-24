@@ -19,6 +19,7 @@ import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.error.exception.AleadyUserClusterException;
 import kr.co.strato.global.error.exception.CreateProjectFailException;
 import kr.co.strato.global.error.exception.DeleteProjectFailException;
@@ -100,13 +101,13 @@ public class PortalProjectService {
     }
     
     /**
-     * 로그인한 사용자가 생성한 Cluster 리스트 조회
+     * 프로젝트로 등록하지 않은 Cluster 리스트 조회
      * @param loginId
      * @return
      */
-    public List<ClusterDto.List> getProjecClusterListByCreateUserId(String loginId) {
+    public List<ClusterDto.List> getProjecClusterListByNotUsedClusters() {
     	
-    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByCreateUserId(loginId);
+    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByNotUsedClusters();
     	
     	//Entity -> DTO 변환
     	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toList(m)).collect(Collectors.toList());
@@ -130,7 +131,7 @@ public class PortalProjectService {
      * @param
      * @return
      */
-    public Long createProject(ProjectRequestDto param) throws CreateProjectFailException {
+    public Long createProject(ProjectRequestDto param) throws AleadyProjectNameException, CreateProjectFailException {
     	
     	String userId = param.getLoginId();
     	String userName = param.getLoginName();
@@ -147,8 +148,14 @@ public class PortalProjectService {
     	projectBuiler.updatedAt(now);
     	projectBuiler.deletedYn("N");
     	
-    	Long resultIdx = null;
+    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName());
+		if(projectInfo != null) {
+			throw new AleadyProjectNameException();
+		}
     	
+    	System.out.println("여기를 타나???");
+		
+		Long resultIdx = null;
     	try {
     		//ProjectDTO -> ProjectEntity
             ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
