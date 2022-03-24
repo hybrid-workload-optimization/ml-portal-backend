@@ -104,7 +104,7 @@ public class TokenValidator {
 		String keyStr = "";
 		String message = new StringBuilder().append(url).append(method).append(timestamp).toString();
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(message.getBytes());
 			byte byteData[] = md.digest();
 			StringBuffer sb = new StringBuffer();

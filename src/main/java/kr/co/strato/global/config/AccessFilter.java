@@ -36,49 +36,49 @@ public class AccessFilter implements Filter{
         HttpServletRequest request = (HttpServletRequest) req;
         
         
-//        String path = request.getServletPath();
-//        
-//        if(path.contains("?")) {
-//        	path = path.split("?")[0];
-//        }
-//        String method = request.getMethod();
-//        String strTimestamp = request.getHeader("timestamp");
-//        Long timestamp = 0L;
-//        if(strTimestamp != null) {
-//        	timestamp = Long.parseLong(strTimestamp);	
-//        }
-//        
-//		String acToken = request.getHeader("access_token");
-//		
-//		try {
-//			System.out.println(tokenValidator.encrypt(acToken, timestamp, path, method));
-//		} catch (Exception e1) {
-//			e1.printStackTrace();
-//		}
-//		
-//		
-//		String token = null;
-//		try {
-//			token = tokenValidator.decrypt(acToken, timestamp, path, method);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println(acToken);
-//		System.out.println(token);
-//		
-//		if(!path.contains("login")) {
-//			if(token == null) {
-//				System.out.println("token is null...");
-//				request.getSession(false);
-//				response.sendError(HttpStatus.UNAUTHORIZED.value());
-//			}else {
-//				if(!tokenValidator.validateToken(token)) {
-//					System.out.println("token is not validate");
-//					request.getSession(false);
-//					response.sendError(HttpStatus.UNAUTHORIZED.value());
-//				}
-//			}	
-//		}
+        String path = request.getServletPath();
+        
+        if(path.contains("?")) {
+        	path = path.split("?")[0];
+        }
+        String method = request.getMethod();
+        String strTimestamp = request.getHeader("timestamp");
+        Long timestamp = 0L;
+        if(strTimestamp != null) {
+        	timestamp = Long.parseLong(strTimestamp);	
+        }
+        
+		String acToken = request.getHeader("access_token");
+		
+		try {
+			System.out.println(tokenValidator.encrypt(acToken, timestamp, path, method));
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		String token = null;
+		try {
+			token = tokenValidator.decrypt(acToken, timestamp, path, method);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println(acToken);
+		System.out.println(token);
+		
+		if(!path.contains("login") && !path.contains("token-refresh")) {
+			if(token == null) {
+				System.out.println("token is null...");
+				request.getSession(false);
+				response.sendError(HttpStatus.UNAUTHORIZED.value());
+			}else {
+				if(!tokenValidator.validateToken(token)) {
+					System.out.println("token is not validate");
+					request.getSession(false);
+					response.sendError(HttpStatus.UNAUTHORIZED.value());
+				}
+			}	
+		}
 		
 		chain.doFilter(request, response);
     }
