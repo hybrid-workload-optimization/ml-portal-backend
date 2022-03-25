@@ -41,14 +41,15 @@ public interface PodDtoMapper {
         @Mapping(target = "namespace", source = "namespace.name"),
         @Mapping(target = "node", source = "node.name"),
         @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
-//        @Mapping(target = "cpu", source = "cpu", qualifiedByName = "getCpu"),
-//        @Mapping(target = "memory", source = "memory", qualifiedByName = "getMemory"),
+        @Mapping(target = "cpu", source = "cpu", qualifiedByName = "getCpu"),
+        @Mapping(target = "memory", source = "memory", qualifiedByName = "getMemory"),
     })
     public PodDto.ResListDto toResK8sListDto(PodEntity entity);
     
     @Mappings({
     	@Mapping(target = "name", source = "podName"),
         @Mapping(target = "namespace", source = "namespace.name"),
+        @Mapping(target = "clusterId", source = "namespace.cluster.clusterId"),
         @Mapping(target = "uid", source = "podUid"),
         @Mapping(target = "node", source = "node.name"),
         @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),

@@ -64,6 +64,7 @@ public class PodDto {
     	private Long id;
         private String name;
         private String namespace;
+        private Long clusterId;
         private String uid;
         private String ip;
         private String qosClass;
