@@ -65,6 +65,9 @@ public class PodEntity {
     @Lob
     private String label;
     
+    @Lob
+    private String image;
+    
     private float cpu;
     
     private float memory;

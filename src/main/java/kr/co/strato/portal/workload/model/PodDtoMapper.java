@@ -55,6 +55,7 @@ public interface PodDtoMapper {
         @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
         @Mapping(target = "annotation", source = "annotation", qualifiedByName = "dataToMap"),
         @Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList"),
+        @Mapping(target = "images", source = "image", qualifiedByName = "stringToList"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
     
@@ -115,6 +116,17 @@ public interface PodDtoMapper {
         try{
         	ObjectMapper mapper = new ObjectMapper();
             List<HashMap<String, Object>> list = mapper.readValue(data, List.class);
+            return list;
+        }catch (Exception e){
+            return new ArrayList<>();
+        }
+    }
+    
+    @Named("stringToList")
+    default List<String> stringToList(String data) {
+    	try{
+        	ObjectMapper mapper = new ObjectMapper();
+            List<String> list = mapper.readValue(data, List.class);
             return list;
         }catch (Exception e){
             return new ArrayList<>();
