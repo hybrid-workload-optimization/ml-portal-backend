@@ -68,7 +68,7 @@ public class PodDto {
         private String uid;
         private String ip;
         private String qosClass;
-//        private String image;
+        private List<String> images;
         
         private HashMap<String, Object> annotation;
         private HashMap<String, Object> label;

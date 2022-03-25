@@ -111,6 +111,10 @@ public interface PodMapper {
     					return map;
     				})
     				.collect(Collectors.toList());
+    		
+    		List<String> images = spec.getContainers().stream().map(container -> container.getImage()).distinct().collect(Collectors.toList());
+    		
+    		String image = mapper.writeValueAsString(images);
 
             // TODO CPU + Memory 계산 작업 필요 (Mi, Gi 외의 값...)
     		// 기준은 GB 단위
@@ -140,12 +144,11 @@ public interface PodMapper {
             	}
             }
             
-            
             String label = mapper.writeValueAsString(metadata.getLabels());
             String annotations = mapper.writeValueAsString(metadata.getAnnotations());
             String createAt = metadata.getCreationTimestamp();
             String conditions = mapper.writeValueAsString(status.getConditions());
-
+            
             NamespaceEntity namespaceEntity = NamespaceEntity.builder().name(namespace).build();
             NodeEntity nodeEntity = null;
             if (nodeName != null) {
@@ -162,6 +165,7 @@ public interface PodMapper {
                     .restart(restart)
                     .status(statusStr)
                     .qosClass(qosClass)
+                    .image(image)
                     .cpu(cpu)
                     .memory(memory)
                     .cpuLimits(cpuLimits)
