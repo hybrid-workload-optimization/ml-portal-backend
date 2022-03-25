@@ -81,6 +81,8 @@ public class ClusterDto {
 		// provisioning
 		private String provisioningType;
 		private String provisioningStatus;
+		private String provisioningLog;
+		private String provisioningUser;
 		
 		// master/worker
 		private int masterCount;
