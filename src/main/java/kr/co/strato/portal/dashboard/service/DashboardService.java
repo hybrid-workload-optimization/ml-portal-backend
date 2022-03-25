@@ -27,7 +27,7 @@ import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.SelectService;
-import kr.co.strato.portal.dashboard.model.DashboardSystemAdminDto;
+import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,7 +60,7 @@ public class DashboardService {
 	 * @param clusterIdx
 	 * @return
 	 */
-	public DashboardSystemAdminDto getDashboardInfoForSystemAdmin(Long projectIdx, Long clusterIdx) {
+	public SystemAdminNodeStateDto getNodeState(Long projectIdx, Long clusterIdx) {
 		int projectCount = 0;
 		int clusterCount = 0;
 		
@@ -86,7 +86,6 @@ public class DashboardService {
 			}
 		}
 		
-		List<ClusterNodeDto.ResListDto> list = new ArrayList<>();
 		List<ClusterEntity> clusters = getKubeConfigIds(projectIdx, clusterIdx);
 		clusterCount = clusters.size();
 		
@@ -94,7 +93,7 @@ public class DashboardService {
 			long currentTime = new Date().getTime();
 			List<GetNodeInfoRunnable> runnables = new ArrayList<>();
 			for(ClusterEntity cluster: clusters) {				
-				GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime);
+				GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, false);
 				runnables.add(getNodeinfoRunnable);
 				Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
 			}
@@ -109,22 +108,8 @@ public class DashboardService {
 				masterReadyCount += r.getMasterReadyCount();
 				workerReadyCount += r.getWorkerReadyCount();		
 				restartWithinTenMinutes += r.getRestartWithinTenMinutes();
-				list.addAll(r.getResListDtos());
 			}
 		}
-		
-		
-		Collections.sort(list, new Comparator<ResListDto>() {
-		    @Override
-		    public int compare(ResListDto b1,ResListDto b2) {
-		    	int dff = Long.valueOf(b2.getClusterIdx() - b1.getClusterIdx()).intValue();
-		    	if(dff == 0) {
-		    		b1.getName().compareTo(b2.getName());
-		    	}
-		    	return dff;
-		    }
-		});
-		
 		
 		readyCount = masterReadyCount + workerReadyCount;
 		
@@ -143,7 +128,7 @@ public class DashboardService {
 			nodeUtilizationState = "Bad";
 		}
 		
-		return DashboardSystemAdminDto.builder()
+		return SystemAdminNodeStateDto.builder()
 				.projectCount(projectCount)
 				.clusterCount(clusterCount)
 				.nodeCount(nodeCount)
@@ -156,8 +141,47 @@ public class DashboardService {
 				.masterUtilization(masterUtilization)
 				.workerUtilization(workerUtilization)
 				.nodeUtilizationState(nodeUtilizationState)
-				.nodeList(list)
 				.build();
+	}
+	
+	/**
+	 * 노드 리스트 반환.
+	 * @param projectIdx
+	 * @param clusterIdx
+	 * @return
+	 */
+	public List<ResListDto> getNodeList(Long projectIdx, Long clusterIdx) {
+		List<ResListDto> list = new ArrayList<>();
+		List<ClusterEntity> clusters = getKubeConfigIds(projectIdx, clusterIdx);
+		
+		if(clusters.size() > 0) {
+			long currentTime = new Date().getTime();
+			List<GetNodeInfoRunnable> runnables = new ArrayList<>();
+			for(ClusterEntity cluster: clusters) {				
+				GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, true);
+				runnables.add(getNodeinfoRunnable);
+				Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
+			}
+			
+			//작업이 완료될때 까지 대기.
+			wait(runnables);
+			
+			for(GetNodeInfoRunnable r : runnables) {
+				list.addAll(r.getResListDtos());
+			}
+		}		
+		
+		Collections.sort(list, new Comparator<ResListDto>() {
+		    @Override
+		    public int compare(ResListDto b1,ResListDto b2) {
+		    	int dff = Long.valueOf(b2.getClusterIdx() - b1.getClusterIdx()).intValue();
+		    	if(dff == 0) {
+		    		b1.getName().compareTo(b2.getName());
+		    	}
+		    	return dff;
+		    }
+		});		
+		return list;
 	}
 	
 
@@ -173,13 +197,15 @@ public class DashboardService {
 		private int masterReadyCount = 0;
 		private int workerReadyCount = 0;		
 		private int restartWithinTenMinutes = 0;
+		private boolean listCollect;
 		
 		private List<ClusterNodeDto.ResListDto> resListDtos;
 
-		public GetNodeInfoRunnable(ClusterEntity cluster, Long currentTime) {
+		public GetNodeInfoRunnable(ClusterEntity cluster, Long currentTime, boolean listCollect) {
 			this.cluster = cluster;
 			this.isFinish = false;
 			this.currentTime = currentTime;
+			this.listCollect = listCollect;
 			this.resListDtos = new ArrayList<>();
 		}
 
@@ -192,26 +218,16 @@ public class DashboardService {
 				
 				List<Node> nodes = nodeAdapterService.getNodeList(kubeConfigId);
 				nodeCount = nodes.size();
-				for(Node node : nodes) {
-					NodeEntity entity = nodeService.toEntity(node, clusterIdx);
-					
-					String name = node.getMetadata().getName();
-					List<Pod> pods = podAdapterService.getList(kubeConfigId, name, null, null, null);
-					
-					long runningSize = pods.stream().filter(p -> p.getStatus().getPhase().equals("Running")).count();
-					int podCount = pods.size();
-					
-					String podStatus = String.format("%d/%d", runningSize, podCount);
+				for(Node node : nodes) {				
+		        	boolean isReady = node.getStatus().getConditions().stream()
+		        			.filter(condition -> condition.getType().equals("Ready"))
+		    				.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
 		        	
-		        	
-		        	ClusterNodeDto.ResListDto nodeListDto = ClusterNodeDtoMapper.INSTANCE.toResListDto(entity);
-		        	nodeListDto.setPodStatus(podStatus);
-		        	nodeListDto.setClusterIdx(clusterIdx);
-		        	nodeListDto.setClusterName(clusterName);
-					
-		        	boolean isReady = Boolean.parseBoolean(entity.getStatus());				
-					String role = entity.getRole();
-					if(role.toLowerCase().contains("master")) {
+		        	List<String> roles = new ArrayList<>();
+		    		node.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
+		    				.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
+		    		
+					if(roles.contains("master")) {
 						masterCount++;
 						if(isReady) {
 							masterReadyCount++;
@@ -227,7 +243,28 @@ public class DashboardService {
 						//10분 이내 재시작 노드
 						restartWithinTenMinutes++;
 					}					
-					this.resListDtos.add(nodeListDto);
+					
+					
+					if(listCollect) {
+						NodeEntity entity = nodeService.toEntity(node, clusterIdx);
+						
+						String name = node.getMetadata().getName();
+						List<Pod> pods = podAdapterService.getList(kubeConfigId, name, null, null, null);
+						
+						long runningSize = pods.stream().filter(p -> p.getStatus().getPhase().equals("Running")).count();
+						int podCount = pods.size();
+						
+						String podStatus = String.format("%d/%d", runningSize, podCount);
+			        	
+			        	
+			        	ClusterNodeDto.ResListDto nodeListDto = ClusterNodeDtoMapper.INSTANCE.toResListDto(entity);
+			        	nodeListDto.setPodStatus(podStatus);
+			        	nodeListDto.setClusterIdx(clusterIdx);
+			        	nodeListDto.setClusterName(clusterName);
+			        	
+			        	this.resListDtos.add(nodeListDto);
+					}
+					
 				}
 				
 			} catch (Exception e) {
@@ -237,6 +274,8 @@ public class DashboardService {
 			}
 		}
 	}
+	
+	
 	
 	/**
 	 * 조건에 맞는 KubeConfigId를 반환한다.
@@ -312,5 +351,4 @@ public class DashboardService {
 			try {Thread.sleep(100);} catch (InterruptedException e) {}
 		}
 	}
-	
 }

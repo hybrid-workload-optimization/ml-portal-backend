@@ -1,8 +1,5 @@
 package kr.co.strato.portal.dashboard.model;
 
-import java.util.List;
-
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class DashboardSystemAdminDto {
+public class DashboardSystemAdminInfoDto {
 	private int projectCount;
 	private int clusterCount;
 	
@@ -29,6 +26,5 @@ public class DashboardSystemAdminDto {
 	
 	private String nodeUtilizationState;
 	
-	private int restartWithinTenMinutes;	
-	private List<ClusterNodeDto.ResListDto> nodeList;
+	private int restartWithinTenMinutes;
 }
