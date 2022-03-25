@@ -49,7 +49,9 @@ public class NamespaceAdapterService {
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage(), e);
 			throw new InternalServerException("json 파싱 에러");
-		}
+		}catch (Exception e){
+            throw new InternalServerException("k8s 통신 에러");
+        }
 	}
     
     
@@ -76,9 +78,8 @@ public class NamespaceAdapterService {
             log.error(e.getMessage(), e);
             throw new InternalServerException("json 파싱 에러");
         }catch (Exception e){
-            e.printStackTrace();
+            throw new InternalServerException("k8s 통신 에러");
         }
-        return null;
     }
 
     public boolean deleteNamespace(Integer kubeConfigId, String name){
