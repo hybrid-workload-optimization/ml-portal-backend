@@ -32,6 +32,7 @@ public class ClusterCloudDto {
 	
 	@Getter
 	@Setter
+	@ToString
 	public static class Node {
 		
 		private String name;

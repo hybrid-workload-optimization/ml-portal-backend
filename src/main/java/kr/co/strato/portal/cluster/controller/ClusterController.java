@@ -217,6 +217,8 @@ public class ClusterController {
         try {
         	clusterService.deleteCluster(clusterIdx);
 		} catch (Exception e) {
+			result = false;
+			
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			

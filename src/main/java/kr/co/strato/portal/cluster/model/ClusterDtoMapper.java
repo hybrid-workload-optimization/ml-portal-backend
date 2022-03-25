@@ -25,8 +25,8 @@ public interface ClusterDtoMapper {
 	
 	public ClusterDto toDto(ClusterEntity cluster);
 	
-	@Mapping(target = "nodeCount", 	source = "c.nodes",			qualifiedByName = "nodeCount")
-    @Mapping(target = "problem",	source = "c.problem",		qualifiedByName = "jsonToList")
+	@Mapping(target = "nodeCount", 		source = "c.nodes",		qualifiedByName = "nodeCount")
+    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
 	public ClusterDto.List toList(ClusterEntity c);
 	
 	@Mapping(target = "kubeConfig",		source = "c.kubeConfig")
@@ -34,8 +34,14 @@ public interface ClusterDtoMapper {
     @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
 	public ClusterDto.Detail toDetail(ClusterEntity c);
 	
-	@Mapping(target = "nodes",			source = "dto.nodes",	qualifiedByName = "toClusterCloudNodeList")
+	@Mapping(target = "userName",		source = "dto.provisioningUser")
+	@Mapping(target = "nodes",			source = "dto.nodes",	qualifiedByName = "dtoToClusterCloudNodeList")
 	public ClusterCloudDto toClusterCloudDto(ClusterDto.Form dto);
+	
+	@Mapping(target = "userName",		source = "c.provisioningUser")
+	@Mapping(target = "nodes",			source = "c.nodes",		qualifiedByName = "entityToClusterCloudNodeList")
+	public ClusterCloudDto toClusterCloudDto(ClusterEntity c);
+	
 	
 	@Named("nodeCount")
     default int nodeCount(List<NodeEntity> nodes) {
@@ -62,8 +68,8 @@ public interface ClusterDtoMapper {
 		}
     }
     
-	@Named("toClusterCloudNodeList")
-    default ArrayList<ClusterCloudDto.Node> toClusterCloudNodeList(ArrayList<ClusterDto.Node> nodes) {
+	@Named("dtoToClusterCloudNodeList")
+    default ArrayList<ClusterCloudDto.Node> dtoToClusterCloudNodeList(ArrayList<ClusterDto.Node> nodes) {
 		try {
 			ArrayList<ClusterCloudDto.Node> results = new ArrayList<>();
 			
@@ -72,6 +78,28 @@ public interface ClusterDtoMapper {
 				result.setName(node.getName());
 				result.setIp(node.getIp());
 				result.setNodeTypes(node.getNodeTypes());
+				
+				results.add(result); 
+			}
+			
+			return results;
+		} catch (Exception e) {
+			return new ArrayList<>();
+		}
+    }
+	
+	@Named("entityToClusterCloudNodeList")
+    default ArrayList<ClusterCloudDto.Node> entityToClusterCloudNodeList(List<NodeEntity> nodes) {
+		try {
+			ArrayList<ClusterCloudDto.Node> results = new ArrayList<>();
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			for (NodeEntity node : nodes) {
+				ClusterCloudDto.Node result = new ClusterCloudDto.Node();  
+				result.setName(node.getName());
+				result.setIp(node.getIp());
+				result.setNodeTypes(mapper.readValue(node.getRole(), ArrayList.class));
 				
 				results.add(result); 
 			}

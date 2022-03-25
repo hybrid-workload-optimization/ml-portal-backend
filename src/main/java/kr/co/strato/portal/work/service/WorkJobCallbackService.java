@@ -21,7 +21,10 @@ import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.service.ClusterSyncService;
+import kr.co.strato.portal.work.model.WorkJob;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
+import kr.co.strato.portal.work.model.WorkJob.WorkJobState;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
 import kr.co.strato.portal.work.model.WorkJobCallback;
@@ -35,10 +38,13 @@ public class WorkJobCallbackService {
 	WorkJobDomainService workJobDomainService;
 	
 	@Autowired
-	ClusterDomainService clusterJobDomainService;
+	ClusterDomainService clusterDomainService;
 	
 	@Autowired
 	ClusterAdapterService clusterAdapterService;
+	
+	@Autowired
+	ClusterSyncService clusterSyncService;
 	
 	
 	public void callbackWorkJob(WorkJobCallback<Map<String, Object>> workJobCallback) {
@@ -75,27 +81,31 @@ public class WorkJobCallbackService {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		
 		Map<String, Object> workJobDataRequest = null;
-		try {
-			workJobDataRequest = mapper.readValue(workJobEntity.getWorkJobDataRequest(), new TypeReference<HashMap<String, Object>>(){});
-		} catch (Exception e) {
-			log.warn("[callbackWorkJob] Can not convert to workJobDataRequest");
-			log.warn("[callbackWorkJob]", e);
-		}
-		
 		Map<String, Object> workJobDataRequestHeader = null;
 		Map<String, Object> workJobDataRequestQuery = null;
 		Map<String, Object> workJobDataRequestPath = null;
 		Map<String, Object> workJobDataRequestBody = null;
-		if (workJobDataRequest != null) {
-			workJobDataRequestHeader	= (Map<String, Object>) workJobDataRequest.get(WorkJobData.HEADER.name());
-			workJobDataRequestQuery		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.QUERY.name());
-			workJobDataRequestPath		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.PATH.name());
-			workJobDataRequestBody		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.BODY.name());
+		
+		if (workJobEntity.getWorkJobDataRequest() != null) {
+			try {
+				workJobDataRequest = mapper.readValue(workJobEntity.getWorkJobDataRequest(), new TypeReference<HashMap<String, Object>>(){});
+			} catch (Exception e) {
+				log.warn("[callbackWorkJob] Can not convert to workJobDataRequest");
+				log.warn("[callbackWorkJob]", e);
+			}
+			
+			if (workJobDataRequest != null) {
+				workJobDataRequestHeader	= (Map<String, Object>) workJobDataRequest.get(WorkJobData.HEADER.name());
+				workJobDataRequestQuery		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.QUERY.name());
+				workJobDataRequestPath		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.PATH.name());
+				workJobDataRequestBody		= (Map<String, Object>) workJobDataRequest.get(WorkJobData.BODY.name());
+			}
 		}
 		
 		// main work_job
+		log.info("[callbackWorkJob] workJobType={}", workJobType.name());
+		
 		if (workJobType == WorkJobType.CLUSTER_CREATE) {
-			
 			try {
 				// Response Data 
 				if (workJobData != null) {
@@ -109,35 +119,55 @@ public class WorkJobCallbackService {
 						log.info("[callbackWorkJob] clusterId : {}", clusterId);	
 					}
 					
-					ProvisioningStatus provisioningStatus = ClusterEntity.ProvisioningStatus.valueOf(state.toUpperCase());
+					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
 					
 					// k8s - get cluster's information(health + version)
 					String providerVersion = null;
-					if (workJobStatus == WorkJobStatus.SUCCESS && provisioningStatus == ProvisioningStatus.FINISHED) {
+					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
 						
 						providerVersion = clusterInfo.getKubeletVersion();
-						log.info("[callbackWorkJob] providerVersion : {}", providerVersion);	
+						log.info("[callbackWorkJob] providerVersion : {}", providerVersion);
+						
+						// db - sync(update) cluster - node/namespace/pv/storageClass
+						clusterSyncService.syncCluster(clusterId, workJobEntity.getWorkJobReferenceIdx());
 					}
 					
-					// update cluster
-					ClusterEntity clusterEntity = clusterJobDomainService.get(workJobEntity.getWorkJobReferenceIdx());
+					// db - update cluster
+					ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
 					clusterEntity.setClusterId(clusterId);
 					clusterEntity.setProvisioningLog(provisioningLog);
 					clusterEntity.setProviderVersion(providerVersion);
 					if (workJobStatus == WorkJobStatus.FAIL) {
 						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
 					} else {
-						clusterEntity.setProvisioningStatus(provisioningStatus.name());
+						clusterEntity.setProvisioningStatus(state.toUpperCase());
 					}
 					
-					clusterJobDomainService.update(clusterEntity);
+					clusterDomainService.update(clusterEntity);
 				}
 			} catch (Exception e) {
 				log.error("[callbackWorkJob] Cluster creation failed");
 				log.error("[callbackWorkJob]", e);
 			}
-			
+		} else if (workJobType == WorkJobType.CLUSTER_DELETE) {
+			try {
+				// Response Data 
+				if (workJobData != null) {
+					String workJobDataLog	= (String) workJobData.get("log");
+					String state			= (String) workJobData.get("state");
+					
+					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
+					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
+						// db - delete cluster
+						ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
+						clusterDomainService.delete(clusterEntity);
+					}
+				}
+			} catch (Exception e) {
+				log.error("[callbackWorkJob] Cluster deletion failed");
+				log.error("[callbackWorkJob]", e);
+			}
 		}
 		
 		// update work history ?

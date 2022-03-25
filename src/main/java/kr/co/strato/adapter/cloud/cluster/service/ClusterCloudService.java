@@ -29,9 +29,9 @@ public class ClusterCloudService {
 		return response;
 	}
 	
-	public String removeCluster(ClusterCloudDto clusterCloudDto) throws Exception {
+	public boolean removeCluster(ClusterCloudDto clusterCloudDto) throws Exception {
 		log.debug("[Remove Cluster] request : {}", clusterCloudDto.toString());
-		String response = clusterCloudClient.removeCluster(clusterCloudDto);
+		boolean response = clusterCloudClient.removeCluster(clusterCloudDto);
 		log.debug("[Remove Cluster] response : {}", response);
 		
 		return response;

@@ -102,4 +102,8 @@ public class ClusterEntity {
 	@Lob
 	@Column(name = "provisioning_log")
 	private String provisioningLog;
+	
+	@Column(name = "provisioning_user")
+	private String provisioningUser;
+	
 }

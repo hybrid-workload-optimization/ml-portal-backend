@@ -30,6 +30,7 @@ public class ClusterDto {
 		// k8s
 		private String kubeConfig;
 		// kubespray
+		private String provisioningUser;
 		private ArrayList<Node> nodes;	
 	}
 
@@ -56,6 +57,8 @@ public class ClusterDto {
 		private String providerVersion;
 		private String createdAt;
 		private ArrayList<String> problem;
+		private String provisioningType;
+		private String provisioningStatus;
 	}
 	
 	@Getter
@@ -75,6 +78,10 @@ public class ClusterDto {
 		private String status;
 		private ArrayList<String> problem;
 		
+		// provisioning
+		private String provisioningType;
+		private String provisioningStatus;
+		
 		// master/worker
 		private int masterCount;
 		private int workerCount;
@@ -86,5 +93,7 @@ public class ClusterDto {
 		private int pvcCount;
 		
 		private String monitoringServiceUrl;
+		
+		private Long workJobIdx;
 	}
 }

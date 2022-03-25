@@ -5,7 +5,11 @@ public class WorkJob {
 	public static enum WorkJobType {
 		
 		// Cluster 생성
-		CLUSTER_CREATE;
+		CLUSTER_CREATE,
+		// Cluster 삭제
+		CLUSTER_DELETE,
+		// Cluster 스케일
+		CLUSTER_SCALE;
 		
 	}
 	
@@ -28,6 +32,15 @@ public class WorkJob {
 		QUERY,
 		PATH,
 		BODY,
+		
+	}
+	
+	public static enum WorkJobState {
+		
+		// 시작
+		STARTED,
+		// 종료
+		FINISHED
 		
 	}
 }

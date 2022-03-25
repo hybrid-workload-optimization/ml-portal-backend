@@ -26,7 +26,7 @@ public interface ClusterCloudClient {
 	 * @return
 	 */
 	@DeleteMapping("/cluster/remove")
-	public String removeCluster(@RequestBody ClusterCloudDto clusterCloudDto);
+	public boolean removeCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 	
 	/**
 	 * kubespray cluster scale 조정

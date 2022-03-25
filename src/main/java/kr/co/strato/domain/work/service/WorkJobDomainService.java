@@ -36,5 +36,12 @@ public class WorkJobDomainService {
 		}
 		return null;
 	}
-	 
+	
+	public WorkJobEntity getWorkJobByWorkJobTypeAndReferenceIdx(String workJobType, Long referenceIdx) {
+		Optional<WorkJobEntity> workJobEntity = workJobRepository.findByWorkJobTypeAndWorkJobReferenceIdx(workJobType, referenceIdx);
+		if (workJobEntity.isPresent()) {
+			return workJobEntity.get();
+		}
+		return null;
+	}
 }
