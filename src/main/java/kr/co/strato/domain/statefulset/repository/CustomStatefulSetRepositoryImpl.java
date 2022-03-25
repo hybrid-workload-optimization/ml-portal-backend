@@ -24,7 +24,7 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
     }
 
     @Override
-    public Page<StatefulSetEntity> getStatefulSetList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId) {
+    public Page<StatefulSetEntity> getStatefulSetList(Pageable pageable, Long projectIdx, Long clusterIdx, Long namespaceIdx) {
 
         QStatefulSetEntity qStatefulSetEntity = QStatefulSetEntity.statefulSetEntity;
         QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
@@ -32,14 +32,11 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
 
 
         BooleanBuilder builder = new BooleanBuilder();
-        if(projectId != null && projectId > 0L){
-            //TODO 프로젝트 조회 조건 추가 필요
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
         }
-        if(clusterId != null && clusterId > 0L){
-            builder.and(qClusterEntity.clusterIdx.eq(clusterId));
-        }
-        if(namespaceId != null && namespaceId > 0L){
-            builder.and(qNamespaceEntity.id.eq(namespaceId));
+        if(namespaceIdx != null && namespaceIdx > 0L){
+            builder.and(qNamespaceEntity.id.eq(namespaceIdx));
         }
 
         QueryResults<StatefulSetEntity> results =

@@ -2,6 +2,7 @@ package kr.co.strato.domain.deployment.repository;
 
 import java.util.List;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,16 +26,15 @@ public class CustomDeploymentRepositoryImpl  implements CustomDeploymentReposito
     @Override
     public Page<DeploymentEntity> getDeploymentPageList(Pageable pageable, DeploymentArgDto args) {
     	QDeploymentEntity qDeploymentEntity = QDeploymentEntity.deploymentEntity;
+        QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+        QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
-//        Long projectIdx= args.getProjectIdx();
-//        if(projectIdx != null && projectIdx > 0L){
-//        }
-        
-//        Long clusterIdx= args.getClusterIdx();
-//        if(clusterIdx != null && clusterIdx > 0L){
-//        }
-        
+
+        Long clusterIdx= args.getClusterIdx();
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
+        }
         Long namespaceIdx = args.getNamespaceIdx();
         if(namespaceIdx != null && namespaceIdx > 0L){
             builder.and(QNamespaceEntity.namespaceEntity.id.eq(namespaceIdx));
@@ -42,6 +42,8 @@ public class CustomDeploymentRepositoryImpl  implements CustomDeploymentReposito
 
 		QueryResults<DeploymentEntity> results = jpaQueryFactory
 				.selectFrom(qDeploymentEntity)
+                .leftJoin(qDeploymentEntity.namespaceEntity, qNamespaceEntity)
+                .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
 				.where(builder)
 				.orderBy(qDeploymentEntity.deploymentIdx.desc())
 				.offset(pageable.getOffset())
