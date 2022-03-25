@@ -28,6 +28,7 @@ import kr.co.strato.global.error.exception.UpdateProjectFailException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
+import kr.co.strato.portal.cluster.service.ClusterService;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
@@ -55,6 +56,9 @@ public class PortalProjectService {
 	
 	@Autowired
 	ProjectClusterDomainService projectClusterDomainService;
+	
+	@Autowired
+	ClusterService clusterService;
 	
 	/**
      * Project 리스트 조회
@@ -148,8 +152,10 @@ public class PortalProjectService {
     	projectBuiler.updatedAt(now);
     	projectBuiler.deletedYn("N");
     	
+System.out.println("ProjectName === " + param.getProjectName());    	
     	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName());
-		if(projectInfo != null) {
+System.out.println("projectInfo === " + projectInfo);
+		if(projectInfo.isPresent()) {
 			throw new AleadyProjectNameException();
 		}
     	
@@ -423,6 +429,12 @@ System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@========================= " + 
     				throw new AleadyUserClusterException();
     			} else {
     				//Cluster 테이블 삭제 및 API 인터페이스를 통한 실제 Cluster 삭제
+    				try {
+    					clusterService.deleteCluster(dto.getClusterIdx());
+    				} catch(Exception e) {
+    					throw new DeleteProjectFailException();
+    				}
+    				
     			}
     		}
     	}
