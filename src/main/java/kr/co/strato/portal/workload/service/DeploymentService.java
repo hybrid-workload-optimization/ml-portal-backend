@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
-import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.apps.*;
 import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
@@ -91,7 +88,7 @@ public class DeploymentService {
 					e2 -> e2.getStatus()
 			));
 		}catch (Exception e){
-
+			log.error("k8s 디플로이먼트 조회 실패");
 		}
 
 		Page<DeploymentEntity> entities =  deploymentRepository.getDeploymentPageList(pageRequest.of(), args);
@@ -126,12 +123,14 @@ public class DeploymentService {
 		try{
 			deployment = deploymentAdapterService.retrieve(clusterId, entitiy.getNamespaceEntity().getName(), entitiy.getDeploymentName());
 		}catch (Exception e){
-//			log.debug(e.getMessage(), e);
+			log.error("k8s 디플로이먼트 조회 실패", e);
 		}
 
 		if(deployment != null && deployment.getStatus() != null){
 			DeploymentStatus status = deployment.getStatus();
-			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid, status);
+			RollingUpdateDeployment rollingUpdateDeployment = deployment.getSpec().getStrategy().getRollingUpdate();
+
+			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid, status, rollingUpdateDeployment);
 		}else{
 			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid);
 		}
@@ -189,12 +188,6 @@ public class DeploymentService {
 		
 		List<Deployment> deployments = deploymentAdapterService.create(clusterEntity.getClusterId(), yaml);
 
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			log.debug(e.getMessage(), e);
-//		}
-
 		//deployment 저장.
 		List<DeploymentEntity> eneities = deployments.stream().map(d -> {
 			DeploymentEntity deploymentEntity = null;
@@ -234,23 +227,18 @@ public class DeploymentService {
 
 						//수정 시에는 기존 레플리카셋 삭제
 						if(deploymentArgDto.getDeploymentIdx() != null){
-							System.out.println("deploymentArgDto.getDeploymentIdx():"+deploymentArgDto.getDeploymentIdx());
 							deploymentDomainService.deleteReplicaSetFromDeploymentIdx(deploymentArgDto.getDeploymentIdx());
 						}
 						replicaSetDomainService.register(replicaSetEntity);
 					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						throw new InternalServerException(e.getMessage());
+						log.error("레플리카셋 저장 실패", e);
 					}
 				});
 			}catch (Exception e) {
-				log.error(e.getMessage(), e);
-				throw new InternalServerException("Error to save ReplicaSet");
+				log.error("레플리카셋 저장 실패", e);
 			}
 			return deploymentEntity;
 		}).collect(Collectors.toList());
-		
-		//TODO replicatset 저장.
 	}
 	
 	//삭제
@@ -291,7 +279,6 @@ public class DeploymentService {
         Integer podReplicas = null;
         Integer podReady = null;
         String condition = null;
-        //TODO
         String image = null;
         
         io.fabric8.kubernetes.api.model.ObjectMeta metadata = d.getMetadata();
@@ -360,7 +347,7 @@ public class DeploymentService {
         return deploymentEntity;
     }
 
-	private ReplicaSetEntity toReplicaSetEntity(ReplicaSet r, NamespaceEntity namespace, DeploymentEntity deployment) throws PortalException, Exception {
+	private ReplicaSetEntity toReplicaSetEntity(ReplicaSet r, NamespaceEntity namespace, DeploymentEntity deployment) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 
 		String name			= r.getMetadata().getName();

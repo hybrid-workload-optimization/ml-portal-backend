@@ -4,12 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.apps.DeploymentCondition;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
+import io.fabric8.kubernetes.api.model.apps.RollingUpdateDeployment;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.HashMap;
@@ -62,9 +59,11 @@ public interface DeploymentDtoMapper {
 			@Mapping(source = "status.conditions", target = "condition", qualifiedByName = "deploymentConditionToString"),
 			@Mapping(source = "status.updatedReplicas", target = "podUpdated"),
 			@Mapping(source = "status.replicas", target = "podReplicas"),
-			@Mapping(source = "status.readyReplicas", target = "podReady")
+			@Mapping(source = "status.readyReplicas", target = "podReady"),
+			@Mapping(source = "rollingUpdateDeployment", target = "maxSurge", qualifiedByName = "getMaxSurge"),
+			@Mapping(source = "rollingUpdateDeployment", target = "maxUnavailable", qualifiedByName = "getMaxUnavailable")
 	})
-	public DeploymentDto toDto(DeploymentEntity entity, Long clusterId, String replicaSetUid, DeploymentStatus status);
+	public DeploymentDto toDto(DeploymentEntity entity, Long clusterId, String replicaSetUid, DeploymentStatus status, RollingUpdateDeployment rollingUpdateDeployment);
 
 	@Mappings({
 		@Mapping(source = "idx", target = "deploymentIdx"),
@@ -86,5 +85,24 @@ public interface DeploymentDtoMapper {
 		}catch (JsonProcessingException e){
 			return null;
 		}
+	}
+
+	@Named("getMaxSurge")
+	default String getMaxSurge(RollingUpdateDeployment rollingUpdateDeployment){
+		String result = rollingUpdateDeployment.getMaxSurge().getStrVal();
+		System.out.println("result:"+result);
+		if(result == null || result.length() == 0){
+			return "0";
+		}
+		return result;
+	}
+
+	@Named("getMaxUnavailable")
+	default String getMaxUnavailable(RollingUpdateDeployment rollingUpdateDeployment){
+		String result = rollingUpdateDeployment.getMaxUnavailable().getStrVal();
+		if(result == null  || result.length() == 0){
+			return "0";
+		}
+		return result;
 	}
 }
