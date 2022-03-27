@@ -3,6 +3,8 @@ package kr.co.strato.domain.statefulset.service;
 import java.util.List;
 import java.util.Optional;
 
+import kr.co.strato.global.error.exception.NoArgumentsRequiredForMethod;
+import org.apache.catalina.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,8 @@ import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
+import javax.xml.stream.events.Namespace;
+
 @Service
 public class StatefulSetDomainService {
     @Autowired
@@ -29,8 +33,16 @@ public class StatefulSetDomainService {
     private NamespaceRepository namespaceRepository;
 
 
-    public Long register(StatefulSetEntity statefulSet, ClusterEntity cluster, String namespaceName) {
-        statefulSet.setNamespace(getNamespace(cluster, namespaceName));
+    public Long register(StatefulSetEntity statefulSet, Long clusterIdx, String namespaceName) {
+        if(clusterIdx == null || clusterIdx == 0L || namespaceName == null){
+            throw new NoArgumentsRequiredForMethod("");
+        }
+        ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
+        NamespaceEntity namespace = getNamespace(cluster, namespaceName);
+        if(namespace != null){
+            throw new NotFoundResourceException("namespace가 존재하지 않습니다.");
+        }
+        statefulSet.setNamespace(namespace);
         statefulSetRepository.save(statefulSet);
         return statefulSet.getId();
     }
@@ -41,7 +53,11 @@ public class StatefulSetDomainService {
      * @param updateEntity 업데이트 할 새로운 데이터 엔티티
      * @return
      */
+    //업데이트 시, statefulSetId를 따로 받는 이유는 어플리케이션 서비스 단에서 엔티티에 id를 매핑해야 한다는 사실을 알 필요가 없게 하기 위해서이다.
     public Long update(Long statefulSetId, StatefulSetEntity updateEntity) {
+        if(statefulSetId == null || statefulSetId == 0L){
+            throw new NoArgumentsRequiredForMethod("");
+        }
         StatefulSetEntity oldEntity = get(statefulSetId);
         changeToNewData(oldEntity, updateEntity);
         statefulSetRepository.save(oldEntity);
@@ -49,6 +65,9 @@ public class StatefulSetDomainService {
     }
 
     public boolean delete(Long statefulSetId){
+        if(statefulSetId == null || statefulSetId == 0L){
+            throw new NoArgumentsRequiredForMethod("");
+        }
         Optional<StatefulSetEntity> opt = statefulSetRepository.findById(statefulSetId);
         if(opt.isPresent()){
             StatefulSetEntity entity = opt.get();

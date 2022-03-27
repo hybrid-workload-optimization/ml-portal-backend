@@ -1,7 +1,7 @@
 package kr.co.strato.global.model;
 
 public enum CommonType implements ResponseType{
-    OK("0001", "정상처리 되었습니다.", null);
+    OK("10001", "정상처리 되었습니다.", null);
 
     private String code;
     private String message;

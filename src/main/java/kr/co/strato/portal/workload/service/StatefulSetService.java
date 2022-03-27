@@ -61,12 +61,12 @@ public class StatefulSetService {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity statefulSet = toEntity(s);
 
-                Long id = statefulSetDomainService.register(statefulSet, cluster, namespaceName);
+                Long id = statefulSetDomainService.register(statefulSet, clusterIdx, namespaceName);
 
                 return id;
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("error parsing json");
+                throw new InternalServerException("Error parsing json");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("Error registering the updated statefulSet in the db");
@@ -145,7 +145,7 @@ public class StatefulSetService {
                 return id;
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage(), e);
-                throw new InternalServerException("json 파싱 에러");
+                throw new InternalServerException("Error parsing json");
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 throw new InternalServerException("Error registering the updated statefulSet in the db");
