@@ -122,7 +122,6 @@ public class UserService {
 	//상세
 	public UserDto getUserInfo(String userId) {
 		UserEntity userEntity = userDomainService.getUserInfoByUserId(userId);
-		System.out.println(userEntity.toString());
 		UserDto userDto = UserDtoMapper.INSTANCE.toDto(userEntity);
 		
 		return userDto;
