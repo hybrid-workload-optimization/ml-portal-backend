@@ -161,23 +161,25 @@ public class AuthorityService {
 	@Transactional
 	public Long modifyUserRole(AuthorityRequestDto.ReqModifyDto param) {
 		//flatmap으로 변경
-		List<AuthorityRequestDto.Menu> menuList = convertToFlatList(param.getMenuList());
-		if ( !CollectionUtils.isEmpty(menuList) ) {
-			// flatmap 처리하면서 남은 subMenuList 비우기 & role에 따른 viewableYn, writeableYn 세팅
-			for (AuthorityRequestDto.Menu menu : menuList) {
-				menu.setSubMenuList(null);
-				if ( StringUtils.equals(menu.getRole(), "edit") ) {
-					menu.setWritableYn("Y");
-					menu.setViewableYn("N");
-				} else if ( StringUtils.equals(menu.getRole(), "view") ) {
-					menu.setWritableYn("N");
-					menu.setViewableYn("Y");
-				} else {
-					menu.setWritableYn("N");
-					menu.setViewableYn("N");
+		if ( !CollectionUtils.isEmpty(param.getMenuList()) ) {
+			List<AuthorityRequestDto.Menu> menuList = convertToFlatList(param.getMenuList());
+			if ( !CollectionUtils.isEmpty(menuList) ) {
+				// flatmap 처리하면서 남은 subMenuList 비우기 & role에 따른 viewableYn, writeableYn 세팅
+				for (AuthorityRequestDto.Menu menu : menuList) {
+					menu.setSubMenuList(null);
+					if ( StringUtils.equals(menu.getRole(), "edit") ) {
+						menu.setWritableYn("Y");
+						menu.setViewableYn("N");
+					} else if ( StringUtils.equals(menu.getRole(), "view") ) {
+						menu.setWritableYn("N");
+						menu.setViewableYn("Y");
+					} else {
+						menu.setWritableYn("N");
+						menu.setViewableYn("N");
+					}
 				}
+				param.setMenuList(menuList);
 			}
-			param.setMenuList(menuList);
 		}
 		
 		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(param.getUserRoleIdx());
