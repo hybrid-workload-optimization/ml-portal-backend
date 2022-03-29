@@ -39,7 +39,7 @@ public class StatefulSetDomainService {
         }
         ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
         NamespaceEntity namespace = getNamespace(cluster, namespaceName);
-        if(namespace != null){
+        if(namespace == null){
             throw new NotFoundResourceException("namespace가 존재하지 않습니다.");
         }
         statefulSet.setNamespace(namespace);
