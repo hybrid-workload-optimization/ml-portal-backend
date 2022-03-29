@@ -8,6 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
+import io.fabric8.kubernetes.api.model.Volume;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
@@ -18,8 +21,10 @@ import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.repository.NodeRepository;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
+import kr.co.strato.domain.persistentVolumeClaim.repository.PersistentVolumeClaimRepository;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.model.PodJobEntity;
+import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodReplicaSetEntity;
 import kr.co.strato.domain.pod.model.PodStatefulSetEntity;
 import kr.co.strato.domain.pod.repository.PodJobRepository;
@@ -69,6 +74,9 @@ public class PodDomainService {
     
     @Autowired
     private PodReplicaSetRepository podReplicaSetRepository;
+    
+    @Autowired
+    private PersistentVolumeClaimRepository pvcRepository;
     
     @Autowired
     private PodJobRepository podJobRepository;
@@ -145,7 +153,7 @@ public class PodDomainService {
      * @param kind : resourceType
      * @return
      */
-    public Long register(PodEntity pod, ClusterEntity cluster, String namespaceName, String kind, PersistentVolumeClaimEntity pvcEntity) {
+    public Long register(PodEntity pod, ClusterEntity cluster, String namespaceName, String kind) {
         List<NamespaceEntity> namespaces = namespaceRepository.findByNameAndClusterIdx(namespaceName, cluster);
         
         try {
@@ -158,14 +166,12 @@ public class PodDomainService {
             		List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
             		if (node != null && node.size() > 0 ) {
                 		pod.setNode(node.get(0));
+                		
+                		podRepository.save(pod);
+                		
+                		// TODO pvcEntity save
+                		addPersistentVolumeClaim(pod);
                 	}
-            		
-            		podRepository.save(pod);
-            	}
-            	
-            	// TODO pvcEntity save
-            	if (pvcEntity != null) {
-            		addPersistentVolumeClaim(pod, pvcEntity);
             	}
             	
             	if (!kind.isEmpty()) {
@@ -254,14 +260,24 @@ public class PodDomainService {
         }
     }
     
-    private void addPersistentVolumeClaim(PodEntity pod, PersistentVolumeClaimEntity pvcEntity){
-        NamespaceEntity namespace = pod.getNamespace();
-        // TODO 
-        /**
-         *  1. pvc 찾기
-         *  2. pvc mapping table에 넣기
-         *  3. save
-         */
+    private void addPersistentVolumeClaim(PodEntity pod){
+    	List<Volume> volumes = pod.getVolumes();
+    	if (!volumes.isEmpty()) {
+    		for(Volume volume : volumes) {
+    			PersistentVolumeClaimVolumeSource pvc = volume.getPersistentVolumeClaim();
+    			if (pvc != null) {
+    				String pvcName = pvc.getClaimName();
+                	PersistentVolumeClaimEntity pvcEntity = pvcRepository.findByNameAndNamespaceId(pvcName, pod.getNamespace().getId());
+                	if (pvcEntity != null) {
+                		PodPersistentVolumeClaimEntity podPersistentVolumeClaim = new PodPersistentVolumeClaimEntity();
+                		podPersistentVolumeClaim.setPod(pod);
+                		podPersistentVolumeClaim.setPersistentVolumeClaim(pvcEntity);
+                		
+                		podPersistentVolumeClaimRepository.save(podPersistentVolumeClaim);
+                	}
+    			}
+    		}
+    	}
     }
     
     private void changeToNewData(PodEntity oldEntity, PodEntity newEntity){

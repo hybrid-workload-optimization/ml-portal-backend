@@ -62,15 +62,12 @@ public class PodService {
                 String namespaceName = s.getMetadata().getNamespace();
                 // ownerReferences 추가
                 PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-                // TODO pvc
-            //  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
-				PersistentVolumeClaimEntity pvcEntity = null;
                 
                 // node name 없어서 재조회해서 update
                 Pod k8sPodDetail = podAdapterService.get(cluster.getClusterId(), namespaceName, pod.getPodName());
                 
                 PodEntity podDetail = PodMapper.INSTANCE.toEntity(k8sPodDetail);
-                Long id = podDomainService.register(podDetail, cluster, namespaceName, null, pvcEntity);
+                Long id = podDomainService.register(podDetail, cluster, namespaceName, null);
                 podDomainService.update(id, podDetail);
                 
                 return id;
@@ -136,13 +133,10 @@ public class PodService {
         		List<Long> ids = k8sPods.stream().map( s -> {
         			try {
         				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-                        // TODO pvc
-        				//  PersistentVolumeClaimEntity pvcEntity = PersistentVolumeMapper.INSTANCE.toEntity(s);
-        				PersistentVolumeClaimEntity pvcEntity = null;
         				String namespaceName = pod.getNamespace().getName();
         				String kind = pod.getKind();
         				
-        				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind, pvcEntity);
+        				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind);
         				return id;
         			} catch (Exception e) {
                         log.error(e.getMessage(), e);

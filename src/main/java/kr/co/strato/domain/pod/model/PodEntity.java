@@ -1,9 +1,7 @@
 package kr.co.strato.domain.pod.model;
 
 
-import javax.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -18,8 +16,10 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Volume;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import lombok.AllArgsConstructor;
@@ -112,4 +112,6 @@ public class PodEntity {
     @Transient
     private List<Quantity> memoryLimits;
     
+    @Transient
+    private List<Volume> volumes;
 }

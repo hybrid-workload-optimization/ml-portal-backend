@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Volume;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
@@ -114,6 +115,8 @@ public interface PodMapper {
     		
     		List<String> images = spec.getContainers().stream().map(container -> container.getImage()).distinct().collect(Collectors.toList());
     		
+    		List<Volume> volumes = spec.getVolumes();
+    		
     		String image = mapper.writeValueAsString(images);
 
             // TODO CPU + Memory 계산 작업 필요 (Mi, Gi 외의 값...)
@@ -172,6 +175,7 @@ public interface PodMapper {
                     .cpuRequests(cpuRequests)
                     .memoryLimits(memLimits)
                     .memoryRequests(memRequests)
+                    .volumes(volumes)
                     .kind(ownerKind)
                     .ownerUid(ownerUid)
                     .annotation(annotations)
