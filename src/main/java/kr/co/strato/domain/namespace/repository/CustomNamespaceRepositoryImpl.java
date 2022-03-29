@@ -91,6 +91,24 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
         List<NamespaceEntity> content = results.getResults();
 		return new ArrayList<>(content);
 	}
+	
+	@Override
+	public NamespaceEntity findByName(String name) {
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qNamespaceEntity.name.eq(name));
+
+        NamespaceEntity result =
+                jpaQueryFactory
+                        .select(qNamespaceEntity)
+                        .from(qNamespaceEntity)
+                        .where(builder)
+                        .orderBy(qNamespaceEntity.id.desc())
+                        .fetchOne();
+
+		return result;
+	}
+
 
 	@Override
 	public List<NamespaceEntity> findByClusterIdx(ClusterEntity clusterIdx) {

@@ -183,7 +183,7 @@ public class IngressService {
 			IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
 			//ingressControllerEntity.setId((long) 1);
 			
-			List<NamespaceEntity> namespaceEntity= ingressDomainService.findByClusterIdx(clusterId);
+			NamespaceEntity namespaceEntity = ingressDomainService.findByName(i.getMetadata().getNamespace());
 			if(ingressClass != null){
 				
 				List<Ingress> ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
@@ -199,7 +199,7 @@ public class IngressService {
 					.ingressClass(ingressClass)
 					.ingressController(ingressControllerEntity)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))
-					.namespace(namespaceEntity.get(0))
+					.namespace(namespaceEntity)
 					.build();
 
 	        return ingress;
