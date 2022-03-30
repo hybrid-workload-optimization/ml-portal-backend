@@ -18,7 +18,7 @@ import kr.co.strato.portal.setting.model.GeneralDto;
 import kr.co.strato.portal.setting.service.GeneralService;
 
 @RestController
-@RequestMapping("/api/v1/setting-general")
+@RequestMapping("/api/v1/setting")
 public class GeneralController {
 
 	@Autowired
@@ -26,7 +26,7 @@ public class GeneralController {
 
 	// 목록
 	@GetMapping("/general-settings")
-	public ResponseWrapper<List<GeneralDto>> getList() {
+	public ResponseWrapper<List<GeneralDto>> getGeneralSettingList() {
 		ResponseWrapper<List<GeneralDto>> result = null;
 		List<GeneralDto> generalSettings = generalService.getList();
 		if (generalSettings != null) {
@@ -37,7 +37,7 @@ public class GeneralController {
 
 	// 상세
 	@GetMapping("/general-settings/{idx}")
-	public ResponseWrapper<GeneralDto> get(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<GeneralDto> getGeneralSetting(@PathVariable(name = "idx") Long idx) {
 		ResponseWrapper<GeneralDto> result = null;
 		GeneralDto generalSetting = generalService.get(idx);
 		if (generalSetting != null) {
@@ -48,7 +48,7 @@ public class GeneralController {
 
 	// 생성
 	@PostMapping("/general-settings")
-	public ResponseWrapper<GeneralDto> post(@RequestBody GeneralDto generalDto) {
+	public ResponseWrapper<GeneralDto> postGeneralSetting(@RequestBody GeneralDto generalDto) {
 		generalService.save(generalDto);
 		ResponseWrapper<GeneralDto> result = new ResponseWrapper<GeneralDto>(CommonType.OK);
 		return result;
@@ -56,7 +56,7 @@ public class GeneralController {
 
 	// 수정
 	@PutMapping("/general-settings/{idx}")
-	public ResponseWrapper<GeneralDto> put(@PathVariable(name = "idx") Long idx, @RequestBody GeneralDto generalDto) {
+	public ResponseWrapper<GeneralDto> putGeneralSetting(@PathVariable(name = "idx") Long idx, @RequestBody GeneralDto generalDto) {
 		generalDto.setIdx(idx);
 		generalService.save(generalDto);
 		ResponseWrapper<GeneralDto> result = new ResponseWrapper<GeneralDto>(CommonType.OK);
@@ -65,7 +65,7 @@ public class GeneralController {
 	
 	// 삭제
 	@DeleteMapping("/general-settings/{idx}")
-	public ResponseWrapper<GeneralDto> put(@PathVariable(name = "idx") Long idx) {
+	public ResponseWrapper<GeneralDto> deleteGeneralSetting(@PathVariable(name = "idx") Long idx) {
 		generalService.delete(idx);
 		ResponseWrapper<GeneralDto> result = new ResponseWrapper<GeneralDto>(CommonType.OK);
 		return result;
