@@ -8,4 +8,6 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 
 public interface CustomIngressRepository {
     public Page<IngressEntity> getIngressList(Pageable pageable,String name,Long namespaceId);
+    public void deleteIngress(Long ingressId);
+    
 }

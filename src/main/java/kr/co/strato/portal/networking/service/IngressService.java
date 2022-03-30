@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -22,6 +23,8 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.ingress.model.IngressControllerEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.IngressRuleEntity;
@@ -47,6 +50,9 @@ public class IngressService {
 	
 	@Autowired
 	private IngressRuleDomainService ingressRuleDomainService;
+	
+    @Autowired
+    private ClusterDomainService clusterDomainService;
 	
 	
 	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable,IngressDto.SearchParam searchParam) {
@@ -87,17 +93,18 @@ public class IngressService {
 	
 	
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteIngress(Long id,Long clusterId){
+    public boolean deleteIngress(Long id){
     	IngressEntity i = ingressDomainService.getDetail(id.longValue());
         String IngressName = i.getName();
-
-        boolean isDeleted = ingressAdapterService.deleteIngress(clusterId, IngressName);
-        if(isDeleted){
-        	ingressRuleDomainService.delete(id);
-            return ingressDomainService.delete(id.longValue());
-        }else{
-            throw new InternalServerException("k8s Ingress 삭제 실패");
-        }
+        String namespace = i.getNamespace().getName();
+        Long clusterId = i.getNamespace().getCluster().getClusterId();
+        
+        boolean isDeleted = ingressAdapterService.deleteIngress(clusterId, IngressName,namespace);
+		if (isDeleted) {
+			return ingressDomainService.delete(id.longValue());
+		} else {
+			throw new InternalServerException("k8s Ingress 삭제 실패");
+		}
     }
 
 	
@@ -121,14 +128,16 @@ public class IngressService {
 	
 	public List<Long> registerIngress(IngressDto.ReqCreateDto yamlApplyParam) {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		ClusterEntity clusterEntity = clusterDomainService.get(yamlApplyParam.getKubeConfigId());
+		Long clusterId = clusterEntity.getClusterId();
 		
-		List<Ingress> ingressList = ingressAdapterService.registerIngress(yamlApplyParam.getKubeConfigId(), yamlDecode);
+		List<Ingress> ingressList = ingressAdapterService.registerIngress(clusterId, yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
 		for (Ingress i : ingressList) {
 			try {
 				// k8s Object -> Entity
-				IngressEntity ingress = toEntity(i,yamlApplyParam.getKubeConfigId());
+				IngressEntity ingress = toEntity(i,clusterId);
 				// save
 				Long id = ingressDomainService.register(ingress);
 				
@@ -181,15 +190,16 @@ public class IngressService {
 			String createdAt = i.getMetadata().getCreationTimestamp();
 			
 			IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
-			//ingressControllerEntity.setId((long) 1);
 			
 			NamespaceEntity namespaceEntity = ingressDomainService.findByName(i.getMetadata().getNamespace());
 			if(ingressClass != null){
 				
 				List<Ingress> ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
-				name = ingressClassK8s.get(0).getMetadata().getName();
+				for (Ingress ic : ingressClassK8s) {
+					ingressClass= ic.getMetadata().getName();
+				}
 				
-				ingressControllerEntity = ingressDomainService.findIngressControllerByName(ingressClassK8s.get(0).getMetadata().getName());
+				ingressControllerEntity = ingressDomainService.findIngressControllerByName(ingressClass);
 				
 			}else {
 				ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");

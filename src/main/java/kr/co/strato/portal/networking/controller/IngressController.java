@@ -92,8 +92,8 @@ public class IngressController {
 
 	@DeleteMapping("/api/v1/networking/deletIngress/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id, @RequestBody Long kubeConfigId) {
-		boolean isDeleted = ingressService.deleteIngress(id,kubeConfigId);
+	public ResponseWrapper<Boolean> deleteIngress(@PathVariable Long id) {
+		boolean isDeleted = ingressService.deleteIngress(id);
 		
 		return new ResponseWrapper<>(isDeleted);
 	}

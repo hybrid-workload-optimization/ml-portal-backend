@@ -98,8 +98,8 @@ public class IngressAdapterService {
 		}
     }
 
-    public boolean deleteIngress(Long kubeConfigId, String name){
-    	WorkloadResourceInfo param = WorkloadResourceInfo.builder().kubeConfigId(kubeConfigId).name(name).build();
+    public boolean deleteIngress(Long kubeConfigId, String name ,String namespace){
+    	WorkloadResourceInfo param = WorkloadResourceInfo.builder().kubeConfigId(kubeConfigId).name(name).namespace(namespace).build();
         return inNamespaceProxy.deleteResource(ResourceType.ingress.get(), param);
     }
     

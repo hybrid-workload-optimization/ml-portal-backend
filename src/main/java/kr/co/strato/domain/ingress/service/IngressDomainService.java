@@ -44,11 +44,7 @@ public class IngressDomainService {
 	}
 	
 	public boolean delete(Long id) {
-		Optional<IngressEntity> opt = ingressRepository.findById(id);
-		if (opt.isPresent()) {
-			IngressEntity entity = opt.get();
-			ingressRepository.delete(entity);
-		}
+		ingressRepository.deleteIngress(id);
 		return true;
 	}
 	
