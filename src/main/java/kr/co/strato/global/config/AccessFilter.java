@@ -101,10 +101,9 @@ public class AccessFilter implements Filter{
     
     private boolean checkPath(String path) {
     	boolean result = false;
-    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "users"};
+    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "users", "api-docs"};
     	result = Arrays.stream(arrPath)
     						.anyMatch(s -> path.contains(s));
-    	System.out.println("path : " + path + " /  result : "+ result );
     	return result;
     	
     }
