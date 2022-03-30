@@ -15,5 +15,5 @@ public interface CustomNamespaceRepository {
 	
 	public void deleteNamespace(Long namespaceId);
 	
-	NamespaceEntity findByName(String name);
+	NamespaceEntity findByName(String name,Long clusterIdx);
 }

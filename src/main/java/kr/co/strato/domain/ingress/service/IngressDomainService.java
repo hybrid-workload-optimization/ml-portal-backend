@@ -74,8 +74,8 @@ public class IngressDomainService {
 		return ingressDefault;
 	}
 	
-	public NamespaceEntity findByName(String name){
-		NamespaceEntity namespaceEntity = namespaceRepository.findByName(name);
+	public NamespaceEntity findByName(String name,Long clusterIdx){
+		NamespaceEntity namespaceEntity = namespaceRepository.findByName(name,clusterIdx);
 		return namespaceEntity;
 	}
 	public IngressEntity get(Long ingressId) {

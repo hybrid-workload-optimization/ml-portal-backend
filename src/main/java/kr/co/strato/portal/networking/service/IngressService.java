@@ -75,7 +75,7 @@ public class IngressService {
 		List<Long> ids = new ArrayList<>();
 		for (Ingress i : ingressList) {
 			try {
-				IngressEntity ingress = toEntity(i,clusterId);
+				IngressEntity ingress = toEntity(i,clusterId,44L);
 
 				// save
 				Long id = ingressDomainService.register(ingress);
@@ -130,14 +130,14 @@ public class IngressService {
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		ClusterEntity clusterEntity = clusterDomainService.get(yamlApplyParam.getKubeConfigId());
 		Long clusterId = clusterEntity.getClusterId();
-		
+		Long clusterIdx = clusterEntity.getClusterIdx();
 		List<Ingress> ingressList = ingressAdapterService.registerIngress(clusterId, yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
 		for (Ingress i : ingressList) {
 			try {
 				// k8s Object -> Entity
-				IngressEntity ingress = toEntity(i,clusterId);
+				IngressEntity ingress = toEntity(i,clusterId,clusterIdx);
 				// save
 				Long id = ingressDomainService.register(ingress);
 				
@@ -156,12 +156,16 @@ public class IngressService {
 	
 	public List<Long> updateIngress(Long ingressId, YamlApplyParam yamlApplyParam){
         String yaml = Base64Util.decode(yamlApplyParam.getYaml());
-
-        List<Ingress> ingress = ingressAdapterService.registerIngress(yamlApplyParam.getKubeConfigId(), yaml);
+        
+        ClusterEntity clusterEntity = clusterDomainService.get(yamlApplyParam.getKubeConfigId());
+		Long clusterId = clusterEntity.getClusterId();
+		Long clusterIdx = clusterEntity.getClusterIdx();
+        
+        List<Ingress> ingress = ingressAdapterService.registerIngress(clusterId, yaml);
 
         List<Long> ids = ingress.stream().map( i -> {
             try {
-            	IngressEntity updateIngress = toEntity(i,yamlApplyParam.getKubeConfigId());
+            	IngressEntity updateIngress = toEntity(i,clusterId,clusterIdx);
 
                 Long id = ingressDomainService.update(updateIngress, ingressId);
                 
@@ -183,8 +187,8 @@ public class IngressService {
         return ids;
     }
 	
-	
-	 private IngressEntity toEntity(Ingress i, Long clusterId) throws JsonProcessingException {
+	 
+	 private IngressEntity toEntity(Ingress i, Long clusterId,Long clusterIdx) throws JsonProcessingException {
 	    	// k8s Object -> Entity
 			String name = i.getMetadata().getName();
 			String uid = i.getMetadata().getUid();
@@ -193,7 +197,7 @@ public class IngressService {
 			
 			IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
 			
-			NamespaceEntity namespaceEntity = ingressDomainService.findByName(i.getMetadata().getNamespace());
+			NamespaceEntity namespaceEntity = ingressDomainService.findByName(i.getMetadata().getNamespace(),clusterIdx);
 			if(ingressClass != null){
 				
 				List<Ingress> ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId,ingressClass);
@@ -216,7 +220,6 @@ public class IngressService {
 
 	        return ingress;
 	    }
-	 
 	 
 	 
 	 

@@ -93,11 +93,11 @@ public class CustomNamespaceRepositoryImpl implements CustomNamespaceRepository{
 	}
 	
 	@Override
-	public NamespaceEntity findByName(String name) {
+	public NamespaceEntity findByName(String name,Long clusterIdx) {
 		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qNamespaceEntity.name.eq(name));
-
+        builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
         NamespaceEntity result =
                 jpaQueryFactory
                         .select(qNamespaceEntity)

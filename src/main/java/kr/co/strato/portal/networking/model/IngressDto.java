@@ -59,6 +59,7 @@ public class IngressDto {
 		private String address;
 		private String host;
 		private Long clusterId;
+		private Long clusterIdx;
     	private Long ingressControllerIdx;
     	private List<RuleList> ruleList;
     }

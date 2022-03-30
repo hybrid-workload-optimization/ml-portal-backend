@@ -24,6 +24,7 @@ public interface IngressDtoMapper {
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
 	@Mapping(target = "namespace" , source = "namespace.name")
 	@Mapping(target = "clusterId" , source = "namespace.cluster.clusterId")
+	@Mapping(target = "clusterIdx" , source = "namespace.cluster.clusterIdx")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
 	@Mapping(target = "address" , source = "ingressController.address")
 	@Mapping(target = "host" , source = "ingressController.name")
