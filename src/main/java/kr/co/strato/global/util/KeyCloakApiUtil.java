@@ -3,21 +3,13 @@ package kr.co.strato.global.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
@@ -40,8 +32,6 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -66,15 +56,17 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.co.strato.global.error.type.AuthErrorType;
+import kr.co.strato.global.error.exception.SsoConnectionException;
 import kr.co.strato.global.model.KeycloakRole;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.model.KeycloakUser;
 import kr.co.strato.portal.setting.model.UserDto;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class KeyCloakApiUtil {
-	private static final Logger logger = LoggerFactory.getLogger(KeyCloakApiUtil.class);
+//	private static final Logger logger = LoggerFactory.getLogger(KeyCloakApiUtil.class);
 
 	@Value("${service.keycloak.address}")
 	private String keycloakUrl;
@@ -134,6 +126,16 @@ public class KeyCloakApiUtil {
 	
 	// 사용자 정보 조회
 		
+	// ROLE 추가(POST)
+	private static final String URI_SET_ROLE = "/auth/admin/realms/Strato-Cloud/roles";
+	
+	// ROLE 수정(PUT), 삭제(DELETE)
+	private static final String URI_UPDATE_ROLE = "/auth/admin/realms/strato-cloud/roles-by-id/{id}";
+	
+	
+	//
+	
+	// MASTER KEY 
 	private static final String MASTER_KEY = "stratoEncryptionqwer1234!@#$";
 
  	// 토큰 생성 - 관리자
@@ -170,11 +172,11 @@ public class KeyCloakApiUtil {
 
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
-			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-//					return false;
-			} else {
-				throw new Exception(e);
-			}
+			log.error(e.getMessage(), e);
+			throw new SsoConnectionException();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new SsoConnectionException();
 		}
 
 		return "Bearer " + token;
@@ -201,8 +203,6 @@ public class KeyCloakApiUtil {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-			logger.info("request uri_userInfo:" + uriGetToken);
-			logger.info("request headers" + headers);
 			
 			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
 			
@@ -227,7 +227,7 @@ public class KeyCloakApiUtil {
 			}
 			
 		} catch (HttpClientErrorException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
 				return new ResponseEntity<>(null, status);
@@ -236,7 +236,7 @@ public class KeyCloakApiUtil {
 				return new ResponseEntity<>(null, e.getStatusCode());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(ktk, status);
@@ -272,12 +272,15 @@ public class KeyCloakApiUtil {
 
 
 		} catch (HttpClientErrorException e) {
+			log.error(e.getMessage(), e);
 			HttpStatus status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-//					return false;
-			} else {
-				throw new Exception(e);
+				log.error(e.getMessage(), e);
+				throw new SsoConnectionException();
 			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new SsoConnectionException();
 		}
 
 		return new ResponseEntity<>(ktk, HttpStatus.OK);
@@ -294,8 +297,6 @@ public class KeyCloakApiUtil {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 //			headers.add("Content-Type", "application/x-www-form-urlencoded");
-			logger.info("request uri_userInfo:" + uriGetToken);
-			logger.info("request headers" + headers);
 
 			MultiValueMap<String, String> tokenMap = new LinkedMultiValueMap<>();
 			tokenMap.add("client_id", keycloakClientId);
@@ -310,9 +311,6 @@ public class KeyCloakApiUtil {
 
 			ResponseEntity<JsonNode> response = requestPostEntity(uriGetToken, req);
 
-			logger.info("status code:" + response.getStatusCode());
-			logger.info("response body:" + response.getBody());
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Object> res = objectMapper.convertValue(response.getBody(), Map.class);
 
@@ -322,10 +320,15 @@ public class KeyCloakApiUtil {
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-//					return false;
+				log.error(e.getMessage(), e);
+				throw new SsoConnectionException();
 			} else {
-				throw new Exception(e);
+				log.error(e.getMessage(), e);
+				throw new SsoConnectionException();
 			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new Exception();
 		}
 		
 		return ktk;
@@ -359,10 +362,12 @@ public class KeyCloakApiUtil {
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-//						return false;
-			} else {
-				throw new Exception(e);
+				log.error(e.getMessage(), e);
+				throw new SsoConnectionException();
 			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new Exception();
 		}
 		
 		return result;
@@ -375,12 +380,8 @@ public class KeyCloakApiUtil {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization",token);
-			logger.info("request uri_userInfo:" + uriUserInfo);
 
 			ResponseEntity<String> response = request(uriUserInfo, HttpMethod.GET, headers, null);
-
-			logger.info("status code:" + response.getStatusCode());
-			logger.info("response body:" + response.getBody());
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			KeycloakUser[] user = objectMapper.readValue(response.getBody(), KeycloakUser[].class);
@@ -394,11 +395,14 @@ public class KeyCloakApiUtil {
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
 			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-				return null;
-			} else {
-				throw new Exception(e);
+				log.error(e.getMessage(), e);
+				throw new SsoConnectionException();
 			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new Exception();
 		}
+		return null;
 	}
 	
 	
@@ -416,6 +420,7 @@ public class KeyCloakApiUtil {
 						+ "{'type' : 'password'," + " 'value': '" + keycloakTempPw + "'," + " 'temporary': false}" + "]}";
 		
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
+		boolean result = false;
 
 		try {
 
@@ -432,9 +437,9 @@ public class KeyCloakApiUtil {
 			HttpResponse response = httpClient.execute(httpPost);
 
 			if (response.getStatusLine().getStatusCode() == 201) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+				result = true;
 			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+				result = false;
 			}
 			
 			
@@ -455,16 +460,18 @@ public class KeyCloakApiUtil {
 //			postUserRole(user, ssoUser, role);
 
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			log.error(e.getMessage(), e);
+			throw new Exception();
 		}
 
-		return true;
+		return result;
 	}
 	
 	
 	//유저 정보 수정
-	public void updateSsoUser(UserDto user, String token) throws Exception {
+	public boolean updateSsoUser(UserDto user, String token) throws Exception {
 		
+		boolean result = false;
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_USER;
@@ -492,33 +499,27 @@ public class KeyCloakApiUtil {
 			HttpResponse response = httpClient.execute(httpPut);
 
 			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+				result = true;
 			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+				result = false;
 			}
 			
 			
 			
 			//@TODO ROLE 수정
-			KeycloakRole role = getRoleByUserRole(user);
-//			KeycloakRole role = new KeycloakRole();
-//			role.setId("d1f29139-d14e-42c5-9025-a36a02026336");
-//			role.setName("proj_member");
-//			role.setDescription("프로젝트 멤버");
-//			role.setComposite(false);
-//			role.setClientRole(false);
-//			role.setContainerId("Strato-Cloud");
-			
-			postUserRole(user, ssoUser, role);
-
+//			KeycloakRole role = getRoleByUserRole(user);
+//			postUserRole(user, ssoUser, role);
 
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			log.error(e.getMessage(), e);
 		}
+		
+		return result;
 	}
 	
 	// 비밀번호 수정
-	public void updatePasswordSsoUser(UserDto user) throws Exception {
+	public boolean updatePasswordSsoUser(UserDto user) throws Exception {
+		boolean result = false;
 		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
@@ -547,19 +548,20 @@ public class KeyCloakApiUtil {
 			HttpResponse response = httpClient.execute(httpPut);
 
 			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+				result = true;
 			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+				result = false;
 			}
 			
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			log.error(e.getMessage(), e);
 		}
+		
+		return result;
 	}
 	
 	// 전체 ROLE 조회
 	public List<KeycloakRole> getRoleList() throws Exception {
-		System.out.println("전체 ROLE 조회");
 		
 		String URI = keycloakUrl + URI_GET_ROLE;
 		String ssoToken = getTokenByManager();
@@ -573,27 +575,14 @@ public class KeyCloakApiUtil {
 
 			HttpResponse response = httpClient.execute(httpGet);
 			
-			System.out.println("전체 ROLE 조회 결과 >> ");
-			
 			ObjectMapper objectMapper = new ObjectMapper();
 			
 			KeycloakRole[] roles = objectMapper.readValue(EntityUtils.toString(response.getEntity()), KeycloakRole[].class);
 
-			for (KeycloakRole keycloakRole : roles) {
-				System.out.println("roles : " + keycloakRole.toString());
-			}
-			
 			result = new ArrayList<>(Arrays.asList(roles));
-			
-			
-			if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
-			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
-			}
 
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			log.error(e.getMessage(), e);
 		}
 		
 		return result;
@@ -601,15 +590,15 @@ public class KeyCloakApiUtil {
 	}
 	
 	
-	//ROLE 조회 - User id로 조회
+	// @TODO
+	// USER > ROLE 조회 - User id로 조회
 	public void getUserRoleInfo(UserDto user, String ssoToken) throws Exception {
-		System.out.println("USERID로 ROLE 조회..");
 		//@TODO SSO > USer-id 가져오기
 		String userId = getUserInfoByUserId(user.getUserId()).getId();
-		System.out.println("==== user id :  " + userId);
 		
 		String uriRoleUser = keycloakUrl + URI_USER_ROLE;
 		String URI = replaceUri(uriRoleUser, "id", userId);
+		KeycloakRole role = null;
 //		String ssoToken = "Bearer " + getTokenByManager();
 		
 		try {
@@ -619,7 +608,10 @@ public class KeyCloakApiUtil {
 
 			HttpResponse response = httpClient.execute(httpGet);
 			
+			ObjectMapper objectMapper = new ObjectMapper();
+			
 			System.out.println(EntityUtils.toString(response.getEntity()));
+//			role = objectMapper.readValue(response.getBody(), KeycloakRole.class);
 			
 			if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
 				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
@@ -631,9 +623,8 @@ public class KeyCloakApiUtil {
 			System.err.println(e.toString());
 		}
 	}
-	//ROLE 추가
+	// USER > ROLE 추가
 	public void postUserRole(UserDto user, String token, KeycloakRole role) throws Exception {
-		System.out.println("ROLE 추가");
 		//@TODO SSO > USer-id 가져오기
 		String userId = getUserInfoByUserId(user.getUserId()).getId();
 		
@@ -647,9 +638,6 @@ public class KeyCloakApiUtil {
 				+ " 'containerId' : '" + role.getContainerId() + "'"
 				+ "}]";
 		
-		System.out.println("token : " + token);
-		System.out.println("URI : " + URI);
-		System.out.println("ssoRole : " + ssoRole.toString());
 		
 		org.json.JSONArray ssoRoleInfo = new org.json.JSONArray(ssoRole);
 //		org.json.JSONObject ssoRoleInfo = new org.json.JSONObject(ssoRole);
@@ -680,7 +668,7 @@ public class KeyCloakApiUtil {
 		}
 	}
 	
-	//ROLE 삭제
+	// USER > ROLE 삭제
 	public void deleteUserRole(UserDto user, String token, KeycloakRole role) throws Exception {
 		System.out.println("ROLE 삭제");
 		//@TODO SSO > USer-id 가져오기
@@ -731,44 +719,35 @@ public class KeyCloakApiUtil {
 
 	
 	//유저 삭제
-	public void deleteSsoUser(UserDto user) throws Exception {
+	public boolean deleteSsoUser(UserDto user) throws Exception {
 		
-		System.out.println("==== delete User ..");
-		
+		boolean result = false;
 		String userId = getUserInfoByUserId(user.getUserId()).getId();
-		
 		String uriDeleteUser = keycloakUrl + URI_UPDATE_USER;
-		
 		String URI = replaceUri(uriDeleteUser, "id", userId);
-		
 		String ssoToken = getTokenByManager();
-		
 		try {
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpDelete httpDelete = new HttpDelete(URI);
 			httpDelete.addHeader("Content-Type", "application/json");
 			httpDelete.addHeader("Authorization", ssoToken);
-			
 			HttpResponse response = httpClient.execute(httpDelete);
-			
 			if (response.getStatusLine().getStatusCode() == 204) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+				result = true;
 			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+				result = false;
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
+		
+		return result;
 	}
-	
 	
 	public KeycloakRole getRoleByUserRole(UserDto user) throws Exception {
 		KeycloakRole result = null;
-		
 		String userRole = user.getUserRole().getUserRoleCode();
-		
 		List<KeycloakRole> roles = getRoleList();
-		
 		if("PROJECT ADMIN".equals(userRole)) {
 			result = roles.stream()
 					.filter(r -> r.getName().equals("proj_admin"))
@@ -780,9 +759,25 @@ public class KeyCloakApiUtil {
 					.findFirst()
 					.orElseThrow(() -> new IllegalArgumentException());
 		}
-		
 		return result;
 	}
+
+	// ROLE 추가
+	public void postRole() {
+		
+	}
+	
+	
+	// ROLE 삭제
+	public void deleteRole() {
+		
+	}
+	
+	// ROLE 수정
+	public void putRole() {
+		
+	}
+	
 	
 	// 토큰
 	@SuppressWarnings("unchecked")
@@ -793,18 +788,11 @@ public class KeyCloakApiUtil {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + token);
-			logger.info("request uri_userInfo:" + uriUserInfo);
-			logger.info("request headers" + headers);
 
 			ResponseEntity<String> response = request(uriUserInfo, HttpMethod.GET, headers, null);
 
-			logger.info("status code:" + response.getStatusCode());
-			logger.info("response body:" + response.getBody());
-
 			ObjectMapper objectMapper = new ObjectMapper();
 			ArrayList<KeycloakUser> users = objectMapper.readValue(response.getBody(), ArrayList.class);
-			logger.info("user size:" + users.size());
-
 			if (users != null && users.size() > 0) {
 				return true;
 			} else {
@@ -833,8 +821,6 @@ public class KeyCloakApiUtil {
 		restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
 		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, httpHeaders);
-		logger.info("request header:" + httpHeaders);
-		logger.info("request body:" + requestBody);
 
 		return restTemplate.exchange(uri, httpMethod, requestEntity, String.class);
 	}
@@ -858,17 +844,12 @@ public class KeyCloakApiUtil {
 			restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
 			requestEntity = new HttpEntity<JsonNode>(requestBody, httpHeaders);
-			logger.info("[request]{} body={}", uri, (requestBody != null) ? requestBody.toString() : "");
-			
-			System.out.println("======== requestEntity :::");
-			System.out.println(requestEntity.toString());
 			
 			return restTemplate.postForEntity(uri, requestEntity, JsonNode.class);
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
 		} catch (HttpStatusCodeException reste) {
-			logger.warn("[request]{}, request={}", uri, requestEntity.toString());
-			logger.warn("[request]", reste);
+			log.error(reste.getMessage(), reste);
 			throw new Exception(reste);
 		}
 
@@ -895,13 +876,9 @@ public class KeyCloakApiUtil {
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
 		}catch (HttpClientErrorException e) {
-			logger.warn("[request]{}, request={}", uri, requestEntity.toString());
-			logger.warn("[request]", e);
 //			return new ResponseEntity<>(null, e.getStatusCode());
 			throw new HttpClientErrorException(e.getStatusCode());
 		}catch (HttpStatusCodeException reste) {
-			logger.warn("[request]{}, request={}", uri, requestEntity.toString());
-			logger.warn("[request]", reste);
 			throw new Exception(reste);
 		}
 
@@ -934,7 +911,7 @@ public class KeyCloakApiUtil {
 			clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
 			clientHttpRequestFactory.setConnectTimeout(10000);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 
 		return clientHttpRequestFactory;

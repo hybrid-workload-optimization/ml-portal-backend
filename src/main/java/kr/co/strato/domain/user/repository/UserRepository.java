@@ -1,6 +1,7 @@
 package kr.co.strato.domain.user.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,15 +11,15 @@ import kr.co.strato.domain.user.model.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, String>, CustomUserRepository {
 	
-	UserEntity findByEmail(String email);
+	Optional<UserEntity> findByEmail(String email);
 	
 	Page<UserEntity> findByUserName(String userName, Pageable pageable);
 	
-	UserEntity findByUserId(String userId);
+	Optional<UserEntity> findByUserId(String userId);
 	
-	UserEntity findByUserIdAndUseYn(String useId, String useYn);
+	Optional<UserEntity> findByUserIdAndUseYn(String useId, String useYn);
 	
-	public List<UserEntity> findByUseYn(String useYn);
+	List<UserEntity> findByUseYn(String useYn);
 	
 	Page<UserEntity> findByUseYn(String useYn, Pageable pageable);
 }

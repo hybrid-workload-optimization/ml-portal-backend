@@ -1,5 +1,6 @@
 package kr.co.strato.portal.common.controller;
 
+
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +27,11 @@ import kr.co.strato.portal.common.model.LoginDto;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/access-manage")
+@Slf4j
 public class AccessController {
 	
 	@Autowired
@@ -58,7 +61,10 @@ public class AccessController {
 				return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
 			}	
 		}catch (HttpClientErrorException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
+			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
+		}catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
 		}
 	}
@@ -71,7 +77,7 @@ public class AccessController {
 		ResponseEntity<KeycloakToken> data = accessService.tokenRefresh(refreshToken);
 		result.setToken(data.getBody());
 		
-		String userId = tokenValidator.extractUserId(data.getBody().getAccessToken());
+		String userId = tokenValidator.extractUserInfo(data.getBody().getAccessToken()).getUserId();
 		UserDto user = userService.getUserInfo(userId);
 		result.setUser(user);
 		

@@ -1,7 +1,7 @@
 package kr.co.strato.global.config;
 
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.Arrays;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -16,9 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import kr.co.strato.global.error.exception.AuthFailException;
 import kr.co.strato.global.validation.TokenValidator;
+import lombok.extern.java.Log;
 
 @Component
+@Log
 public class AccessFilter implements Filter{
 
 	
@@ -32,13 +35,12 @@ public class AccessFilter implements Filter{
     
     @Override
     public void doFilter(ServletRequest req, ServletResponse res,
-                         FilterChain chain) throws IOException, ServletException {
+                         FilterChain chain) throws IOException, ServletException, AuthFailException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
         
         
         String path = request.getServletPath();
-        
         if(path.contains("?")) {
         	path = path.split("?")[0];
         }
@@ -49,52 +51,62 @@ public class AccessFilter implements Filter{
         	timestamp = Long.parseLong(strTimestamp);	
         }
         
-        System.out.println(timestamp);
-        
+        System.out.println("path : " + path);
 		String acToken = request.getHeader("access_token");
-//		Enumeration<String> names = request.getHeaderNames();
-//		while(names.hasMoreElements()) {
-//			String name = names.nextElement();
-//			String value = request.getHeader(name);
-//			
-//			System.out.println("name : " + name + " / value : " + value);
-//					
-//		}
+/*		
+		Enumeration<String> names = request.getHeaderNames();
+		while(names.hasMoreElements()) {
+			String name = names.nextElement();
+			String value = request.getHeader(name);
+			
+			System.out.println("name : " + name + " / value : " + value);
+		}
 		
-//		try {
-//			System.out.println(tokenValidator.encrypt(acToken, timestamp, path, method));
-//		} catch (Exception e1) {
-//			e1.printStackTrace();
-//		}
+		System.out.println(path);
 		
-		
-/*
-		if(!path.contains("access-manage")) {
+	*/	
+
+//		if(!path.contains("access-manage") && !path.contains("swagger") && !path.contains("test") && !path.contains("/users/dupl/") && !(path.contains("/users") && "POST".equals(method))) {
+		if(!checkPath(path)) {
 			String token = null;
 			try {
 				token = tokenValidator.decrypt(acToken, timestamp, path, method);
 			} catch (Exception e) {
 				e.printStackTrace();
+				request.getSession(false);
+				response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			}
-			System.out.println(token);
 			if(token == null) {
-				System.out.println("token is null...");
+				log.info("Token Is Null");
 				request.getSession(false);
 				response.sendError(HttpStatus.UNAUTHORIZED.value());
 			}else {
 				if(!tokenValidator.validateToken(token)) {
-					System.out.println("token is not validate");
+					log.info("Token Is Not Validate");
 					request.getSession(false);
 					response.sendError(HttpStatus.UNAUTHORIZED.value());
+				}else {
+					chain.doFilter(request, response);
 				}
 			}	
+		}else {
+			chain.doFilter(request, response);
 		}
-		*/
-		chain.doFilter(request, response);
+		
     }
 	
     @Override
     public void destroy() {
+    }
+    
+    private boolean checkPath(String path) {
+    	boolean result = false;
+    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "users"};
+    	result = Arrays.stream(arrPath)
+    						.anyMatch(s -> path.contains(s));
+    	System.out.println("path : " + path + " /  result : "+ result );
+    	return result;
+    	
     }
 
 }

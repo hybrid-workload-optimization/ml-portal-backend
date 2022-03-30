@@ -1,6 +1,7 @@
 package kr.co.strato.portal.setting.service;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
+import kr.co.strato.global.error.exception.SsoConnectionException;
 import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
@@ -21,8 +23,11 @@ import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class UserService {
 	
 	@Autowired
@@ -43,10 +48,10 @@ public class UserService {
 		
 		//keycloak 연동
 		try {
-			System.out.println("keycloak 연동 >> 등록");
 			keyCloakApiUtil.createSsoUser(param);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
+			throw new SsoConnectionException(e.getMessage());
 		}		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		userDomainService.saveUser(entity, "post");
@@ -63,10 +68,9 @@ public class UserService {
 		
 		//keycloak 연동
 		try {
-//			keyCloakApiUtil.updateSsoUser(param, null);
-			System.out.println("keycloak 연동 >> 수정");
-		} catch (Exception e) {
-			e.printStackTrace();
+			keyCloakApiUtil.updateSsoUser(param, null);
+		}  catch (Exception e) {
+			log.error(e.getMessage());
 		}
 		
 		return param.getUserId();
@@ -82,9 +86,8 @@ public class UserService {
 		//keycloak 연동
 		try {
 			keyCloakApiUtil.deleteSsoUser(param);
-			System.out.println("keycloak 연동 >> 삭제");
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 		
@@ -143,7 +146,7 @@ public class UserService {
 		try {
 			keyCloakApiUtil.updatePasswordSsoUser(param);
 		}catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 	}
@@ -233,6 +236,11 @@ public class UserService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void tokenTest() {
+//		String token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRVFMzT1IyYXhpQklnWWtSYlhCR2tCZVIybW5uOW1OSDQ4UWFXZEV4U053In0.eyJleHAiOjE2NDg1MTU5ODAsImlhdCI6MTY0ODUxNTY4MCwianRpIjoiNWZiYzYwYmMtMTg3OC00NWFiLTg5ZjktZWJmNTY5NDlmMWEwIiwiaXNzIjoiaHR0cDovLzE3Mi4xNi4xMC4xMTQ6ODU4MC9hdXRoL3JlYWxtcy9zdHJhdG8tY2xvdWQiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNDg2YzA1OWYtYTA3MS00N2ZkLWI3YmUtNzNiZDJkMmRjYjYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGFhc19wb3J0YWwiLCJzZXNzaW9uX3N0YXRlIjoiMjAwZWU0MDUtNWMyZS00ODM0LThmYjEtY2UzNTE1ZTBiY2U4IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vcGFhc3BvcnRhbC5zdHJhdG8uY29tIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJwcm9qX21lbWJlciIsIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1zcHRlay1jbG91ZCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiMjAwZWU0MDUtNWMyZS00ODM0LThmYjEtY2UzNTE1ZTBiY2U4IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0MUB0ZXN0LmNvbSIsImVtYWlsIjoidGVzdDFAdGVzdC5jb20ifQ.P7Kn6gQiQAeCBoF-7fTKuX3lOgCZ1GMlBhL2I1eR5JQK8SPzdE1F1eoL2rBSZaTuTtgeqLGKyB6qN7GHkpOj8tLpO04UCxij5eii00V_uGZqaqLg141o4OJUcCM5bAXo0WKFrKy6EFF6NVQQye4xXRz73yeZZDi3fqSKY4VKXURXXJ5Olx2E9C2eZR5YRsX6mq6fey3iDQIlTcwkOZ5EjFk8KeDnUn8-9KF0YAo565LoCsAyk8aHXdkVOErTDfPBFHkBjLrik7PLl7vGxPIT9f68Gg_XE3OkeQoS5QffgyLGKlzfhO_Ipblo1ZI3SSyt1VxbEtt5RVaIa3jRD6t96A";
+//		tokenValidator.validateToken(token);
 	}
 
 

@@ -33,7 +33,6 @@ public class AccessService {
 	//token 유효성 검증
 	public boolean tokenVerify(String accessToken) {
 		boolean result = tokenValidator.validateToken(accessToken);
-		System.out.println(result);
 		return result;
 	}
 	

@@ -2,6 +2,7 @@ package kr.co.strato.domain.user.service;
 
 import java.util.Optional;
 
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +12,17 @@ import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.repository.UserRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
+import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.UserDto.SearchParam;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author tmdgh
  *
  */
 @Service
+@Slf4j
 public class UserDomainService {
 	
 	@Autowired
@@ -39,7 +43,6 @@ public class UserDomainService {
 		// 등록
 		if("post".equals(mode)) {
 			//DB 저장
-		
 			//PROJECT MEMBER의 RoleCode 가져오기
 			String roleCode = "PROJECT_MEMBER";
 			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
@@ -54,26 +57,27 @@ public class UserDomainService {
 			String roleCode = entity.getUserRole().getUserRoleCode();
 
 			// 수정
-			UserEntity pUser = userRepository.findByUserId(entity.getUserId());
-			if(entity.getContact() != null && !"".equals(entity.getContact())) {
-				pUser.setContact(entity.getContact());
+			Optional<UserEntity> pUser = userRepository.findByUserId(entity.getUserId());
+			if(pUser.isPresent()) {
+				if(entity.getContact() != null && !"".equals(entity.getContact())) {
+					pUser.get().setContact(entity.getContact());
+				}
+				if(entity.getOrganization() != null && !"".equals(entity.getOrganization())) {
+					pUser.get().setOrganization(entity.getOrganization());
+				}
+				if(entity.getUserRole().getUserRoleCode() != null && !"".equals(entity.getUserRole().getUserRoleCode())) {
+					UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+//					pUser.getUserRole().setId(role.getId());
+					pUser.get().setUserRole(role);
+				}
+				userRepository.save(pUser.get());
+
+
+			}else {
+				throw new NotFoundResourceException("user : " + entity.toString());
 			}
-			if(entity.getOrganization() != null && !"".equals(entity.getOrganization())) {
-				pUser.setOrganization(entity.getOrganization());
-			}
-			if(entity.getUserRole().getUserRoleCode() != null && !"".equals(entity.getUserRole().getUserRoleCode())) {
-				UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-//				pUser.getUserRole().setId(role.getId());
-				pUser.setUserRole(role);
-				
-			}
-			System.out.println("==================유저 수정");
-			System.out.println(pUser.toString());
-			System.out.println("==================유저 수정");
-			userRepository.save(pUser);
 			
-			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-			
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);						
 			// 기존 ROLE와 업데이트할 ROLE이 다르면, keycloak Update
 			if(roleCode != null && !"".equals(roleCode) && !roleCode.equals(role.getUserRoleCode())) {
 				// keycloak Role Update 필요
@@ -125,18 +129,30 @@ public class UserDomainService {
 	 * @return
 	 */
 	public UserEntity getUserInfoByEmail(String email) {
-		return userRepository.findByEmail(email);
+		Optional<UserEntity> user = userRepository.findByEmail(email);
+		if(user.isPresent()) {
+			return user.get();
+		}else {
+			throw new NotFoundResourceException("userEmail : " + email);
+		}
 	}
 	
 	/**
 	 * UserId로 검색 > 단일
 	 * @param userId
 	 * @return
+	 * @throws NotFoundException 
 	 */
 	public UserEntity getUserInfoByUserId(String userId) {
 //		return userRepository.findByUserId(userId);
 		// 사용중인 user만 검색하기 위해 useYn  추가
-		return userRepository.findByUserIdAndUseYn(userId, "Y");
+		
+		Optional<UserEntity> user = userRepository.findByUserIdAndUseYn(userId, "Y"); 
+		if(user.isPresent()) {
+			return user.get();
+		}else {
+			throw new NotFoundResourceException("userID : " + userId);
+		}
 	}
 	
 	/**

@@ -1,6 +1,12 @@
 package kr.co.strato.portal.setting.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -18,37 +24,77 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
+import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
+import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
+import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
+import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
+import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
+import kr.co.strato.portal.work.model.WorkHistoryDto;
+import kr.co.strato.portal.work.service.WorkHistoryService;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/user-manage")
+@Slf4j
 public class UserController {
 	
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	WorkHistoryService workHistoryService;
 	
 	//등록
 	@PostMapping("/users")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<String> postUser(@RequestBody UserDto param, HttpSession session){
 		String result = "N";
-		//@TODO session 에서 로그인한 사용자 추가
-		System.out.println("================ 등록 ===========");
-		System.out.println(param.toString());
-		System.out.println("================ 등록 ===========");
 		
-		// 등록 전 중복 체크
-//			UserDto user = userService.getUserInfo(param.getUserId());
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> meta = mapper.convertValue(param, Map.class);
 		
-//		if(user != null) {
-		if(true) {
-			param.setUseYn("Y");
+		String workTarget					= null;
+        Map<String, Object> workMetadata	= meta;
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+		
+        
+		param.setUseYn("Y");
+		try {
 			userService.postUser(param);
 			result = param.getUserId();
+		}catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.INSERT)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 		
 		return new ResponseWrapper<>(result);
@@ -59,8 +105,40 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> patchUser(@RequestBody UserDto param, HttpSession session){
 		
-		param.setUseYn("Y");
-		userService.patchUser(param);
+		String workTarget					= null;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> meta = mapper.convertValue(param, Map.class);
+        Map<String, Object> workMetadata	= meta;
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+
+		try {
+			param.setUseYn("Y");
+			userService.patchUser(param);
+			
+		}catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.UPDATE)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
 		
 		return new ResponseWrapper<>(param.getUserId());
 	}
@@ -71,8 +149,40 @@ public class UserController {
 	public ResponseWrapper<String> deleteUser(@RequestParam(value = "userId") String userId, HttpSession session){
 		
 		UserDto param = new UserDto();
-		param.setUserId(userId);
-		userService.deleteUser(param);
+		
+		String workTarget					= null;
+        Map<String, Object> workMetadata	= new HashMap<>();
+        workMetadata.put("userId", userId);
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+
+		try {
+			param.setUserId(userId);
+			userService.deleteUser(param);
+			
+		}catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.DELETE)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
 		
 		return new ResponseWrapper<>(param.getUserId());
 	}
@@ -85,11 +195,39 @@ public class UserController {
 		if(pageRequest.getProperty() == null) pageRequest.setProperty("userId");
 		
 		Page<UserDto> list = null;
+		
+		String workTarget					= null;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> meta = mapper.convertValue(searchParam, Map.class);
+        Map<String, Object> workMetadata	= meta;
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+
 		try {
 			list = userService.getAllUserList(pageRequest.of(), searchParam);
+			
 		}catch (Exception e) {
-			e.printStackTrace();
-		} finally {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.LIST)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 		
 		return new ResponseWrapper<>(list);
@@ -100,13 +238,41 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<UserDto> getUserDetail(@PathVariable String userId){
 		UserDto userDto = null;
-		System.out.println("상세정보 user id : " + userId);
+		
+
+		
+		String workTarget					= null;
+        Map<String, Object> workMetadata	= new HashMap<>();
+//        workMetadata.put("userId", decodeUrl(userId));
+        workMetadata.put("userId", userId);
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+
 		try {
+//			userDto = userService.getUserInfo(decodeUrl(userId));
 			userDto = userService.getUserInfo(userId);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
+		}catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
 			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.DETAIL)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 		
 		return new ResponseWrapper<>(userDto);
@@ -117,7 +283,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<List<UserRoleDto>> getUserRoleList(){
 		List<UserRoleDto> list = userService.getUserRoleList();
-		
 		return new ResponseWrapper<>(list);
 	}
 	
@@ -126,9 +291,40 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> patchUserPassword(@RequestBody UserDto param, HttpSession session){
 		
-		System.out.println("==== 비밀번호 수정");
+		String workTarget					= null;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> meta = mapper.convertValue(param, Map.class);
+        Map<String, Object> workMetadata	= meta;
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "비밀번호 변경";
 		
-		userService.patchUserPassword(param);
+		param.setUseYn("Y");
+		try {
+			userService.patchUserPassword(param);
+		}catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.UPDATE)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		
 		
 		return new ResponseWrapper<>(param.getUserId());
 	}
@@ -137,15 +333,22 @@ public class UserController {
 	@GetMapping("/users/dupl/{userId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> checkDuplUser(@PathVariable String userId){
-		String result = "N";
-		UserDto user = userService.getUserInfo(userId);
-		
-		if(user != null) {
-			result ="Y";
+		String result = "Y"; // Y : 없음 , N : 있음
+		try {
+//			UserDto user = userService.getUserInfo(decodeUrl(userId));
+			UserDto user = userService.getUserInfo(userId);
+			
+			if(user != null) { // 유저 객체가 존재하면 result : N
+				result ="N";
+			}
+		}catch (NotFoundResourceException e) {
+			result = "Y";
+		}catch (Exception e) {
+			result = "N";
+			log.error(e.getMessage(), e);
 		}
 		
 		return new ResponseWrapper<>(result);
-		
 	}
 	
 	@GetMapping("/test")
@@ -153,10 +356,18 @@ public class UserController {
 	public void testController() {
 		System.out.println("============>> 테스트");
 		
-		userService.getTest();
+//		userService.getTest();
+		userService.tokenTest();
 		
 		System.out.println("<<============ 테스트 종료");
 	}
+	
+	private String decodeUrl(String msg) throws UnsupportedEncodingException {
+		String result = URLDecoder.decode(msg, StandardCharsets.UTF_8.toString()).replaceAll("%2E",".");
+		
+		return result;
+	}
+	
 	
 
 }

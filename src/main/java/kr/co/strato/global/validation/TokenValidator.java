@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import kr.co.strato.portal.setting.model.UserDto;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class TokenValidator {
 
 	@Value("${service.keycloak.public.key}")
@@ -33,25 +36,24 @@ public class TokenValidator {
 		try {
 			
 			Optional<RSAPublicKey> k = getParsePublicKey();
-			
 			try {
 				Claims claims = Jwts.parser()
 						.setSigningKey(k.get())
 						.parseClaimsJws(token)
 						.getBody();
-				System.out.println(claims);
+//				System.out.println(claims);
 				result = true;
-				return true;
+				return result;
 			}catch (Exception e) {
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				result = false;
 				return result;
 			}
 			
 		}catch (ExpiredJwtException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		
 		return result;
@@ -59,19 +61,20 @@ public class TokenValidator {
 	}
 	
 	
-	public String extractUserId(String token) {
-		String userId = null;
+	public UserDto extractUserInfo(String token) {
+		UserDto user = new UserDto();
 		try {
 			Optional<RSAPublicKey> k = getParsePublicKey();
 			Claims claims = Jwts.parser()
 							.setSigningKey(k.get())
 							.parseClaimsJws(token)
 							.getBody();
-			userId = claims.get("email").toString();
+			user.setUserId(claims.get("email").toString());
+			
 		}catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
-		return userId;
+		return user;
 	}
 	
 	
@@ -85,8 +88,8 @@ public class TokenValidator {
             return Optional.of(pubKey);
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-            System.out.println("Exception block | Public key parsing error ");
+        	log.error(e.getMessage(), e);
+//            System.out.println("Exception block | Public key parsing error ");
             return Optional.empty();
         }
 	}
@@ -114,7 +117,8 @@ public class TokenValidator {
 			keyStr = sb.toString();
 
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			keyStr = "";
 		}
 		return keyStr;
@@ -135,7 +139,6 @@ public class TokenValidator {
 	
     public String encrypt(String text, Long timestamp, String url, String method) throws Exception {
     	String key = generateKey(timestamp, url, method);
-    	System.out.println("=== key : " + key);
     	String iv = key.substring(0, 16);
         Cipher cipher = Cipher.getInstance(alg);
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES");
