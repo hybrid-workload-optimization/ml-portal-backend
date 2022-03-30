@@ -19,4 +19,5 @@ public class ProjectClusterDto {
 	private String clusterName;
 	private String description;
 	private String createdAt;
+	private String addedAt;
 }

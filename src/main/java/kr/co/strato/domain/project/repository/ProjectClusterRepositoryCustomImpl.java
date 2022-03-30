@@ -38,9 +38,13 @@ public class ProjectClusterRepositoryCustomImpl implements ProjectClusterReposit
 						clusterEntity.providerVersion, 
 						clusterEntity.clusterName,
 						clusterEntity.description,
-						ExpressionUtils.as(
+						/*ExpressionUtils.as(
 							Expressions.stringTemplate("DATE_FORMAT({0}, {1})", clusterEntity.createdAt, "%Y-%m-%d %H:%i"),
 							"createdAt"
+						)*/
+						ExpressionUtils.as(
+							Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectClusterEntity.addedAt, "%Y-%m-%d %H:%i"),
+							"addedAt"
 						)
 				  ))
 				  .from(projectClusterEntity)

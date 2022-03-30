@@ -492,4 +492,16 @@ System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@========================= " + 
         
         return result;
     }
+    
+    /**
+    * ClusterId가 소속 된 Project 상세 조회
+    * @param clusterIdx : ClusterId
+    * @return ProjectDto 반환, 소속된 Project가 없는 경우 null 반환
+    */
+    /*public ProjectDto getProjectDetailByClusterId(Long clusterIdx) {
+    	
+    	ProjectDto projectInfo = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+    }*/
+
+
 }

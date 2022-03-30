@@ -29,4 +29,7 @@ public class ProjectClusterEntity {
 	@Id
 	@Column(name="project_idx")
 	private Long projectIdx;
+	
+	@Column(name="added_at")
+	private String addedAt;
 }
