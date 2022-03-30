@@ -165,10 +165,12 @@ public class IngressService {
 
                 Long id = ingressDomainService.update(updateIngress, ingressId);
                 
-                ingressRuleDomainService.delete(id);
+                boolean ruleDel = ingressRuleDomainService.delete(id);
+               
+                if(ruleDel) {
                 //ingress rule save
 				ingressRuleRegister(i,id);
-
+                }
                 return id;
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage(), e);

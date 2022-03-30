@@ -42,11 +42,7 @@ public class IngressRuleDomainService {
 	}
 	
 	public boolean delete(Long id) {
-		Optional<IngressRuleEntity> opt = ingressRuleRepository.findById(id);
-		if (opt.isPresent()) {
-			IngressRuleEntity entity = opt.get();
-			ingressRuleRepository.delete(entity);
-		}
+		ingressRuleRepository.deleteIngressRule(id);
 		return true;
 	}
 	
