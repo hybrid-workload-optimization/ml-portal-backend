@@ -66,7 +66,7 @@ public class PortalProjectService {
      * @param param
      * @return
      */
-    public Page<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
+    public Page<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception {
     	
     	PageImpl<ProjectDto> projectList = projectDomainService.getProjectList(pageable, param);
     	
@@ -152,15 +152,11 @@ public class PortalProjectService {
     	projectBuiler.updatedAt(now);
     	projectBuiler.deletedYn("N");
     	
-System.out.println("ProjectName === " + param.getProjectName());    	
     	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName());
-System.out.println("projectInfo === " + projectInfo);
 		if(projectInfo.isPresent()) {
 			throw new AleadyProjectNameException();
 		}
     	
-    	System.out.println("여기를 타나???");
-		
 		Long resultIdx = null;
     	try {
     		//ProjectDTO -> ProjectEntity

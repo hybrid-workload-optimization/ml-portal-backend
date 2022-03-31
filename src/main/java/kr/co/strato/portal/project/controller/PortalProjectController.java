@@ -38,7 +38,7 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest, ProjectDto param) {
+    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest, ProjectDto param) throws Exception {
         
     	Page<ProjectDto> response = portalProjectService.getProjectList(pageRequest.of(), param);
         
@@ -122,7 +122,7 @@ public class PortalProjectController {
      */
     @PostMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws AleadyProjectNameException,  Exception {
+    public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws AleadyProjectNameException, Exception {
         
     	Long response = portalProjectService.createProject(param);
         

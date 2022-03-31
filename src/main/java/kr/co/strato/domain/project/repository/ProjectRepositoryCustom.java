@@ -8,7 +8,7 @@ import kr.co.strato.portal.project.model.ProjectDto;
 
 public interface ProjectRepositoryCustom {
 
-	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param);
+	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception;
 	
 	public ProjectDto getProjectDetail(Long projectIdx);
 	

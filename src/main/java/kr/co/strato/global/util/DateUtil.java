@@ -115,4 +115,9 @@ public class DateUtil {
     	
     	return sdf.format(date);
     }
+    
+    public static Date toDate(String date, String dateFormat) throws ParseException {
+    	SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+    	return format.parse(date);
+    }
 }

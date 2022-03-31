@@ -34,7 +34,7 @@ public class ProjectDomainService {
      * @param param
      * @return
      */
-    public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) {
+    public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception {
     	
     	return projectRepository.getProjectList(pageable, param);
     }

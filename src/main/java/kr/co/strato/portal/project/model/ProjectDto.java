@@ -26,6 +26,10 @@ public class ProjectDto {
 	private String userName;
 	private Long clusterCount;
 	private Long userCount;
-	private String projectUserName;
+	private String projectPmName;
+	private String projectPmId;
 	private String projectUserEmail;
+	
+	private String fresh;
+	private String owner;
 }
