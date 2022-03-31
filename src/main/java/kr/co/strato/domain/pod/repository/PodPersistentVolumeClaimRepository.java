@@ -9,5 +9,4 @@ import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimPK;
 
 public interface PodPersistentVolumeClaimRepository extends JpaRepository<PodPersistentVolumeClaimEntity, PodPersistentVolumeClaimPK>, CustomPodRepository {
-	public List<PodPersistentVolumeClaimEntity> findByPod(PodEntity pod);
 };

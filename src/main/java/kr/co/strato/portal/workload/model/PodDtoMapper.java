@@ -16,9 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
@@ -56,6 +59,7 @@ public interface PodDtoMapper {
         @Mapping(target = "annotation", source = "annotation", qualifiedByName = "dataToMap"),
         @Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList"),
         @Mapping(target = "images", source = "image", qualifiedByName = "stringToList"),
+        @Mapping(target = "clusterName", source = "namespace.cluster.clusterName"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
     
@@ -133,19 +137,6 @@ public interface PodDtoMapper {
         }
     }
     
-    @Named("pvcToList")
-    default List<HashMap<String, Object>> pvcToList(PersistentVolumeClaimEntity pvcEntity) {
-        try{
-        	return new ArrayList<>();
-//            List<HashMap<String, Object>> list = pvcEntity.stream().map(e => {
-//        		return new Map<String,Object> ();
-//            }).collect(Collectors.toList());
-//            return list;
-        }catch (Exception e){
-            return new ArrayList<>();
-        }
-    }
- 
     @Named("podStatus")
     default String podStatus(StatefulSetStatus status) {
     	try{
@@ -156,4 +147,5 @@ public interface PodDtoMapper {
             return null;
         }
     }
+    
 }

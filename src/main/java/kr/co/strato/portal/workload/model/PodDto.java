@@ -79,6 +79,8 @@ public class PodDto {
         private String status;
         private String kind;
         
+        private String clusterName;
+        
         private List<HashMap<String, Object>> condition;
     }
     

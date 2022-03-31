@@ -23,12 +23,15 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
+import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDtoMapper;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.PodDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PodService {
 	@Autowired
     private ClusterDomainService clusterDomainService;
+
     @Autowired
     private PodDomainService podDomainService;
     
@@ -46,6 +50,9 @@ public class PodService {
     
     @Autowired
     private StatefulSetAdapterService statefulSetAdapterService;
+    
+    @Autowired
+    private PersistentVolumeClaimDomainService persistentVolumeClaimDomainService;
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
@@ -109,7 +116,6 @@ public class PodService {
     @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
     	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
-    	Long projectId = searchParam.getProjectId();
     	Long clusterIdx = searchParam.getClusterIdx();
     	Integer page = pageable.getPageNumber();
 
@@ -239,6 +245,12 @@ public class PodService {
     	}
     	
     	return dtoList;
+    }
+    
+    public List<PersistentVolumeClaimDto.ResListDto> getPodPersistentVolumeClaim(Long podId) {
+    	List<PersistentVolumeClaimEntity> result = persistentVolumeClaimDomainService.getPodPersistentVolumeClaimList(podId);
+    	List<PersistentVolumeClaimDto.ResListDto> dtos = result.stream().map(e -> PersistentVolumeClaimDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
+    	return dtos;
     }
     
     public Boolean deletePod(Long podId) {

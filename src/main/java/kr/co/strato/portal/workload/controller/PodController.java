@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.service.PodService;
 
@@ -65,7 +67,6 @@ public class PodController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Boolean> deletePod(@PathVariable Long id){
     	Boolean result = podService.deletePod(id);
-
         return new ResponseWrapper<>(result);
     }
     
@@ -95,8 +96,13 @@ public class PodController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<String> getPodYaml(@PathVariable Long id) {
     	String result = podService.getPodtYaml(id);
-
         return new ResponseWrapper<>(result);
-
+    }
+    
+    @GetMapping("api/v1/pod/{podId}/pvcList")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<PersistentVolumeClaimDto.ResListDto>> getPodPersistentVolumeClaim(@PathVariable Long podId){
+    	List<PersistentVolumeClaimDto.ResListDto> result = podService.getPodPersistentVolumeClaim(podId);
+        return new ResponseWrapper<>(result);
     }
 }
