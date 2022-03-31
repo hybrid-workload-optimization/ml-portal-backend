@@ -132,21 +132,26 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
 	                              "userCount"),
 						  ExpressionUtils.as(
+								  JPAExpressions.select(projectUserEntity.userId)
+	                                            .from(projectUserEntity)
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
+	                              "projectPmId"),
+						  ExpressionUtils.as(
 								  JPAExpressions.select(userEntity.userName)
 	                                            .from(userEntity)
 	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.userId))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                              "projectUserName"),
+	                              "projectPmName"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(userEntity.email)
 	                                            .from(userEntity)
 	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.userId))
 	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                              "projectUserEmail"),
+	                              "projectPmEmail"),
 						  
 						  ExpressionUtils.as(
-									Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d %H:%i"),
-									"createdAt"
+								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d %H:%i"),
+								  "createdAt"
 								)
 				  ))
 				  .from(projectEntity)
@@ -154,7 +159,13 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  )
 				  .fetchOne();
 		
-		return result;
+		ProjectDto projectInfo = result;
+		/*if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
+			String description = projectInfo.getDescription().replaceAll(System.getProperty("line.separator"), "<br />");
+			projectInfo.setDescription(description);
+		}*/
+		
+		return projectInfo;
 	}
 	
 	public ProjectEntity getProjectDetailByClusterId(Long clusterIdx) {

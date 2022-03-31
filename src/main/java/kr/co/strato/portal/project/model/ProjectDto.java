@@ -28,7 +28,7 @@ public class ProjectDto {
 	private Long userCount;
 	private String projectPmName;
 	private String projectPmId;
-	private String projectUserEmail;
+	private String projectPmEmail;
 	
 	private String fresh;
 	private String owner;
