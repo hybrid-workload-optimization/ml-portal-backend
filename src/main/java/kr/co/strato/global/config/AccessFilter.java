@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import kr.co.strato.global.error.exception.AuthFailException;
 import kr.co.strato.global.validation.TokenValidator;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.extern.java.Log;
 
 @Component
@@ -51,7 +52,6 @@ public class AccessFilter implements Filter{
         	timestamp = Long.parseLong(strTimestamp);	
         }
         
-        System.out.println("path : " + path);
 		String acToken = request.getHeader("access_token");
 /*		
 		Enumeration<String> names = request.getHeaderNames();
@@ -67,7 +67,7 @@ public class AccessFilter implements Filter{
 	*/	
 
 //		if(!path.contains("access-manage") && !path.contains("swagger") && !path.contains("test") && !path.contains("/users/dupl/") && !(path.contains("/users") && "POST".equals(method))) {
-		if(!checkPath(path)) {
+		if(!checkPath(path, method)) {
 			String token = null;
 			try {
 				token = tokenValidator.decrypt(acToken, timestamp, path, method);
@@ -86,6 +86,8 @@ public class AccessFilter implements Filter{
 					request.getSession(false);
 					response.sendError(HttpStatus.UNAUTHORIZED.value());
 				}else {
+					UserDto loginUser = tokenValidator.extractUserInfo(token);
+					request.setAttribute("loginUser", loginUser);
 					chain.doFilter(request, response);
 				}
 			}	
@@ -99,13 +101,20 @@ public class AccessFilter implements Filter{
     public void destroy() {
     }
     
-    private boolean checkPath(String path) {
+    private boolean checkPath(String path, String method) {
     	boolean result = false;
-    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "users", "api-docs"};
+    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/select/"};
+    	
+    	if("POST".equals(method) && path.contains("users")) {
+    		// 회원가입 액션
+    		return true;
+    	}
+    	
     	result = Arrays.stream(arrPath)
     						.anyMatch(s -> path.contains(s));
-    	return result;
     	
+    	return result;
     }
+    
 
 }

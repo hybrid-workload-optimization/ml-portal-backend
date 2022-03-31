@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
@@ -49,6 +51,9 @@ public class UserController {
 	
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	TokenValidator tokenValidator;
 	
 	@Autowired
 	WorkHistoryService workHistoryService;
@@ -190,9 +195,11 @@ public class UserController {
 	//목록
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<UserDto>> getUserList(PageRequest pageRequest, UserDto.SearchParam searchParam){
+	public ResponseWrapper<Page<UserDto>> getUserList(PageRequest pageRequest, UserDto.SearchParam searchParam, HttpServletRequest request){
 		
 		if(pageRequest.getProperty() == null) pageRequest.setProperty("userId");
+		
+//		tokenValidator.extractUserInfo(request.getHeader("access_token"));
 		
 		Page<UserDto> list = null;
 		
@@ -238,8 +245,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<UserDto> getUserDetail(@PathVariable String userId){
 		UserDto userDto = null;
-		
-
 		
 		String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();

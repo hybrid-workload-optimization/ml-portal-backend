@@ -415,6 +415,7 @@ public class KeyCloakApiUtil {
 //		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
 		String ssoUser = "{ 'username' : '" + user.getUserId() + "',"
 				+ " 'email' : '" + user.getEmail() + "',"
+				+ " 'firstName' : '" + user.getUserName() + "',"
 				+ " 'enabled' : true," + ""
 				+ " 'credentials' : ["
 						+ "{'type' : 'password'," + " 'value': '" + keycloakTempPw + "'," + " 'temporary': false}" + "]}";

@@ -109,9 +109,6 @@ public class UserService {
 	// 목록 > param(projectId, authorityId)
 	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param) throws Exception{
 		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable, param);
-		for (UserEntity userEntity : userEntityList) {
-			System.out.println(userEntity.toString());
-		}
 		List<UserDto> userDtoList = userEntityList
 										.getContent()
 										.stream()

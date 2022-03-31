@@ -70,6 +70,7 @@ public class TokenValidator {
 							.parseClaimsJws(token)
 							.getBody();
 			user.setUserId(claims.get("email").toString());
+			user.setUserName(claims.get("name").toString());
 			
 		}catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -125,6 +126,10 @@ public class TokenValidator {
 	}
 	
 	public String decrypt(String cipherText, Long timestamp, String url, String method) throws Exception {
+//		System.out.println("acToken : " + cipherText);
+//		System.out.println("timestamp : " + timestamp);
+//		System.out.println("url : " + url);
+//		System.out.println("method : " + method);
 		String key = generateKey(timestamp, url, method);
         Cipher cipher = Cipher.getInstance(alg);
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES");
