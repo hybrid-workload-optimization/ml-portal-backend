@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,6 +237,12 @@ public class DashboardService {
 				Long kubeConfigId = cluster.getClusterId();
 				String clusterName = cluster.getClusterName();
 				
+				List<NodeEntity> nodeEntity = nodeService.getNodeList(clusterIdx);
+				Map<String, NodeEntity> nodeMap = nodeEntity.stream()
+					      .collect(Collectors.toMap(
+					    		  NodeEntity::getName,
+					    		  Function.identity()));
+				
 				ProjectEntity projectEntry = projectDomainService.getProjectDetailByClusterId(clusterIdx);
 				List<Node> nodes = nodeAdapterService.getNodeList(kubeConfigId);
 				nodeCount = nodes.size();
@@ -266,9 +274,16 @@ public class DashboardService {
 					
 					
 					if(listCollect) {
-						NodeEntity entity = nodeService.toEntity(node, clusterIdx);
-						
 						String name = node.getMetadata().getName();
+						NodeEntity entity = nodeMap.get(name);
+						if(entity != null) {
+							ClusterEntity clusterEntity = new ClusterEntity();
+							clusterEntity.setClusterIdx(clusterIdx);
+							entity.setCluster(clusterEntity);
+						} else {
+							entity = nodeService.toEntity(node, clusterIdx);
+						}
+						
 						List<Pod> pods = podAdapterService.getList(kubeConfigId, name, null, null, null);
 						
 						long runningSize = pods.stream().filter(p -> p.getStatus().getPhase().equals("Running")).count();
@@ -296,6 +311,7 @@ public class DashboardService {
 			        		PodEntity pod = PodMapper.INSTANCE.toEntity(s);
 			        		return pod;
 			        	}).collect(Collectors.toList());
+			        	
 			        	ClusterNodeDto.ResDetailChartDto chartNode = new ClusterNodeDto.ResDetailChartDto();
 			        	nodeService.setUsage(node, podEntrys, chartNode);
 			        	nodeListDto.setDetailChart(chartNode);

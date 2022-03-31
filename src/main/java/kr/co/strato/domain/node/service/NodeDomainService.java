@@ -1,6 +1,7 @@
 package kr.co.strato.domain.node.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,10 @@ public class NodeDomainService {
 
 	public Page<NodeEntity> getNodeList(Pageable pageable, Long clusterId,String name) {
 		return nodeRepository.getNodeList(pageable,  clusterId,name);
+	}
+	
+	public List<NodeEntity> getNodeList(Long clusterId) {
+		return nodeRepository.getNodeList(clusterId);
 	}
 	
 	

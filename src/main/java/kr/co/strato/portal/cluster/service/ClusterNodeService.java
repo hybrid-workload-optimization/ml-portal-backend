@@ -67,12 +67,21 @@ public class ClusterNodeService {
 		return page;
 	}
 	
-  public Page<ClusterNodeDto.ResListDto> getClusterNodes(Pageable pageable, ClusterNodeDto.SearchParam searchParam){
+	/**
+	 * Cluster에 속한 노드 배열 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	public List<NodeEntity> getNodeList(Long clusterId) {
+		return nodeDomainService.getNodeList(clusterId);
+	}
+	
+	public Page<ClusterNodeDto.ResListDto> getClusterNodes(Pageable pageable, ClusterNodeDto.SearchParam searchParam){
         Page<NodeEntity> nodes = nodeDomainService.getNodeList(pageable, searchParam.getClusterIdx(), searchParam.getName());
         List<ClusterNodeDto.ResListDto> dtos = nodes.stream().map(e -> ClusterNodeDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
         Page<ClusterNodeDto.ResListDto> pages = new PageImpl<>(dtos, pageable, nodes.getTotalElements());
         return pages;
-   }
+	}
 
 
 	@Transactional(rollbackFor = Exception.class)

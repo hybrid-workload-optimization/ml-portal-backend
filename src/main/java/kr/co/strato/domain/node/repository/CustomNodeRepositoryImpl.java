@@ -51,6 +51,29 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
 
         return new PageImpl<>(content, pageable, total);
     }
+    
+    @Override
+	public List<NodeEntity> getNodeList(Long clusterIdx) {
+    	QNodeEntity qNodeEntity = QNodeEntity.nodeEntity;
+        QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
+    	
+    	BooleanBuilder builder = new BooleanBuilder();
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
+        }
+        
+        QueryResults<NodeEntity> results =
+                jpaQueryFactory
+                        .select(qNodeEntity)
+                        .from(qNodeEntity)
+                        .leftJoin(qNodeEntity.cluster, qClusterEntity)
+                        .where(builder)
+                        .orderBy(qNodeEntity.id.desc())
+                        .fetchResults();
+
+        List<NodeEntity> content = results.getResults();
+		return content;
+	}
 
 	@Override
 	public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity, Pageable pageable) {
@@ -116,5 +139,4 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
 
 		return results;
 	}
-	
 }
