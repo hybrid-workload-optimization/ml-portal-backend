@@ -53,4 +53,8 @@ public class NodeDomainService {
 	public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity,Pageable pageable) {
 		return nodeRepository.findByClusterIdx(clusterEntity,pageable);
 	}
+	
+	public NodeEntity findNodeName(Long clusterIdx, String name) {
+		return nodeRepository.findNodeName(clusterIdx, name);
+	}
 }

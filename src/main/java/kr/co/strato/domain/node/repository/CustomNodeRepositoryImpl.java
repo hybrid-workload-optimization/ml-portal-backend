@@ -94,4 +94,27 @@ public class CustomNodeRepositoryImpl implements CustomNodeRepository{
         List<NodeEntity> content = results.getResults();
 		return new ArrayList<>(content);
 	}
+	
+	@Override
+	public NodeEntity findNodeName(Long clusterIdx, String name) {
+		QNodeEntity qNodeEntity = QNodeEntity.nodeEntity;
+        QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
+        
+        // required condition
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
+        builder.and(qNodeEntity.name.eq(name));
+
+        NodeEntity results =
+                jpaQueryFactory
+                        .select(qNodeEntity)
+                        .from(qNodeEntity)
+                        .leftJoin(qNodeEntity.cluster, qClusterEntity)
+                        .where(builder)
+                        .orderBy(qNodeEntity.id.desc())
+                        .fetchOne();
+
+		return results;
+	}
+	
 }

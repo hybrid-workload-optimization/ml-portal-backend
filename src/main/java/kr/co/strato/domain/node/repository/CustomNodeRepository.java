@@ -14,5 +14,6 @@ public interface CustomNodeRepository {
     public Page<NodeEntity> findByClusterIdx(ClusterEntity clusterEntity, Pageable pageable);//clusterIdx 조회(Page 객체 반환)
     
     public List<NodeEntity> findByNameAndClusterIdx(String nodeName, ClusterEntity clusterEntity);
+    public  NodeEntity findNodeName(Long clusterIdx, String name);
 
 }

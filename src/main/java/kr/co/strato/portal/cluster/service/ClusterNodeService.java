@@ -270,5 +270,16 @@ public class ClusterNodeService {
 		}
 		return val;
 	}
+	/**
+	* Node 이름으로 NodeEntity를 구해 반환
+	* @param clusterIdx
+	* @param nodeName
+	* @return
+	*/
+	public NodeEntity getNodeByName(Long clusterIdx, String nodeName) {
+		NodeEntity nodeEntity= nodeDomainService.findNodeName(clusterIdx,nodeName);
+		
+		return nodeEntity;
+		}
     
 }
