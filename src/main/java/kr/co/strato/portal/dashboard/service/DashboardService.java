@@ -1,7 +1,5 @@
 package kr.co.strato.portal.dashboard.service;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Service;
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeCondition;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
@@ -27,6 +24,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
@@ -223,6 +221,7 @@ public class DashboardService {
 				Long kubeConfigId = cluster.getClusterId();
 				String clusterName = cluster.getClusterName();
 				
+				ProjectEntity projectEntry = projectDomainService.getProjectDetailByClusterId(clusterIdx);
 				List<Node> nodes = nodeAdapterService.getNodeList(kubeConfigId);
 				nodeCount = nodes.size();
 				for(Node node : nodes) {				
@@ -268,7 +267,14 @@ public class DashboardService {
 			        	nodeListDto.setPodStatus(podStatus);
 			        	nodeListDto.setClusterIdx(clusterIdx);
 			        	nodeListDto.setClusterName(clusterName);
-			        	nodeListDto.setUid(entity.getUid());			        	
+			        	nodeListDto.setUid(entity.getUid());
+			        	
+			        	if(projectEntry != null) {
+			        		nodeListDto.setProjectIdx(projectEntry.getId());
+			        		nodeListDto.setProjectName(projectEntry.getProjectName());
+			        		
+			        	}
+			        	
 			        	this.resListDtos.add(nodeListDto);
 			        	
 			        	

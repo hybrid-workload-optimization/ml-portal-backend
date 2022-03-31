@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeCondition;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
-import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
@@ -33,7 +32,6 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
-import kr.co.strato.portal.workload.model.PodDtoMapper;
 
 @Service
 public class ClusterNodeService {

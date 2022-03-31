@@ -47,6 +47,8 @@ public class ClusterNodeDto {
 	@Setter
 	@NoArgsConstructor
 	public static class ResListDetailDto extends ResListDto {
+		private Long projectIdx;
+		private String projectName;
 		private ResDetailChartDto detailChart;
 	}
 
