@@ -20,6 +20,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.portal.project.model.ProjectDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -129,6 +131,18 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .where(projectEntity.id.eq(projectIdx)
 				  )
 				  .fetchOne();
+		
+		return result;
+	}
+	
+	public ProjectEntity getProjectDetailByClusterId(Long clusterIdx) {
+		
+		ProjectEntity result = queryFactory
+				.select(projectEntity)
+				 .from(projectEntity)
+				 .join(projectClusterEntity).on(projectEntity.id.eq(projectClusterEntity.projectIdx))
+				 .where(projectClusterEntity.clusterIdx.eq(clusterIdx))
+				 .fetchOne();
 		
 		return result;
 	}
