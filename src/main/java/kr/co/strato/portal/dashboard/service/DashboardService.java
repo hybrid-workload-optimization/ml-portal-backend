@@ -26,7 +26,6 @@ import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
-import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
@@ -196,8 +195,12 @@ public class DashboardService {
 	 * @param nodeName
 	 * @return
 	 */
-	public NodeEntity getNodeEntity(Long clusterIdx, String nodeName) {
-		return nodeService.getNodeByName(clusterIdx, nodeName);
+	public Long getNodeId(Long clusterIdx, String nodeName) {
+		NodeEntity entity = nodeService.getNodeByName(clusterIdx, nodeName);
+		if(entity != null) {
+			return entity.getId();
+		}
+		return -1L;
 	}
 	
 

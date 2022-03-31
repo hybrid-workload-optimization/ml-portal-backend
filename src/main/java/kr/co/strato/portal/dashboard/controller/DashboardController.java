@@ -35,11 +35,11 @@ public class DashboardController {
 		return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/dashboard/common/node")
-    public ResponseWrapper<NodeEntity> getNodeEntityByNodeName(
+	@GetMapping("/api/v1/dashboard/common/nodeId")
+    public ResponseWrapper<Long> getNodeIdByNodeName(
     		@RequestParam(required = true) Long clusterIdx,
     		@RequestParam(required = true) String nodeName) throws Exception {
-		NodeEntity nodeEntity = dashboardService.getNodeEntity(clusterIdx, nodeName);
-		return new ResponseWrapper<>(nodeEntity);
+		Long nodeId = dashboardService.getNodeId(clusterIdx, nodeName);
+		return new ResponseWrapper<>(nodeId);
     }
 }
