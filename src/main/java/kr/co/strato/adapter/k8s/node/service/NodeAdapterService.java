@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 import feign.FeignException;
 import io.fabric8.kubernetes.api.model.Node;
@@ -47,11 +47,13 @@ public class NodeAdapterService {
 		log.debug("[Get Node List] response : {}", results);
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
-			ObjectMapper mapper = new ObjectMapper();
-			List<Node> clusterNodes = mapper.readValue(results, new TypeReference<List<Node>>() {});
-
+			// DataMapping 모듈 ObjectMapper -> gson 으로 변경 2022-03-31 이호철
+			
+			Gson gson = new GsonBuilder().create();
+			List<Node> clusterNodes = gson.fromJson(results, TypeToken.getParameterized(List.class, Node.class).getType());
+			
 			return clusterNodes;
-		} catch (JsonProcessingException e) {
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new InternalServerException("json 파싱 에러");
 		}

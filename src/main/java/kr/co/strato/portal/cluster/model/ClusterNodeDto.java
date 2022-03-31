@@ -30,6 +30,7 @@ public class ClusterNodeDto {
 	public static class ResListDto{
 		private Long id;
 		private String name;
+		private String uid;
 		private String ip;
 		private String status;
 		private String k8sVersion;
@@ -40,6 +41,13 @@ public class ClusterNodeDto {
 		private String clusterName;
 		private String podStatus;
 		private List<String> role;
+	}
+	
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	public static class ResListDetailDto extends ResListDto {
+		private ResDetailChartDto detailChart;
 	}
 
 	

@@ -262,7 +262,7 @@ public class ClusterNodeService {
 		chartNode.setMemoryRequestsFraction(memoryRequestsFraction.doubleValue());
 	}
 	
-	public static BigDecimal sum(List<Quantity> list) {
+	public BigDecimal sum(List<Quantity> list) {
 		BigDecimal val = new BigDecimal(0);
 		for(Quantity value : list) {			
 			if(value != null) {

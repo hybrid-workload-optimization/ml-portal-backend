@@ -1,5 +1,7 @@
 package kr.co.strato.portal.dashboard.service;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +19,17 @@ import org.springframework.stereotype.Service;
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeCondition;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
+import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDto;
+import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.SelectService;
@@ -150,8 +156,8 @@ public class DashboardService {
 	 * @param clusterIdx
 	 * @return
 	 */
-	public List<ResListDto> getNodeList(Long projectIdx, Long clusterIdx) {
-		List<ResListDto> list = new ArrayList<>();
+	public List<ResListDetailDto> getNodeList(Long projectIdx, Long clusterIdx) {
+		List<ResListDetailDto> list = new ArrayList<>();
 		List<ClusterEntity> clusters = getKubeConfigIds(projectIdx, clusterIdx);
 		
 		if(clusters.size() > 0) {
@@ -171,16 +177,17 @@ public class DashboardService {
 			}
 		}		
 		
-		Collections.sort(list, new Comparator<ResListDto>() {
+		Collections.sort(list, new Comparator<ResListDetailDto>() {
 		    @Override
-		    public int compare(ResListDto b1,ResListDto b2) {
+		    public int compare(ResListDetailDto b1,ResListDetailDto b2) {
 		    	int dff = Long.valueOf(b2.getClusterIdx() - b1.getClusterIdx()).intValue();
 		    	if(dff == 0) {
 		    		b1.getName().compareTo(b2.getName());
 		    	}
 		    	return dff;
 		    }
-		});		
+		});
+		
 		return list;
 	}
 	
@@ -199,7 +206,7 @@ public class DashboardService {
 		private int restartWithinTenMinutes = 0;
 		private boolean listCollect;
 		
-		private List<ClusterNodeDto.ResListDto> resListDtos;
+		private List<ClusterNodeDto.ResListDetailDto> resListDtos;
 
 		public GetNodeInfoRunnable(ClusterEntity cluster, Long currentTime, boolean listCollect) {
 			this.cluster = cluster;
@@ -257,12 +264,21 @@ public class DashboardService {
 						String podStatus = String.format("%d/%d", runningSize, podCount);
 			        	
 			        	
-			        	ClusterNodeDto.ResListDto nodeListDto = ClusterNodeDtoMapper.INSTANCE.toResListDto(entity);
+			        	ClusterNodeDto.ResListDetailDto nodeListDto = ClusterNodeDtoMapper.INSTANCE.toResListDetailDto(entity);
 			        	nodeListDto.setPodStatus(podStatus);
 			        	nodeListDto.setClusterIdx(clusterIdx);
 			        	nodeListDto.setClusterName(clusterName);
-			        	
+			        	nodeListDto.setUid(entity.getUid());			        	
 			        	this.resListDtos.add(nodeListDto);
+			        	
+			        	
+			        	List<PodEntity> podEntrys =  pods.stream().map( s -> {
+			        		PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+			        		return pod;
+			        	}).collect(Collectors.toList());
+			        	ClusterNodeDto.ResDetailChartDto chartNode = new ClusterNodeDto.ResDetailChartDto();
+			        	nodeService.setUsage(node, podEntrys, chartNode);
+			        	nodeListDto.setDetailChart(chartNode);
 					}
 					
 				}
@@ -273,6 +289,7 @@ public class DashboardService {
 				this.isFinish = true;
 			}
 		}
+		
 	}
 	
 	

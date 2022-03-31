@@ -25,6 +25,11 @@ public interface ClusterNodeDtoMapper {
 	@Mapping(target = "clusterName", source = "cluster.clusterName")
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToList")
 	public ClusterNodeDto.ResListDto toResListDto(NodeEntity node);
+	
+	@Mapping(target = "clusterIdx", source = "cluster.clusterIdx")
+	@Mapping(target = "clusterName", source = "cluster.clusterName")
+	@Mapping(target = "role", source = "role", qualifiedByName = "roleToList")
+	public ClusterNodeDto.ResListDetailDto toResListDetailDto(NodeEntity node);
 
 	@Mapping(target = "clusterIdx", source = "cluster.clusterIdx")
 	@Mapping(target = "clusterId", source = "cluster.clusterId")
@@ -33,6 +38,8 @@ public interface ClusterNodeDtoMapper {
 	@Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList")
 	@Mapping(target = "role", source = "role", qualifiedByName = "roleToList")
 	public ClusterNodeDto.ResDetailDto toResDetailDto(NodeEntity node);
+	
+	
 
 	@Named("labelToMap")
 	default HashMap<String, Object> labelToMap(String label) {

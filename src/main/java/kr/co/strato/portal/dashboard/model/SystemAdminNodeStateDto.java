@@ -1,8 +1,5 @@
 package kr.co.strato.portal.dashboard.model;
 
-import java.util.List;
-
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +25,5 @@ public class SystemAdminNodeStateDto {
 	int workerUtilization;
 	
 	private String nodeUtilizationState;
-	
 	private int restartWithinTenMinutes;
 }
