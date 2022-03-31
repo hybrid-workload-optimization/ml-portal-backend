@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
@@ -32,5 +33,13 @@ public class DashboardController {
     		@RequestParam(required = false) Long clusterIdx) throws Exception {
 		List<ResListDetailDto> result = dashboardService.getNodeList(projectIdx, clusterIdx);
 		return new ResponseWrapper<>(result);
+    }
+	
+	@GetMapping("/api/v1/dashboard/common/node")
+    public ResponseWrapper<NodeEntity> getNodeEntityByNodeName(
+    		@RequestParam(required = true) Long clusterIdx,
+    		@RequestParam(required = true) String nodeName) throws Exception {
+		NodeEntity nodeEntity = dashboardService.getNodeEntity(clusterIdx, nodeName);
+		return new ResponseWrapper<>(nodeEntity);
     }
 }

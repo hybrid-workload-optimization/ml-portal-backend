@@ -26,6 +26,7 @@ import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
+import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
@@ -187,6 +188,16 @@ public class DashboardService {
 		});
 		
 		return list;
+	}
+	
+	/**
+	 * 파라메타 정보에 맞는 노드 반환.
+	 * @param clusterIdx
+	 * @param nodeName
+	 * @return
+	 */
+	public NodeEntity getNodeEntity(Long clusterIdx, String nodeName) {
+		return nodeService.getNodeByName(clusterIdx, nodeName);
 	}
 	
 
