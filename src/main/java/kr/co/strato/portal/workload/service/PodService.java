@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,9 +233,9 @@ public class PodService {
 		String nodeName = searchParam.getNodeName();
 		String ownerUid = searchParam.getOwnerUid();
 		String namespace = searchParam.getNamespaceName();
-//		Map<String, String> selector = searchParam.getSelector();
-    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, null);
-//    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, selector);
+		Map<String, String> selector = searchParam.getSelector();
+//    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, null);
+    	List<Pod> k8sPods = podAdapterService.getList(clusterId, nodeName, ownerUid, namespace, selector);
     	List<PodDto.ResListDto> dtoList = new ArrayList<>();
     	
     	for(Pod k8sPod : k8sPods) {
