@@ -133,46 +133,6 @@ public class ClusterController {
         return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/clusters/{clusterIdx}/summary1")
-    public ResponseWrapper<ClusterDto.Summary> getClusterSummary1(@PathVariable(required = true) Long clusterIdx){
-		ClusterDto.Summary result = null;
-        
-		String workTarget					= null;
-        Map<String, Object> workMetadata	= new HashMap<>();
-        WorkResult workResult				= WorkResult.SUCCESS;
-        String workMessage					= "";
-        
-        workMetadata.put("clusterIdx", clusterIdx);
-        
-        try {
-        	result = clusterService.getClusterSummary(clusterIdx);
-		} catch (Exception e) {
-			workResult		= WorkResult.FAIL;
-			workMessage		= e.getMessage();
-			
-			log.error(e.getMessage(), e);
-			throw new PortalException(e.getMessage());
-		} finally {
-			try {
-				workHistoryService.registerWorkHistory(
-						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.CLUSTER)
-						.workMenu2(WorkMenu2.NONE)
-						.workMenu3(WorkMenu3.NONE)
-						.workAction(WorkAction.DETAIL)
-						.target(workTarget)
-						.meta(workMetadata)
-						.result(workResult)
-						.message(workMessage)
-						.build());
-			} catch (Exception e) {
-				// ignore
-			}
-		}
-        
-        return new ResponseWrapper<>(result);
-    }
-	
 	@PostMapping("/api/v1/clusters")
     public ResponseWrapper<Long> registerCluster(@Valid @RequestBody ClusterDto.Form clusterDto){
         Long result = null;
@@ -315,20 +275,6 @@ public class ClusterController {
 	
 	@PostMapping("/api/v1/clusters/connection")
     public ResponseWrapper<Boolean> isClusterConnection(@RequestBody ClusterDto.Form clusterDto){
-		boolean result = false;
-        
-        try {
-        	result = clusterService.isClusterConnection(clusterDto.getKubeConfig());
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw new PortalException(e.getMessage());
-		}
-        
-        return new ResponseWrapper<>(result);
-    }
-	
-	@PostMapping("/api/v1/clusters/connection1")
-    public ResponseWrapper<Boolean> isClusterConnection1(@RequestBody ClusterDto.Form clusterDto){
 		boolean result = false;
         
         try {
