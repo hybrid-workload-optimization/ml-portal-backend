@@ -40,6 +40,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
@@ -324,10 +325,34 @@ public class ClusterService {
 		
 		ClusterDto.Detail detail = ClusterDtoMapper.INSTANCE.toDetail(clusterEntity);
 		
+		// provisioning information - workJobIdx
+		Long workJobIdx = null;
+		
+		WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
+		log.debug("[getCluster] workJobEntity = {}", workJobEntity);
+		
+		if (workJobEntity != null) {
+			workJobIdx = workJobEntity.getWorkJobIdx();
+		}
+		
+		detail.setWorkJobIdx(workJobIdx);
+		
+		return detail;
+	}
+	
+	
+	/**
+	 * Cluster 상세 조회(요약)
+	 * 
+	 * @param clusterIdx
+	 * @return
+	 * @throws Exception
+	 */
+	public ClusterDto.Summary getClusterSummary(Long clusterIdx) throws Exception {
 		PageRequest pageRequest = new PageRequest();
 		
 		// node
-		List<NodeEntity> nodes = clusterEntity.getNodes();
+		List<NodeEntity> nodes = nodeDomainService.getNodeList(pageRequest.of(), clusterIdx, null).getContent();
 		
 		// namespace
 		List<NamespaceEntity> namespaces = namespaceDomainService.getNamespaceList(pageRequest.of(), clusterIdx, null).getContent();
@@ -337,7 +362,7 @@ public class ClusterService {
 		
 		// TODO : pvc list
 		
-		log.debug("[getCluster] nodes/namespaces/pods size = {}/{}/{}", nodes.size(), namespaces.size(), pods.size());
+		log.debug("[Cluster Summary] nodes/namespaces/pods size = {}/{}/{}", nodes.size(), namespaces.size(), pods.size());
 		
 		List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
 		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker")).collect(Collectors.toList());
@@ -345,8 +370,8 @@ public class ClusterService {
 		List<NodeEntity> availableMasterNodes = masterNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
 		List<NodeEntity> availableworkerNodes = workerNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
 		
-		log.debug("[getCluster] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
-		log.debug("[getCluster] availableMasterNodes/availableworkerNodes size = {}/{}", availableMasterNodes.size(), availableworkerNodes.size());
+		log.debug("[Cluster Summary] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
+		log.debug("[Cluster Summary] availableMasterNodes/availableworkerNodes size = {}/{}", availableMasterNodes.size(), availableworkerNodes.size());
 		
 		// Master/Worker 수량
 		int masterCount = masterNodes.size();
@@ -356,26 +381,18 @@ public class ClusterService {
 		float availableMasterPercent = masterCount > 0 ? (availableMasterNodes.size() * 100 / masterCount) : 0;
 		float availableWorkerPercent = workerCount > 0 ? (availableworkerNodes.size() * 100 / workerCount) : 0;
 		
-		// provisioning information - workJobIdx
-		Long workJobIdx = null;
-		WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
-		log.debug("[getCluster] workJobEntity = {}", workJobEntity);
-		if (workJobEntity != null) {
-			workJobIdx = workJobEntity.getWorkJobIdx();
-		}
+		Summary summary = new ClusterDto.Summary();
+		summary.setMasterCount(masterCount);
+		summary.setWorkerCount(workerCount);
+		summary.setAvailableMasterPercent(availableMasterPercent);
+		summary.setAvailableWorkerPercent(availableWorkerPercent);
+		summary.setNamespaceCount(namespaces.size());
+		summary.setPodCount(pods.size());
+		summary.setPvcCount(0); // TODO : pvc count
 		
-		detail.setMasterCount(masterCount);
-		detail.setWorkerCount(workerCount);
-		detail.setAvailableMasterPercent(availableMasterPercent);
-		detail.setAvailableWorkerPercent(availableWorkerPercent);
-		detail.setNamespaceCount(namespaces.size());
-		detail.setPodCount(pods.size());
-		detail.setPvcCount(0); // TODO : pvc count
-		detail.setWorkJobIdx(workJobIdx);
-		
-		return detail;
+		return summary;
 	}
-
+	
 	/**
 	 * Cluster 삭제
 	 * 
@@ -527,4 +544,5 @@ public class ClusterService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

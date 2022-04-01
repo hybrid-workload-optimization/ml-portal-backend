@@ -84,6 +84,13 @@ public class ClusterDto {
 		private String provisioningLog;
 		private String provisioningUser;
 		
+		private Long workJobIdx;
+	}
+	
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	public static class Summary {
 		// master/worker
 		private int masterCount;
 		private int workerCount;
@@ -95,7 +102,5 @@ public class ClusterDto {
 		private int pvcCount;
 		
 		private String monitoringServiceUrl;
-		
-		private Long workJobIdx;
 	}
 }
