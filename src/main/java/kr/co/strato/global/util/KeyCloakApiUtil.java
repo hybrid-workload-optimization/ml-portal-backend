@@ -352,12 +352,12 @@ public class KeyCloakApiUtil {
 
 			HttpResponse response = httpClient.execute(httpPost);
 
-			if (response.getStatusLine().getStatusCode() == 201) {
-				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
-			} else {
-				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
-				System.out.println(response);
-			}
+//			if (response.getStatusLine().getStatusCode() == 201) {
+//				System.out.println("response is completed : " + response.getStatusLine().getStatusCode());
+//			} else {
+//				System.out.println("response is error : " + response.getStatusLine().getStatusCode());
+//				System.out.println(response);
+//			}
 
 		} catch (HttpClientErrorException e) {
 			HttpStatus status = e.getStatusCode();
