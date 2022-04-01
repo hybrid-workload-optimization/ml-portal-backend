@@ -94,4 +94,25 @@ public class ProjectUserDomainService {
 		
 		return projectUserRepository.deleteByProjectIdxAndUserId(projectIdx, userId);
 	}
+	
+	/**
+     * Project의 User 조회
+     * @param projectIdx
+     * @param userId
+     * @return
+     */
+	public ProjectUserEntity getProjectUser(Long projectIdx, String userId) {
+		
+		return projectUserRepository.findByProjectIdxAndUserId(projectIdx, userId);
+	}
+	
+	/**
+     * Project User 삭제(삭제요청한 User 삭제)
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteRequestProjectUser(Long projectIdx, List<String> userIds) {
+		
+		return projectUserRepository.deleteByProjectIdxAndUserIdNotIn(projectIdx, userIds);
+	}
 }

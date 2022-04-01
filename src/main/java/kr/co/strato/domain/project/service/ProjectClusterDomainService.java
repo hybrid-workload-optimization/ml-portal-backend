@@ -94,4 +94,35 @@ public class ProjectClusterDomainService {
 		
 		return projectClusterRepository.deleteByProjectIdxAndClusterIdx(projectIdx, clusterIdx);
 	}
+	
+	/**
+     * Project의 Cluster 조회
+     * @param projectIdx
+     * @param clusterIdx
+     * @return
+     */
+	public ProjectClusterEntity getProjectCluster(Long projectIdx, Long clusterIdx) {
+		
+		return projectClusterRepository.findByProjectIdxAndClusterIdx(projectIdx, clusterIdx);
+	}
+	
+	/**
+     * Project Cluster 삭제
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteProjectClusterNotDuplicate(Long projectIdx) {
+		
+		return projectClusterRepository.deleteByProjectIdx(projectIdx);
+	}
+	
+	/**
+     * Project Cluster 삭제(삭제요청한 Cluster 삭제)
+     * @param projectIdx
+     * @return
+     */
+	public Integer deleteRequestProjectCluster(Long projectIdx, List<Long> clusters) {
+		
+		return projectClusterRepository.deleteByProjectIdxAndClusterIdxNotIn(projectIdx, clusters);
+	}
 }
