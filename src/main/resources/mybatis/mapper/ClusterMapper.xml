@@ -160,6 +160,9 @@
 	<!-- namespace -->
 	delete from namespace where cluster_idx = #{clusterIdx};
 	
+	<!-- project cluster -->
+	delete from project_cluster where cluster_idx = #{clusterIdx};
+	
 	<!-- cluster -->
 	delete from cluster where cluster_idx = #{clusterIdx};
 	</delete>
