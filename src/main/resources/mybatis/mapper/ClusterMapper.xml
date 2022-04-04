@@ -157,8 +157,11 @@
 	<!-- node -->
 	delete from node where cluster_idx = #{clusterIdx};
 	
-	<!--namespace -->
+	<!-- namespace -->
 	delete from namespace where cluster_idx = #{clusterIdx};
+	
+	<!-- cluster -->
+	delete from cluster where cluster_idx = #{clusterIdx};
 	</delete>
 	
  </mapper>
