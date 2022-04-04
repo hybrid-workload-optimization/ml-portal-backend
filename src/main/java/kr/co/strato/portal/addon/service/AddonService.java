@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import kr.co.strato.adapter.k8s.common.proxy.AddonProxy;
 import kr.co.strato.domain.addon.model.AddonEntity;
 import kr.co.strato.domain.addon.service.AddonDomainService;
@@ -53,6 +56,7 @@ public class AddonService {
 			list.stream().forEach(
 					addon -> addon.setAddonEntity(addonMap.get(addon.getAddonId())));
 		}
+		log.info("Addon list call. clusterIdx: {}", clusterId);
 		log.info("Addon list size: {}", list.size());
 		return list;
 	}
@@ -94,7 +98,12 @@ public class AddonService {
 			entity.setAddonId(addonId);
 			//entity.setInstallUserId(addonId);
 			addonDomainService.register(entity);
-		}		
+		}
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		log.info("Addon install. clusterIdx: {}, addonId: {}", clusterId, addonId);
+		log.info("Addon install. parameters: {}", gson.toJson(parameters));
+		log.info("Addon install. result: {}", isOk);
 		return isOk;
 	}
 	
@@ -116,6 +125,9 @@ public class AddonService {
 		if(isOk) {
 			addonDomainService.delete(clusterId, addonId);
 		}
+		
+		log.info("Addon uninstall. clusterIdx: {}, addonId: {}", clusterId, addonId);
+		log.info("Addon uninstall result: {}", isOk);
 		return isOk;
 	}
 	
