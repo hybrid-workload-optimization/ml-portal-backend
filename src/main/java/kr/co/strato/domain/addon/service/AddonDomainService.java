@@ -1,6 +1,7 @@
 package kr.co.strato.domain.addon.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,25 @@ public class AddonDomainService {
 	 */
 	public List<AddonEntity> getListByClusterId(Long clusterIdx) {
 		return addonRepository.findByClusterIdx(clusterIdx);
+	}
+	
+	/**
+	 * Addon 반환
+	 * @param clusterIdx
+	 * @param addonId
+	 * @return
+	 */
+	public AddonEntity getEntity(Long clusterIdx, String addonId) {
+		AddonIdPK pk = new AddonIdPK();
+		pk.setClusterIdx(clusterIdx);
+		pk.setAddonId(addonId);
+		
+		Optional<AddonEntity> addon = addonRepository.findById(pk);
+		if (addon.isPresent()) {
+			return addon.get();
+		}
+		
+		return null;
 	}
 	
 	/**
