@@ -32,4 +32,6 @@ public class ProjectDto {
 	
 	private String fresh;
 	private String owner;
+	
+	private String type;
 }

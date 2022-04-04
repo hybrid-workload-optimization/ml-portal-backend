@@ -80,9 +80,9 @@ public class PortalProjectService {
      * @param projectIdx
      * @return
      */
-    public ProjectDto getProjectDetail(Long projectIdx) {
+    public ProjectDto getProjectDetail(Long projectIdx, String type) {
     	
-        return projectDomainService.getProjectDetail(projectIdx);
+        return projectDomainService.getProjectDetail(projectIdx, type);
     }
     
     /**

@@ -44,9 +44,9 @@ public class ProjectDomainService {
      * @param projectIdx
      * @return
      */
-    public ProjectDto getProjectDetail(Long projectIdx) {
+    public ProjectDto getProjectDetail(Long projectIdx, String type) {
     	
-    	return projectRepository.getProjectDetail(projectIdx);
+    	return projectRepository.getProjectDetail(projectIdx, type);
     }
     
     /**

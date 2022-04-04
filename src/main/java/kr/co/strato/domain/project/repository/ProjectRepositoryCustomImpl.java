@@ -110,7 +110,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}
 	
 	@Override
-	public ProjectDto getProjectDetail(Long projectIdx) {
+	public ProjectDto getProjectDetail(Long projectIdx, String type) {
 		
 		BooleanBuilder builder = new BooleanBuilder();
 	    if(projectIdx != null) {
@@ -162,10 +162,16 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .fetchOne();
 		
 		ProjectDto projectInfo = result;
-		/*if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
-			String description = projectInfo.getDescription().replaceAll(System.getProperty("line.separator"), "<br />");
+		if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
+			String description = "";
+			if("view".equals(type)) {
+				description = projectInfo.getDescription().replaceAll("\n", "<br />");
+			} else {
+				description = projectInfo.getDescription().replaceAll("<br />", "\n");
+			}
+					
 			projectInfo.setDescription(description);
-		}*/
+		}
 		
 		return projectInfo;
 	}

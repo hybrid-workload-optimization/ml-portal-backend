@@ -10,7 +10,7 @@ public interface ProjectRepositoryCustom {
 
 	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception;
 	
-	public ProjectDto getProjectDetail(Long projectIdx);
+	public ProjectDto getProjectDetail(Long projectIdx, String type);
 	
 	public ProjectEntity getProjectDetailByClusterId(Long clusterIdx);
 }
