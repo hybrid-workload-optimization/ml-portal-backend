@@ -96,7 +96,9 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				
 				Date today = DateUtil.toDate(DateUtil.currentDateTime("yyyy-MM-dd"), "yyyy-MM-dd");
 				Date create = DateUtil.toDate(dto.getCreatedAt(), "yyyy-MM-dd");
-				int compare = today.compareTo(create);
+				long diffSec = (today.getTime() - create.getTime()) / 1000;
+				long compare = diffSec / (24 * 60 * 60);
+				System.out.println("compare === " + compare);
 				if(compare <= 3) {
 					dto.setFresh(dto.getCreatedAt());
 				}
@@ -108,7 +110,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}
 	
 	@Override
-	public ProjectDto getProjectDetail(Long projectIdx) {
+	public ProjectDto getProjectDetail(Long projectIdx, String type) {
 		
 		BooleanBuilder builder = new BooleanBuilder();
 	    if(projectIdx != null) {
@@ -160,10 +162,16 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .fetchOne();
 		
 		ProjectDto projectInfo = result;
-		/*if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
-			String description = projectInfo.getDescription().replaceAll(System.getProperty("line.separator"), "<br />");
+		if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
+			String description = "";
+			if("view".equals(type)) {
+				description = projectInfo.getDescription().replaceAll("\n", "<br />");
+			} else {
+				description = projectInfo.getDescription().replaceAll("<br />", "\n");
+			}
+					
 			projectInfo.setDescription(description);
-		}*/
+		}
 		
 		return projectInfo;
 	}

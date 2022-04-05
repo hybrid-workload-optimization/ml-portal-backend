@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,9 +53,11 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects/{projectIdx}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<ProjectDto> getProjectDetail(@PathVariable("projectIdx") Long projectIdx) {
+    public ResponseWrapper<ProjectDto> getProjectDetail(@PathVariable("projectIdx") Long projectIdx, ProjectDto param) {
         
-    	ProjectDto response = portalProjectService.getProjectDetail(projectIdx);
+    	System.out.println("type === " + param.getType());
+    	
+    	ProjectDto response = portalProjectService.getProjectDetail(projectIdx, param.getType());
         
         return new ResponseWrapper<ProjectDto>(response);
     }

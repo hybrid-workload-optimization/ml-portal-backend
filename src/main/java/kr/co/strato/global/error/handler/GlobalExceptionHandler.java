@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(DeleteProjectFailException.class)
-    @ResponseStatus(code = HttpStatus.OK)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseWrapper unhandleDeleteProjectFailException(DeleteProjectFailException e) {
     	e.printStackTrace();
     	ProjectErrorType errorType = ProjectErrorType.FAIL_PROJECT_DELETE;
