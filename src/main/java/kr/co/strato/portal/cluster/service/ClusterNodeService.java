@@ -96,7 +96,7 @@ public class ClusterNodeService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteClusterNode(Long id){
     	NodeEntity n = nodeDomainService.getDetail(id.longValue());
-        Long clusterId = n.getCluster().getClusterIdx();
+        Long clusterId = n.getCluster().getClusterId();
         String nodeName = n.getName();
 
         boolean isDeleted = nodeAdapterService.deleteNode(clusterId.intValue(), nodeName);
