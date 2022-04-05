@@ -153,7 +153,7 @@ public class PortalProjectService {
     	projectBuiler.updatedAt(now);
     	projectBuiler.deletedYn("N");
     	
-    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName());
+    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName(), "N");
 		if(projectInfo.isPresent()) {
 			throw new AleadyProjectNameException();
 		}
@@ -500,7 +500,16 @@ public class PortalProjectService {
             projectUserDomainService.deleteProjectByProjectIdx(projectInfo.get().getId());
         	
         	//Project 삭제
-        	projectDomainService.deleteProject(projectInfo.get().getId());
+            String userId = param.getLoginId();
+        	String userName = param.getLoginName();
+        	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+            
+            ProjectEntity projectEntity = projectInfo.get();
+            projectEntity.setUpdateUserId(userId);
+            projectEntity.setUpdateUserName(userName);
+            projectEntity.setUpdatedAt(now);
+            projectEntity.setDeletedYn("Y");
+            projectDomainService.deleteProject(projectEntity);
         	
         	result = true;
     	} catch(Exception e) {

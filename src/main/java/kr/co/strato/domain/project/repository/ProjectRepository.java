@@ -8,5 +8,5 @@ import kr.co.strato.domain.project.model.ProjectEntity;
 
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long>, ProjectRepositoryCustom {
 	
-	Optional<ProjectEntity>findByProjectName(String projectName);
+	Optional<ProjectEntity>findByProjectNameAndDeletedYn(String projectName, String deletedYn);
 }

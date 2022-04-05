@@ -81,7 +81,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  ))
 				  .from(projectEntity)
 				  .where(projectEntity.id.in(
-						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(param.getUserId()), builder))
+						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(param.getUserId()), builder)), projectEntity.deletedYn.eq("N")
 				  )
 				  .offset(pageable.getOffset())
                   .limit(pageable.getPageSize())

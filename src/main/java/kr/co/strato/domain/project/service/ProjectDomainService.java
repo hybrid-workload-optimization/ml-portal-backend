@@ -90,9 +90,9 @@ public class ProjectDomainService {
      * @param
      * @return
      */
-    public void deleteProject(Long projectIdx) {
+    public void deleteProject(ProjectEntity projectEntity) {
     	
-    	projectRepository.deleteById(projectIdx);
+    	projectRepository.save(projectEntity);
     }
     
     /**
@@ -100,9 +100,9 @@ public class ProjectDomainService {
      * @param
      * @return
      */
-    public Optional<ProjectEntity> getProjectByProjectName(String projectName) {
+    public Optional<ProjectEntity> getProjectByProjectName(String projectName, String deletedYn) {
     	
-    	return projectRepository.findByProjectName(projectName);
+    	return projectRepository.findByProjectNameAndDeletedYn(projectName, deletedYn);
     }
     
     /**
