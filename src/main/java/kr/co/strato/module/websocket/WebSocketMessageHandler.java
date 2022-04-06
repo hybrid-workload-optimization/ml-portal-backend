@@ -32,25 +32,34 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
         logger.info("Session connect success. Session ID: {}, Session Size: {}", session.getId(), clientMap.size());
 
         String sessionId = session.getId();
-        if(!clientMap.containsKey(sessionId)) {
-            String wsPath = (String)session.getAttributes().get("path");
-            String path = wsPath.replace("/ws", "");
-            if(path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            String serverUrl = getUrl(path);
-            if(serverUrl == null) {
-                logger.info("Unknown server type - URI: {}", path);
-                session.close();
-                return;
-            }
+        
+        try {
+			if(!clientMap.containsKey(sessionId)) {
+				logger.info("new session started.");
+			    String wsPath = (String)session.getAttributes().get("path");
+			    String path = wsPath.replace("/ws", "");
+			    if(path.startsWith("/")) {
+			        path = path.substring(1);
+			    }
+			    String serverUrl = getUrl(path);
+			    if(serverUrl == null) {
+			        logger.info("Unknown server type - URI: {}", path);
+			        session.close();
+			        return;
+			    }
 
-            String url = String.format("%s%s", serverUrl, path);
+			    String url = String.format("%s%s", serverUrl, path);
 
-            WebSocketMessageBroker client = new WebSocketMessageBroker(session, url);
-            client.start();
-            clientMap.put(sessionId, client);
-        }
+			    WebSocketMessageBroker client = new WebSocketMessageBroker(session, url);
+			    client.start();
+			    clientMap.put(sessionId, client);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+       
     }
 
 
@@ -69,6 +78,8 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
+    	logger.info("error - session id = [{}]", session.getId());
+    	
         //커넥션 에러 시 호출
         if (session.isOpen()) {
             logger.info("session [{}] is open, need close", session.getId());
