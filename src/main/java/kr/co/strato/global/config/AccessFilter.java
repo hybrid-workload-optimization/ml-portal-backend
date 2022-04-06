@@ -3,7 +3,6 @@ package kr.co.strato.global.config;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -21,10 +20,10 @@ import org.springframework.stereotype.Component;
 import kr.co.strato.global.error.exception.AuthFailException;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Log
+@Slf4j
 public class AccessFilter implements Filter{
 
 	
@@ -76,6 +75,8 @@ public class AccessFilter implements Filter{
 	*/
 
 //		if(!path.contains("access-manage") && !path.contains("swagger") && !path.contains("test") && !path.contains("/users/dupl/") && !(path.contains("/users") && "POST".equals(method))) {
+		
+		//log.info("before check path = {}", path);
 		if(!checkPath(path, method)) {
 			String token = null;
 			try {
