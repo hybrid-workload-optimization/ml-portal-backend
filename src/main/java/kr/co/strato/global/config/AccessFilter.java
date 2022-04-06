@@ -54,7 +54,7 @@ public class AccessFilter implements Filter{
         }
 
 
-		String acToken = request.getHeader("access_token");
+		String acToken = request.getHeader("access-token");
 		Enumeration<String> enumeration = request.getHeaderNames();
 		while(enumeration.hasMoreElements()){
 			log.info("header:"+enumeration.nextElement());
