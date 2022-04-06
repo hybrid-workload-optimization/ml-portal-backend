@@ -33,7 +33,7 @@ public class SelectService {
     private UserRoleDomainService userRoleDomainService;
     
     public List<SelectDto> getSelectProjects(){
-        List<ProjectEntity> projects = projectDomainService.getProjects();
+        List<ProjectEntity> projects = projectDomainService.getNotDeletedProjects();
         List<SelectDto> selectProjects =  projects.stream().map( e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
 
         return selectProjects;

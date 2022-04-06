@@ -64,7 +64,10 @@ public class ProjectDomainService {
 	public List<ProjectEntity> getProjects(){
 		return projectRepository.findAll();
 	}
-	
+
+    public List<ProjectEntity> getNotDeletedProjects(){
+        return projectRepository.findByDeletedYn("N");
+    }
 	/**
      * Project 조회
      * @param
