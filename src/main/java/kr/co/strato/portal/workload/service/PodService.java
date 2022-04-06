@@ -259,6 +259,7 @@ public class PodService {
     	try {
     		PodEntity entity = podDomainService.get(podId);
         	podDomainService.delete(entity);
+        	podAdapterService.delete(entity.getNamespace().getCluster().getClusterId(), entity.getNamespace().getName(), entity.getPodName());
         	result = true;
     	} catch (Exception e) {
     		log.error(e.getMessage(), e);
