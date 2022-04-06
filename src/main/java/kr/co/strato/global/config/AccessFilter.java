@@ -56,11 +56,11 @@ public class AccessFilter implements Filter{
 
 		String acToken = request.getHeader("access-token");
 		Enumeration<String> enumeration = request.getHeaderNames();
-		while(enumeration.hasMoreElements()){
-			log.info("header:"+enumeration.nextElement());
-		}
-		log.info("getHeaders:"+request.getHeaderNames().toString());
-		log.info("acToken:"+acToken);
+//		while(enumeration.hasMoreElements()){
+//			log.info("header:"+enumeration.nextElement());
+//		}
+//		log.info("getHeaders:"+request.getHeaderNames().toString());
+//		log.info("acToken:"+acToken);
 /*
 		Enumeration<String> names = request.getHeaderNames();
 		while(names.hasMoreElements()) {
@@ -79,7 +79,7 @@ public class AccessFilter implements Filter{
 			String token = null;
 			try {
 				token = tokenValidator.decrypt(acToken, timestamp, path, method);
-				log.info("token:"+token);
+//				log.info("token:"+token);
 			} catch (Exception e) {
 				e.printStackTrace();
 				request.getSession(false);
