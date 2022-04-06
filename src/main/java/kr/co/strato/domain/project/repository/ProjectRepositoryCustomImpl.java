@@ -161,7 +161,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  )
 				  .fetchOne();
 		
-		ProjectDto projectInfo = result;
+		/*ProjectDto projectInfo = result;
 		if(!"".equals(projectInfo.getDescription()) && projectInfo.getDescription() != null) {
 			String description = "";
 			if("view".equals(type)) {
@@ -171,9 +171,9 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			}
 					
 			projectInfo.setDescription(description);
-		}
+		}*/
 		
-		return projectInfo;
+		return result;
 	}
 	
 	public ProjectEntity getProjectDetailByClusterId(Long clusterIdx) {
