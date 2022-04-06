@@ -3,6 +3,7 @@ package kr.co.strato.global.config;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -112,7 +113,7 @@ public class AccessFilter implements Filter{
     
     private boolean checkPath(String path, String method) {
     	boolean result = false;
-    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/select/"};
+    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/select/", "/ws", "/api/v1/work-job/callback"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
