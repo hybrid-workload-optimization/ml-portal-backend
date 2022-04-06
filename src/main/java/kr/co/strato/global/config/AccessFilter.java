@@ -2,6 +2,7 @@ package kr.co.strato.global.config;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -51,8 +52,14 @@ public class AccessFilter implements Filter{
         if(strTimestamp != null) {
         	timestamp = Long.parseLong(strTimestamp);	
         }
-        
+
+
 		String acToken = request.getHeader("access_token");
+		Enumeration<String> enumeration = request.getHeaderNames();
+		while(enumeration.hasMoreElements()){
+			log.info("header:"+enumeration.nextElement());
+		}
+		log.info("getHeaders:"+request.getHeaderNames().toString());
 		log.info("acToken:"+acToken);
 /*
 		Enumeration<String> names = request.getHeaderNames();
