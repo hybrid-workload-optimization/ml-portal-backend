@@ -26,7 +26,6 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Table(name = "cluster")
 public class ClusterEntity {
 	

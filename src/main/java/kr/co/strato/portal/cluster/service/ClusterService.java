@@ -1,5 +1,6 @@
 package kr.co.strato.portal.cluster.service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
@@ -159,6 +161,7 @@ public class ClusterService {
 		// kubeCofingId = clusterId
 		Long clusterId = Long.valueOf(strClusterId);
 		
+		// TODO : 이건 목록/상세 정보 조회 시 실시간으로 가져와야 할 듯함.. 
 		// k8s - get cluster's information(health + version)
 		ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
 		String clusterHealth		= clusterInfo.getClusterHealth().getHealth();
@@ -240,6 +243,7 @@ public class ClusterService {
 		log.info("[createKubesprayCluster] register cluster : {}", clusterEntity.toString());
 		
 		// db - insert cluster's node
+		/*
 		for (ClusterDto.Node node : clusterDto.getNodes()) {
 			NodeEntity nodeEntity = new NodeEntity();
 			nodeEntity.setName(node.getName());
@@ -249,6 +253,7 @@ public class ClusterService {
 			
 			nodeDomainService.register(nodeEntity);
 		}
+		*/
 		
 		// kubespray - create cluster
 		ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
@@ -290,6 +295,17 @@ public class ClusterService {
 		// db - get cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
+		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
+		if (provisioningType == ProvisioningType.KUBECONFIG) {
+			return updateK8sCluster(clusterEntity, clusterDto);
+		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
+			return updateKubesprayCluster(clusterEntity, clusterDto);
+		}
+		
+		return null;
+	}
+
+	private Long updateK8sCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto) throws Exception {
 		// k8s - update cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
@@ -303,15 +319,69 @@ public class ClusterService {
 		}
 		
 		// db - update cluster
-		clusterEntity.setClusterName(clusterDto.getClusterName());
-		clusterEntity.setKubeConfig(clusterDto.getKubeConfig());
+		//clusterEntity.setClusterName(clusterDto.getClusterName());
+		//clusterEntity.setKubeConfig(clusterDto.getKubeConfig());
 		clusterEntity.setDescription(clusterDto.getDescription());
+		// TODO : update_user information
 		
 		clusterDomainService.update(clusterEntity);
 		
-		return clusterIdx;
+		return null;
 	}
-
+	
+	@Transactional(rollbackFor = Exception.class)
+	private Long updateKubesprayCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto) throws Exception {
+		// db - create work job
+		WorkJobDto workJobDto = WorkJobDto.builder().
+				workJobTarget(clusterDto.getClusterName())
+				.workJobType(WorkJobType.CLUSTER_SCALE)
+				.workJobStatus(WorkJobStatus.RUNNING)
+				.workJobStartAt(DateUtil.currentDateTime())
+				.workSyncYn("N")
+				.build();
+		
+		Long workJobIdx = workJobService.registerWorkJob(workJobDto);
+		log.info("[updateKubesprayCluster] work job idx : {}", workJobIdx);
+		
+		// db - get kubespray version
+		String kubesprayVersion = getKubesprayVersionFromSetting();
+		log.info("[updateKubesprayCluster] kubespray version : {}", kubesprayVersion);
+		
+		// db - update cluster
+		clusterEntity.setDescription(clusterDto.getDescription());
+		// TODO : update_user information
+		
+		clusterDomainService.update(clusterEntity);
+		log.info("[updateKubesprayCluster] update cluster : {}", clusterEntity.toString());
+		
+		// kubespray - scale cluster
+		ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
+		clusterCloudDto.setKubesprayVersion(kubesprayVersion);
+		clusterCloudDto.setCallbackUrl(portalBackendServiceUrl + ":" + portalBackendServicePort + portalBackendServiceCallbackUrl);
+		clusterCloudDto.setWorkJobIdx(workJobIdx);
+		{
+			// db - update work job
+			Map<String, Object> workJobDataRequest	= new HashMap<>();
+			workJobDataRequest.put(WorkJobData.BODY.name(), clusterCloudDto);
+			
+			String workJobRequest = new ObjectMapper().writeValueAsString(workJobDataRequest);
+			log.info("[updateKubesprayCluster] work job request : {}", workJobRequest);
+			
+			workJobDto.setWorkJobIdx(workJobIdx);
+			workJobDto.setWorkJobDataRequest(workJobRequest);
+			workJobDto.setWorkJobReferenceIdx(clusterEntity.getClusterIdx());
+			
+			workJobService.updateWorkJob(workJobDto);
+		}
+		
+		boolean isUpdated = clusterCloudService.scaleCluster(clusterCloudDto);
+		if (!isUpdated) {
+			throw new PortalException("Cluster scale failed");
+		}
+		
+		return workJobIdx;
+	}
+	
 	/**
 	 * Cluster 상세 조회
 	 * 
@@ -323,24 +393,62 @@ public class ClusterService {
 		// cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
+		// convert from entity to dto
 		ClusterDto.Detail detail = ClusterDtoMapper.INSTANCE.toDetail(clusterEntity);
 		
-		// provisioning information - workJobIdx
+		// 1. add info by provisioning type
 		Long workJobIdx = null;
 		
-		WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
-		log.debug("[getCluster] workJobEntity = {}", workJobEntity);
-		
-		if (workJobEntity != null) {
-			workJobIdx = workJobEntity.getWorkJobIdx();
+		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
+		if (provisioningType == ProvisioningType.KUBECONFIG) {
+			addK8sClusterInfo(clusterEntity, detail);
+		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
+			addKubesprayClusterInfo(clusterEntity, detail);
+			
+			// get workJobIdx
+			WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
+			log.debug("[getCluster] workJobEntity = {}", workJobEntity);
+			
+			if (workJobEntity != null) {
+				workJobIdx = workJobEntity.getWorkJobIdx();
+			}
 		}
 		
+		// 2. add info by workJobIdx
 		detail.setWorkJobIdx(workJobIdx);
 		
 		return detail;
 	}
 	
+	private void addK8sClusterInfo(ClusterEntity clusterEntity, ClusterDto.Detail detail) throws Exception {
+		// original code
+		ClusterAdapterDto cluster = clusterAdapterService.getCluster(clusterEntity.getClusterId());
+		log.debug("[addK8sClusterInfo] kube config : {}", cluster.getConfigContents());
+		
+		detail.setKubeConfig(cluster.getConfigContents());
+		// temporary code
+		//detail.setKubeConfig(clusterEntity.getKubeConfig());
+	}
 	
+	@SuppressWarnings("unchecked")
+	private void addKubesprayClusterInfo(ClusterEntity clusterEntity, ClusterDto.Detail detail) throws Exception {
+		ArrayList<ClusterDto.Node> results = new ArrayList<>();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		for (NodeEntity n : clusterEntity.getNodes()) {
+			Node node = new ClusterDto.Node();
+			node.setName(n.getName());
+			node.setIp(n.getIp());
+			node.setNodeTypes(mapper.readValue(n.getRole(), ArrayList.class));
+			
+			results.add(node);
+		}
+		
+		detail.setNodes(results);
+	}
+	
+
 	/**
 	 * Cluster 상세 조회(요약)
 	 * 
@@ -399,15 +507,17 @@ public class ClusterService {
 	 * @param clusterIdx
 	 * @throws Exception
 	 */
-	public void deleteCluster(Long clusterIdx) throws Exception {
+	public Long deleteCluster(Long clusterIdx) throws Exception {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			deleteK8sCluster(clusterEntity);
+			return deleteK8sCluster(clusterEntity);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			deleteKubesprayCluster(clusterEntity);
+			return deleteKubesprayCluster(clusterEntity);
 		}
+		
+		return null;
 	}
 	
 	/**
@@ -416,13 +526,15 @@ public class ClusterService {
 	 * @param clusterEntity
 	 * @throws Exception
 	 */
-	private void deleteK8sCluster(ClusterEntity clusterEntity) throws Exception {
+	private Long deleteK8sCluster(ClusterEntity clusterEntity) throws Exception {
 		boolean isDeleted = clusterAdapterService.deleteCluster(clusterEntity.getClusterId());
 		if (!isDeleted) {
 			throw new PortalException("Cluster deletion failed");
 		}
 		
 		clusterDomainService.delete(clusterEntity);
+		
+		return null;
 	}
 	
 	/**
@@ -431,7 +543,7 @@ public class ClusterService {
 	 * @param clusterEntity
 	 * @throws Exception
 	 */
-	private void deleteKubesprayCluster(ClusterEntity clusterEntity) throws Exception {
+	private Long deleteKubesprayCluster(ClusterEntity clusterEntity) throws Exception {
 		// db - create work job
 		WorkJobDto workJobDto = WorkJobDto.builder().
 				workJobTarget(clusterEntity.getClusterName())
@@ -472,6 +584,8 @@ public class ClusterService {
 		if (!isDeleted) {
 			throw new PortalException("Cluster deletion failed");
 		}
+		
+		return workJobIdx;
 	}
 	
 	/**

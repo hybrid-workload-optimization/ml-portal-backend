@@ -15,8 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.PortalException;
@@ -45,6 +46,9 @@ public class WorkJobCallbackService {
 	
 	@Autowired
 	ClusterSyncService clusterSyncService;
+	
+	@Autowired
+	NodeDomainService nodeDomainService;
 	
 	
 	public void callbackWorkJob(WorkJobCallback<Map<String, Object>> workJobCallback) {
@@ -129,7 +133,14 @@ public class WorkJobCallbackService {
 						providerVersion = clusterInfo.getKubeletVersion();
 						log.info("[callbackWorkJob] providerVersion : {}", providerVersion);
 						
-						// db - sync(update) cluster - node/namespace/pv/storageClass
+						// db - 생성시 등록한 node 정보 삭제
+						/*
+						ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
+						for (NodeEntity nodeEntity : clusterEntity.getNodes() ) {
+							nodeDomainService.delete(nodeEntity.getId());
+						}
+						*/
+						// db - sync(insert) cluster - node/namespace/pv/storageClass
 						clusterSyncService.syncCluster(clusterId, workJobEntity.getWorkJobReferenceIdx());
 					}
 					
@@ -148,6 +159,23 @@ public class WorkJobCallbackService {
 				}
 			} catch (Exception e) {
 				log.error("[callbackWorkJob] Cluster creation failed");
+				log.error("[callbackWorkJob]", e);
+			}
+		} else if (workJobType == WorkJobType.CLUSTER_SCALE) {
+			try {
+				// Response Data 
+				if (workJobData != null) {
+					String workJobDataLog	= (String) workJobData.get("log");
+					String state			= (String) workJobData.get("state");
+					
+					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
+					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
+						// db - sync(update) node
+						clusterSyncService.syncClusterNode(workJobEntity.getWorkJobReferenceIdx());
+					}
+				} 
+			} catch (Exception e) {
+				log.error("[callbackWorkJob] Cluster scale failed");
 				log.error("[callbackWorkJob]", e);
 			}
 		} else if (workJobType == WorkJobType.CLUSTER_DELETE) {

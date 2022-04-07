@@ -1,6 +1,5 @@
 package kr.co.strato.domain.pod.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.Volume;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -290,5 +288,15 @@ public class PodDomainService {
         oldEntity.setLabel(newEntity.getLabel());
         oldEntity.setAnnotation(newEntity.getAnnotation());
         oldEntity.setLabel(newEntity.getLabel());
+    }
+    
+    /**
+     * Node 정보를 이용하여 Pod 삭제
+     * 
+     * @param nodeEntity
+     */
+    public void deleteByNode(NodeEntity nodeEntity) {
+    	List<PodEntity> pods = podRepository.findByNode(nodeEntity);
+		pods.forEach(pod -> podRepository.delete(pod));
     }
 }

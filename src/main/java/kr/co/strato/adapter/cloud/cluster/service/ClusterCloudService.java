@@ -21,9 +21,9 @@ public class ClusterCloudService {
 		return response;
 	}
 	
-	public String scaleCluster(ClusterCloudDto clusterCloudDto) throws Exception {
+	public boolean scaleCluster(ClusterCloudDto clusterCloudDto) throws Exception {
 		log.debug("[Scale Cluster] request : {}", clusterCloudDto.toString());
-		String response = clusterCloudClient.scaleCluster(clusterCloudDto);
+		boolean response = clusterCloudClient.scaleCluster(clusterCloudDto);
 		log.debug("[Scale Cluster] response : {}", response);
 		
 		return response;

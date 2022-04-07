@@ -44,7 +44,8 @@ public class NodeAdapterService {
 
 		// 조회 요청
 		String results = nonNamespaceProxy.getResourceList(ResourceType.node.get(), param);
-		log.debug("[Get Node List] response : {}", results);
+		//log.debug("[Get Node List] response : {}", results);
+		
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
 			// DataMapping 모듈 ObjectMapper -> gson 으로 변경 2022-03-31 이호철

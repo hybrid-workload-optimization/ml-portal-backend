@@ -71,19 +71,20 @@ public class ClusterDto {
 		private String provider;
 		private String providerVersion;
 		private String createdAt;
-		private String kubeConfig;
 		private String description;
-		
 		// status
 		private String status;
 		private ArrayList<String> problem;
-		
 		// provisioning
 		private String provisioningType;
 		private String provisioningStatus;
 		private String provisioningLog;
+		// k8s
+		private String kubeConfig;
+		// kubespray
 		private String provisioningUser;
-		
+		private ArrayList<Node> nodes;	
+		// work job
 		private Long workJobIdx;
 	}
 	

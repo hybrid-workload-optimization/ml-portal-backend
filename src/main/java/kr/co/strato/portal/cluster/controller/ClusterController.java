@@ -208,6 +208,7 @@ public class ClusterController {
 						.meta(workMetadata)
 						.result(workResult)
 						.message(workMessage)
+						.workJobIdx(result)
 						.build());
 			} catch (Exception e) {
 				// ignore
@@ -218,8 +219,8 @@ public class ClusterController {
     }
 	
 	@DeleteMapping("/api/v1/clusters/{clusterIdx}")
-    public ResponseWrapper<Boolean> deleteCluster(@PathVariable(required = true) Long clusterIdx){
-		boolean result = true;
+    public ResponseWrapper<Long> deleteCluster(@PathVariable(required = true) Long clusterIdx){
+		Long result = null;
 		
 		String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();
@@ -229,10 +230,8 @@ public class ClusterController {
         workMetadata.put("clusterIdx", clusterIdx);
 
         try {
-        	clusterService.deleteCluster(clusterIdx);
-		} catch (Exception e) {
-			result = false;
-			
+        	result = clusterService.deleteCluster(clusterIdx);
+		} catch (Exception e) {			
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
 			
@@ -250,6 +249,7 @@ public class ClusterController {
 						.meta(workMetadata)
 						.result(workResult)
 						.message(workMessage)
+						.workJobIdx(result)
 						.build());
 			} catch (Exception e) {
 				// ignore
@@ -269,6 +269,7 @@ public class ClusterController {
 			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
 		}
+        log.debug("[isClusterDuplication] result = {}", result);
         
         return new ResponseWrapper<>(result);
     }

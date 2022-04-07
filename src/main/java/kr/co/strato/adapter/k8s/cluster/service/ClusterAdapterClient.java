@@ -14,6 +14,15 @@ import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 public interface ClusterAdapterClient {
 	
 	/**
+	 * k8s config 상세 정보
+	 * 
+	 * @param kubeConfigId
+	 * @return
+	 */
+	@GetMapping("/kubeConfig")
+	public String getCluster(@RequestParam("kubeConfigId") Long kubeConfigId);
+	
+	/**
 	 * k8s config 등록
 	 *  
 	 * @param provider

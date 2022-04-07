@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
@@ -16,6 +17,20 @@ public class ClusterAdapterService {
 
 	@Autowired
 	ClusterAdapterClient clusterAdapterClient;
+	
+	
+	public ClusterAdapterDto getCluster(Long kubeConfigId) throws Exception {
+		log.debug("[Get Cluster] request : {}", kubeConfigId);
+		String response = clusterAdapterClient.getCluster(kubeConfigId);
+		log.debug("[Get Cluster] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		
+		ClusterAdapterDto result = mapper.readValue(response, new TypeReference<ClusterAdapterDto>(){});
+        
+		return result;
+	}
 	
 	public String registerCluster(ClusterAdapterDto clusterAdapterDto) throws Exception {
 		log.debug("[Register Cluster] request : {}", clusterAdapterDto.toString());

@@ -35,6 +35,6 @@ public interface ClusterCloudClient {
 	 * @return
 	 */
 	@PostMapping("/cluster/scale")
-	public String scaleCluster(@RequestBody ClusterCloudDto clusterCloudDto);
+	public boolean scaleCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 	
 }
