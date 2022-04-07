@@ -18,11 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.NodeCondition;
 import kr.co.strato.adapter.cloud.cluster.model.ClusterCloudDto;
 import kr.co.strato.adapter.cloud.cluster.service.ClusterCloudService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
@@ -91,6 +93,9 @@ public class ClusterService {
 	
 	@Autowired
 	ClusterSyncService clusterSyncService;
+	
+	@Autowired
+	NodeAdapterService nodeAdapterService;
 	
 	@Value("${portal.backend.service.url}")
 	String portalBackendServiceUrl;
@@ -457,7 +462,14 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	public ClusterDto.Summary getClusterSummary(Long clusterIdx) throws Exception {
+		// db - get cluster
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+				
+		// k8s - get node
+		List<io.fabric8.kubernetes.api.model.Node> k8sNodes = nodeAdapterService.getNodeList(clusterEntity.getClusterId());
+		
 		PageRequest pageRequest = new PageRequest();
+		pageRequest.setSize(Integer.MAX_VALUE);
 		
 		// node
 		List<NodeEntity> nodes = nodeDomainService.getNodeList(pageRequest.of(), clusterIdx, null).getContent();
@@ -469,25 +481,51 @@ public class ClusterService {
 		List<PodEntity> pods = podDomainService.getPods(pageRequest.of(), null, clusterIdx, null, null).getContent();
 		
 		// TODO : pvc list
+		// not implemented
 		
 		log.debug("[Cluster Summary] nodes/namespaces/pods size = {}/{}/{}", nodes.size(), namespaces.size(), pods.size());
 		
 		List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
-		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker")).collect(Collectors.toList());
+		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker") || "[]".equals(n.getRole())).collect(Collectors.toList());
 		
-		List<NodeEntity> availableMasterNodes = masterNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
-		List<NodeEntity> availableworkerNodes = workerNodes.stream().filter(n -> ("true").equals(n.getStatus())).collect(Collectors.toList());
+		int availableMasterCount = 0;
+		for (NodeEntity n : masterNodes) {
+			for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
+				String uid = k8sNode.getMetadata().getUid();
+				List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
+				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+				
+				if (n.getUid().equals(uid) && status) {
+					availableMasterCount++;
+				}
+			}
+		}
+		
+		int availableWorkerCount = 0;
+		for (NodeEntity n : workerNodes) {
+			for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
+				String uid = k8sNode.getMetadata().getUid();
+				List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
+				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+				
+				if (n.getUid().equals(uid) && status) {
+					availableWorkerCount++;
+				}
+			}
+		}
 		
 		log.debug("[Cluster Summary] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
-		log.debug("[Cluster Summary] availableMasterNodes/availableworkerNodes size = {}/{}", availableMasterNodes.size(), availableworkerNodes.size());
+		log.debug("[Cluster Summary] availableMasterCount/availableWorkerCount = {}/{}", availableMasterCount, availableWorkerCount);
 		
 		// Master/Worker 수량
 		int masterCount = masterNodes.size();
 		int workerCount = workerNodes.size();
 		
 		// Master/Worker 가동률
-		float availableMasterPercent = masterCount > 0 ? (availableMasterNodes.size() * 100 / masterCount) : 0;
-		float availableWorkerPercent = workerCount > 0 ? (availableworkerNodes.size() * 100 / workerCount) : 0;
+		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 0;
+		float availableWorkerPercent = workerCount > 0 ? (availableWorkerCount * 100 / workerCount) : 0;
 		
 		Summary summary = new ClusterDto.Summary();
 		summary.setMasterCount(masterCount);
