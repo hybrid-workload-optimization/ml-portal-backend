@@ -18,8 +18,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
+/**
+ * @see : 2022.04.07
+ * Relation이 있는 Entity Class에는 ToString 하지 말것!!
+ * 각 Entity Class에서 ToString을 하고 출력할때 런타임 오류 발생됨.
+ *
+ */
 @Entity
 @Getter
 @Setter
