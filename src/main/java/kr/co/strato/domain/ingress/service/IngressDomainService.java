@@ -39,8 +39,8 @@ public class IngressDomainService {
 		return ingressRepository.findAll(pageable);
 	}
 	
-	public Page<IngressEntity> getIngressList(Pageable pageable,String name,Long namespaceId) {
-		return ingressRepository.getIngressList(pageable,name, namespaceId);
+	public Page<IngressEntity> getIngressList(Pageable pageable,Long clusterIdx,Long namespaceIdx) {
+		return ingressRepository.getIngressList(pageable,clusterIdx, namespaceIdx);
 	}
 	
 	public boolean delete(Long id) {

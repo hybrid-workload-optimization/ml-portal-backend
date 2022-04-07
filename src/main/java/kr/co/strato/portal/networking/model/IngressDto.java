@@ -15,23 +15,22 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 public class IngressDto {
-	
+
 	@Getter
 	@Setter
 	@NoArgsConstructor
-	public static class ReqCreateDto{
-	    //TODO validation체크
+	public static class ReqCreateDto {
+		// TODO validation체크
 		private Long kubeConfigId;
-		
-		 @K8sKind(value = K8sKindType.Ingress)
-	    private String yaml;
+
+		@K8sKind(value = K8sKindType.Ingress)
+		private String yaml;
 	}
 
-
 	@Getter
 	@Setter
 	@NoArgsConstructor
-	public static class ResListDto{
+	public static class ResListDto {
 		private Long id;
 		private String name;
 		private String uid;
@@ -44,35 +43,35 @@ public class IngressDto {
 		private Long ingressControllerIdx;
 	}
 
-	
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class ResDetailDto{
-    	private Long id;
-    	private String name;
-    	private String uid;
-    	private String ingressClass;
-    	private LocalDateTime createdAt;
-    	private Long namespaceIdx;
-    	private String namespace;
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	public static class ResDetailDto {
+		private Long id;
+		private String name;
+		private String uid;
+		private String ingressClass;
+		private LocalDateTime createdAt;
+		private Long namespaceIdx;
+		private String namespace;
 		private String address;
 		private String host;
 		private Long clusterId;
 		private Long clusterIdx;
-    	private Long ingressControllerIdx;
-    	private List<RuleList> ruleList;
-    }
-	
+		private Long ingressControllerIdx;
+		private List<RuleList> ruleList;
+	}
+
 	@Getter
 	@Setter
 	@NoArgsConstructor
 	@ToString
-	public static class SearchParam{
-	    private Long namespaceIdx;
-	    private String name;
+	public static class SearchParam {
+		private Long projectIdx;
+		private Long clusterIdx;
+		private Long namespaceIdx;
 	}
-	
+
 	@Getter
 	@Setter
 	@ToString
@@ -83,7 +82,6 @@ public class IngressDto {
 		private String pathType;
 		private String service;
 		private String port;
-		
-		
+
 	}
 }

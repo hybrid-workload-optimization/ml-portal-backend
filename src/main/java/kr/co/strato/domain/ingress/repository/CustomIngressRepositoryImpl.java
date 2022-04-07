@@ -12,6 +12,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.cronjob.model.QCronJobEntity;
 import kr.co.strato.domain.deployment.model.QDeploymentEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
@@ -38,22 +39,27 @@ public class CustomIngressRepositoryImpl implements CustomIngressRepository{
     }
 
     @Override
-    public Page<IngressEntity> getIngressList(Pageable pageable,String name,Long namespaceId) {
+    public Page<IngressEntity> getIngressList(Pageable pageable,Long clusterIdx,Long namespaceIdx) {
 
         QIngressEntity qIngressEntity = QIngressEntity.ingressEntity;
         QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
-
+        QClusterEntity qCluster = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
-        if(namespaceId != null && namespaceId > 0L){
-            builder.and(qNamespaceEntity.id.eq(namespaceId));
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qCluster.clusterIdx.eq(clusterIdx));
         }
+        if(namespaceIdx !=  null && namespaceIdx > 0L){
+            builder.and(qNamespaceEntity.id.eq(namespaceIdx));
+        }
+
 
         QueryResults<IngressEntity> results =
                 jpaQueryFactory
                         .select(qIngressEntity)
                         .from(qIngressEntity)
                         .leftJoin(qIngressEntity.namespace, qNamespaceEntity)
+                        .leftJoin(qNamespaceEntity.cluster, qCluster)
                         .where(builder)
                         .orderBy(qIngressEntity.id.desc())
                         .offset(pageable.getOffset())

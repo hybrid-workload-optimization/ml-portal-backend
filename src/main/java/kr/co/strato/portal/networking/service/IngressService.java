@@ -56,7 +56,7 @@ public class IngressService {
 	
 	
 	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable,IngressDto.SearchParam searchParam) {
-		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable,searchParam.getName(),searchParam.getNamespaceIdx());
+		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable,searchParam.getClusterIdx(),searchParam.getNamespaceIdx());
 		List<IngressDto.ResListDto> ingressList = ingressPage.getContent().stream().map(c -> IngressDtoMapper.INSTANCE.toResListDto(c)).collect(Collectors.toList());
 		
 		Page<IngressDto.ResListDto> page = new PageImpl<>(ingressList, pageable, ingressPage.getTotalElements());
