@@ -1,15 +1,13 @@
 package kr.co.strato.module.websocket;
 
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class WebSocketMessageBroker extends Thread implements MessageReceiver {
     //Kubernetes I/F쪽 세선
@@ -33,12 +31,17 @@ public class WebSocketMessageBroker extends Thread implements MessageReceiver {
         WebSocketClientHandler handler = new WebSocketClientHandler(waitForEndOfMessage, this);
         try {
             serverSession = webSocketClient.doHandshake(handler, url).get(10, TimeUnit.SECONDS);
+            //최대 3MB
+            serverSession.setTextMessageSizeLimit(1024 * 1024 * 3);
             setConnected(serverSession != null && serverSession.isOpen());
             waitForEndOfMessage.await();
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            
+            disconnect();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
+        
     }
 
     /**
@@ -55,8 +58,11 @@ public class WebSocketMessageBroker extends Thread implements MessageReceiver {
      * @throws IOException
      */
     public void disconnect() throws IOException {
-        if(serverSession != null) {
+        if(serverSession != null && serverSession.isOpen()) {
             serverSession.close();
+        }
+        if(clientSession != null && clientSession.isOpen()) {
+        	clientSession.close();
         }
     }
 

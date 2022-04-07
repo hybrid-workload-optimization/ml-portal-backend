@@ -80,15 +80,6 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception) {
     	logger.info("error - session id = [{}]", session.getId());
     	
-        //커넥션 에러 시 호출
-        if (session.isOpen()) {
-            logger.info("session [{}] is open, need close", session.getId());
-            try {
-                session.close();
-            } catch (IOException e) {
-                logger.error("", e);
-            }
-        }
         disconnect(session);
         clientMap.remove(session.getId());
     }
@@ -109,6 +100,14 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             };
+        }
+        if (session.isOpen()) {
+            logger.info("session [{}] is open, need close", session.getId());
+            try {
+                session.close();
+            } catch (IOException e) {
+                logger.error("", e);
+            }
         }
     }
 
