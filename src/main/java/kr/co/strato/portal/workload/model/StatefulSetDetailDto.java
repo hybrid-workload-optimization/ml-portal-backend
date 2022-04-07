@@ -35,6 +35,8 @@ public class StatefulSetDetailDto {
         private Integer replicas;
         private Integer readyReplicas;
         private String clusterId;
+        private String projectName;
+        private String clusterName;
     }
 
     @Getter

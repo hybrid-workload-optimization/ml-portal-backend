@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectClusterDomainService;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,6 +50,9 @@ public class StatefulSetService {
 
     @Autowired
     private NamespaceDomainService namespaceDomainService;
+
+    @Autowired
+    private ProjectDomainService projectDomainService;
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
@@ -163,9 +170,14 @@ public class StatefulSetService {
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
         Long clusterId = entity.getNamespace().getCluster().getClusterId();
+        Long clusterIdx = entity.getNamespace().getCluster().getClusterIdx();
+        String clusterName = entity.getNamespace().getCluster().getClusterName();
+        ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+        String projectName = projectEntity.getProjectName();
+
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
-        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId);
+        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId, projectName, clusterName);
 
         return dto;
     }

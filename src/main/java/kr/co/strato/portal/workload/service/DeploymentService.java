@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.api.model.apps.*;
 import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
@@ -67,6 +69,9 @@ public class DeploymentService {
 
 	@Autowired
 	ReplicaSetAdapterService replicaSetAdapterService;
+
+	@Autowired
+	private ProjectDomainService projectDomainService;
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -109,19 +114,24 @@ public class DeploymentService {
 	
 	//상세
 	public DeploymentDto get(Long idx){
-		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(idx);
-		Long clusterId = entitiy.getNamespaceEntity().getCluster().getClusterId();
+		DeploymentEntity entity = deploymentDomainService.getDeploymentEntitiy(idx);
+		Long clusterId = entity.getNamespaceEntity().getCluster().getClusterId();
+		Long clusterIdx = entity.getNamespaceEntity().getCluster().getClusterIdx();
+		String clusterName = entity.getNamespaceEntity().getCluster().getClusterName();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		String projectName = projectEntity.getProjectName();
+
 		String replicaSetUid = null;
 		Deployment deployment = null;
 		DeploymentDto dto = null;
 
-		List<ReplicaSetEntity> replicaSetEntities = replicaSetDomainService.getByDeplymentIdx(entitiy.getDeploymentIdx());
+		List<ReplicaSetEntity> replicaSetEntities = replicaSetDomainService.getByDeplymentIdx(entity.getDeploymentIdx());
 		if(replicaSetEntities != null && replicaSetEntities.size() > 0){
 			replicaSetUid = replicaSetEntities.get(0).getReplicaSetUid();
 		}
 
 		try{
-			deployment = deploymentAdapterService.retrieve(clusterId, entitiy.getNamespaceEntity().getName(), entitiy.getDeploymentName());
+			deployment = deploymentAdapterService.retrieve(clusterId, entity.getNamespaceEntity().getName(), entity.getDeploymentName());
 		}catch (Exception e){
 			log.error("k8s 디플로이먼트 조회 실패", e);
 		}
@@ -130,9 +140,9 @@ public class DeploymentService {
 			DeploymentStatus status = deployment.getStatus();
 			RollingUpdateDeployment rollingUpdateDeployment = deployment.getSpec().getStrategy().getRollingUpdate();
 
-			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid, status, rollingUpdateDeployment);
+			dto = DeploymentDtoMapper.INSTANCE.toDto(entity, clusterId, replicaSetUid, status, rollingUpdateDeployment, projectName, clusterName);
 		}else{
-			dto = DeploymentDtoMapper.INSTANCE.toDto(entitiy, clusterId, replicaSetUid);
+			dto = DeploymentDtoMapper.INSTANCE.toDto(entity, clusterId, replicaSetUid, projectName, clusterName);
 		}
 
 		return dto;

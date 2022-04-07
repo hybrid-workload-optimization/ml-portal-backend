@@ -27,4 +27,6 @@ public class DeploymentDto {
 	private String condition;
 	private String clusterId;
 	private String replicaSetUid;
+	private String projectName;
+	private String clusterName;
 }

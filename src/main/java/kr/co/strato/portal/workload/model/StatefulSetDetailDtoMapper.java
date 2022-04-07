@@ -29,7 +29,9 @@ public interface StatefulSetDetailDtoMapper {
     @Mapping(target = "replicas", source = "k8s.status.readyReplicas")
     @Mapping(target = "readyReplicas", source = "k8s.status.replicas")
     @Mapping(target = "clusterId", source = "clusterId")
-    public StatefulSetDetailDto.ResDetailDto toResDetailDto(StatefulSetEntity entity, StatefulSet k8s, Long clusterId);
+    @Mapping(target = "projectName", source = "projectName")
+    @Mapping(target = "clusterName", source = "clusterName")
+    public StatefulSetDetailDto.ResDetailDto toResDetailDto(StatefulSetEntity entity, StatefulSet k8s, Long clusterId, String projectName, String clusterName);
 
     @Named("creatdAtToString")
     default String creatdAtToString(LocalDateTime createdAt){
