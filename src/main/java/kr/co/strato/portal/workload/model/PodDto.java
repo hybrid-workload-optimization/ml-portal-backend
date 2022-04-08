@@ -36,6 +36,7 @@ public class PodDto {
     @NoArgsConstructor
     public static class ResListDto{
         private Long id;
+        private String clusterName;
         private String name;
         private String namespace;
         private String node;

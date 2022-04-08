@@ -36,6 +36,7 @@ public interface PodDtoMapper {
         @Mapping(target = "label", source = "label", qualifiedByName = "dataToMap"),
         @Mapping(target = "cpu", source = "cpu", qualifiedByName = "getCpu"),
         @Mapping(target = "memory", source = "memory", qualifiedByName = "getMemory"),
+        @Mapping(target = "clusterName", source = "namespace.cluster.clusterName"),
     })
     public PodDto.ResListDto toResListDto(PodEntity entity);
     
