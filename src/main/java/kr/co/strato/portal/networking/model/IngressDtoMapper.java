@@ -28,6 +28,7 @@ public interface IngressDtoMapper {
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
 	@Mapping(target = "address" , source = "ingressController.address")
 	@Mapping(target = "host" , source = "ingressController.name")
+	@Mapping(target = "clusterName" , source = "namespace.cluster.clusterName")
 	public IngressDto.ResDetailDto toResDetailDto(IngressEntity ingressEntity);
 	
 	

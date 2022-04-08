@@ -33,7 +33,8 @@ public interface K8sServiceDtoMapper {
     @Mapping(target = "namespaceName", source = "service.namespace.name")
     @Mapping(target = "endpoints", source = "endpoints")
     @Mapping(target = "clusterId", source = "clusterId")
-    public K8sServiceDto.ResDetailDto toDetailDto(ServiceEntity service, List<ServiceEndpointEntity> endpoints, Long clusterId);
+    @Mapping(target = "clusterName", source = "clusterName")
+    public K8sServiceDto.ResDetailDto toDetailDto(ServiceEntity service, List<ServiceEndpointEntity> endpoints, Long clusterId, String clusterName);
 
     @Named("stringToMap")
     default HashMap<String, Object> stringToMap(String text){

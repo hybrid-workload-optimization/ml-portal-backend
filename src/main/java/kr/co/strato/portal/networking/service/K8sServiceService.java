@@ -158,9 +158,11 @@ public class K8sServiceService {
     public K8sServiceDto.ResDetailDto getService(Long serviceId){
         ServiceEntity service = serviceDomainService.get(serviceId);
         Long clusterId = service.getNamespace().getCluster().getClusterId();
+        String clusterName = service.getNamespace().getCluster().getClusterName();
+
         List<ServiceEndpointEntity> endpoints = serviceDomainService.getServiceEndpoints(serviceId);
 
-        K8sServiceDto.ResDetailDto dto = K8sServiceDtoMapper.INSTANCE.toDetailDto(service, endpoints, clusterId);
+        K8sServiceDto.ResDetailDto dto = K8sServiceDtoMapper.INSTANCE.toDetailDto(service, endpoints, clusterId, clusterName);
 
         return dto;
     }

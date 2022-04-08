@@ -71,6 +71,7 @@ public class K8sServiceDto {
         private String sessionAffinity;
         private List<ResEndPointListDto> endpoints;
         private Long clusterId;
+        private String clusterName;
     }
 
     @Getter

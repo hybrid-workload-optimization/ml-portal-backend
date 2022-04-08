@@ -109,7 +109,7 @@ public class IngressService {
 
 	
     public IngressDto.ResDetailDto getIngressDetail(Long id){
-    	IngressEntity ingressEntity = ingressDomainService.getDetail(id); 
+    	IngressEntity ingressEntity = ingressDomainService.getDetail(id);
     	List<IngressRuleEntity> ruleList = ingressRuleDomainService.findByIngressId(id);
 
     	IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
