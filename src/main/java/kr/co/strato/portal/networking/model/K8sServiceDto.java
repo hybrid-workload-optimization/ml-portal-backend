@@ -24,6 +24,7 @@ public class K8sServiceDto {
         private List<HashMap<String, Object>> internalEndpoints;
         private List<HashMap<String, Object>> externalEndpoints;
         private LocalDateTime age;
+        private String clusterName;
     }
 
     @Getter

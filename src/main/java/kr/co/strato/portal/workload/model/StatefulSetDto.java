@@ -39,7 +39,7 @@ public class StatefulSetDto {
         private String image;
         private LocalDateTime age;
         private HashMap<String, Object> label;
-
+        private String clusterName;
     }
 
     @Getter

@@ -23,6 +23,7 @@ public interface K8sServiceDtoMapper {
     @Mapping(target = "internalEndpoints", source = "internalEndpoint", qualifiedByName = "stringToMapList")
     @Mapping(target = "externalEndpoints", source = "externalEndpoint", qualifiedByName = "stringToMapList")
     @Mapping(target = "age", source = "createdAt")
+    @Mapping(target = "clusterName", source = "namespace.cluster.clusterName")
     public K8sServiceDto.ResListDto toResListDto(ServiceEntity entity);
 
     @Mapping(target = "label", source = "service.label", qualifiedByName = "stringToMap")

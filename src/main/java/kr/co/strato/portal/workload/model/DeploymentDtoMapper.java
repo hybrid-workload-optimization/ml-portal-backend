@@ -21,7 +21,8 @@ public interface DeploymentDtoMapper {
 		@Mapping(source = "deploymentName", target = "name"),
 		@Mapping(source = "deploymentUid", target = "uid"),
 		@Mapping(source = "namespaceEntity.id", target = "namespaceIdx"),
-		@Mapping(source = "namespaceEntity.name", target = "namespaceName")
+		@Mapping(source = "namespaceEntity.name", target = "namespaceName"),
+		@Mapping(source = "namespaceEntity.cluster.clusterName", target = "clusterName")
 	})
 	@Named("toDeploymentDto")
 	public DeploymentDto toDto(DeploymentEntity entity);
@@ -33,7 +34,8 @@ public interface DeploymentDtoMapper {
 			@Mapping(source = "entity.namespaceEntity.id", target = "namespaceIdx"),
 			@Mapping(source = "entity.namespaceEntity.name", target = "namespaceName"),
 			@Mapping(source = "status.replicas", target = "podReplicas"),
-			@Mapping(source = "status.readyReplicas", target = "podReady")
+			@Mapping(source = "status.readyReplicas", target = "podReady"),
+			@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName")
 	})
 	public DeploymentDto toDto(DeploymentEntity entity, DeploymentStatus status);
 

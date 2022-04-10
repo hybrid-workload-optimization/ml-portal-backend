@@ -31,6 +31,7 @@ public class ReplicaSetDto {
 		private int desiredPod;
 		private String image;
 		private String age;
+		private String clusterName;
 	}
 	
 	@Getter

@@ -41,6 +41,7 @@ public class IngressDto {
 		private String address;
 		private String host;
 		private Long ingressControllerIdx;
+		private String clusterName;
 	}
 
 	@Getter

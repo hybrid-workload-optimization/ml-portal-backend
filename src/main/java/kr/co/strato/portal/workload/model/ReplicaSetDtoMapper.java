@@ -27,6 +27,7 @@ public interface ReplicaSetDtoMapper {
     @Mapping(target = "namespace",			source = "r.namespace.name")
     @Mapping(target = "age",				source = "r.createdAt")
     @Mapping(target = "label",				source = "r.label",			qualifiedByName = "jsonToMap")
+    @Mapping(target = "clusterName",				source = "r.namespace.cluster.clusterName")
 	public ReplicaSetDto.List toList(ReplicaSetEntity r);
 	
 	@Mapping(target = "name", 				source = "r.replicaSetName")
@@ -35,6 +36,7 @@ public interface ReplicaSetDtoMapper {
     @Mapping(target = "label",				source = "r.label",			qualifiedByName = "jsonToMap")
 	@Mapping(target = "runningPod",			source = "k8s.status.readyReplicas")
     @Mapping(target = "desiredPod",			source = "k8s.status.replicas")
+    @Mapping(target = "clusterName",				source = "r.namespace.cluster.clusterName")
 	public ReplicaSetDto.List toList(ReplicaSetEntity r, ReplicaSet k8s);
 	
 	@Mapping(target = "replicaSetIdx",		source = "r.replicaSetIdx")

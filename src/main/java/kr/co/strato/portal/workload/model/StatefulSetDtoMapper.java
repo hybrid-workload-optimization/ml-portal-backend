@@ -22,12 +22,14 @@ public interface StatefulSetDtoMapper {
     @Mapping(target = "namespace", source = "namespace.name")
     @Mapping(target = "age", source = "createdAt")
     @Mapping(target = "label", source = "label", qualifiedByName = "labelToMap")
+    @Mapping(target = "clusterName", source = "entity.namespace.cluster.clusterName")
     public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity);
 
     @Mapping(target = "name", source = "entity.statefulSetName")
     @Mapping(target = "namespace", source = "entity.namespace.name")
     @Mapping(target = "age", source = "entity.createdAt")
     @Mapping(target = "label", source = "entity.label", qualifiedByName = "labelToMap")
+    @Mapping(target = "clusterName", source = "entity.namespace.cluster.clusterName")
     @Mapping(target = "replicas", source = "k8s.status.replicas")
     @Mapping(target = "readyReplicas", source = "k8s.status.readyReplicas")
     public StatefulSetDto.ResListDto toResListDto(StatefulSetEntity entity, StatefulSet k8s);
