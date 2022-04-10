@@ -159,10 +159,18 @@ public class K8sServiceService {
         ServiceEntity service = serviceDomainService.get(serviceId);
         Long clusterId = service.getNamespace().getCluster().getClusterId();
         String clusterName = service.getNamespace().getCluster().getClusterName();
+        String namespaceName = service.getNamespace().getName();
 
-        List<ServiceEndpointEntity> endpoints = serviceDomainService.getServiceEndpoints(serviceId);
+        Endpoints endpoints = endpointAdapterService.get(clusterId, namespaceName, service.getServiceName());
 
-        K8sServiceDto.ResDetailDto dto = K8sServiceDtoMapper.INSTANCE.toDetailDto(service, endpoints, clusterId, clusterName);
+        List<ServiceEndpointEntity> endpointEntities = new ArrayList<>();
+        try {
+            endpointEntities = toEntities(endpoints);
+        } catch (JsonProcessingException e) {
+            endpointEntities = serviceDomainService.getServiceEndpoints(serviceId);
+        }
+
+        K8sServiceDto.ResDetailDto dto = K8sServiceDtoMapper.INSTANCE.toDetailDto(service, endpointEntities, clusterId, clusterName);
 
         return dto;
     }
