@@ -21,10 +21,18 @@ public class ClusterCloudService {
 		return response;
 	}
 	
-	public boolean scaleCluster(ClusterCloudDto clusterCloudDto) throws Exception {
-		log.debug("[Scale Cluster] request : {}", clusterCloudDto.toString());
-		boolean response = clusterCloudClient.scaleCluster(clusterCloudDto);
-		log.debug("[Scale Cluster] response : {}", response);
+	public boolean scaleOutCluster(ClusterCloudDto clusterCloudDto) throws Exception {
+		log.debug("[Scale Out Cluster] request : {}", clusterCloudDto.toString());
+		boolean response = clusterCloudClient.scaleOutCluster(clusterCloudDto);
+		log.debug("[Scale Out Cluster] response : {}", response);
+		
+		return response;
+	}
+	
+	public boolean scaleInCluster(ClusterCloudDto clusterCloudDto) throws Exception {
+		log.debug("[Scale In Cluster] request : {}", clusterCloudDto.toString());
+		boolean response = clusterCloudClient.scaleInCluster(clusterCloudDto);
+		log.debug("[Scale In Cluster] response : {}", response);
 		
 		return response;
 	}

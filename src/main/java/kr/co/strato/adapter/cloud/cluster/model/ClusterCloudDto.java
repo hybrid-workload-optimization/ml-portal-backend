@@ -29,6 +29,8 @@ public class ClusterCloudDto {
 	
 	private ArrayList<Node> nodes;
 	
+	private ArrayList<String> removeNodes;
+	
 	
 	@Getter
 	@Setter

@@ -31,7 +31,9 @@ public class ClusterDto {
 		private String kubeConfig;
 		// kubespray
 		private String provisioningUser;
-		private ArrayList<Node> nodes;	
+		private ArrayList<Node> nodes;
+		private ArrayList<Node> originalNodes;
+		private ArrayList<String> removeNodes;
 	}
 
 	@Getter

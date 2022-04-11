@@ -29,12 +29,20 @@ public interface ClusterCloudClient {
 	public boolean removeCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 	
 	/**
-	 * kubespray cluster scale 조정
+	 * kubespray cluster scale(out) 조정
 	 * 
 	 * @param clusterCloudDto
 	 * @return
 	 */
 	@PostMapping("/cluster/scale")
-	public boolean scaleCluster(@RequestBody ClusterCloudDto clusterCloudDto);
+	public boolean scaleOutCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 	
+	/**
+	 * kubespray cluster scale(in) 조정 - Node 삭제
+	 * 
+	 * @param clusterCloudDto
+	 * @return
+	 */
+	@DeleteMapping("/cluster/removeNode")
+	public boolean scaleInCluster(@RequestBody ClusterCloudDto clusterCloudDto);
 }

@@ -359,7 +359,48 @@ public class ClusterService {
 		clusterDomainService.update(clusterEntity);
 		log.info("[updateKubesprayCluster] update cluster : {}", clusterEntity.toString());
 		
-		// kubespray - scale cluster
+		// kubespray - scale-in/out cluster
+		boolean isScaleOut = false;
+		if (clusterDto.getNodes().size() >= clusterDto.getOriginalNodes().size()) { // scale-out
+			isScaleOut = true;
+		} else { // scale-in
+			// copy from original nodes
+			ArrayList<ClusterDto.Node> copyNodes = new ArrayList<>();
+			ArrayList<ClusterDto.Node> originalNodes = clusterDto.getOriginalNodes();
+			originalNodes.forEach(o -> {
+				ClusterDto.Node n = new ClusterDto.Node();
+				n.setName(o.getName());
+				n.setIp(o.getIp());
+				
+				ArrayList<String> roles = new ArrayList<>();
+				for (String role : o.getNodeTypes()) {
+					roles.add(role);
+				}
+				n.setNodeTypes(roles);
+				
+				copyNodes.add(n);
+			});
+			
+			// find to deleted nodes 
+			for (int i = 0; i < originalNodes.size(); i++) {
+				for (ClusterDto.Node node : clusterDto.getNodes()) {
+					// find same node : based on node's ip
+					if (originalNodes.get(i).getIp().equals(node.getIp())) {
+						originalNodes.remove(i);
+					}
+				}
+			}
+			
+			ArrayList<String> deletedNodes = new ArrayList<>();
+			for (ClusterDto.Node node : originalNodes) {
+				deletedNodes.add(node.getName());
+			}
+			
+			// set node
+			clusterDto.setRemoveNodes(deletedNodes);
+			clusterDto.setNodes(copyNodes);
+		}
+		
 		ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
 		clusterCloudDto.setKubesprayVersion(kubesprayVersion);
 		clusterCloudDto.setCallbackUrl(portalBackendServiceUrl + ":" + portalBackendServicePort + portalBackendServiceCallbackUrl);
@@ -379,7 +420,7 @@ public class ClusterService {
 			workJobService.updateWorkJob(workJobDto);
 		}
 		
-		boolean isUpdated = clusterCloudService.scaleCluster(clusterCloudDto);
+		boolean isUpdated = isScaleOut ? clusterCloudService.scaleOutCluster(clusterCloudDto) : clusterCloudService.scaleInCluster(clusterCloudDto);
 		if (!isUpdated) {
 			throw new PortalException("Cluster scale failed");
 		}
