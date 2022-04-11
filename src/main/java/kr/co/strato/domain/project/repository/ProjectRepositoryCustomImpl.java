@@ -76,7 +76,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d"),
 								  "createdAt"),
 						  ExpressionUtils.as(
-								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.updatedAt, "%Y-%m-%d"),
+								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.updatedAt, "%Y-%m-%d %H:%i:%s"),
 								  "updatedAt")
 				  ))
 				  .from(projectEntity)
