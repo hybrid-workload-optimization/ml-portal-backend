@@ -15,6 +15,7 @@ public class ProjectClusterDto {
 	private Long projectIdx;
 	
 	private String provider;
+	private Long nodeCount;
 	private String providerVersion;
 	private String clusterName;
 	private String description;

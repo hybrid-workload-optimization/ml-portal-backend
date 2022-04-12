@@ -1,7 +1,9 @@
 package kr.co.strato.domain.project.repository;
 
 import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
+import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
 import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
+import static kr.co.strato.domain.node.model.QNodeEntity.nodeEntity;
 
 import java.util.List;
 
@@ -33,7 +35,12 @@ public class ProjectClusterRepositoryCustomImpl implements ProjectClusterReposit
 				.select(Projections.fields(
 						ProjectClusterDto.class,
 						projectClusterEntity.clusterIdx, 
-						projectClusterEntity.projectIdx, 
+						projectClusterEntity.projectIdx,
+						ExpressionUtils.as(
+								  JPAExpressions.select(nodeEntity.cluster.clusterIdx.count())
+	                                            .from(nodeEntity)
+	                                            .where(nodeEntity.cluster.clusterIdx.eq(projectClusterEntity.clusterIdx)),
+	                              "nodeCount"),
 						clusterEntity.provider,
 						clusterEntity.providerVersion, 
 						clusterEntity.clusterName,
