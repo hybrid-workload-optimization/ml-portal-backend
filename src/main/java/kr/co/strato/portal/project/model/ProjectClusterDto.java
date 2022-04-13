@@ -19,6 +19,8 @@ public class ProjectClusterDto {
 	private String providerVersion;
 	private String clusterName;
 	private String description;
+	private String provisioningType;
+	private String provisioningStatus;
 	private String createdAt;
 	private String addedAt;
 }
