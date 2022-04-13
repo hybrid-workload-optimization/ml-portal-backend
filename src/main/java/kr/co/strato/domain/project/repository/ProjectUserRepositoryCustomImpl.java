@@ -50,6 +50,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				  .from(projectUserEntity)
 				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
 				  .where(projectUserEntity.projectIdx.eq(projectIdx))
+				  .orderBy(projectUserEntity.projectUserRole.desc())
 				  .fetch();
 		
 		return result;
