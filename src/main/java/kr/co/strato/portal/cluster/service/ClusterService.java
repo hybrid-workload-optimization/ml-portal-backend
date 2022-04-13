@@ -154,7 +154,7 @@ public class ClusterService {
 				} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
 					//배포 실패
 					health = new ClusterHealthAdapterDto();
-					health.setHealth("Unhealthy");
+					health.setHealth("Deploy Fail");
 					health.addProbleam("Cluster deployment failed.");
 				}
 			} else {
