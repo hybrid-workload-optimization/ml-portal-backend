@@ -15,10 +15,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import kr.co.strato.global.error.exception.AuthFailException;
+import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.validation.TokenValidator;
+import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +32,9 @@ public class AccessFilter implements Filter{
 	
 	@Autowired
 	TokenValidator tokenValidator;
+	
+	@Autowired
+	AccessService accessService;
 	
     @Override
     public void init(FilterConfig fc) throws ServletException {
@@ -81,7 +87,6 @@ public class AccessFilter implements Filter{
 			String token = null;
 			try {
 				token = tokenValidator.decrypt(acToken, timestamp, path, method);
-//				log.info("token:"+token);
 			} catch (Exception e) {
 				e.printStackTrace();
 				request.getSession(false);
@@ -91,18 +96,30 @@ public class AccessFilter implements Filter{
 				log.info("Token Is Null");
 				request.getSession(false);
 				response.sendError(HttpStatus.UNAUTHORIZED.value());
-			}else {
+			} else {
 				if(!tokenValidator.validateToken(token)) {
 					log.info("Token Is Not Validate");
+					
+					
+					//토큰 만료.
+					try {
+						ResponseEntity<KeycloakToken> entity = accessService.tokenRefresh(token);
+						KeycloakToken keycloakToken = entity.getBody();
+						keycloakToken.getAccessToken();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					
 					request.getSession(false);
 					response.sendError(HttpStatus.UNAUTHORIZED.value());
-				}else {
+				} else {
 					UserDto loginUser = tokenValidator.extractUserInfo(token);
 					request.setAttribute("loginUser", loginUser);
 					chain.doFilter(request, response);
 				}
 			}	
-		}else {
+		} else {
 			chain.doFilter(request, response);
 		}
 		
@@ -114,7 +131,7 @@ public class AccessFilter implements Filter{
     
     private boolean checkPath(String path, String method) {
     	boolean result = false;
-    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/select/", "/ws", "/api/v1/work-job/callback"};
+    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/ws", "/api/v1/work-job/callback"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
