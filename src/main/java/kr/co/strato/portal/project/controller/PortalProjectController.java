@@ -19,6 +19,7 @@ import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
@@ -27,7 +28,7 @@ import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @RestController
-public class PortalProjectController {
+public class PortalProjectController extends CommonController {
 
 	@Autowired
 	PortalProjectService portalProjectService;
@@ -39,8 +40,12 @@ public class PortalProjectController {
      */
     @GetMapping("/api/v1/project/projects")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest, ProjectDto param) throws Exception {
+    public ResponseWrapper<Page<ProjectDto>> getProjectList(PageRequest pageRequest) throws Exception {
         
+    	ProjectDto param = new ProjectDto();
+    	UserDto userInfo = getLoginUser();
+    	param.setUserId(userInfo.getUserId());
+    	
     	Page<ProjectDto> response = portalProjectService.getProjectList(pageRequest.of(), param);
         
         return new ResponseWrapper<Page<ProjectDto>>(response);
@@ -127,6 +132,10 @@ public class PortalProjectController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseWrapper<Long> createProject(@RequestBody ProjectRequestDto param) throws AleadyProjectNameException, Exception {
         
+    	UserDto userInfo = getLoginUser();
+    	param.setLoginId(userInfo.getUserId());
+    	param.setLoginName(userInfo.getUserName());
+    	
     	Long response = portalProjectService.createProject(param);
         
         return new ResponseWrapper<Long>(response);
@@ -169,6 +178,10 @@ public class PortalProjectController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseWrapper<Boolean> updateProject(@RequestBody ProjectRequestDto param) {
         
+    	UserDto userInfo = getLoginUser();
+    	param.setLoginId(userInfo.getUserId());
+    	param.setLoginName(userInfo.getUserName());
+    	
     	Boolean response = portalProjectService.updateProject(param);
         
         return new ResponseWrapper<Boolean>(response);
@@ -197,6 +210,10 @@ public class PortalProjectController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseWrapper<Boolean> updateProjectUser(@RequestBody ProjectRequestDto param) {
         
+    	UserDto userInfo = getLoginUser();
+    	param.setLoginId(userInfo.getUserId());
+    	param.setLoginName(userInfo.getUserName());
+    	
     	Boolean response = portalProjectService.updateProjectUser(param);
         
         return new ResponseWrapper<Boolean>(response);

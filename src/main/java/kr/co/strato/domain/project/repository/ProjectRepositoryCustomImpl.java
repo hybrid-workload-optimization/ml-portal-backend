@@ -98,7 +98,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				Date create = DateUtil.toDate(dto.getCreatedAt(), "yyyy-MM-dd");
 				long diffSec = (today.getTime() - create.getTime()) / 1000;
 				long compare = diffSec / (24 * 60 * 60);
-				System.out.println("compare === " + compare);
 				if(compare <= 3) {
 					dto.setFresh(dto.getCreatedAt());
 				}
