@@ -145,7 +145,19 @@ public class AddonService {
 	 * @return
 	 */
 	public boolean isInstall(Long clusterIdx, String addonType) {
-		return addonDomainService.isInstall(clusterIdx, addonType);
+		return addonDomainService.getEntityByType(clusterIdx, addonType) != null;
+	}
+	
+	public Addon getAddonByType(Long clusterIdx, String addonType) {
+		AddonEntity entity = addonDomainService.getEntityByType(clusterIdx, addonType);
+		if(entity != null) {
+			Long kubeConfigId = getKubeConfigId(clusterIdx);
+			Addon addon = addonProxy.getAddon(kubeConfigId, entity.getAddonId());
+			
+			addon.setAddonEntity(entity);
+			return addon;
+		}
+		return null;
 	}
 	
 	/**
