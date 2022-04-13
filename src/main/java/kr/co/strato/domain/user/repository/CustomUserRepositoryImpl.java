@@ -64,6 +64,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 					.where(builder)
 					.offset(pageable.getOffset())
 					.groupBy(qUserEntity.userId)
+					.orderBy(qUserEntity.createdAt.desc())
 					.fetchResults();
 			
 		}else {
@@ -76,6 +77,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 					.where(builder)
 					.offset(pageable.getOffset())
 					.groupBy(qUserEntity.userId)
+					.orderBy(qUserEntity.createdAt.desc())
 					.fetchResults();	
 		}
 		
