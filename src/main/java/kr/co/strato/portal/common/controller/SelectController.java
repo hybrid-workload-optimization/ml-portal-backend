@@ -14,7 +14,7 @@ import kr.co.strato.portal.common.model.SelectDto;
 import kr.co.strato.portal.common.service.SelectService;
 
 @RestController
-public class SelectController {
+public class SelectController extends CommonController {
     @Autowired
     private SelectService selectService;
 

@@ -60,6 +60,7 @@ public class DashboardService {
     private PodAdapterService podAdapterService;
 	
 	
+	
 	/**
 	 * System admin용 Dashboard 데이터 반환.
 	 * @param projectIdx
@@ -98,10 +99,14 @@ public class DashboardService {
 		if(clusterCount > 0) {
 			long currentTime = new Date().getTime();
 			List<GetNodeInfoRunnable> runnables = new ArrayList<>();
-			for(ClusterEntity cluster: clusters) {				
-				GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, false);
-				runnables.add(getNodeinfoRunnable);
-				Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
+			for(ClusterEntity cluster: clusters) {
+				
+				Long kubeConfigId = cluster.getClusterId();
+				if(kubeConfigId != null) {
+					GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, false);
+					runnables.add(getNodeinfoRunnable);
+					Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
+				}
 			}
 			
 			//작업이 완료될때 까지 대기.
@@ -163,10 +168,13 @@ public class DashboardService {
 		if(clusters.size() > 0) {
 			long currentTime = new Date().getTime();
 			List<GetNodeInfoRunnable> runnables = new ArrayList<>();
-			for(ClusterEntity cluster: clusters) {				
-				GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, true);
-				runnables.add(getNodeinfoRunnable);
-				Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
+			for(ClusterEntity cluster: clusters) {
+				Long kubeConfigId = cluster.getClusterId();
+				if(kubeConfigId != null) {
+					GetNodeInfoRunnable getNodeinfoRunnable = new GetNodeInfoRunnable(cluster, currentTime, true);
+					runnables.add(getNodeinfoRunnable);
+					Executors.newSingleThreadExecutor().submit(getNodeinfoRunnable);
+				}				
 			}
 			
 			//작업이 완료될때 까지 대기.
@@ -244,6 +252,7 @@ public class DashboardService {
 					    		  Function.identity()));
 				
 				ProjectEntity projectEntry = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+				
 				List<Node> nodes = nodeAdapterService.getNodeList(kubeConfigId);
 				nodeCount = nodes.size();
 				for(Node node : nodes) {				

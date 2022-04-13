@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,4 +80,13 @@ public class ClusterAdapterService {
         
 		return result;
 	}
+	
+	
+	public ClusterHealthAdapterDto getClusterHealthInfo(Long kubeConfigId) throws Exception {
+		log.debug("[Get Cluster Health] request : {}", kubeConfigId);
+		ClusterHealthAdapterDto healthDto = clusterAdapterClient.getClusterHealth(kubeConfigId);
+		log.debug("[Get Cluster Health] response : {}", healthDto.toString());
+		return healthDto;
+	}
+	
 }

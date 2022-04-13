@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 
 @FeignClient(name = "clusterAdapterClient", url = "${service.kubernetes-interface.url}")
 public interface ClusterAdapterClient {
@@ -75,7 +76,7 @@ public interface ClusterAdapterClient {
 	 * @return
 	 */
 	@GetMapping("/cluster/health")
-	public String getClusterHealth(@RequestParam("kubeConfigId") Long kubeConfigId);
+	public ClusterHealthAdapterDto getClusterHealth(@RequestParam("kubeConfigId") Long kubeConfigId);
 	
 	/**
 	 * k8s cluster version 정보

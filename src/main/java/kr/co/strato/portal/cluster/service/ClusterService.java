@@ -22,10 +22,12 @@ import io.fabric8.kubernetes.api.model.NodeCondition;
 import kr.co.strato.adapter.cloud.cluster.model.ClusterCloudDto;
 import kr.co.strato.adapter.cloud.cluster.service.ClusterCloudService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -121,6 +123,56 @@ public class ClusterService {
 				.map(c -> ClusterDtoMapper.INSTANCE.toList(c))
 				.collect(Collectors.toList());
 		
+		
+		//Health 정보 설정.
+		for(ClusterDto.List item : clusterList) {
+			Long kubeConfigId = item.getClusterId();
+			String pStatus = item.getProvisioningStatus();
+			
+			ClusterHealthAdapterDto health = null;
+			if(pStatus != null) {
+				if(pStatus.equals(ProvisioningStatus.FINISHED.toString())) {
+					if(kubeConfigId != null) {
+						try {
+							health = clusterAdapterService.getClusterHealthInfo(kubeConfigId);
+						} catch(Exception e) {
+							// Health 정보를 가져올 수 없는 경우.
+							health = new ClusterHealthAdapterDto();
+							health.setHealth("Unhealthy");
+							health.addProbleam("Could not get cluster information.");
+						}
+					}
+					
+				} else if(pStatus.equals(ProvisioningStatus.READY.toString())) {
+					//배포 준비
+					health = new ClusterHealthAdapterDto();
+					health.setHealth("Waiting");
+				} else if( pStatus.equals(ProvisioningStatus.STARTED.toString())) {
+					//배포중
+					health = new ClusterHealthAdapterDto();
+					health.setHealth("Deploying");
+				} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
+					//배포 실패
+					health = new ClusterHealthAdapterDto();
+					health.setHealth("Unhealthy");
+					health.addProbleam("Cluster deployment failed.");
+				}
+			} else {
+				health = new ClusterHealthAdapterDto();
+				health.setHealth("Error");
+				health.addProbleam("Cluster deployment information does not exist.");
+			}
+			
+			
+			if(health == null) {
+				health = new ClusterHealthAdapterDto();
+				health.setHealth("Error");
+				health.addProbleam("Unknown Error.");
+			}
+			
+			item.setStatus(health.getHealth());
+			item.setProblem((ArrayList<String>)health.getProblem());
+		}
 		return new PageImpl<>(clusterList, pageable, clusterPage.getTotalElements());
 	}
 	
@@ -607,9 +659,12 @@ public class ClusterService {
 	 */
 	private Long deleteK8sCluster(ClusterEntity clusterEntity) throws Exception {
 		boolean isDeleted = clusterAdapterService.deleteCluster(clusterEntity.getClusterId());
-		if (!isDeleted) {
-			throw new PortalException("Cluster deletion failed");
-		}
+		
+		//K8S I/F 삭제 실패하더래도 클러스터 정보 삭제하도록 주석 처리
+		//이호철 22.04.12
+		//if (!isDeleted) {
+		//	throw new PortalException("Cluster deletion failed");
+		//}
 		
 		clusterDomainService.delete(clusterEntity);
 		

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.validation.constraints.NotEmpty;
 
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,6 +54,7 @@ public class ClusterDto {
 		private Long clusterIdx;
 		private String clusterName;
 		private String description;
+		private Long clusterId;
 		private String status;
 		private int nodeCount;
 		private String provider;
