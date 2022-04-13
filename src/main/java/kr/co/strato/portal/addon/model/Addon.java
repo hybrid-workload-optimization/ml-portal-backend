@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class Addon {
 	private String addonId;	
+	private String addonType;
 	private String name;
 	private String version;	
 	private String desc;	

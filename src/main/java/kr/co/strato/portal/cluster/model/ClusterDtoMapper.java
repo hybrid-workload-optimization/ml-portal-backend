@@ -1,6 +1,9 @@
 package kr.co.strato.portal.cluster.model;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,11 +30,13 @@ public interface ClusterDtoMapper {
 	
 	@Mapping(target = "nodeCount", 		source = "c.nodes",		qualifiedByName = "nodeCount")
     @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
+	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
 	public ClusterDto.List toList(ClusterEntity c);
 	
 	@Mapping(target = "kubeConfig",		source = "c.kubeConfig")
 	@Mapping(target = "description",	source = "c.description")
     @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
+	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
 	public ClusterDto.Detail toDetail(ClusterEntity c);
 	
 	@Mapping(target = "userName",		source = "dto.provisioningUser")
@@ -41,6 +46,21 @@ public interface ClusterDtoMapper {
 	@Mapping(target = "userName",		source = "c.provisioningUser")
 	@Mapping(target = "nodes",			source = "c.nodes",		qualifiedByName = "entityToClusterCloudNodeList")
 	public ClusterCloudDto toClusterCloudDto(ClusterEntity c);
+	
+	
+	@Named("createdAt")
+    default String createdAt(String createdAt) {
+		if(createdAt != null) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
+			try {
+				Date date = formatter.parse(createdAt);
+				return formatter.format(date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}	
+		}	
+        return createdAt;
+    }
 	
 	
 	@Named("nodeCount")

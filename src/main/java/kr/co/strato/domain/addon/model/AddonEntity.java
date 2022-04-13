@@ -32,6 +32,9 @@ public class AddonEntity {
 	@Column(name = "addon_id")
 	private String addonId;
 	
+	@Column(name = "addon_type")
+	private String addonType;
+	
 	@Column(name = "install_user_id")
 	private String installUserId;
 	

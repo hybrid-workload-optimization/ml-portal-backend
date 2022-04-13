@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -83,7 +84,12 @@ public class AddonService {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean installAddon(Long clusterId, String addonId, Map<String, Object> parameters) {
+	public boolean installAddon(Long clusterId, String addonId, Map<String, Object> parameters, String userName) {
+		Addon addon = getAddon(clusterId, addonId);
+		if(addon == null) {
+			return false;
+		}
+		
 		Long kubeConfigId = getKubeConfigId(clusterId);
 		
 		Map<String, Object> param = new HashMap<>();
@@ -95,8 +101,9 @@ public class AddonService {
 		if(isOk) {
 			AddonEntity entity = new AddonEntity();
 			entity.setClusterIdx(clusterId);
-			entity.setAddonId(addonId);
-			//entity.setInstallUserId(addonId);
+			entity.setAddonId(addon.getAddonId());
+			entity.setAddonType(addon.getAddonType());
+			entity.setInstallUserId(addonId);
 			addonDomainService.register(entity);
 		}
 		
@@ -129,6 +136,16 @@ public class AddonService {
 		log.info("Addon uninstall. clusterIdx: {}, addonId: {}", clusterId, addonId);
 		log.info("Addon uninstall result: {}", isOk);
 		return isOk;
+	}
+	
+	/**
+	 * Addon 설치 여부 리턴.
+	 * @param clusterIdx
+	 * @param addonType
+	 * @return
+	 */
+	public boolean isInstall(Long clusterIdx, String addonType) {
+		return addonDomainService.isInstall(clusterIdx, addonType);
 	}
 	
 	/**

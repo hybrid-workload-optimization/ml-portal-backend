@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
+import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.addon.model.Addon;
 import kr.co.strato.portal.addon.service.AddonService;
+import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @RestController
-public class AddonController {
+public class AddonController extends CommonController {
 
 	@Autowired
 	private AddonService addonService;
@@ -25,16 +28,16 @@ public class AddonController {
 	
 	@ApiOperation(value="Addon 리스트")
 	@GetMapping("/api/v1/addon/list")
-	public List<Addon> getAddons(@RequestParam Long clusterId) throws IOException {
-		return addonService.getAddons(clusterId);
+	public ResponseWrapper<List<Addon>> getAddons(@RequestParam Long clusterIdx) throws IOException {
+		return new ResponseWrapper<>(addonService.getAddons(clusterIdx));
 	}
 	
 	@ApiOperation(value="Addon 상세 조회")
 	@GetMapping("/api/v1/addon/detail")
-	public Addon getAddon(
-			@RequestParam Long clusterId, 
+	public ResponseWrapper<Addon> getAddon(
+			@RequestParam Long clusterIdx, 
 			@RequestParam String addonId) {
-		return addonService.getAddon(clusterId, addonId);
+		return new ResponseWrapper<>(addonService.getAddon(clusterIdx, addonId));
 	}
 	
 	
@@ -43,7 +46,7 @@ public class AddonController {
 			+"***입력부***\n"
 			+"```\n"
 			+"{\r\n"
-			+ "  \"kubeConfigId\": 1,\r\n"
+			+ "  \"clusterIdx\": 1,\r\n"
 			+ "  \"addonId\": \"1\",\r\n"
 			+ "  \"parameters\":  {\r\n"
 			+ "  }\r\n"
@@ -55,14 +58,21 @@ public class AddonController {
 			+"\n"
 	)
 	@PostMapping("/api/v1/addon/install")
-	public boolean install(@RequestBody Map<String, Object> param) {
-		Long clusterId = (Long)param.get("clusterId");
+	public ResponseWrapper<Boolean> install(@RequestBody Map<String, Object> param) {
+		Long clusterIdx = Long.valueOf((int)param.get("clusterIdx"));
 		String addonId = (String)param.get("addonId");
 		Map<String, Object> parameters = null;
 		if(param.get("parameters") != null) {
 			parameters = (Map<String, Object>)param.get("parameters");
-		}	
-		return addonService.installAddon(clusterId, addonId, parameters);
+		}
+		
+		String userId = null;
+		UserDto user = getLoginUser();
+		if(user != null) {
+			userId = user.getUserId();
+		}
+		
+		return new ResponseWrapper<>(addonService.installAddon(clusterIdx, addonId, parameters, userId));
 	}
 	
 	@ApiOperation(value="Addon 삭제",
@@ -70,7 +80,7 @@ public class AddonController {
 			+"***입력부***\n"
 			+"```\n"
 			+"{\r\n"
-			+ "  \"kubeConfigId\": 1,\r\n"
+			+ "  \"clusterIdx\": 1,\r\n"
 			+ "  \"addonId\": \"1\"\r\n"
 			+ "}\r\n"		
 			+"```\n"
@@ -80,10 +90,31 @@ public class AddonController {
 			+"\n"
 	)
 	@DeleteMapping("/api/v1/addon/uninstall")
-	public boolean uninstall(@RequestBody Map<String, Object> param) {
-		Long clusterId = (Long)param.get("clusterId");
+	public ResponseWrapper<Boolean> uninstall(@RequestBody Map<String, Object> param) {
+		Long clusterIdx = Long.valueOf((int)param.get("clusterIdx"));
 		String addonId = (String)param.get("addonId");
-		return addonService.uninstallAddon(clusterId, addonId);
+		return new ResponseWrapper<>(addonService.uninstallAddon(clusterIdx, addonId));
+	}
+	
+	@ApiOperation(value="Addon 설치 여부 문의.",
+	notes=""
+			+"***입력부***\n"
+			+"```\n"
+			+"{\r\n"
+			+ "  \"clusterIdx\": 1,\r\n"
+			+ "  \"addonType\": \"cluster-monitoring\"\r\n"
+			+ "}\r\n"		
+			+"```\n"
+			+"***출력부***\n"
+			+"```\n"
+			+"true or false"
+			+"\n"
+	)
+	@PostMapping("/api/v1/addon/isInstall")
+	public ResponseWrapper<Boolean> isInstall(@RequestBody Map<String, Object> param) {
+		Long clusterIdx = Long.valueOf((int)param.get("clusterIdx"));
+		String addonType = (String)param.get("addonType");
+		return new ResponseWrapper<>(addonService.isInstall(clusterIdx, addonType));
 	}
 	
 }

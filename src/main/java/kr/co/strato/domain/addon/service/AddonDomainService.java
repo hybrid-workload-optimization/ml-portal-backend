@@ -72,4 +72,8 @@ public class AddonDomainService {
 		addonRepository.deleteByClusterIdx(clusterIdx);
 	}
 	
+	public boolean isInstall(Long clusterIdx, String addonType) {
+		Optional<AddonEntity> addon = addonRepository.findByClusterIdxAndAddonType(clusterIdx, addonType);
+		return addon.isPresent();
+	}
 }

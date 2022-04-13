@@ -1,6 +1,7 @@
 package kr.co.strato.domain.addon.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,5 +24,11 @@ public interface AddonRepository extends JpaRepository<AddonEntity, AddonIdPK> {
 	 */
 	@Transactional
 	public void deleteByClusterIdx(Long clusterIdx);
+	
+	/**
+	 * Addon Type으로 설치 에드온 반환.
+	 * @param addonType
+	 */
+	public Optional<AddonEntity> findByClusterIdxAndAddonType(Long clusterIdx, String addonType);
 	
 }
