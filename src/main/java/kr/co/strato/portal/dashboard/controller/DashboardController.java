@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
