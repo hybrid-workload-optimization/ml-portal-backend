@@ -381,7 +381,7 @@ public class UserService {
 	private String genResetPasswordContents(String requestCode) {
 		String url = frontUrl;
 		if(!url.endsWith("/")) {
-			url += "/";
+			url += "/#/";
 		}		
 		url += "change-password?requestCode="+requestCode;
 		return url;
