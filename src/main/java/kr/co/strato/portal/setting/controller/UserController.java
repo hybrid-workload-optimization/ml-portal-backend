@@ -38,6 +38,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
+import kr.co.strato.portal.setting.model.UserDto.ResetRequest;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
@@ -383,7 +384,7 @@ public class UserController {
 	 * 패스워드 변경 페이지 요청.
 	 * @param requestCode
 	 * @return
-	 */
+	 
 	@GetMapping("/users/reset/password/page")
 	@ResponseStatus(HttpStatus.OK)
 	public void resetPasswordPage(HttpServletResponse response, 
@@ -391,6 +392,7 @@ public class UserController {
 		String url = userService.getResetPasswordUrl(requestCode);
 		response.sendRedirect(url);
 	}
+	*/
 	
 	
 	@PostMapping("/users/reset/password")
@@ -398,5 +400,12 @@ public class UserController {
 	public ResponseWrapper<String> resetUserPassword(@RequestBody ResetParam param) {
 		String res = userService.resetUserPassword(param);
 		return new ResponseWrapper<>(res);
+	}
+	
+	@GetMapping("/users/reset/password")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<ResetRequest> resetUserPassword(@RequestParam String requestCode) {
+		ResetRequest req = userService.getResetUserId(requestCode);
+		return new ResponseWrapper<>(req);
 	}
 }

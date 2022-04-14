@@ -28,6 +28,7 @@ import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
+import kr.co.strato.portal.setting.model.UserDto.ResetRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -110,77 +111,7 @@ public class UserService {
 		return null;
 	}
 	
-	public String getResetPasswordUrl(String requestCode) {
-		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);		
-		String url = frontUrl;
-		if(!url.endsWith("/")) {
-			url += "/";
-		}
-		
-		if(entity != null) {
-			LocalDateTime requestTime = entity.getCreatedAt();
-			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
-			
-			if(beforeOneHour.isBefore(requestTime)) {
-				//유효 시간 이내
-				url += "change-password?userId="+entity.getUserId()+"&requestCode="+requestCode;
-			} else {
-				//1시간 경과
-				url += "change-password-expiry";
-			}
-		} else {
-			//잘못된 요청 페이지
-			url += "bad-request";
-		}		
-		return url;
-	}
 	
-	/**
-	 * 패스워드 변경
-	 * @param param
-	 */
-	public String resetUserPassword(ResetParam param) {
-		String requestCode = param.getRequestCode();
-		String id = param.getUserId();
-		String password = param.getUserPassword();
-		
-		String result = null;
-		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
-		if(entity != null) {
-			LocalDateTime requestTime = entity.getCreatedAt();
-			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
-			
-			if(beforeOneHour.isBefore(requestTime)) {
-				UserDto user = new UserDto();
-				user.setUserId(id);
-				user.setUserPassword(password);
-				
-				patchUserPassword(user);
-				userDomainService.deleteResetPasswordRequest(id);
-				
-				result = "success";
-			} else {
-				//1시간 경과
-				result = "expiry";
-			}
-		} else {
-			//잘못된 요청
-			result = "bad-request";
-		}
-		return result;
-	}
-	
-	
-	/**
-	 * 비밀번호 초기화 html 내용 생성하여 리턴.
-	 * @param requestCode
-	 * @return
-	 */
-	private String genResetPasswordContents(String requestCode) {
-		String changeUrl = backUrl + ":18080";
-		changeUrl += "/api/v1/user-manage/users/reset/password/page?requestCode="+requestCode;	
-		return changeUrl;
-	}
 	
 	
 	//수정
@@ -365,7 +296,111 @@ public class UserService {
 	}
 
 
+	public ResetRequest getResetUserId(String requestCode) {
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
+		ResetRequest request = new ResetRequest();
+		if(entity != null) {
+			LocalDateTime requestTime = entity.getCreatedAt();
+			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
+			
+			if(beforeOneHour.isBefore(requestTime)) {
+				//유효 시간 이내
+				request.setResult("success");
+				request.setUserId(entity.getUserId());
+			} else {
+				//1시간 경과
+				request.setResult("fail");
+				request.setReason("expiry");
+			}
+		} else {
+			//잘못된 요청 페이지
+			request.setResult("fail");
+			request.setReason("bad request");
+		}		
+		return request;
+	}	
 	
+	/**
+	 * 패스워드 변경
+	 * @param param
+	 */
+	public String resetUserPassword(ResetParam param) {
+		String requestCode = param.getRequestCode();
+		String id = param.getUserId();
+		String password = param.getUserPassword();
+		
+		String result = null;
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
+		if(entity != null) {
+			if(entity.getUserId().equals(param.getUserId())) {
+				LocalDateTime requestTime = entity.getCreatedAt();
+				LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
+				
+				if(beforeOneHour.isBefore(requestTime)) {
+					UserDto user = new UserDto();
+					user.setUserId(id);
+					user.setUserPassword(password);
+					
+					patchUserPassword(user);
+					userDomainService.deleteResetPasswordRequest(id);
+					
+					result = "success";
+				} else {
+					//1시간 경과
+					result = "expiry";
+				}
+			} else {
+				result = "bad request";
+			}
+		} else {
+			//잘못된 요청
+			result = "bad request";
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 비밀번호 초기화 html 내용 생성하여 리턴.
+	 * @param requestCode
+	 * @return
+	 */
+	private String genResetPasswordContents(String requestCode) {
+		String url = frontUrl;
+		if(!url.endsWith("/")) {
+			url += "/";
+		}		
+		url += "change-password?requestCode="+requestCode;
+		return url;
+	}
+	
+
+	/*
+	public String getResetPasswordUrl(String requestCode) {
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);		
+		String url = frontUrl;
+		if(!url.endsWith("/")) {
+			url += "/";
+		}
+		
+		if(entity != null) {
+			LocalDateTime requestTime = entity.getCreatedAt();
+			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
+			
+			if(beforeOneHour.isBefore(requestTime)) {
+				//유효 시간 이내
+				url += "change-password?userId="+entity.getUserId()+"&requestCode="+requestCode;
+			} else {
+				//1시간 경과
+				url += "change-password-expiry";
+			}
+		} else {
+			//잘못된 요청 페이지
+			url += "bad-request";
+		}		
+		return url;
+	}
+	*/
 	
 
 }

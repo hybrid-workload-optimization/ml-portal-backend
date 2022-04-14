@@ -73,6 +73,17 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
+    public static class ResetRequest {
+        private String result;
+        private String userId;
+        private String reason;
+    }
+    
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
     public static class ResetParam{
         private String requestCode;
         private String userId;
