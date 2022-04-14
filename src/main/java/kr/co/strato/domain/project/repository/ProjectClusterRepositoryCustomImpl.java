@@ -1,9 +1,8 @@
 package kr.co.strato.domain.project.repository;
 
-import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
-import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
 import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
 import static kr.co.strato.domain.node.model.QNodeEntity.nodeEntity;
+import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -12,4 +12,5 @@ public interface ProjectClusterRepositoryCustom {
 	public List<ClusterEntity> getProjectClusterListExceptUse(Long projectId);
 	
 	public List<ClusterEntity> getProjecClusterListByNotUsedClusters();
+	
 }

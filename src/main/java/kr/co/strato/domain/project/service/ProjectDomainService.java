@@ -14,6 +14,7 @@ import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.domain.project.repository.ProjectRepository;
 import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -65,9 +66,22 @@ public class ProjectDomainService {
 		return projectRepository.findAll();
 	}
 
-    public List<ProjectEntity> getNotDeletedProjects(){
+    public List<ProjectEntity> getNotDeletedProjects(UserDto loginUser) {
         return projectRepository.findByDeletedYn("N");
     }
+    
+    public List<ProjectEntity> getUserProjects(UserDto loginUser) {
+    	String roleCode = loginUser.getUserRole().getUserRoleCode();
+    	if(roleCode.equals("SYSTEM_ADMIN")) {
+    		//system admin 권한 인 경우 모든 프로젝트 반환
+    		return projectRepository.findByDeletedYn("N");
+    	} else {
+    		//아닌 경우 소속된 프로젝트만 반환.
+    		return projectRepository.getUserProjects(loginUser);
+    	}
+    }
+    
+    
 	/**
      * Project 조회
      * @param

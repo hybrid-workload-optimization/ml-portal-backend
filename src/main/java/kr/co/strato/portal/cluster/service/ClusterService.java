@@ -49,6 +49,7 @@ import kr.co.strato.portal.cluster.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
@@ -116,8 +117,8 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Page<ClusterDto.List> getClusterList(Pageable pageable) throws Exception {
-		Page<ClusterEntity> clusterPage = clusterDomainService.getList(pageable);
+	public Page<ClusterDto.List> getClusterList(UserDto loginUser, Pageable pageable) throws Exception {
+		Page<ClusterEntity> clusterPage = clusterDomainService.getList(loginUser, pageable);
 		
 		List<ClusterDto.List> clusterList = clusterPage.getContent().stream()
 				.map(c -> ClusterDtoMapper.INSTANCE.toList(c))

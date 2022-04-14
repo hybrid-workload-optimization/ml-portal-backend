@@ -22,6 +22,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
@@ -33,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class ClusterController {
+public class ClusterController extends CommonController {
 
 	@Autowired
 	ClusterService clusterService;
@@ -51,7 +52,7 @@ public class ClusterController {
         String workMessage					= "";
         
         try {
-        	results = clusterService.getClusterList(pageRequest.of());
+        	results = clusterService.getClusterList(getLoginUser(), pageRequest.of());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();

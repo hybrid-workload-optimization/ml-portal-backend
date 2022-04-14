@@ -23,6 +23,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.project.model.ProjectDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -185,5 +186,28 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				 .fetchOne();
 		
 		return result;
+	}
+
+	@Override
+	public List<ProjectEntity> getUserProjects(UserDto loginUser) {
+		BooleanBuilder builder = new BooleanBuilder();
+		QueryResults<ProjectEntity> result = queryFactory
+				  .select(Projections.fields(
+						  ProjectEntity.class,
+						  projectEntity.id, 
+						  projectEntity.projectName,
+						  projectEntity.description, 
+						  ExpressionUtils.as(
+								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d"),
+								  "createdAt"),
+						  ExpressionUtils.as(
+								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.updatedAt, "%Y-%m-%d %H:%i:%s"),
+								  "updatedAt")
+				  ))
+				  .from(projectEntity)
+				  .where(projectEntity.id.in(
+						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
+				  ).fetchResults();
+		return result.getResults();
 	}
 }

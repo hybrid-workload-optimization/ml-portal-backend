@@ -15,6 +15,7 @@ import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 public class ClusterDomainService {
@@ -50,8 +51,15 @@ public class ClusterDomainService {
 		}
 	}
 	
-	public Page<ClusterEntity> getList(Pageable pageable) {
-		return clusterRepository.findAll(pageable);
+	public Page<ClusterEntity> getList(UserDto loginUser, Pageable pageable) {
+		String roleCode = loginUser.getUserRole().getUserRoleCode();
+    	if(roleCode.equals("SYSTEM_ADMIN")) {
+    		//system admin 권한 인 경우 모든 클러스터 반환
+    		return  clusterRepository.findAll(pageable);
+    	} else {
+    		//아닌 경우 소속된 클러스터 반환.
+    		return clusterRepository.getUserClusterList(pageable, loginUser);
+    	}
 	}
 
 	public boolean isClusterDuplication(String name) {
@@ -80,6 +88,22 @@ public class ClusterDomainService {
 		List<ClusterEntity> clusters = clusterRepository.findAll();
 
 		return clusters;
+	}
+	
+	/**
+	 * 로그인한 사용자가 접근 가능한 클러스터 리스트 반환.
+	 * @param loginUser
+	 * @return
+	 */
+	public List<ClusterEntity> getListByLoginUser(UserDto loginUser){
+		String roleCode = loginUser.getUserRole().getUserRoleCode();
+    	if(roleCode.equals("SYSTEM_ADMIN")) {
+    		//system admin 권한 인 경우 모든 클러스터 반환
+    		return clusterRepository.findAll();
+    	} else {
+    		//아닌 경우 소속된 클러스터 반환.
+    		return clusterRepository.getUserClusterList(loginUser);
+    	}
 	}
 	
 

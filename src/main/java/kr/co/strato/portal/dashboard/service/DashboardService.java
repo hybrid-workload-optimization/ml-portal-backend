@@ -34,6 +34,7 @@ import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.SelectService;
 import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,7 +68,7 @@ public class DashboardService {
 	 * @param clusterIdx
 	 * @return
 	 */
-	public SystemAdminNodeStateDto getNodeState(Long projectIdx, Long clusterIdx) {
+	public SystemAdminNodeStateDto getNodeState(UserDto loginUser, Long projectIdx, Long clusterIdx) {
 		int projectCount = 0;
 		int clusterCount = 0;
 		
@@ -86,14 +87,14 @@ public class DashboardService {
 		String nodeUtilizationState = null;
 		
 		if(projectIdx == null) {
-			projectCount = selectService.getSelectProjects().size();		
+			projectCount = selectService.getSelectProjects(loginUser).size();		
 		} else {			
 			if(projectDomainService.getProjectById(projectIdx).orElse(null) != null) {
 				projectCount = 1;	
 			}
 		}
 		
-		List<ClusterEntity> clusters = getKubeConfigIds(projectIdx, clusterIdx);
+		List<ClusterEntity> clusters = getKubeConfigIds(loginUser, projectIdx, clusterIdx);
 		clusterCount = clusters.size();
 		
 		if(clusterCount > 0) {
@@ -161,9 +162,9 @@ public class DashboardService {
 	 * @param clusterIdx
 	 * @return
 	 */
-	public List<ResListDetailDto> getNodeList(Long projectIdx, Long clusterIdx) {
+	public List<ResListDetailDto> getNodeList(UserDto loginUser, Long projectIdx, Long clusterIdx) {
 		List<ResListDetailDto> list = new ArrayList<>();
-		List<ClusterEntity> clusters = getKubeConfigIds(projectIdx, clusterIdx);
+		List<ClusterEntity> clusters = getKubeConfigIds(loginUser, projectIdx, clusterIdx);
 		
 		if(clusters.size() > 0) {
 			long currentTime = new Date().getTime();
@@ -345,13 +346,13 @@ public class DashboardService {
 	 * @param clusterIdx
 	 * @return
 	 */
-	private List<ClusterEntity> getKubeConfigIds(Long projectIdx, Long clusterIdx) {
+	private List<ClusterEntity> getKubeConfigIds(UserDto loginUser, Long projectIdx, Long clusterIdx) {
 		List<ClusterEntity> clusters = null;
 		if(clusterIdx == null) {
 	        if(projectIdx != null && projectIdx > 0L){
 	            clusters = clusterDomainService.getListByProjectIdx(projectIdx);
 	        } else{
-	            clusters = clusterDomainService.getListAll();
+	            clusters = clusterDomainService.getListByLoginUser(loginUser);
 	        }
 		} else {
 			clusters = new ArrayList<>();

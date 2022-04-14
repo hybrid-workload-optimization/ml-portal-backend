@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto.ResListDetailDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
 import kr.co.strato.portal.dashboard.service.DashboardService;
 
 @RestController
-public class DashboardController {
+public class DashboardController extends CommonController {
 	
 	@Autowired
 	private DashboardService dashboardService;
@@ -22,7 +23,7 @@ public class DashboardController {
     public ResponseWrapper<SystemAdminNodeStateDto> getNodeState(
     		@RequestParam(required = false) Long projectIdx,
     		@RequestParam(required = false) Long clusterIdx) throws Exception {
-		SystemAdminNodeStateDto result = dashboardService.getNodeState(projectIdx, clusterIdx);
+		SystemAdminNodeStateDto result = dashboardService.getNodeState(getLoginUser(), projectIdx, clusterIdx);
 		return new ResponseWrapper<>(result);
     }
 	
@@ -30,7 +31,7 @@ public class DashboardController {
     public ResponseWrapper<List<ResListDetailDto>> getNodeList(
     		@RequestParam(required = false) Long projectIdx,
     		@RequestParam(required = false) Long clusterIdx) throws Exception {
-		List<ResListDetailDto> result = dashboardService.getNodeList(projectIdx, clusterIdx);
+		List<ResListDetailDto> result = dashboardService.getNodeList(getLoginUser(), projectIdx, clusterIdx);
 		return new ResponseWrapper<>(result);
     }
 	

@@ -21,7 +21,7 @@ public class SelectController extends CommonController {
     @GetMapping("api/v1/select/projects")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<SelectDto>> getProjects(){
-        List<SelectDto> results = selectService.getSelectProjects();
+        List<SelectDto> results = selectService.getSelectProjects(getLoginUser());
 
         return new ResponseWrapper<>(results);
     }
@@ -37,7 +37,7 @@ public class SelectController extends CommonController {
     @GetMapping("api/v1/select/clusters")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<SelectDto>> getClusters(@RequestParam(required = false) Long projectIdx){
-        List<SelectDto> results = selectService.getSelectClusters(projectIdx);
+        List<SelectDto> results = selectService.getSelectClusters(getLoginUser(), projectIdx);
 
         return new ResponseWrapper<>(results);
     }

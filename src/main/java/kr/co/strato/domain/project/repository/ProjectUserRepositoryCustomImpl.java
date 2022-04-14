@@ -3,7 +3,6 @@ package kr.co.strato.domain.project.repository;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
 import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;

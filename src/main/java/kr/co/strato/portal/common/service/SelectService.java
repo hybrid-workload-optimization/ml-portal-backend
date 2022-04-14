@@ -17,6 +17,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.portal.common.model.SelectDto;
 import kr.co.strato.portal.common.model.SelectDtoMapper;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 public class SelectService {
@@ -32,14 +33,14 @@ public class SelectService {
     @Autowired
     private UserRoleDomainService userRoleDomainService;
     
-    public List<SelectDto> getSelectProjects(){
-        List<ProjectEntity> projects = projectDomainService.getNotDeletedProjects();
+    public List<SelectDto> getSelectProjects(UserDto loginUser){
+        List<ProjectEntity> projects = projectDomainService.getUserProjects(loginUser);
         List<SelectDto> selectProjects =  projects.stream().map( e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
 
         return selectProjects;
     }
 
-    public List<SelectDto> getSelectClusters(Long projectIdx){
+    public List<SelectDto> getSelectClusters(UserDto loginUser, Long projectIdx){
         List<ClusterEntity> clusters = new ArrayList<>();
         if(projectIdx != null && projectIdx > 0L){
             clusters = clusterDomainService.getListByProjectIdx(projectIdx);
