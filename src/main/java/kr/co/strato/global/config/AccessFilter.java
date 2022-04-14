@@ -131,7 +131,16 @@ public class AccessFilter implements Filter{
     
     private boolean checkPath(String path, String method) {
     	boolean result = false;
-    	String[] arrPath = new String[] {"access-manage","swagger","test", "/users/dupl" , "api-docs", "/ws", "/api/v1/work-job/callback"};
+    	String[] arrPath = new String[] {
+    			"access-manage",
+    			"swagger", 
+    			"test", 
+    			"/users/dupl" , 
+    			"api-docs", 
+    			"/ws", 
+    			"/api/v1/work-job/callback", 
+    			"favicon.ico",
+    			"/users/reset/password"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션

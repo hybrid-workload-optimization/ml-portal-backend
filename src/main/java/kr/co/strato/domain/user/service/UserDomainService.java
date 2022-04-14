@@ -9,8 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserResetPasswordEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.repository.UserRepository;
+import kr.co.strato.domain.user.repository.UserResetPasswordRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
@@ -30,6 +32,9 @@ public class UserDomainService {
 	
 	@Autowired
 	UserRoleRepository userRoleRepository;
+	
+	@Autowired
+	UserResetPasswordRepository resetPasswordRepostory;
 	
 	@Autowired
 	KeyCloakApiUtil	keyCloakApiUtil;
@@ -166,8 +171,38 @@ public class UserDomainService {
 	}
 
 
-
+	/**
+	 * 패스워드 변경 요청 저장.
+	 * @param resetEntity
+	 */
+	public void saveResetPasswordRequest(UserResetPasswordEntity resetEntity) {
+		resetPasswordRepostory.save(resetEntity);
+	}
 	
+	/**
+	 * 패스워드 변경 요청 반환.
+	 * @param requestCode
+	 * @return
+	 */
+	public UserResetPasswordEntity getResetPasswordRequest(String requestCode) {
+		return resetPasswordRepostory.findByRequestCode(requestCode);
+	}
 	
+	/**
+	 * 패스워드 변경 요청 반환.
+	 * @param requestCode
+	 * @return
+	 */
+	public UserResetPasswordEntity getResetPasswordRequestByUserId(String userId) {
+		return resetPasswordRepostory.findByUserId(userId);
+	}
+	
+	/**
+	 * 패스워드 변경 요청 삭제.
+	 * @param email
+	 */
+	public void deleteResetPasswordRequest(String userId) {
+		resetPasswordRepostory.deleteByUserId(userId);
+	}
 
 }

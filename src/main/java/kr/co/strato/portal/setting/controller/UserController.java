@@ -1,5 +1,6 @@
 package kr.co.strato.portal.setting.controller;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,6 +37,7 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
@@ -290,7 +295,7 @@ public class UserController {
 		List<UserRoleDto> list = userService.getUserRoleList();
 		return new ResponseWrapper<>(list);
 	}
-	
+		
 	// 비밀번호 변경
 	@PatchMapping("/users/password")
 	@ResponseStatus(HttpStatus.OK)
@@ -374,5 +379,24 @@ public class UserController {
 	}
 	
 	
-
+	/**
+	 * 패스워드 변경 페이지 요청.
+	 * @param requestCode
+	 * @return
+	 */
+	@GetMapping("/users/reset/password/page")
+	@ResponseStatus(HttpStatus.OK)
+	public void resetPasswordPage(HttpServletResponse response, 
+			@RequestParam String requestCode) throws IOException {
+		String url = userService.getResetPasswordUrl(requestCode);
+		response.sendRedirect(url);
+	}
+	
+	
+	@PostMapping("/users/reset/password")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> resetUserPassword(@RequestBody ResetParam param) {
+		String res = userService.resetUserPassword(param);
+		return new ResponseWrapper<>(res);
+	}
 }

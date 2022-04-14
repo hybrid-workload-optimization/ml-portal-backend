@@ -1,10 +1,13 @@
 package kr.co.strato.portal.setting.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserResetPasswordEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
@@ -23,7 +27,7 @@ import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
-import lombok.extern.java.Log;
+import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -42,6 +46,14 @@ public class UserService {
 	@Autowired
 	TokenValidator tokenValidator;
 	
+	@Autowired
+	EmailService emailService;
+	
+	@Value("${portal.front.service.url}")
+	String frontUrl;
+	
+	@Value("${portal.backend.service.url}")
+	String backUrl;
 	
 	//등록
 	public String postUser(UserDto param) {
@@ -57,9 +69,119 @@ public class UserService {
 		userDomainService.saveUser(entity, "post");
 		
 		//패스워드 초기화 이메일 전송
-		
+		requestResetPassword(param);
 		return param.getUserId();
 	}
+	
+	/**
+	 * 패스워드 변경 요청
+	 * @param user
+	 */
+	private void requestResetPassword(UserDto user) {
+		String email = user.getEmail();
+		String userId = user.getUserId();
+		
+		String requestCode = UUID.randomUUID().toString();
+
+		//변경 요청 생성.
+		UserResetPasswordEntity requestEntity = new UserResetPasswordEntity();
+		requestEntity.setRequestCode(requestCode);
+		requestEntity.setEmail(email);
+		requestEntity.setUserId(userId);
+		userDomainService.saveResetPasswordRequest(requestEntity);
+		
+		
+		
+		String title = "PaaS Portal 비밀번호 재설정";
+		String contents = genResetPasswordContents(requestCode);
+		emailService.sendMail(email, title, contents);
+	}
+	
+	/**
+	 * 패스워드 변경 요청 이메일 반환.
+	 * @param requestCode
+	 * @return
+	 */
+	public String getRequestUserId(String requestCode) {
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
+		if(entity != null) {
+			return entity.getUserId();
+		}
+		return null;
+	}
+	
+	public String getResetPasswordUrl(String requestCode) {
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);		
+		String url = frontUrl;
+		if(!url.endsWith("/")) {
+			url += "/";
+		}
+		
+		if(entity != null) {
+			LocalDateTime requestTime = entity.getCreatedAt();
+			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
+			
+			if(beforeOneHour.isBefore(requestTime)) {
+				//유효 시간 이내
+				url += "change-password?userId="+entity.getUserId()+"&requestCode="+requestCode;
+			} else {
+				//1시간 경과
+				url += "change-password-expiry";
+			}
+		} else {
+			//잘못된 요청 페이지
+			url += "bad-request";
+		}		
+		return url;
+	}
+	
+	/**
+	 * 패스워드 변경
+	 * @param param
+	 */
+	public String resetUserPassword(ResetParam param) {
+		String requestCode = param.getRequestCode();
+		String id = param.getUserId();
+		String password = param.getUserPassword();
+		
+		String result = null;
+		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
+		if(entity != null) {
+			LocalDateTime requestTime = entity.getCreatedAt();
+			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
+			
+			if(beforeOneHour.isBefore(requestTime)) {
+				UserDto user = new UserDto();
+				user.setUserId(id);
+				user.setUserPassword(password);
+				
+				patchUserPassword(user);
+				userDomainService.deleteResetPasswordRequest(id);
+				
+				result = "success";
+			} else {
+				//1시간 경과
+				result = "expiry";
+			}
+		} else {
+			//잘못된 요청
+			result = "bad-request";
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 비밀번호 초기화 html 내용 생성하여 리턴.
+	 * @param requestCode
+	 * @return
+	 */
+	private String genResetPasswordContents(String requestCode) {
+		String changeUrl = backUrl + ":18080";
+		changeUrl += "/api/v1/user-manage/users/reset/password/page?requestCode="+requestCode;	
+		return changeUrl;
+	}
+	
 	
 	//수정
 	public String patchUser(UserDto param) {

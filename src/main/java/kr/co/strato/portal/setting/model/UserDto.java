@@ -67,4 +67,15 @@ public class UserDto {
         private Long projectId;
         private String authorityId;
     }
+    
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class ResetParam{
+        private String requestCode;
+        private String userId;
+        private String userPassword;
+    }
 }
