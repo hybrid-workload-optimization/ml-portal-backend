@@ -137,23 +137,5 @@ public class AddonController extends CommonController {
 		String addonType = (String)param.get("addonType");
 		return new ResponseWrapper<>(addonService.getAddonByType(clusterIdx, addonType));
 	}
-	
-	@ApiOperation(value="Addon 설치 여부 문의.",
-	notes=""
-			+"***입력부***\n"
-			+"```\n"
-			+"{\r\n"
-			+ "  \"clusterIdx\": 1\r\n"
-			+ "}\r\n"		
-			+"```\n"
-			+"***출력부***\n"
-			+"```\n"
-			+"true or false"
-			+"\n"
-	)
-	@GetMapping("/api/v1/addon/clusterMonitoring")
-	public ResponseWrapper<Addon> getClusterMonitoringAddon(@RequestParam Long clusterIdx) {
-		String addonType = "cluster-monitoring";
-		return new ResponseWrapper<>(addonService.getAddonByType(clusterIdx, addonType));
-	}	
+		
 }

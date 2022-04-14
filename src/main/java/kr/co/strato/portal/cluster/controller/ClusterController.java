@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.addon.model.Addon;
+import kr.co.strato.portal.addon.service.AddonService;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
@@ -41,6 +43,9 @@ public class ClusterController extends CommonController {
 	
 	@Autowired
 	WorkHistoryService workHistoryService;
+	
+	@Autowired
+	private AddonService addonService;
 	
 	@GetMapping("/api/v1/clusters")
     public ResponseWrapper<Page<ClusterDto.List>> getCluterList(PageRequest pageRequest){
@@ -428,4 +433,10 @@ public class ClusterController extends CommonController {
 	
         return new ResponseWrapper<>(results);
     }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/cluster-monitoring-addon")
+	public ResponseWrapper<Addon> getClusterMonitoringAddon(@PathVariable(required = true) Long clusterIdx) {
+		String addonType = "cluster-monitoring";
+		return new ResponseWrapper<>(addonService.getAddonByType(clusterIdx, addonType));
+	}
 }
