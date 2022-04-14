@@ -81,16 +81,18 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  "updatedAt")
 				  ))
 				  .from(projectEntity)
+				  .where(projectEntity.deletedYn.eq("N"))
 				  .offset(pageable.getOffset())
-                  .limit(pageable.getPageSize());
+                  .limit(pageable.getPageSize())
+	    		  .orderBy(projectEntity.createdAt.desc());
+	    
 	    
 	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
 	    	query = query.where(projectEntity.id.in(
-					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
+					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);
-	    } else {
-	    	query = query.where(projectEntity.deletedYn.eq("N"));
 	    }
+	    
 	    QueryResults<ProjectDto> result = query.fetchResults();
 	    
 		
@@ -211,14 +213,14 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.updatedAt, "%Y-%m-%d %H:%i:%s"),
 								  "updatedAt")
 				  ))
-				  .from(projectEntity);
+				  .from(projectEntity)
+				  .where(projectEntity.deletedYn.eq("N"))
+				  .orderBy(projectEntity.createdAt.desc());
 		
 		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
 			query = query.where(projectEntity.id.in(
-	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
+	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);
-	    } else {
-	    	query = query.where(projectEntity.deletedYn.eq("N"));
 	    }
 		
 		QueryResults<ProjectEntity> result = query.fetchResults();

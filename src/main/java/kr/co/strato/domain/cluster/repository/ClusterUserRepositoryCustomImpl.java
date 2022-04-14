@@ -34,7 +34,6 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 		JPAQuery<ClusterEntity> query =  queryFactory
 				.select(clusterEntity)
 				  .from(clusterEntity);
-		
 		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
 			query = query.where(clusterEntity.clusterIdx.in(
 					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
@@ -42,6 +41,7 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 					))
 			  ));
 	    }
+		query.orderBy(clusterEntity.createdAt.desc());
 		
 		List<ClusterEntity> result = query.fetch();		
 		return result;

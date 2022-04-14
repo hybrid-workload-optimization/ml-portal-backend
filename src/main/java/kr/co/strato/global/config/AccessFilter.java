@@ -2,7 +2,6 @@ package kr.co.strato.global.config;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Enumeration;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -15,11 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import kr.co.strato.global.error.exception.AuthFailException;
-import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -59,70 +56,43 @@ public class AccessFilter implements Filter{
         	timestamp = Long.parseLong(strTimestamp);	
         }
 
-
 		String acToken = request.getHeader("access-token");
-		Enumeration<String> enumeration = request.getHeaderNames();
-//		while(enumeration.hasMoreElements()){
-//			log.info("header:"+enumeration.nextElement());
-//		}
-//		log.info("getHeaders:"+request.getHeaderNames().toString());
-//		log.info("acToken:"+acToken);
-/*
-		Enumeration<String> names = request.getHeaderNames();
-		while(names.hasMoreElements()) {
-			String name = names.nextElement();
-			String value = request.getHeader(name);
-			
-			System.out.println("name : " + name + " / value : " + value);
-		}
 		
-		System.out.println(path);
-		
-	*/
-
-//		if(!path.contains("access-manage") && !path.contains("swagger") && !path.contains("test") && !path.contains("/users/dupl/") && !(path.contains("/users") && "POST".equals(method))) {
-		
-		//log.info("before check path = {}", path);
 		if(!checkPath(path, method)) {
-			String token = null;
-			try {
-				token = tokenValidator.decrypt(acToken, timestamp, path, method);
-			} catch (Exception e) {
-				e.printStackTrace();
-				request.getSession(false);
-				response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
-			}
-			if(token == null) {
-				log.info("Token Is Null");
-				request.getSession(false);
-				response.sendError(HttpStatus.UNAUTHORIZED.value());
-			} else {
-				if(!tokenValidator.validateToken(token)) {
-					log.info("Token Is Not Validate");
-					
-					
-					//토큰 만료.
-					try {
-						ResponseEntity<KeycloakToken> entity = accessService.tokenRefresh(token);
-						KeycloakToken keycloakToken = entity.getBody();
-						keycloakToken.getAccessToken();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-					
+			if(acToken != null) {
+				String token = null;
+				try {
+					token = tokenValidator.decrypt(acToken, timestamp, path, method);
+				} catch (Exception e) {
+					e.printStackTrace();
+					request.getSession(false);
+					response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
+				}
+				if(token == null) {
+					log.info("Token is null");
 					request.getSession(false);
 					response.sendError(HttpStatus.UNAUTHORIZED.value());
 				} else {
-					UserDto loginUser = tokenValidator.extractUserInfo(token);
-					request.setAttribute("loginUser", loginUser);
-					chain.doFilter(request, response);
-				}
-			}	
-		} else {
+					if(!tokenValidator.validateToken(token)) {
+						log.info("Token is not validate. Token: {}", token);
+						
+						//토큰 기간 만료
+						request.getSession(false);
+						response.sendError(HttpStatus.UNAUTHORIZED.value());
+					} else {
+						UserDto loginUser = tokenValidator.extractUserInfo(token);
+						request.setAttribute("loginUser", loginUser);
+						chain.doFilter(request, response);
+					}
+				}	
+			} else {
+				log.error("Token is null");
+				request.getSession(false);
+				response.sendError(HttpStatus.UNAUTHORIZED.value());
+			}
+		} else {			
 			chain.doFilter(request, response);
 		}
-		
     }
 	
     @Override
