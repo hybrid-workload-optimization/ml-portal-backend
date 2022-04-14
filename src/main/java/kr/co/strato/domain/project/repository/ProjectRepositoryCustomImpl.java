@@ -217,6 +217,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 			query = query.where(projectEntity.id.in(
 	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
 			);
+	    } else {
+	    	query = query.where(projectEntity.deletedYn.eq("N"));
 	    }
 		
 		QueryResults<ProjectEntity> result = query.fetchResults();
