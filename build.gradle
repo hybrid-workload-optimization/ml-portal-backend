@@ -62,6 +62,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
     
 	implementation group: 'com.google.api-client', name: 'google-api-client', version: '1.33.4'
+	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
     
 }
 
