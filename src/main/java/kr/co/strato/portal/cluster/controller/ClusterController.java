@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
@@ -83,6 +84,18 @@ public class ClusterController extends CommonController {
 		}
         
         return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/clusters/{clusterIdx}/status")
+    public ResponseWrapper<ClusterDto.Status> getClusterStatus(@PathVariable(required = true) Long clusterIdx){
+		ClusterDto.Status result = null;
+        try {
+        	result = clusterService.getClusterStatus(clusterIdx);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}        
+        return new ResponseWrapper<>(result);
     }
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}")

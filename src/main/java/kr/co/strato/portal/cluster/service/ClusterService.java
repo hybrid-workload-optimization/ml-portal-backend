@@ -130,51 +130,67 @@ public class ClusterService {
 			Long kubeConfigId = item.getClusterId();
 			String pStatus = item.getProvisioningStatus();
 			
-			ClusterHealthAdapterDto health = null;
-			if(pStatus != null) {
-				if(pStatus.equals(ProvisioningStatus.FINISHED.toString())) {
-					if(kubeConfigId != null) {
-						try {
-							health = clusterAdapterService.getClusterHealthInfo(kubeConfigId);
-						} catch(Exception e) {
-							// Health 정보를 가져올 수 없는 경우.
-							health = new ClusterHealthAdapterDto();
-							health.setHealth("Unhealthy");
-							health.addProbleam("Could not get cluster information.");
-						}
-					}
-					
-				} else if(pStatus.equals(ProvisioningStatus.READY.toString())) {
-					//배포 준비
-					health = new ClusterHealthAdapterDto();
-					health.setHealth("Waiting");
-				} else if( pStatus.equals(ProvisioningStatus.STARTED.toString())) {
-					//배포중
-					health = new ClusterHealthAdapterDto();
-					health.setHealth("Deploying");
-				} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
-					//배포 실패
-					health = new ClusterHealthAdapterDto();
-					health.setHealth("Deploy Fail");
-					health.addProbleam("Cluster deployment failed.");
-				}
-			} else {
-				health = new ClusterHealthAdapterDto();
-				health.setHealth("Error");
-				health.addProbleam("Cluster deployment information does not exist.");
-			}
-			
-			
-			if(health == null) {
-				health = new ClusterHealthAdapterDto();
-				health.setHealth("Error");
-				health.addProbleam("Unknown Error.");
-			}
+			ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
 			
 			item.setStatus(health.getHealth());
 			item.setProblem((ArrayList<String>)health.getProblem());
 		}
 		return new PageImpl<>(clusterList, pageable, clusterPage.getTotalElements());
+	}
+	
+	public ClusterDto.Status getClusterStatus(Long clusterIdx) {
+		ClusterDto.Status status = new ClusterDto.Status();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		if(clusterEntity != null) {
+			Long kubeConfigId = clusterEntity.getClusterId();
+			String pStatus = clusterEntity.getProvisioningStatus();
+			
+			ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
+			
+			status.setClusterIdx(clusterIdx);
+			status.setStatus(health.getHealth());
+			status.setProblem(status.getProblem());
+		}
+		return status;
+	}
+	
+	public ClusterHealthAdapterDto getClusterStatus(Long kubeConfigId, String pStatus) {
+		ClusterHealthAdapterDto health = new ClusterHealthAdapterDto();
+		if(pStatus != null) {
+			if(pStatus.equals(ProvisioningStatus.FINISHED.toString())) {
+				if(kubeConfigId != null) {
+					try {
+						health = clusterAdapterService.getClusterHealthInfo(kubeConfigId);
+					} catch(Exception e) {
+						// Health 정보를 가져올 수 없는 경우.
+						health = new ClusterHealthAdapterDto();
+						health.setHealth("Unhealthy");
+						health.addProbleam("Could not get cluster information.");
+					}
+				}
+				
+			} else if(pStatus.equals(ProvisioningStatus.READY.toString())) {
+				//배포 준비
+				health.setHealth("Waiting");
+			} else if( pStatus.equals(ProvisioningStatus.STARTED.toString())) {
+				//배포중
+				health.setHealth("Deploying");
+			} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
+				//배포 실패
+				health.setHealth("Deploy Fail");
+				health.addProbleam("Cluster deployment failed.");
+			}
+		} else {
+			health.setHealth("Error");
+			health.addProbleam("Cluster deployment information does not exist.");
+		}
+		
+		
+		if(health == null) {
+			health.setHealth("Error");
+			health.addProbleam("Unknown Error.");
+		}
+		return health;
 	}
 	
 	/**
