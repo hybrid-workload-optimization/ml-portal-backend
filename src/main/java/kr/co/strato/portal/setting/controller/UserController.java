@@ -1,16 +1,13 @@
 package kr.co.strato.portal.setting.controller;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,7 +33,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
-import kr.co.strato.portal.setting.model.UserDto.ResetRequest;
+import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
@@ -402,10 +397,17 @@ public class UserController {
 		return new ResponseWrapper<>(res);
 	}
 	
+	@GetMapping("/users/reset/password/user")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<ResetRequestResult> resetUserPassword(@RequestParam String requestCode) {
+		ResetRequestResult req = userService.getResetUserId(requestCode);
+		return new ResponseWrapper<>(req);
+	}
+	
 	@GetMapping("/users/reset/password")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ResetRequest> resetUserPassword(@RequestParam String requestCode) {
-		ResetRequest req = userService.getResetUserId(requestCode);
-		return new ResponseWrapper<>(req);
+	public ResponseWrapper<ResetRequestResult> requestResetPassword(@RequestParam String email) {
+		ResetRequestResult result = userService.requestResetPassword(email);
+		return new ResponseWrapper<>(result);
 	}
 }

@@ -73,7 +73,7 @@ public class UserDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    public static class ResetRequest {
+    public static class ResetRequestResult {
         private String result;
         private String userId;
         private String reason;

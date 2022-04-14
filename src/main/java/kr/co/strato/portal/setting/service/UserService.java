@@ -1,6 +1,5 @@
 package kr.co.strato.portal.setting.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,11 +23,11 @@ import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDto.ResetParam;
+import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
-import kr.co.strato.portal.setting.model.UserDto.ResetParam;
-import kr.co.strato.portal.setting.model.UserDto.ResetRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -70,7 +69,7 @@ public class UserService {
 		userDomainService.saveUser(entity, "post");
 		
 		//패스워드 초기화 이메일 전송
-		requestResetPassword(param);
+		requestResetPassword(param.getUserId(), param.getEmail());
 		return param.getUserId();
 	}
 	
@@ -78,10 +77,7 @@ public class UserService {
 	 * 패스워드 변경 요청
 	 * @param user
 	 */
-	private void requestResetPassword(UserDto user) {
-		String email = user.getEmail();
-		String userId = user.getUserId();
-		
+	private void requestResetPassword(String userId, String email) {		
 		String requestCode = UUID.randomUUID().toString();
 
 		//변경 요청 생성.
@@ -294,11 +290,28 @@ public class UserService {
 //		String token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRVFMzT1IyYXhpQklnWWtSYlhCR2tCZVIybW5uOW1OSDQ4UWFXZEV4U053In0.eyJleHAiOjE2NDg1MTU5ODAsImlhdCI6MTY0ODUxNTY4MCwianRpIjoiNWZiYzYwYmMtMTg3OC00NWFiLTg5ZjktZWJmNTY5NDlmMWEwIiwiaXNzIjoiaHR0cDovLzE3Mi4xNi4xMC4xMTQ6ODU4MC9hdXRoL3JlYWxtcy9zdHJhdG8tY2xvdWQiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNDg2YzA1OWYtYTA3MS00N2ZkLWI3YmUtNzNiZDJkMmRjYjYwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicGFhc19wb3J0YWwiLCJzZXNzaW9uX3N0YXRlIjoiMjAwZWU0MDUtNWMyZS00ODM0LThmYjEtY2UzNTE1ZTBiY2U4IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vcGFhc3BvcnRhbC5zdHJhdG8uY29tIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJwcm9qX21lbWJlciIsIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1zcHRlay1jbG91ZCIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiMjAwZWU0MDUtNWMyZS00ODM0LThmYjEtY2UzNTE1ZTBiY2U4IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0MUB0ZXN0LmNvbSIsImVtYWlsIjoidGVzdDFAdGVzdC5jb20ifQ.P7Kn6gQiQAeCBoF-7fTKuX3lOgCZ1GMlBhL2I1eR5JQK8SPzdE1F1eoL2rBSZaTuTtgeqLGKyB6qN7GHkpOj8tLpO04UCxij5eii00V_uGZqaqLg141o4OJUcCM5bAXo0WKFrKy6EFF6NVQQye4xXRz73yeZZDi3fqSKY4VKXURXXJ5Olx2E9C2eZR5YRsX6mq6fey3iDQIlTcwkOZ5EjFk8KeDnUn8-9KF0YAo565LoCsAyk8aHXdkVOErTDfPBFHkBjLrik7PLl7vGxPIT9f68Gg_XE3OkeQoS5QffgyLGKlzfhO_Ipblo1ZI3SSyt1VxbEtt5RVaIa3jRD6t96A";
 //		tokenValidator.validateToken(token);
 	}
+	
+	
+	public ResetRequestResult requestResetPassword(String email) {
+		ResetRequestResult result = new ResetRequestResult();
+		UserEntity entity = userDomainService.getUserInfoByEmail(email);
+		if(entity != null) {
+			String userId = entity.getUserId();
+			requestResetPassword(userId, email);
+			
+			result.setResult("success");
+			result.setUserId(userId);
+		} else {
+			result.setResult("fail");
+			result.setReason("unknown user");
+		}
+		return result;
+	}
 
 
-	public ResetRequest getResetUserId(String requestCode) {
+	public ResetRequestResult getResetUserId(String requestCode) {
 		UserResetPasswordEntity entity = userDomainService.getResetPasswordRequest(requestCode);
-		ResetRequest request = new ResetRequest();
+		ResetRequestResult request = new ResetRequestResult();
 		if(entity != null) {
 			LocalDateTime requestTime = entity.getCreatedAt();
 			LocalDateTime beforeOneHour = LocalDateTime.now().minusHours(1);
