@@ -18,6 +18,7 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -39,14 +40,13 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	}*/
 	
 	@Override
-	public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception {
-		
+	public PageImpl<ProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception {
 		BooleanBuilder builder = new BooleanBuilder();
 	    if(!"".equals(param.getProjectName()) && param.getProjectName() != null) {
 	    	builder.and(projectEntity.projectName.contains(param.getProjectName()));
 	    }
-		
-		QueryResults<ProjectDto> result = queryFactory
+	    
+	    JPAQuery<ProjectDto> query = queryFactory
 				  .select(Projections.fields(
 						  ProjectDto.class,
 						  projectEntity.id, 
@@ -81,12 +81,17 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  "updatedAt")
 				  ))
 				  .from(projectEntity)
-				  .where(projectEntity.id.in(
-						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(param.getUserId()), builder)), projectEntity.deletedYn.eq("N")
-				  )
 				  .offset(pageable.getOffset())
-                  .limit(pageable.getPageSize())
-				  .fetchResults();
+                  .limit(pageable.getPageSize());
+	    
+	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+	    	query = query.where(projectEntity.id.in(
+					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
+			);
+	    }
+	    QueryResults<ProjectDto> result = query.fetchResults();
+	    
+		
 		
 		List<ProjectDto> resultList = result.getResults();
 		if(resultList != null && resultList.size() > 0) {
@@ -191,7 +196,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	@Override
 	public List<ProjectEntity> getUserProjects(UserDto loginUser) {
 		BooleanBuilder builder = new BooleanBuilder();
-		QueryResults<ProjectEntity> result = queryFactory
+		JPAQuery<ProjectEntity> query =  queryFactory
 				  .select(Projections.fields(
 						  ProjectEntity.class,
 						  projectEntity.id, 
@@ -204,10 +209,15 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.updatedAt, "%Y-%m-%d %H:%i:%s"),
 								  "updatedAt")
 				  ))
-				  .from(projectEntity)
-				  .where(projectEntity.id.in(
-						 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
-				  ).fetchResults();
+				  .from(projectEntity);
+		
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+			query = query.where(projectEntity.id.in(
+	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
+			);
+	    }
+		
+		QueryResults<ProjectEntity> result = query.fetchResults();
 		return result.getResults();
 	}
 }

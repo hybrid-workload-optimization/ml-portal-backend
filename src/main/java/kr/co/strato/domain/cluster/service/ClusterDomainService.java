@@ -52,14 +52,7 @@ public class ClusterDomainService {
 	}
 	
 	public Page<ClusterEntity> getList(UserDto loginUser, Pageable pageable) {
-		String roleCode = loginUser.getUserRole().getUserRoleCode();
-    	if(roleCode.equals("SYSTEM_ADMIN")) {
-    		//system admin 권한 인 경우 모든 클러스터 반환
-    		return  clusterRepository.findAll(pageable);
-    	} else {
-    		//아닌 경우 소속된 클러스터 반환.
-    		return clusterRepository.getUserClusterList(pageable, loginUser);
-    	}
+		return clusterRepository.getUserClusterList(pageable, loginUser);
 	}
 
 	public boolean isClusterDuplication(String name) {
@@ -96,14 +89,7 @@ public class ClusterDomainService {
 	 * @return
 	 */
 	public List<ClusterEntity> getListByLoginUser(UserDto loginUser){
-		String roleCode = loginUser.getUserRole().getUserRoleCode();
-    	if(roleCode.equals("SYSTEM_ADMIN")) {
-    		//system admin 권한 인 경우 모든 클러스터 반환
-    		return clusterRepository.findAll();
-    	} else {
-    		//아닌 경우 소속된 클러스터 반환.
-    		return clusterRepository.getUserClusterList(loginUser);
-    	}
+		return clusterRepository.getUserClusterList(loginUser);
 	}
 	
 

@@ -46,7 +46,7 @@ public class PortalProjectController extends CommonController {
     	UserDto userInfo = getLoginUser();
     	param.setUserId(userInfo.getUserId());
     	
-    	Page<ProjectDto> response = portalProjectService.getProjectList(pageRequest.of(), param);
+    	Page<ProjectDto> response = portalProjectService.getProjectList(getLoginUser(), pageRequest.of(), param);
         
         return new ResponseWrapper<Page<ProjectDto>>(response);
     }

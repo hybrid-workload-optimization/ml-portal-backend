@@ -11,7 +11,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
@@ -29,16 +31,19 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 
 	@Override
 	public List<ClusterEntity> getUserClusterList(UserDto loginUser) {
-		List<ClusterEntity> result = queryFactory
+		JPAQuery<ClusterEntity> query =  queryFactory
 				.select(clusterEntity)
-				  .from(clusterEntity)
-				  .where(clusterEntity.clusterIdx.in(
-						JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
-								JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))
-						))
-				  ))
-				  .fetch();
+				  .from(clusterEntity);
 		
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+			query = query.where(clusterEntity.clusterIdx.in(
+					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
+							JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))
+					))
+			  ));
+	    }
+		
+		List<ClusterEntity> result = query.fetch();		
 		return result;
 	}
 

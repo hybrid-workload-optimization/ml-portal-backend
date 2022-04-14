@@ -56,6 +56,8 @@ public class UserService {
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		userDomainService.saveUser(entity, "post");
 		
+		//패스워드 초기화 이메일 전송
+		
 		return param.getUserId();
 	}
 	

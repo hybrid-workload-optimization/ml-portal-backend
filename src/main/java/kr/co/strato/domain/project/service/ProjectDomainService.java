@@ -35,9 +35,9 @@ public class ProjectDomainService {
      * @param param
      * @return
      */
-    public PageImpl<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception {
+    public PageImpl<ProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception {
     	
-    	return projectRepository.getProjectList(pageable, param);
+    	return projectRepository.getProjectList(loginUser, pageable, param);
     }
     
     /**
@@ -71,14 +71,7 @@ public class ProjectDomainService {
     }
     
     public List<ProjectEntity> getUserProjects(UserDto loginUser) {
-    	String roleCode = loginUser.getUserRole().getUserRoleCode();
-    	if(roleCode.equals("SYSTEM_ADMIN")) {
-    		//system admin 권한 인 경우 모든 프로젝트 반환
-    		return projectRepository.findByDeletedYn("N");
-    	} else {
-    		//아닌 경우 소속된 프로젝트만 반환.
-    		return projectRepository.getUserProjects(loginUser);
-    	}
+    	return projectRepository.getUserProjects(loginUser);
     }
     
     

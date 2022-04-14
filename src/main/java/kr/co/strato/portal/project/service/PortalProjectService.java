@@ -67,9 +67,9 @@ public class PortalProjectService {
      * @param param
      * @return
      */
-    public Page<ProjectDto> getProjectList(Pageable pageable, ProjectDto param) throws Exception {
+    public Page<ProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception {
     	
-    	PageImpl<ProjectDto> projectList = projectDomainService.getProjectList(pageable, param);
+    	PageImpl<ProjectDto> projectList = projectDomainService.getProjectList(loginUser, pageable, param);
     	
     	//페이징 정보 추가
         return projectList;
