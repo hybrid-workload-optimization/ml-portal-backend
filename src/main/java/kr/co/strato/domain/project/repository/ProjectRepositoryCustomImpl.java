@@ -88,7 +88,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	    	query = query.where(projectEntity.id.in(
 					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder)), projectEntity.deletedYn.eq("N")
 			);
-	    } else if(loginUser != null && loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+	    } else {
 	    	query = query.where(projectEntity.deletedYn.eq("N"));
 	    }
 	    QueryResults<ProjectDto> result = query.fetchResults();
