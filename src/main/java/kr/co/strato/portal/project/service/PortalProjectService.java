@@ -140,7 +140,7 @@ public class PortalProjectService {
     	
     	String userId = param.getLoginId();
     	String userName = param.getLoginName();
-    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
     	
     	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
     	projectBuiler.projectName(param.getProjectName());
@@ -242,7 +242,7 @@ public class PortalProjectService {
     	
     	String userId = param.getLoginId();
     	String userName = param.getLoginName();
-    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
     	
     	boolean result = false;
     	
@@ -383,7 +383,7 @@ public class PortalProjectService {
     	
     	String userId = param.getLoginId();
     	String userName = param.getLoginName();
-    	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+    	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
     	
     	boolean result = false;
     	
@@ -502,7 +502,7 @@ public class PortalProjectService {
         	//Project 삭제
             String userId = param.getLoginId();
         	String userName = param.getLoginName();
-        	String now = DateUtil.currentDateTime("yyyy-MM-dd hh:mm:ss");
+        	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
             
             ProjectEntity projectEntity = projectInfo.get();
             projectEntity.setUpdateUserId(userId);
