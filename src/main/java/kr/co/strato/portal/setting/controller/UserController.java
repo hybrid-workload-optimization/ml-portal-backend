@@ -399,7 +399,7 @@ public class UserController {
 	
 	@GetMapping("/users/reset/password/user")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ResetRequestResult> resetUserPassword(@RequestParam String requestCode) {
+	public ResponseWrapper<ResetRequestResult> resetUserInfo(@RequestParam String requestCode) {
 		ResetRequestResult req = userService.getResetUserId(requestCode);
 		return new ResponseWrapper<>(req);
 	}
