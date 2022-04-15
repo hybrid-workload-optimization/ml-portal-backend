@@ -30,15 +30,24 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.cronjob.service.CronJobDomainService;
+import kr.co.strato.domain.deployment.service.DeploymentDomainService;
+import kr.co.strato.domain.ingress.service.IngressDomainService;
+import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
+import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
+import kr.co.strato.domain.service.service.ServiceDomainService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
+import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
+import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.PortalException;
@@ -68,7 +77,38 @@ public class ClusterService {
 	NodeDomainService nodeDomainService;
 	
 	@Autowired
+	PersistentVolumeDomainService pvDomainService;
+	
+	@Autowired
+	StorageClassDomainService storageClassDomainService;
+	
+	
+	
+	@Autowired
 	NamespaceDomainService namespaceDomainService;
+	
+	@Autowired
+	DeploymentDomainService deploymentDomainService;
+	
+	@Autowired
+	StatefulSetDomainService statefulSetDomainService;
+	
+	@Autowired
+	CronJobDomainService cronJobDomainService;
+	
+	@Autowired
+	JobDomainService jobDomainService;
+	
+	@Autowired
+	ReplicaSetDomainService replicaSetDomainService;
+	
+	@Autowired
+	ServiceDomainService serviceDomainService;
+	
+	@Autowired
+	IngressDomainService ingressDomainService;
+	
+	
 	
 	@Autowired
 	PodDomainService podDomainService;
@@ -516,7 +556,12 @@ public class ClusterService {
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			addK8sClusterInfo(clusterEntity, detail);
+			try {
+				addK8sClusterInfo(clusterEntity, detail);
+			} catch (Exception e) {
+				log.error("", e);
+			}
+			
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
 			addKubesprayClusterInfo(clusterEntity, detail);
 			
@@ -675,20 +720,20 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	private Long deleteK8sCluster(ClusterEntity clusterEntity) throws Exception {
-		boolean isDeleted = clusterAdapterService.deleteCluster(clusterEntity.getClusterId());
+		try {
+			boolean isDeleted = clusterAdapterService.deleteCluster(clusterEntity.getClusterId());
+		} catch (Exception e) {
+			log.error("", e);		
+		}		
 		
-		//K8S I/F 삭제 실패하더래도 클러스터 정보 삭제하도록 주석 처리
-		//이호철 22.04.12
-		//if (!isDeleted) {
-		//	throw new PortalException("Cluster deletion failed");
-		//}
-		
+		//클러스터 삭제
 		clusterDomainService.delete(clusterEntity);
 		
 		return null;
 	}
 	
 	/**
+	 * 
 	 * (Kubespray) Cluster 삭제
 	 * 
 	 * @param clusterEntity
@@ -735,6 +780,9 @@ public class ClusterService {
 		if (!isDeleted) {
 			throw new PortalException("Cluster deletion failed");
 		}
+		
+		//클러스터 삭제
+		clusterDomainService.delete(clusterEntity);
 		
 		return workJobIdx;
 	}

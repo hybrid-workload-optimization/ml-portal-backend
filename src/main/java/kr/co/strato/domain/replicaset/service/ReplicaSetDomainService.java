@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,5 +48,9 @@ public class ReplicaSetDomainService {
 	public List<ReplicaSetEntity> getByDeplymentIdx(Long deploymentIdx){
 		DeploymentEntity deployment = DeploymentEntity.builder().deploymentIdx(deploymentIdx).build();
 		return replicaSetRepository.getByDeployment(deployment);
+	}
+	
+	public Integer deleteByNamespaceEntity(NamespaceEntity namespace) {
+		return replicaSetRepository.deleteByNamespace(namespace);
 	}
 }

@@ -87,5 +87,8 @@ public class StorageClassDomainService {
 		oldEntity.setLabel(newEntity.getLabel());
 	}
 
-	
+	public Integer deleteByCluster(ClusterEntity cluster) {
+		return storageClassRepository.deleteByCluster(cluster);
+	}
+
 }

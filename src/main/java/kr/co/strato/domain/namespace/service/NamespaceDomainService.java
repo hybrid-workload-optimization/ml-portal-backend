@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -81,6 +80,11 @@ public class NamespaceDomainService {
 		oldEntity.setStatus(newEntity.getStatus());
 		oldEntity.setAnnotation(newEntity.getAnnotation());
 		oldEntity.setLabel(newEntity.getLabel());
+	}
+	
+	public void deleteByClusterIdx(Long clusterIdx) {
+		List<NamespaceEntity> list = findByClusterIdx(clusterIdx);
+		list.forEach(n -> delete(n.getId()));
 	}
 	
 }

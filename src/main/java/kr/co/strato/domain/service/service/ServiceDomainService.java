@@ -1,5 +1,13 @@
 package kr.co.strato.domain.service.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
@@ -8,13 +16,6 @@ import kr.co.strato.domain.service.model.ServiceEntity;
 import kr.co.strato.domain.service.repository.ServiceEndPointRepository;
 import kr.co.strato.domain.service.repository.ServiceRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ServiceDomainService {
@@ -85,10 +86,14 @@ public class ServiceDomainService {
         Optional<ServiceEntity> opt = serviceRepository.findById(serviceId);
         if(opt.isPresent()){
             ServiceEntity entity = opt.get();
-            deleteServiceEndpoints(entity);
-            serviceRepository.delete(entity);
+            delete(entity);
         }
         return true;
+    }
+    
+    public void delete(ServiceEntity entity) { 
+    	deleteServiceEndpoints(entity);
+        serviceRepository.delete(entity);
     }
 
     public List<ServiceEndpointEntity> getServiceEndpoints(Long serviceId){
@@ -125,5 +130,10 @@ public class ServiceDomainService {
     private void registerServiceEndpoint(ServiceEndpointEntity serviceEndpoint, ServiceEntity service){
         serviceEndpoint.setService(service);
         serviceEndPointRepository.save(serviceEndpoint);
+    }
+    
+    public void deleteByNamespaceEntity(NamespaceEntity namespace) {
+    	List<ServiceEntity> list = serviceRepository.findByNamespace(namespace);
+    	list.forEach(s ->  delete(s));
     }
 }

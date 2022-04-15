@@ -100,6 +100,10 @@ public class PersistentVolumeDomainService {
         oldEntity.setAnnotation(newEntity.getAnnotation());
         oldEntity.setLabel(newEntity.getLabel());
     }
+    
+    public Integer deleteByCluster(ClusterEntity cluster) {
+		return persistentVolumeRepository.deleteByCluster(cluster);
+	}
 
 	
 }

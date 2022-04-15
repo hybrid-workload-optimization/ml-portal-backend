@@ -4,6 +4,7 @@
  <mapper namespace="kr.co.strato.domain.cluster.mapper.ClusterMapper">
  
  	<delete id="deleteClusterAll">
+ 	 	
  	<!-- pod_replica_set -->
 	delete from pod_replica_set where replica_set_idx in
 	(
@@ -13,20 +14,20 @@
 		)
 	);
 	
-	<!-- deployment -->
-	delete from deployment where deployment_idx in 
-	( 
-		select deployment_idx from replica_set where namespace_idx in
-		(
-			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
-		)
-	);
 	
 	<!-- replica_set  -->
 	delete from replica_set where namespace_idx in
 	(
 		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
 	);
+	
+	<!-- deployment -->
+	delete from deployment where namespace_idx in 
+	( 
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
+	);
+	
+	
 	
 	<!-- pod_stateful_set -->
 	delete from pod_stateful_set where stateful_set_idx in
@@ -118,16 +119,16 @@
 	<!-- ingress_rule -->
 	delete from ingress_rule where ingress_idx in
 	(
-		select ingress_idx from ingress where ingress_controller_idx in
+		select ingress_idx from ingress where namespace_idx in
 		(
-			select ingress_controller_idx from ingress_controller where cluster_idx = #{clusterIdx}
+			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
 		)
 	);
 	
 	<!-- ingress -->
-	delete from ingress where ingress_controller_idx in
+	delete from ingress where namespace_idx in
 	(
-		select ingress_controller_idx from ingress_controller where cluster_idx = #{clusterIdx}
+		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
 	);
 	
 	<!-- ingress_controller -->
@@ -147,12 +148,15 @@
 	(
 		select namespace_idx from namespace where cluster_idx = #{clusterIdx}
 	);
- 	
- 	<!-- storage_class -->
-	delete from storage_class where cluster_idx = #{clusterIdx};
+	
+	<!-- addon -->
+	delete from cluster_addon where cluster_idx = #{clusterIdx};
 	
 	<!-- persistent_volume -->
 	delete from persistent_volume where cluster_idx = #{clusterIdx};
+ 	
+ 	<!-- storage_class -->
+	delete from storage_class where cluster_idx = #{clusterIdx};	
 		
 	<!-- node -->
 	delete from node where cluster_idx = #{clusterIdx};

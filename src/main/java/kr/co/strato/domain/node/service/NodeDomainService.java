@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.repository.NodeRepository;
+import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -19,6 +20,9 @@ public class NodeDomainService {
 
 	@Autowired
 	private NodeRepository nodeRepository;
+	
+	@Autowired
+	private PodDomainService podDomainService;
 	
 	public Long register(NodeEntity nodeEntity) {
 		
@@ -62,4 +66,13 @@ public class NodeDomainService {
 	public NodeEntity findNodeName(Long clusterIdx, String name) {
 		return nodeRepository.findNodeName(clusterIdx, name);
 	}
+	
+	public void deleteByClusterIdx(Long clusterIdx) {
+		List<NodeEntity> list = getNodeList(clusterIdx);
+		list.forEach((node) -> {
+			podDomainService.deleteByNode(node);
+			delete(node.getId());
+		});
+	}
+	
 }

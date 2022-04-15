@@ -94,7 +94,6 @@ public class ClusterDomainService {
 	
 
 	public void delete(ClusterEntity clusterEntity) {
-		//clusterRepository.delete(clusterEntity);
 		clusterMapper.deleteClusterAll(clusterEntity.getClusterIdx());
 	}
 	

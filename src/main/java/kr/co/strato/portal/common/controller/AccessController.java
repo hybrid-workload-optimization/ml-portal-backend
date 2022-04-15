@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -26,6 +28,8 @@ import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.model.LoginDto;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDto.ResetParam;
+import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
 import kr.co.strato.portal.setting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,6 +99,28 @@ public class AccessController {
 	@GetMapping("/logout/{userId}")
 	public void doLogout(@PathVariable String userId) throws Exception {
 		accessService.doLogout(userId);
+	}
+	
+	
+	@PostMapping("/users/reset/password")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> resetUserPassword(@RequestBody ResetParam param) {
+		String res = userService.resetUserPassword(param);
+		return new ResponseWrapper<>(res);
+	}
+	
+	@GetMapping("/users/reset/password/user")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<ResetRequestResult> resetUserInfo(@RequestParam String requestCode) {
+		ResetRequestResult req = userService.getResetUserId(requestCode);
+		return new ResponseWrapper<>(req);
+	}
+	
+	@GetMapping("/users/reset/password")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<ResetRequestResult> requestResetPassword(@RequestParam String email) {
+		ResetRequestResult result = userService.requestResetPassword(email);
+		return new ResponseWrapper<>(result);
 	}
 	
 }

@@ -390,24 +390,5 @@ public class UserController {
 	*/
 	
 	
-	@PostMapping("/users/reset/password")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> resetUserPassword(@RequestBody ResetParam param) {
-		String res = userService.resetUserPassword(param);
-		return new ResponseWrapper<>(res);
-	}
 	
-	@GetMapping("/users/reset/password/user")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ResetRequestResult> resetUserInfo(@RequestParam String requestCode) {
-		ResetRequestResult req = userService.getResetUserId(requestCode);
-		return new ResponseWrapper<>(req);
-	}
-	
-	@GetMapping("/users/reset/password")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<ResetRequestResult> requestResetPassword(@RequestParam String email) {
-		ResetRequestResult result = userService.requestResetPassword(email);
-		return new ResponseWrapper<>(result);
-	}
 }

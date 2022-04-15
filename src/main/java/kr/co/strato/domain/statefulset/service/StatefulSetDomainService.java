@@ -3,8 +3,6 @@ package kr.co.strato.domain.statefulset.service;
 import java.util.List;
 import java.util.Optional;
 
-import kr.co.strato.global.error.exception.NoArgumentsRequiredForMethod;
-import org.apache.catalina.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,9 +15,8 @@ import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.pod.repository.PodRepository;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
+import kr.co.strato.global.error.exception.NoArgumentsRequiredForMethod;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
-
-import javax.xml.stream.events.Namespace;
 
 @Service
 public class StatefulSetDomainService {
@@ -111,4 +108,11 @@ public class StatefulSetDomainService {
         oldEntity.setAnnotation(newEntity.getAnnotation());
         oldEntity.setLabel(newEntity.getLabel());
     }
+    
+    public void deleteByNamespaceEntity(NamespaceEntity namespace) {
+		List<StatefulSetEntity> list = statefulSetRepository.findByNamespace(namespace);
+		list.forEach((e) -> {
+			delete(e.getId());
+		});
+	}
 }

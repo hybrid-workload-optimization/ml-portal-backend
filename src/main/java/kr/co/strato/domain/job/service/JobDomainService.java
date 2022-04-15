@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -35,5 +36,9 @@ public class JobDomainService {
 	
 	public void delete(Long idx){
 		jobRepository.deleteById(idx);
+	}
+	
+	public Integer deleteByNamespaceEntity(NamespaceEntity namespace) {
+		return jobRepository.deleteByNamespaceEntity(namespace);
 	}
 }

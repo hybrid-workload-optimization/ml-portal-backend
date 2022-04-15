@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.repository.CronJobRepository;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
@@ -35,5 +36,9 @@ public class CronJobDomainService {
 	
 	public void delete(Long idx){
 		cronJobRepository.deleteById(idx);
+	}
+	
+	public Integer deleteByNamespaceEntity(NamespaceEntity namespace) {
+		return cronJobRepository.deleteByNamespaceEntity(namespace);
 	}
 }
