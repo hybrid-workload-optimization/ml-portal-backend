@@ -239,12 +239,16 @@ public class IngressService {
 							String path = rulePath.getPath();
 							String pathType = rulePath.getPathType();
 							String protocol = "http";
-
+							
+							/*
+							host는 설정 안되있으면 없는게 정상
+							이호철 주석 처리 22.04.15
 							if(host == null) {
 								//빈값 임시 디폴트값
 								IngressControllerEntity ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
 								host = ingressControllerEntity.getAddress();
 							}
+							*/
 							
 							IngressBackend backend = rulePath.getBackend();
 							IngressServiceBackend serviceBackend = backend.getService();
