@@ -59,8 +59,12 @@ public class JobService {
 	
 	//목록
 	public Page<JobDto> getList(PageRequest pageRequest, JobArgDto args){
+		Long clusterIdx = args.getClusterIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Page<JobEntity> entities=  jobRepository.getPageList(pageRequest.of(), args);
 		List<JobDto> dtos = entities.getContent().stream().map(JobDtoMapper.INSTANCE::toDto).collect(Collectors.toList());
+		dtos.forEach(j -> j.setClusterName(clusterEntity.getClusterName()));
+		
 		Page<JobDto> result = new PageImpl<>(dtos, pageRequest.of(), entities.getTotalElements());
 		return result;
 	}
@@ -115,6 +119,7 @@ public class JobService {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
 		List<Job> jobs = jobAdapterService.create(clusterId, yaml);
+System.out.println("jobs === " + jobs.toString());
 		//job 저장.
 		List<JobEntity> eneities = jobs.stream().map(e -> {
 			JobEntity jobEntity = null;

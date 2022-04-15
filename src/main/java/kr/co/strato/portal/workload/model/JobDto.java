@@ -9,6 +9,12 @@ public class JobDto {
 	private Long idx;
 	private String name;
 	private String uid;
+	private String clusterName;
 	private Long namespaceIdx;
-	private String namespaceName;
+	private String namespace;
+	private String createdAt;
+	private String image;
+	private String label;
+	private String pod;
+	
 }

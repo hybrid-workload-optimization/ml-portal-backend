@@ -18,7 +18,10 @@ public interface JobDtoMapper {
 		@Mapping(source = "jobName", target = "name"),
 		@Mapping(source = "jobUid", target = "uid"),
 		@Mapping(source = "namespaceEntity.id", target = "namespaceIdx"),
-		@Mapping(source = "namespaceEntity.name", target = "namespaceName")
+		@Mapping(source = "namespaceEntity.name", target = "namespace"),
+		@Mapping(source = "image", target = "image"),
+		@Mapping(source = "label", target = "label"),
+		@Mapping(source = "createdAt", target = "createdAt")
 	})
 	@Named("toDto")
 	public JobDto toDto(JobEntity entity);
