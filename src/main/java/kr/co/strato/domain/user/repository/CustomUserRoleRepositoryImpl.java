@@ -75,6 +75,7 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 				.select(Projections.fields(UserRoleEntity.class, 
 								userRoleEntity.id
 							,	userRoleEntity.userRoleName
+							,	userRoleEntity.userRoleCode
 						))
 				.from(userRoleEntity)
 				.where(builder)
