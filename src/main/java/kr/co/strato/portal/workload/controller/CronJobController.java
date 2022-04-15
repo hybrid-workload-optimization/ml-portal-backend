@@ -27,28 +27,28 @@ public class CronJobController {
 	CronJobService cronJobService;
 	
 
-	@GetMapping("/jobs")
+	@GetMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Page<CronJobDto>> getCronJobList(PageRequest pageRequest, CronJobArgDto args) {
 		Page<CronJobDto> result = cronJobService.getList(pageRequest, args);
 		return new ResponseWrapper<Page<CronJobDto>>(result);
 	}
 	
-	@GetMapping("/jobs/{idx}")
+	@GetMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<CronJobDto> getCronJob (@PathVariable(name = "idx") Long idx) {
 		CronJobDto result = cronJobService.get(idx);
 		return new ResponseWrapper<CronJobDto>(result);
 	}
 	
-	@GetMapping("/jobs/{idx}/yaml")
+	@GetMapping("/cron-jobs/{idx}/yaml")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> getCronJobYaml (@PathVariable(name = "idx") Long idx) {
 		String result = cronJobService.getYaml(idx);
 		return new ResponseWrapper<String>(result);
 	}
 	
-	@PostMapping("/jobs")
+	@PostMapping("/cron-jobs")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<CronJobDto> postCronJob (@RequestBody CronJobArgDto CronJobArgDto) {
 		ResponseWrapper<CronJobDto> result = null;
@@ -56,7 +56,7 @@ public class CronJobController {
 		return result;
 	}
 	
-	@PutMapping("/jobs/{idx}")
+	@PutMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<CronJobDto> putCronJob (@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
 		CronJobArgDto.setJobIdx(idx);
@@ -64,7 +64,7 @@ public class CronJobController {
 		return new ResponseWrapper<CronJobDto>();
 	}
 	
-	@DeleteMapping("/jobs/{idx}")
+	@DeleteMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<CronJobDto> deleteCronJob (@PathVariable(name = "idx") Long idx, @RequestBody CronJobArgDto CronJobArgDto) {
 		CronJobArgDto.setJobIdx(idx);
