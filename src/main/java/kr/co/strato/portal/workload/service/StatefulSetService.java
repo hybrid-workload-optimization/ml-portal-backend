@@ -84,6 +84,7 @@ public class StatefulSetService {
     }
 
     public Page<StatefulSetDto.ResListDto> getStatefulSets(Pageable pageable, StatefulSetDto.SearchParam searchParam){
+    	Long projectIdx = searchParam.getProjectIdx();
         Long clusterIdx = searchParam.getClusterIdx();
         Long namespaceIdx = searchParam.getNamespaceIdx();
         ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
@@ -106,10 +107,11 @@ public class StatefulSetService {
                 e2-> e2
         ));
 
-        Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, clusterIdx, clusterId, namespaceIdx);
+        //Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, clusterIdx, clusterId, namespaceIdx);
+        Page<StatefulSetEntity> statefulSetEntities = statefulSetDomainService.getStatefulSets(pageable, projectIdx, clusterIdx, namespaceIdx);
         List<StatefulSetDto.ResListDto> dtos = statefulSetEntities.stream().map(
                 e -> {
-                    String uid = e.getStatefulSetUid();
+                    String uid = e.getStatefulSetUid();System.out.println();
                     if(maps.containsKey(uid)){
                         return StatefulSetDtoMapper.INSTANCE.toResListDto(e, maps.get(uid));
                     }
