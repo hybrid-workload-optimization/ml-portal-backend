@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,6 @@ import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
-import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
@@ -65,13 +63,16 @@ public class CronJobService {
 	CronJobRepository cronJobRepository;
 	
 	//목록
-	public Page<CronJobDto> getList(PageRequest pageRequest, CronJobArgDto args){
-		Long clusterIdx = args.getClusterIdx();
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+	public Page<CronJobDto> getList(PageRequest pageRequest, CronJobArgDto args) {		
 		Page<CronJobEntity> entities=  cronJobRepository.getPageList(pageRequest.of(), args);
 		List<CronJobDto> dtos = entities.getContent().stream().map(CronJobDtoMapper.INSTANCE::toDto).collect(Collectors.toList());
-		dtos.forEach(j -> j.setClusterName(clusterEntity.getClusterName()));
 		
+		//TODO 클러스터 이름 적용 부분 수정
+		Long clusterIdx = args.getClusterIdx();
+		if(clusterIdx != null) {
+			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+			dtos.forEach(j -> j.setClusterName(clusterEntity.getClusterName()));
+		}
 		Page<CronJobDto> result = new PageImpl<>(dtos, pageRequest.of(), entities.getTotalElements());
 		return result;
 	}
