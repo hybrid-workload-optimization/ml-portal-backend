@@ -41,7 +41,7 @@ public class CronJobEntity {
 	private String cronJobUid;
 	
 	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	private String createdAt;
 	
 	@Column(name = "schedule")
 	private String schedule;
@@ -50,7 +50,7 @@ public class CronJobEntity {
 	private String pause;
 	
 	@Column(name = "last_schedule")
-	private LocalDateTime lastSchedule;
+	private String lastSchedule;
 	
 	@Column(name = "concurrency_policy")
 	private String concurrencyPolicy;

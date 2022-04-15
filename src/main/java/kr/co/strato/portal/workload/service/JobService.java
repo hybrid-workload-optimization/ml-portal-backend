@@ -1,7 +1,11 @@
 package kr.co.strato.portal.workload.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +16,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.kubernetes.api.model.batch.JobSpec;
+import io.fabric8.kubernetes.api.model.batch.JobStatus;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
-import kr.co.strato.portal.workload.model.JobArgDto;
-import kr.co.strato.portal.workload.model.JobDto;
-import kr.co.strato.portal.workload.model.JobDtoMapper;
-import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
@@ -27,6 +32,11 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.workload.model.JobArgDto;
+import kr.co.strato.portal.workload.model.JobDto;
+import kr.co.strato.portal.workload.model.JobDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -155,36 +165,48 @@ public class JobService {
 	}
 	
 	
-    private JobEntity toEntity(Job job) throws JsonProcessingException {
+    public JobEntity toEntity(Job job) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         
-        String name = null;
-        String uid = null;
-        String annotation = null;
-        String label = null;
-        String strategy = null;
-        String selector = null;
-        String maxSurge = null;
-        String maxUnavailable = null;
-        Integer podUpdated = null;
-        Integer podReplicas = null;
-        Integer podReady = null;
-        String condition = null;
-        String image = null;
+        String name 		= job.getMetadata().getName();
+        String uid			= job.getMetadata().getUid();
+        String label		= mapper.writeValueAsString(job.getMetadata().getLabels());
+        String createAt		= job.getMetadata().getCreationTimestamp();
+        String annotations	= mapper.writeValueAsString(job.getMetadata().getAnnotations());
+       
+        JobSpec spec = job.getSpec();
+		JobStatus status = job.getStatus();
+		ObjectMeta meta = job.getMetadata();
+		
+		Integer replicas = status.getActive();
+		Integer succeeded = status.getSucceeded();
+		Integer active = status.getActive() == null ? 0: status.getActive();
+		
+		Integer completions = spec.getCompletions();
+		Integer parallelism = spec.getParallelism();
+		
+		
+		PodSpec podSpec = spec.getTemplate().getSpec();	
+		
+		
+		
+		Map<String, Object> podStatus = new HashMap<>();
+		podStatus.put("Succeeded", succeeded);
+		podStatus.put("Desired", succeeded);
+		
+		List<String> images = podSpec.getContainers().stream().map(container -> container.getImage()).collect(toList());
         
-        float fMaxSurge = 0f;
-        if(maxSurge != null && !maxSurge.isEmpty())
-        	fMaxSurge = Float.parseFloat(maxSurge);
-        
-        float fMaxUnavailable = 0f;
-        if(maxUnavailable != null && !maxUnavailable.isEmpty())
-        	fMaxUnavailable = Float.parseFloat(maxUnavailable);
         
         JobEntity deploymentEntity = JobEntity.builder()
 				.jobName(name)
 				.jobUid(uid)
-				.image(image)
-				.createdAt(LocalDateTime.now())
+				.annotation(annotations)
+				.label(label)
+				.status(annotations)
+				.image(images.get(0))
+				.parallelExecution(Integer.toString(parallelism))
+				.completionMode(Integer.toString(completions))
+				.createdAt(DateUtil.convertDateTime(createAt))
 				.build();
 
         return deploymentEntity;

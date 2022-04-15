@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import feign.FeignException;
 import io.fabric8.kubernetes.api.model.batch.Job;
+import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
@@ -104,4 +105,20 @@ public class JobAdapterService {
             throw new InternalServerException("k8s interface 통신 에러 - Job yaml 조회 에러");
         }
     }
+    
+    public List<Job> getListFromOwnerUid(Long clusterId, String ownerUid) throws Exception {
+		ResourceListSearchInfo body = ResourceListSearchInfo.builder()
+				.kubeConfigId(clusterId)
+				.ownerUid(ownerUid)
+				.build();
+
+		log.debug("[Get Job List] request : {}", body.toString());
+		String response = inNamespaceProxy.getResourceList(ResourceType.job.get(), body);
+		log.debug("[Get Job List] response : {}", response);
+
+		ObjectMapper mapper = new ObjectMapper();
+		List<Job> result = mapper.readValue(response, new TypeReference<List<Job>>(){});
+
+		return result;
+	}
 }

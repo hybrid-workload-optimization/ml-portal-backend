@@ -43,7 +43,7 @@ public class JobEntity {
 	private String jobUid;
 	
 	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	private String createdAt;
 	
 	@Column(name = "image")
 	private String image;
@@ -62,6 +62,9 @@ public class JobEntity {
 	
 	@Column(name = "status")
 	private String status;
+	
+	@Column(name = "cron_job_idx")
+	private Long cronJobIdx;
 	
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "namespace_idx")

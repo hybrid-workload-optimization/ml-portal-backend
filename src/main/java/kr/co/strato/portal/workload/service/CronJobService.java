@@ -1,6 +1,5 @@
 package kr.co.strato.portal.workload.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,29 +7,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.batch.CronJob;
+import io.fabric8.kubernetes.api.model.batch.CronJobSpec;
+import io.fabric8.kubernetes.api.model.batch.CronJobStatus;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import kr.co.strato.adapter.k8s.cronjob.service.CronJobAdapterService;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
-import kr.co.strato.portal.workload.model.CronJobArgDto;
-import kr.co.strato.portal.workload.model.CronJobDto;
-import kr.co.strato.portal.workload.model.CronJobDtoMapper;
-import lombok.extern.slf4j.Slf4j;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.repository.CronJobRepository;
 import kr.co.strato.domain.cronjob.service.CronJobDomainService;
-import kr.co.strato.domain.job.repository.JobRepository;
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.workload.model.CronJobArgDto;
+import kr.co.strato.portal.workload.model.CronJobDto;
+import kr.co.strato.portal.workload.model.CronJobDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -38,6 +42,15 @@ import kr.co.strato.global.util.Base64Util;
 public class CronJobService {
 	@Autowired
 	CronJobDomainService cronJobDomainService;
+	
+	@Autowired
+	JobService jobService;
+	
+	@Autowired
+	JobDomainService jobDomainService;
+	
+	@Autowired
+	JobAdapterService jobAdapterService;
 	
 	@Autowired
 	ClusterDomainService clusterDomainService;
@@ -53,8 +66,12 @@ public class CronJobService {
 	
 	//목록
 	public Page<CronJobDto> getList(PageRequest pageRequest, CronJobArgDto args){
+		Long clusterIdx = args.getClusterIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Page<CronJobEntity> entities=  cronJobRepository.getPageList(pageRequest.of(), args);
 		List<CronJobDto> dtos = entities.getContent().stream().map(CronJobDtoMapper.INSTANCE::toDto).collect(Collectors.toList());
+		dtos.forEach(j -> j.setClusterName(clusterEntity.getClusterName()));
+		
 		Page<CronJobDto> result = new PageImpl<>(dtos, pageRequest.of(), entities.getTotalElements());
 		return result;
 	}
@@ -110,11 +127,13 @@ public class CronJobService {
 		Long clusterId = clusterEntity.getClusterId();
 		
 		List<CronJob> jobs = cronJobAdapterService.create(clusterId, yaml);
+		
+		
 		//job 저장.
 		List<CronJobEntity> eneities = jobs.stream().map(e -> {
 			CronJobEntity cronJobEntity = null;
 			try {
-				cronJobEntity = toEntity(e);
+				cronJobEntity = toEntity(clusterEntity, e);
 			} catch (JsonProcessingException ex) {
 				log.debug(yaml);
 			}
@@ -128,6 +147,24 @@ public class CronJobService {
 				//수정시
 				if(cronJobArgDto.getJobIdx() != null)
 					cronJobEntity.setCronJobIdx(cronJobArgDto.getJobIdx());
+				
+				try {
+					List<Job> jobsList = jobAdapterService.getListFromOwnerUid(clusterEntity.getClusterId(), cronJobEntity.getCronJobUid());
+					for(Job j: jobsList) {
+						JobEntity job = jobService.toEntity(j);
+						//수정 시에는 기존 잡 목록 삭제
+						if(cronJobArgDto.getJobIdx() != null) {
+							jobDomainService.deleteByCronJobIdx(cronJobArgDto.getJobIdx());
+						}
+						
+						job.setCronJobIdx(cronJobEntity.getCronJobIdx());
+						jobDomainService.save(job);
+						cronJobEntity.setJobEntity(job);
+					}				
+					
+				} catch (Exception e1) {
+					log.error("크론잡 저장 실패", e);
+				}
 				
 				cronJobDomainService.save(cronJobEntity);
 			}
@@ -160,35 +197,34 @@ public class CronJobService {
 	}
 	
 	
-    private CronJobEntity toEntity(CronJob job) throws JsonProcessingException {
+    private CronJobEntity toEntity(ClusterEntity clusterEntity, CronJob job) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         
-        String name = null;
-        String uid = null;
-        String annotation = null;
-        String label = null;
-        String strategy = null;
-        String selector = null;
-        String maxSurge = null;
-        String maxUnavailable = null;
-        Integer podUpdated = null;
-        Integer podReplicas = null;
-        Integer podReady = null;
-        String condition = null;
-        String image = null;
+        String name 		= job.getMetadata().getName();
+        String uid			= job.getMetadata().getUid();
+        String label		= mapper.writeValueAsString(job.getMetadata().getLabels());
+        String createAt		= job.getMetadata().getCreationTimestamp();
+        String annotations	= mapper.writeValueAsString(job.getMetadata().getAnnotations());
         
-        float fMaxSurge = 0f;
-        if(maxSurge != null && !maxSurge.isEmpty())
-        	fMaxSurge = Float.parseFloat(maxSurge);
         
-        float fMaxUnavailable = 0f;
-        if(maxUnavailable != null && !maxUnavailable.isEmpty())
-        	fMaxUnavailable = Float.parseFloat(maxUnavailable);
+        CronJobSpec spec = job.getSpec();
+		CronJobStatus status = job.getStatus();
+		
+		String schedule = spec.getSchedule();
+		String concurrencyPolicy = spec.getConcurrencyPolicy();
+		String lastSchedule = status.getLastScheduleTime();
+		boolean pause = spec.getSuspend();
         
         CronJobEntity entity = CronJobEntity.builder()
 				.cronJobName(name)
 				.cronJobUid(uid)
-				.createdAt(LocalDateTime.now())
+				.schedule(schedule)
+				.concurrencyPolicy(concurrencyPolicy)
+				.lastSchedule(DateUtil.convertDateTime(lastSchedule))
+				.pause(Boolean.toString(pause))
+				.label(label)
+				.annotation(annotations)
+				.createdAt(DateUtil.convertDateTime(createAt))
 				.build();
 
         return entity;

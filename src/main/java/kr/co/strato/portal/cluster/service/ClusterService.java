@@ -74,41 +74,10 @@ public class ClusterService {
 	ClusterDomainService clusterDomainService;
 	
 	@Autowired
-	NodeDomainService nodeDomainService;
-	
-	@Autowired
-	PersistentVolumeDomainService pvDomainService;
-	
-	@Autowired
-	StorageClassDomainService storageClassDomainService;
-	
-	
+	NodeDomainService nodeDomainService;	
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
-	
-	@Autowired
-	DeploymentDomainService deploymentDomainService;
-	
-	@Autowired
-	StatefulSetDomainService statefulSetDomainService;
-	
-	@Autowired
-	CronJobDomainService cronJobDomainService;
-	
-	@Autowired
-	JobDomainService jobDomainService;
-	
-	@Autowired
-	ReplicaSetDomainService replicaSetDomainService;
-	
-	@Autowired
-	ServiceDomainService serviceDomainService;
-	
-	@Autowired
-	IngressDomainService ingressDomainService;
-	
-	
 	
 	@Autowired
 	PodDomainService podDomainService;
@@ -776,9 +745,15 @@ public class ClusterService {
 			workJobService.updateWorkJob(workJobDto);
 		}
 		
-		boolean isDeleted = clusterCloudService.removeCluster(clusterCloudDto);
-		if (!isDeleted) {
-			throw new PortalException("Cluster deletion failed");
+		try {
+			boolean isDeleted = clusterCloudService.removeCluster(clusterCloudDto);
+			/*
+			if (!isDeleted) {
+				throw new PortalException("Cluster deletion failed");
+			}
+			*/
+		} catch (Exception e) {
+			log.error(e.getMessage());
 		}
 		
 		//클러스터 삭제

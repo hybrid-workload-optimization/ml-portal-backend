@@ -10,4 +10,6 @@ public interface JobRepository extends JpaRepository<JobEntity, Long>, CustomJob
 	
 	@Transactional
 	public Integer deleteByNamespaceEntity(NamespaceEntity namespace);
+	
+	public void deleteByCronJobIdx(Long cronJobIdx);
 }

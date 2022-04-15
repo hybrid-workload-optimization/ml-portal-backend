@@ -41,4 +41,9 @@ public class JobDomainService {
 	public Integer deleteByNamespaceEntity(NamespaceEntity namespace) {
 		return jobRepository.deleteByNamespaceEntity(namespace);
 	}
+	
+	public void deleteByCronJobIdx(Long cronJobIdx) {
+		deleteByCronJobIdx(cronJobIdx);
+	}
+	
 }
