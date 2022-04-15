@@ -33,7 +33,7 @@ public interface CronJobDtoMapper {
 		@Mapping(source = "name", target = "cronJobName"),
 		@Mapping(source = "uid", target = "cronJobUid"),
 		@Mapping(source = "namespaceIdx", target = "namespaceEntity.id"),
-		@Mapping(source = "namespaceName", target = "namespaceEntity.name")
+		@Mapping(source = "namespace", target = "namespaceEntity.name")
 	})
 	@Named("toEntity")
 	public CronJobEntity toEntity(JobDto dto);
