@@ -116,7 +116,6 @@ public class PodService {
     
     @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
-    	// TODO 수정: clusterId db에서 전체 가져와서 for문 돌리기
     	Long clusterIdx = searchParam.getClusterIdx();
     	Integer page = pageable.getPageNumber();
 
@@ -133,7 +132,6 @@ public class PodService {
         		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
         		
                 // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
-        		// TODO idx로 해야되나???
         		podDomainService.deleteByClusterIdx(clusterIdx);
         		
                 // k8s data insert
@@ -142,8 +140,10 @@ public class PodService {
         				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
         				String namespaceName = pod.getNamespace().getName();
         				String kind = pod.getKind();
-        				
-        				Long id = podDomainService.register(pod, clusterEntity, namespaceName, kind);
+        				Long id = null;
+        				if (pod.getNode() != null) {
+        					id = podDomainService.register(pod, clusterEntity, namespaceName, kind);
+        				}
         				return id;
         			} catch (Exception e) {
                         log.error(e.getMessage(), e);

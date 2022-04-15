@@ -174,7 +174,7 @@ public class PodDomainService {
                 	}
             	}
             	
-            	if (!kind.isEmpty()) {
+            	if (pod != null && !kind.isEmpty()) {
                 	// 첫글자 소문자
                     kind = kind.substring(0, 1).toLowerCase() + kind.substring(1);
                     
