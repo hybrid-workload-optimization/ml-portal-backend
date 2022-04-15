@@ -145,6 +145,7 @@ public class UserService {
 		return 0L;
 	}
 	
+	/*
 	//목록 > Page 만, 
 	public Page<UserDto> getAllUserList(Pageable pageable) throws Exception{
 		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable);
@@ -156,6 +157,7 @@ public class UserService {
 		
 		return new PageImpl<>(userDtoList, pageable, userEntityList.getTotalElements());
 	}
+	*/
 	
 	// 목록 > param(projectId, authorityId)
 	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param) throws Exception{

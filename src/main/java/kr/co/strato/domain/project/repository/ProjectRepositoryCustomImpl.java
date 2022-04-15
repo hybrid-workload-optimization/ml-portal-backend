@@ -87,7 +87,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	    		  .orderBy(projectEntity.createdAt.desc());
 	    
 	    
-	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN") 
+	    		&& !loginUser.getUserRole().getUserRoleCode().equals("PORTAL_ADMIN")) {
 	    	query = query.where(projectEntity.id.in(
 					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);
@@ -217,7 +218,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .where(projectEntity.deletedYn.eq("N"))
 				  .orderBy(projectEntity.createdAt.desc());
 		
-		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")
+				&& !loginUser.getUserRole().getUserRoleCode().equals("PORTAL_ADMIN")) {
 			query = query.where(projectEntity.id.in(
 	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);

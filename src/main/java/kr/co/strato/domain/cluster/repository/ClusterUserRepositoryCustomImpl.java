@@ -34,7 +34,8 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 		JPAQuery<ClusterEntity> query =  queryFactory
 				.select(clusterEntity)
 				  .from(clusterEntity);
-		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")) {
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")
+				&& !loginUser.getUserRole().getUserRoleCode().equals("PORTAL_ADMIN")) {
 			query = query.where(clusterEntity.clusterIdx.in(
 					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
 							JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))

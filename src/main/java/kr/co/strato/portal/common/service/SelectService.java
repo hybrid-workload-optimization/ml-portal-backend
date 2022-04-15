@@ -58,7 +58,7 @@ public class SelectService {
     }
 
 	public List<SelectDto> getUserRoles() {
-		List<UserRoleEntity> roles = userRoleDomainService.getAllListAuthority();
+		List<UserRoleEntity> roles = userRoleDomainService.getUseUserRole();
 		List<SelectDto> selectRoles = roles.stream().map(e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
 		return selectRoles;
 	}

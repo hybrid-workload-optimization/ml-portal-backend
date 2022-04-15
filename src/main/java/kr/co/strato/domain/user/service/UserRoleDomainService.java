@@ -43,6 +43,13 @@ public class UserRoleDomainService {
 	public List<UserRoleEntity> getAllListAuthority() {
 		return userRoleRepository.findAll();
 	}
+	
+	/*
+	 * 사용 가능한 유저 권한 목록 반환.
+	 */
+	public List<UserRoleEntity> getUseUserRole() {
+		return userRoleRepository.findByUserRole(1L, "N");
+	}
 
 	public int getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
 		int count = userRoleRepository.findCountByAccessRoleNameAndGroupYn(userRoleName, groupYn);

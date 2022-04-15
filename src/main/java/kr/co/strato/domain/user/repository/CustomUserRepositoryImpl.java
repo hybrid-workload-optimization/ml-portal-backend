@@ -42,7 +42,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		
 		BooleanBuilder builder = new BooleanBuilder();
 		
-		builder.and(qUserEntity.useYn.eq("Y"));
+		builder.and(qUserEntity.useYn.eq("Y")).and(qUserEntity.userRole.id.ne(1L));
 		
 
 		

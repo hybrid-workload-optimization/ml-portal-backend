@@ -16,6 +16,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.OrderUtil;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 
@@ -63,5 +64,23 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 		long total = results.getTotal();
 		
 		return new PageImpl<>(content, pageable, total);
+	}
+
+	@Override
+	public List<UserRoleEntity> findByUserRole(Long notId, String groupYn) {
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(userRoleEntity.id.ne(notId)).and(userRoleEntity.groupYn.eq(groupYn));
+		
+		QueryResults<UserRoleEntity> results = jpaQueryFactory
+				.select(Projections.fields(UserRoleEntity.class, 
+								userRoleEntity.id
+							,	userRoleEntity.userRoleName
+						))
+				.from(userRoleEntity)
+				.where(builder)
+				.fetchResults();
+		
+		List<UserRoleEntity> content = results.getResults();
+		return content;
 	}
 }
