@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
+import java.util.HashMap;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +16,7 @@ public class JobDto {
 	private String namespace;
 	private String createdAt;
 	private String image;
-	private String label;
+	private HashMap<String, Object> label;
 	private String pod;
 	
 }
