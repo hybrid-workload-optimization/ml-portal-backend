@@ -17,9 +17,9 @@ public class ClusterNamespaceDto {
 	@Getter
 	@Setter
 	@NoArgsConstructor
-	public static class ReqCreateDto{
+	public static class ReqCreateDto {
 	    //TODO validation체크
-	    private Long kubeConfigId;
+	    private Long clusterIdx;
 	    
 	    @K8sKind(value = K8sKindType.Namespace)
 	    private String yaml;

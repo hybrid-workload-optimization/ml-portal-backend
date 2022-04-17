@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.api.model.batch.JobStatus;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.job.service.JobDomainService;
@@ -119,7 +120,7 @@ public class JobService {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
 		List<Job> jobs = jobAdapterService.create(clusterId, yaml);
-System.out.println("jobs === " + jobs.toString());
+
 		//job 저장.
 		List<JobEntity> eneities = jobs.stream().map(e -> {
 			JobEntity jobEntity = null;
@@ -151,22 +152,27 @@ System.out.println("jobs === " + jobs.toString());
 	
 	//삭제
 	public void delete(JobArgDto jobArgDto){
-		Long clusterId = jobArgDto.getClusterId();
-		Long namespaceIdx = jobArgDto.getNamespaceIdx();
-		Long deploymentIdx = jobArgDto.getJobIdx();
-		String jobName = null;
-		String namespaceName = null;
+		Long jobIdx = jobArgDto.getJobIdx();
+		JobEntity jobEntity = jobDomainService.getById(jobIdx);
+		NamespaceEntity namespaceEntity = jobEntity.getNamespaceEntity();
+		ClusterEntity clusterEntity = namespaceEntity.getCluster();
 		
-		NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+		String namespaceName = null;
+		Long clusterId = null;
+		String jobName = null;
+
+		if(clusterEntity != null)
+			clusterId = clusterEntity.getClusterId();
+
 		if(namespaceEntity != null)
 			namespaceName = namespaceEntity.getName();
-		
-		JobEntity jobEntity = jobDomainService.getById(deploymentIdx);
+
 		if(jobEntity != null)
 			jobName = jobEntity.getJobName();
 		
+		
 		jobAdapterService.delete(clusterId, namespaceName, jobName);
-		jobDomainService.delete(deploymentIdx);
+		jobDomainService.delete(jobIdx);
 	}
 	
 	
@@ -199,6 +205,8 @@ System.out.println("jobs === " + jobs.toString());
 		podStatus.put("Succeeded", succeeded);
 		podStatus.put("Desired", succeeded);
 		
+		String jobStatus	= mapper.writeValueAsString(podStatus);
+		
 		List<String> images = podSpec.getContainers().stream().map(container -> container.getImage()).collect(toList());
         
         
@@ -207,7 +215,7 @@ System.out.println("jobs === " + jobs.toString());
 				.jobUid(uid)
 				.annotation(annotations)
 				.label(label)
-				.status(annotations)
+				.status(jobStatus)
 				.image(images.get(0))
 				.parallelExecution(Integer.toString(parallelism))
 				.completionMode(Integer.toString(completions))

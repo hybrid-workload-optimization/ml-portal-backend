@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -40,6 +41,9 @@ public class ClusterStorageClassService {
 	
 	@Autowired
 	private PersistentVolumeDomainService persistentVolumeDomainService;
+	@Autowired
+	private ClusterDomainService clusterDomainService;
+	
 	
 	public Page<ClusterStorageClassDto.ResListDto> getClusterStorageClassList(Pageable pageable, ClusterStorageClassDto.SearchParam searchParam) {
 		Page<StorageClassEntity> storageClassPage = storageClassDomainService.getStorageClassList(pageable, searchParam.getClusterIdx(), searchParam.getName());
@@ -111,15 +115,18 @@ public class ClusterStorageClassService {
     
 	
 	public List<Long> registerClusterStorageClass(ClusterStorageClassDto.ReqCreateDto yamlApplyParam) {
+		Long clusterIdx = yamlApplyParam.getClusterIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
-		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(yamlApplyParam.getKubeConfigId(), yamlDecode);
+		List<StorageClass> storageClassList = storageClassAdapterService.registerStorageClass(clusterEntity.getClusterId(), yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
 		for (StorageClass sc : storageClassList) {
 			try {
 				// k8s Object -> Entity
-				StorageClassEntity clusterStorageClass = toEntity(sc,yamlApplyParam.getKubeConfigId());
+				StorageClassEntity clusterStorageClass = toEntity(sc, clusterIdx);
 
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);
@@ -159,7 +166,7 @@ public class ClusterStorageClassService {
     }
 	
 	
-	 private StorageClassEntity toEntity(StorageClass sc, Long clusterId) throws JsonProcessingException {
+	 private StorageClassEntity toEntity(StorageClass sc, Long clusterIdx) throws JsonProcessingException {
 	        ObjectMapper mapper = new ObjectMapper();
 	    	// k8s Object -> Entity
 			String name = sc.getMetadata().getName();
@@ -172,7 +179,7 @@ public class ClusterStorageClassService {
 			String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
 			
 			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(clusterId);
+			clusterEntity.setClusterIdx(clusterIdx);
 			
 			StorageClassEntity clusterStorageClass = StorageClassEntity.builder().name(name).uid(uid)
 					.createdAt(DateUtil.strToLocalDateTime(createdAt))

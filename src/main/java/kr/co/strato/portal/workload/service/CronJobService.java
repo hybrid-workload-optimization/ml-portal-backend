@@ -179,22 +179,26 @@ public class CronJobService {
 	
 	//삭제
 	public void delete(CronJobArgDto CronJobArgDto){
-		Long clusterId = CronJobArgDto.getClusterId();
-		Long namespaceIdx = CronJobArgDto.getNamespaceIdx();
-		Long deploymentIdx = CronJobArgDto.getJobIdx();
-		String jobName = null;
-		String namespaceName = null;
+		Long cronJobIdx = CronJobArgDto.getJobIdx();
+		CronJobEntity cronJobEntity = cronJobDomainService.getById(cronJobIdx);
+		NamespaceEntity namespaceEntity = cronJobEntity.getNamespaceEntity();
+		ClusterEntity clusterEntity = namespaceEntity.getCluster();
 		
-		NamespaceEntity namespaceEntity = namespaceDomainService.getDetail(namespaceIdx);
+		String namespaceName = null;
+		Long clusterId = null;
+		String cronJobName = null;
+
+		if(clusterEntity != null)
+			clusterId = clusterEntity.getClusterId();
+
 		if(namespaceEntity != null)
 			namespaceName = namespaceEntity.getName();
-		
-		CronJobEntity cronJobEntity = cronJobDomainService.getById(deploymentIdx);
+
 		if(cronJobEntity != null)
-			jobName = cronJobEntity.getCronJobName();
+			cronJobName = cronJobEntity.getCronJobName();
 		
-		cronJobAdapterService.delete(clusterId, namespaceName, jobName);
-		cronJobDomainService.delete(deploymentIdx);
+		cronJobAdapterService.delete(clusterId, namespaceName, cronJobName);
+		cronJobDomainService.delete(cronJobIdx);
 	}
 	
 	

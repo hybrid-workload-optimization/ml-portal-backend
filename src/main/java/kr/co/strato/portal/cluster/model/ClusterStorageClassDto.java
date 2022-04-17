@@ -21,7 +21,7 @@ public class ClusterStorageClassDto {
 	@NoArgsConstructor
 	public static class ReqCreateDto{
 	    //TODO validation체크
-		private Long kubeConfigId;
+		private Long clusterIdx;
 
 		@K8sKind(value = K8sKindType.StorageClass)
 		private String yaml;

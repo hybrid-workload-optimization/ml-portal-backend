@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.namespace.service.NamespaceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -35,6 +36,8 @@ public class ClusterNamespaceService {
 	private NamespaceAdapterService namespaceAdapterService;
 	@Autowired
 	private NamespaceDomainService 	namespaceDomainService;
+	@Autowired
+	private ClusterDomainService clusterDomainService;
 	
 	
 	public Page<ClusterNamespaceDto.ResListDto> getClusterNamespaceList(Pageable pageable, ClusterNamespaceDto.SearchParam searchParam) {
@@ -84,13 +87,17 @@ public class ClusterNamespaceService {
     }
    
 	public List<Long> registerClusterNamespace(ClusterNamespaceDto.ReqCreateDto yamlApplyParam) {
+		Long clusterIdx = yamlApplyParam.getClusterIdx();
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
 		
-		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(yamlApplyParam.getKubeConfigId(),yamlDecode);
+		List<Namespace> clusterNamespaces = namespaceAdapterService.registerNamespace(clusterEntity.getClusterId(), yamlDecode);
 		List<Long> ids = new ArrayList<>();
 		for (Namespace n : clusterNamespaces) {
 			try {
-				NamespaceEntity namespace = toEntity(n,yamlApplyParam.getKubeConfigId());
+				NamespaceEntity namespace = toEntity(n, clusterIdx);
 				// save
 				Long id = namespaceDomainService.register(namespace);
 				ids.add(id);

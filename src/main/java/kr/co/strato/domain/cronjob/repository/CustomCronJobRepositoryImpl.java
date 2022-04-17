@@ -10,6 +10,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.model.QCronJobEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
@@ -25,17 +26,15 @@ public class CustomCronJobRepositoryImpl  implements CustomCronJobRepository{
     @Override
     public Page<CronJobEntity> getPageList(Pageable pageable, CronJobArgDto args) {
     	QCronJobEntity qCronJobEntity = QCronJobEntity.cronJobEntity;
+    	QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+    	QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
-//	    Long projectIdx= args.getProjectIdx();
-//	    if(projectIdx != null && projectIdx > 0L){
-        
-//	    }
 
-//	    Long clusterIdx= args.getClusterIdx();
-//	    if(clusterIdx != null && clusterIdx > 0L){
-        
-//	    }
+	    Long clusterIdx= args.getClusterIdx();
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
+        }
         
         Long namespaceIdx = args.getNamespaceIdx();
         if(namespaceIdx != null && namespaceIdx > 0L){
@@ -44,6 +43,8 @@ public class CustomCronJobRepositoryImpl  implements CustomCronJobRepository{
 
 		QueryResults<CronJobEntity> results = jpaQueryFactory
 				.selectFrom(qCronJobEntity)
+				.leftJoin(qCronJobEntity.namespaceEntity, qNamespaceEntity)
+	            .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
 				.where(builder)
 				.orderBy(qCronJobEntity.cronJobIdx.desc())
 				.offset(pageable.getOffset())

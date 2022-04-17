@@ -10,6 +10,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.model.QJobEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -49,17 +50,15 @@ public class CustomJobRepositoryImpl  implements CustomJobRepository{
 	 @Override
     public Page<JobEntity> getPageList(Pageable pageable, JobArgDto args) {
     	QJobEntity qJobEntity = QJobEntity.jobEntity;
+    	QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+    	QClusterEntity qClusterEntity = QClusterEntity.clusterEntity;
 
         BooleanBuilder builder = new BooleanBuilder();
-//	    Long projectIdx= args.getProjectIdx();
-//	    if(projectIdx != null && projectIdx > 0L){
         
-//	    }
-
-//	    Long clusterIdx= args.getClusterIdx();
-//	    if(clusterIdx != null && clusterIdx > 0L){
-        
-//	    }
+	    Long clusterIdx= args.getClusterIdx();
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qClusterEntity.clusterIdx.eq(clusterIdx));
+        }
         
         Long namespaceIdx = args.getNamespaceIdx();
         if(namespaceIdx != null && namespaceIdx > 0L){
@@ -68,6 +67,8 @@ public class CustomJobRepositoryImpl  implements CustomJobRepository{
 
 		QueryResults<JobEntity> results = jpaQueryFactory
 				.selectFrom(qJobEntity)
+				.leftJoin(qJobEntity.namespaceEntity, qNamespaceEntity)
+	            .leftJoin(qNamespaceEntity.cluster, qClusterEntity)
 				.where(builder)
 				.orderBy(qJobEntity.jobIdx.desc())
 				.offset(pageable.getOffset())
