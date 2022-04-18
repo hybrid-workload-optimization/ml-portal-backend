@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Volume;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import lombok.AllArgsConstructor;
@@ -52,6 +53,11 @@ public class PodEntity {
     @ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "node_idx")
 	private NodeEntity node;
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+   	@JoinColumn(name = "cluster_idx")
+   	private ClusterEntity cluster;
     
     private String ip;
     

@@ -110,22 +110,19 @@ public class PodDomainService {
 		podRepository.delete(pod);
     }
     
-    public void deleteByClusterIdx(Long clusterIdx) {
-    	Optional<ClusterEntity> optCluster = clusterRepository.findById(clusterIdx.longValue());
+    public void deleteByClusterIdx(ClusterEntity cluster) {
+		List<NamespaceEntity> namespaces = namespaceRepository.findByClusterIdx(cluster);
+		
+		// pod mapping table delete
+		for(NamespaceEntity namespace : namespaces) {
+			List<PodEntity> pods = podRepository.findAllByNamespaceIdx(namespace.getId());
+			
+			for(PodEntity pod : pods) {
+				podRepository.delete(pod);
+			}
+		}
     	
-    	if(optCluster.isPresent()){
-    		ClusterEntity cluster = optCluster.get();
-    		List<NamespaceEntity> namespaces = namespaceRepository.findByClusterIdx(cluster);
-    		
-    		// pod mapping table delete
-    		for(NamespaceEntity namespace : namespaces) {
-    			List<PodEntity> pods = podRepository.findAllByNamespaceIdx(namespace.getId());
-    			
-    			for(PodEntity pod : pods) {
-    				podRepository.delete(pod);
-    			}
-    		}
-    	}
+    	podRepository.deleteByCluster(cluster);
     }
     
     public StatefulSetEntity getPodStatefulSet(Long podId) {
@@ -161,18 +158,20 @@ public class PodDomainService {
         	if(namespaces != null && namespaces.size() > 0){
             	pod.setNamespace(namespaces.get(0));
             	
+            	
+            	
             	if (pod.getNode() != null) {
             		String nodeName = pod.getNode().getName();
             		List<NodeEntity> node = nodeRepository.findByNameAndClusterIdx(nodeName, cluster);
             		if (node != null && node.size() > 0 ) {
                 		pod.setNode(node.get(0));
-                		
-                		podRepository.save(pod);
-                		
-                		// TODO pvcEntity save
-                		addPersistentVolumeClaim(pod);
                 	}
             	}
+            	
+            	podRepository.save(pod);
+        		
+        		// TODO pvcEntity save
+        		addPersistentVolumeClaim(pod);
             	
             	if (pod != null && !kind.isEmpty()) {
                 	// 첫글자 소문자

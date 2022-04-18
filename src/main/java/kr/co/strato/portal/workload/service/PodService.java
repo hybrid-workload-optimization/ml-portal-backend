@@ -23,6 +23,8 @@ import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
@@ -54,6 +56,9 @@ public class PodService {
     
     @Autowired
     private PersistentVolumeClaimDomainService persistentVolumeClaimDomainService;
+    
+    @Autowired
+    private NamespaceDomainService namespaceDomainService;
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
@@ -114,36 +119,77 @@ public class PodService {
         return ids;
     }
     
+    /*
     @Transactional(rollbackFor = Exception.class)
     public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
     	Long clusterIdx = searchParam.getClusterIdx();
+    	Long namespaceIdx = searchParam.getNamespaceId();
+    	ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+    	
+    	String namespace = null;
+    	if(namespaceIdx != null) {
+    		NamespaceEntity namespaceEntity = namespaceDomainService.get(namespaceIdx);
+    		namespace = namespaceEntity.getName();
+    	}
+    	
+    	
+    	Long clusterId = clusterEntity.getClusterId();
+ 		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, namespace, null);
+ 		
+ 		List<PodEntity> list = new ArrayList<>();
+ 		for(Pod p : k8sPods) {
+ 			try {
+				PodEntity pod = PodMapper.INSTANCE.toEntity(p);
+				list.add(pod);
+			} catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+ 		}
+ 		List<PodDto.ResListDto> dtos = list.stream().map(e -> PodDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
+ 		dtos.forEach(p -> p.setClusterName(clusterEntity.getClusterName()));
+ 		
+        Page<PodDto.ResListDto> pages = new PageImpl<>(dtos, pageable, list.size());
+        return pages;
+    }
+    */
+    
+    
+    @Transactional(rollbackFor = Exception.class)
+    public Page<PodDto.ResListDto> getPods(Pageable pageable, PodDto.SearchParam searchParam) {
+    	Long clusterIdx = searchParam.getClusterIdx();
+    	Long namespaceIdx = searchParam.getNamespaceId();
     	Integer page = pageable.getPageNumber();
 
     	if (page == 0
 //    			&& projectId == null 
 //    			&& clusterIdx == null 
     			&& clusterIdx != null 
-    			&& searchParam.getNamespaceId() == null 
+//    			&& searchParam.getNamespaceId() == null 
     			&& searchParam.getNodeId() == null) {
 //    		List<ClusterEntity> clusters = clusterDomainService.getListAll();
 //    		for(ClusterEntity clusterEntity : clusters) {
+    			
+    			
+    		
     			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
                 Long clusterId = clusterEntity.getClusterId();
         		List<Pod> k8sPods = podAdapterService.getList(clusterId, null, null, null, null);
         		
                 // cluster id 기준 db row delete (관련된 모든 mapping table의 값도 삭제)
-        		podDomainService.deleteByClusterIdx(clusterIdx);
+        		podDomainService.deleteByClusterIdx(clusterEntity);
         		
                 // k8s data insert
         		List<Long> ids = k8sPods.stream().map( s -> {
         			try {
         				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+        				pod.setCluster(clusterEntity);
         				String namespaceName = pod.getNamespace().getName();
         				String kind = pod.getKind();
         				Long id = null;
-        				if (pod.getNode() != null) {
-        					id = podDomainService.register(pod, clusterEntity, namespaceName, kind);
-        				}
+        				//if (pod.getNode() != null) {
+        				
+    					id = podDomainService.register(pod, clusterEntity, namespaceName, kind);
+        				//}
         				return id;
         			} catch (Exception e) {
                         log.error(e.getMessage(), e);
@@ -159,6 +205,7 @@ public class PodService {
         
     	return pages;
     }
+    
     
 
     public PodDto.ResDetailDto getPodDetail(Long podId){
