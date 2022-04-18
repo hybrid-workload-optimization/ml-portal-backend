@@ -83,7 +83,8 @@ public interface PodDtoMapper {
     @Mappings({
     	@Mapping(target = "name", source = "entity.replicaSetName"),
     	@Mapping(target = "type", source = "resourceType"),
-    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
+    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus"),
+    	@Mapping(target = "createdAt", source = "entity.createdAt", qualifiedByName = "createdAt")
     })
     public PodDto.ResOwnerDto toResReplicaSetOwnerInfoDto(ReplicaSetEntity entity, StatefulSet k8s,  String resourceType);
     
@@ -150,6 +151,10 @@ public interface PodDtoMapper {
             return null;
         }
     }
-   
+    
+    @Named("createdAt")
+    default LocalDateTime createdAt(String createdAt) {
+    	return LocalDateTime.parse(createdAt, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+    }
     
 }
