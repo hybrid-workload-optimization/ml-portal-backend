@@ -50,6 +50,8 @@ public interface ReplicaSetDtoMapper {
 	@Mapping(target = "image",				source = "r.image")
 	@Mapping(target = "runningPod",			source = "k8s.status.readyReplicas")
     @Mapping(target = "desiredPod",			source = "k8s.status.replicas")
+	@Mapping(target = "clusterName",		source = "r.namespace.cluster.clusterName")
+	@Mapping(target = "clusterId",			source = "r.namespace.cluster.clusterId")
     public ReplicaSetDto.Detail toDetail(ReplicaSetEntity r, ReplicaSet k8s);
 	
 	@Named("jsonToMap")

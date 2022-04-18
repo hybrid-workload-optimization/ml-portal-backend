@@ -49,6 +49,7 @@ public class ReplicaSetDto {
 		private int runningPod;
 		private int desiredPod;
 		private Long clusterId;
+		private String clusterName;
 		
 		private ArrayList<PodDto.ResListDto> pods;
 	}
