@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +83,8 @@ public interface PodDtoMapper {
     @Mappings({
     	@Mapping(target = "name", source = "entity.replicaSetName"),
     	@Mapping(target = "type", source = "resourceType"),
-    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus")
+    	@Mapping(target = "pod", source = "k8s.status", qualifiedByName = "podStatus"),
+    	@Mapping(target = "createdAt", source = "entity.createdAt", qualifiedByName = "createdAt")
     })
     public PodDto.ResOwnerDto toResReplicaSetOwnerInfoDto(ReplicaSetEntity entity, StatefulSet k8s,  String resourceType);
     
@@ -147,6 +150,11 @@ public interface PodDtoMapper {
         }catch (Exception e){
             return null;
         }
+    }
+    
+    @Named("createAt")
+    default LocalDateTime createAt(String createAt) {
+    	return LocalDateTime.parse(createAt, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
     }
     
 }
