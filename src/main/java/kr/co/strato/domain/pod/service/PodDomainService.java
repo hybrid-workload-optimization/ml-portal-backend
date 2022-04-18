@@ -111,6 +111,7 @@ public class PodDomainService {
     }
     
     public void deleteByClusterIdx(ClusterEntity cluster) {
+    	/*
 		List<NamespaceEntity> namespaces = namespaceRepository.findByClusterIdx(cluster);
 		
 		// pod mapping table delete
@@ -121,6 +122,7 @@ public class PodDomainService {
 				podRepository.delete(pod);
 			}
 		}
+    	*/
     	
     	podRepository.deleteByCluster(cluster);
     }
