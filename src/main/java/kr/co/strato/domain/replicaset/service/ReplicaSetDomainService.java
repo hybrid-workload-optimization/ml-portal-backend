@@ -3,8 +3,10 @@ package kr.co.strato.domain.replicaset.service;
 import java.util.List;
 import java.util.Optional;
 
+import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.pod.repository.PodRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,9 @@ public class ReplicaSetDomainService {
 	@Autowired
 	ReplicaSetRepository replicaSetRepository;
 	
+	@Autowired
+	PodRepository podRepository;
+	
 	
 	public Long register(ReplicaSetEntity replicaSetEntity) {
 		replicaSetRepository.save(replicaSetEntity);
@@ -29,6 +34,8 @@ public class ReplicaSetDomainService {
 	}
 	
 	public void delete(ReplicaSetEntity replicaSetEntity) {
+		//파드 삭제
+		podRepository.deleteByOwnerUidAndKind(replicaSetEntity.getReplicaSetUid(), ResourceType.replicaSet.get());
 		replicaSetRepository.delete(replicaSetEntity);
 	}
 
