@@ -74,11 +74,11 @@ public class ClusterPersistentVolumeService {
         String persistentVolumeName = pv.getName();
 
         boolean isDeleted = persistentVolumeAdapterService.deletePersistentVolume(clusterId.intValue(), persistentVolumeName);
-        if(isDeleted){
+        //if(isDeleted){
             return persistentVolumeDomainService.delete(id.longValue());
-        }else{
-            throw new InternalServerException("k8s persistentVolume 삭제 실패");
-        }
+        //}else{
+        //    throw new InternalServerException("k8s persistentVolume 삭제 실패");
+        //}
     }
 
     public ClusterPersistentVolumeDto.ResDetailDto getClusterPersistentVolumeDetail(Long id){
