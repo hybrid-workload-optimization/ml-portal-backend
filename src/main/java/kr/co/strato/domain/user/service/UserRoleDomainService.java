@@ -50,6 +50,12 @@ public class UserRoleDomainService {
 	public List<UserRoleEntity> getUseUserRole() {
 		return userRoleRepository.findByUserRole(1L, "N");
 	}
+	
+	public List<UserRoleEntity> getProjectUserRole() {
+		UserRoleEntity projectGroup = getUserRoleByCode("PROJECT");
+		List<UserRoleEntity> list = userRoleRepository.findByParentUserRoleIdx(projectGroup.getId());
+		return list;
+	}
 
 	public int getUserRoleDuplicateCheck(String userRoleName, String groupYn) {
 		int count = userRoleRepository.findCountByAccessRoleNameAndGroupYn(userRoleName, groupYn);

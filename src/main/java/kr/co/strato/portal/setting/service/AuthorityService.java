@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.auth.AUTH;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -357,5 +356,13 @@ public class AuthorityService {
 				}
 				return Stream.of(menu);
 			}).collect(Collectors.toList());
+	}
+	
+	/**
+	 * 프로젝트 사용자가 가질 수 있는 유저 권한 리턴.
+	 * @return
+	 */
+	public List<UserRoleEntity> getProjectUserRole() {
+		return userRoleDomainService.getProjectUserRole();
 	}
 }
