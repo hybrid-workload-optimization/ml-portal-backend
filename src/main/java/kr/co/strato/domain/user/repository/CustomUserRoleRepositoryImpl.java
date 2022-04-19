@@ -84,4 +84,26 @@ public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 		List<UserRoleEntity> content = results.getResults();
 		return content;
 	}
+
+	@Override
+	public List<UserRoleEntity> findByParentUserRoleIdx(Long parentRoleIdx, String notRoleCode) {
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(userRoleEntity.parentUserRoleIdx.eq(parentRoleIdx));
+		if(notRoleCode != null) {
+			builder.and(userRoleEntity.userRoleCode.ne(notRoleCode));
+		}
+		
+		QueryResults<UserRoleEntity> results = jpaQueryFactory
+				.select(Projections.fields(UserRoleEntity.class, 
+								userRoleEntity.id
+							,	userRoleEntity.userRoleName
+							,	userRoleEntity.userRoleCode
+						))
+				.from(userRoleEntity)
+				.where(builder)
+				.fetchResults();
+		
+		List<UserRoleEntity> content = results.getResults();
+		return content;
+	}
 }

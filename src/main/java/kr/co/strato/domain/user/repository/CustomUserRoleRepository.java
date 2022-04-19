@@ -14,5 +14,7 @@ public interface CustomUserRoleRepository {
 	Page<AuthorityRequestDto> getListPagingUserRoleToDto(AuthorityRequestDto.ReqViewDto params, Pageable pageable);
 	
 	List<UserRoleEntity> findByUserRole(Long notId, String groupYn);
+	
+	List<UserRoleEntity> findByParentUserRoleIdx(Long parentRoleIdx, String notRoleCode);
 
 }
