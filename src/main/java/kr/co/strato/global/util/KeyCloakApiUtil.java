@@ -56,6 +56,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.error.exception.SsoConnectionException;
 import kr.co.strato.global.model.KeycloakRole;
 import kr.co.strato.global.model.KeycloakToken;
@@ -132,7 +134,7 @@ public class KeyCloakApiUtil {
 	// ROLE 수정(PUT), 삭제(DELETE)
 	private static final String URI_UPDATE_ROLE = "/auth/admin/realms/strato-cloud/roles-by-id/{id}";
 	
-	
+	private static final String URI_GET_USER_ROLE = "/auth/admin/realms/Strato-Cloud/users/{id}/role-mappings/realm/";
 	//
 	
 	// MASTER KEY 
@@ -624,13 +626,26 @@ public class KeyCloakApiUtil {
 			System.err.println(e.toString());
 		}
 	}
+	
 	// USER > ROLE 추가
-	public void postUserRole(UserDto user, String token, KeycloakRole role) throws Exception {
+	public void postUserRole(String userId, String roleCode) throws Exception {
+		KeycloakRole role = getKeycloakRole(roleCode);
+		if(role != null) {
+			String ssoToken = getTokenByManager();
+			deleteAllUserRole(userId, ssoToken);
+			postUserRole(userId, ssoToken, role);
+		}
+	}
+	
+	
+	// USER > ROLE 추가
+	public void postUserRole(String userId, String token, KeycloakRole role) throws Exception {
+	
 		//@TODO SSO > USer-id 가져오기
-		String userId = getUserInfoByUserId(user.getUserId()).getId();
+		String keycloakUserId = getUserInfoByUserId(userId).getId();
 		
 		String url = keycloakUrl + URI_USER_ROLE;
-		String URI = replaceUri(url, "id", userId);
+		String URI = replaceUri(url, "id", keycloakUserId);
 		String ssoRole = "[{ 'id' : '" + role.getId() + "'," 
 				+ " 'name' : '" + role.getName() + "',"
 				+ " 'description' : '" + role.getDescription() + "',"
@@ -669,14 +684,68 @@ public class KeyCloakApiUtil {
 		}
 	}
 	
+	public List<KeycloakRole> getUserRole(String userId) {
+		List<KeycloakRole> result = null;
+		try {
+			String keycloakUserId = getUserInfoByUserId(userId).getId();
+			String url = keycloakUrl + URI_GET_USER_ROLE;
+			url = replaceUri(url, "id", keycloakUserId);
+			
+			String URI = keycloakUrl + URI_GET_ROLE;
+			String ssoToken = getTokenByManager();
+			
+			HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpGet httpGet = new HttpGet(URI);
+			httpGet.addHeader("Authorization", ssoToken);
+
+			HttpResponse response = httpClient.execute(httpGet);
+			
+			ObjectMapper objectMapper = new ObjectMapper();
+			
+			KeycloakRole[] roles = objectMapper.readValue(EntityUtils.toString(response.getEntity()), KeycloakRole[].class);
+
+			result = new ArrayList<>(Arrays.asList(roles));
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return result;
+	}
+	
+	public void deleteAllUserRole(String userId) {
+		try {
+			String ssoToken = getTokenByManager();
+			deleteAllUserRole(userId, ssoToken);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+	}
+	
+	/**
+	 * Keycloak 사용자의 모든 권한 삭제
+	 * @param userId
+	 */
+	public void deleteAllUserRole(String userId, String token) {
+		List<KeycloakRole> userRoles =  getUserRole(userId);
+		try {
+			if(userRoles != null && userRoles.size() > 0) {
+				for(KeycloakRole role : userRoles) {
+					deleteUserRole(userId, token, role);
+				}
+			}
+		} catch (Exception e) {
+			log.error("", e);
+		}
+	}
+	
 	// USER > ROLE 삭제
-	public void deleteUserRole(UserDto user, String token, KeycloakRole role) throws Exception {
+	public void deleteUserRole(String userId, String token, KeycloakRole role) throws Exception {
 		System.out.println("ROLE 삭제");
 		//@TODO SSO > USer-id 가져오기
-		String userId = getUserInfoByUserId(user.getUserId()).getId();
+		String keycloakUserId = getUserInfoByUserId(userId).getId();
 		
 		String url = keycloakUrl + URI_USER_ROLE;
-		String URI = replaceUri(url, "id", userId);
+		String URI = replaceUri(url, "id", keycloakUserId);
 		String ssoRole = "[{ 'id' : '" + role.getId() + "'," 
 				+ " 'name' : '" + role.getName() + "',"
 				+ " 'description' : '" + role.getDescription() + "',"
@@ -744,39 +813,100 @@ public class KeyCloakApiUtil {
 		
 		return result;
 	}
-	
-	public KeycloakRole getRoleByUserRole(UserDto user) throws Exception {
-		KeycloakRole result = null;
-		String userRole = user.getUserRole().getUserRoleCode();
-		List<KeycloakRole> roles = getRoleList();
-		if("PROJECT ADMIN".equals(userRole)) {
-			result = roles.stream()
-					.filter(r -> r.getName().equals("proj_admin"))
-					.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException());
-		}else{
-			result = roles.stream()
-					.filter(r -> r.getName().equals("proj_member"))
-					.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException());
-		}
-		return result;
-	}
 
 	// ROLE 추가
-	public void postRole() {
+	public boolean postRole(UserRoleEntity paramEntity) {
+		String uri = keycloakUrl + URI_SET_ROLE;
 		
+		org.json.JSONObject ssoUserInfo = new org.json.JSONObject();
+		ssoUserInfo.put("name", paramEntity.getUserRoleCode());
+		ssoUserInfo.put("description", paramEntity.getDescription());
+		boolean result = false;
+
+		try {			
+			String ssoToken = getTokenByManager();
+
+			HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.addHeader("Content-Type", "application/json");
+			httpPost.addHeader("Authorization", ssoToken);
+
+			// string 값으로 변환 할 때 char-set 설정
+			StringEntity users = new StringEntity(ssoUserInfo.toString(), "UTF-8");
+
+			httpPost.setEntity(users);
+
+			HttpResponse response = httpClient.execute(httpPost);
+
+			if (response.getStatusLine().getStatusCode() == 201) {
+				result = true;
+			} else {
+				result = false;
+			}
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		return result;
 	}
 	
 	
 	// ROLE 삭제
-	public void deleteRole() {
-		
+	public boolean deleteRole(String userRoleCode) {	
+		String uri = keycloakUrl + URI_UPDATE_ROLE;
+		boolean result = false;
+
+		try {
+			KeycloakRole role = getKeycloakRole(userRoleCode);
+			
+			if(role != null) {
+				uri = replaceUri(uri, "id", role.getId());
+				
+				String ssoToken = getTokenByManager();
+				HttpClient httpClient = HttpClientBuilder.create().build();
+				HttpDelete httpDelete = new HttpDelete(uri);
+				httpDelete.addHeader("Content-Type", "application/json");
+				httpDelete.addHeader("Authorization", ssoToken);
+
+				HttpResponse response = httpClient.execute(httpDelete);
+
+				if (response.getStatusLine().getStatusCode() == 204) {
+					result = true;
+				} else {
+					result = false;
+				}
+			} else {
+				result = false;
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		return result;
 	}
 	
 	// ROLE 수정
 	public void putRole() {
 		
+	}
+	
+	/**
+	 * Role 코드에 맞는 롤 반환.
+	 * @param roleCode
+	 * @return
+	 * @throws Exception
+	 */
+	private KeycloakRole getKeycloakRole(String roleCode) throws Exception {
+		KeycloakRole role = null;
+		List<KeycloakRole> roles = getRoleList();
+		for(KeycloakRole r : roles) {
+			if(roleCode.equals(r.getName())) {
+				role= r;
+				break;
+			}
+		}
+		return role;
 	}
 	
 	
@@ -942,6 +1072,27 @@ public class KeyCloakApiUtil {
 		
 		return token;
 	}
+	
+	
+	/*
+	public KeycloakRole getRoleByUserRole(UserDto user) throws Exception {
+		KeycloakRole result = null;
+		String userRole = user.getUserRole().getUserRoleCode();
+		List<KeycloakRole> roles = getRoleList();
+		if("PROJECT ADMIN".equals(userRole)) {
+			result = roles.stream()
+					.filter(r -> r.getName().equals("proj_admin"))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException());
+		}else{
+			result = roles.stream()
+					.filter(r -> r.getName().equals("proj_member"))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException());
+		}
+		return result;
+	}
+	*/
 	
 		
 }

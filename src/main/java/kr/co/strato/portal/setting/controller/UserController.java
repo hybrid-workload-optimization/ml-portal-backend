@@ -357,17 +357,6 @@ public class UserController {
 		return new ResponseWrapper<>(result);
 	}
 	
-	@GetMapping("/test")
-	@ResponseStatus(HttpStatus.OK)
-	public void testController() {
-		System.out.println("============>> 테스트");
-		
-//		userService.getTest();
-		userService.tokenTest();
-		
-		System.out.println("<<============ 테스트 종료");
-	}
-	
 	private String decodeUrl(String msg) throws UnsupportedEncodingException {
 		String result = URLDecoder.decode(msg, StandardCharsets.UTF_8.toString()).replaceAll("%2E",".");
 		

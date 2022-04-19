@@ -29,6 +29,7 @@ import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
@@ -60,6 +61,9 @@ public class AuthorityService {
 	
 	@Autowired
 	private ProjectUserDomainService projectUserDomainService;
+	
+	@Autowired
+	KeyCloakApiUtil keyCloakApiUtil;
 	
 	
 	public Page<AuthorityRequestDto> getListPagingAuthorityDto(AuthorityRequestDto.ReqViewDto param, Pageable pageable) {
@@ -133,7 +137,7 @@ public class AuthorityService {
 			paramEntity.setParentUserRoleIdx((long)0);
 		} else {
 			paramEntity.setUserRoleCode("ROLE_" + Long.toString(System.currentTimeMillis()));
-			
+						
 			//자식일경우 그룹에 매핑된 실제 권한이므로 메뉴생성
 			List<MenuEntity> menus = menuDomainService.getAllMenu();
 			for ( MenuEntity menu : menus ) {
@@ -143,6 +147,13 @@ public class AuthorityService {
 				userRoleMenu.setWritableYn("N");
 				userRoleMenu.setCreated_at(new Date());
 				paramEntity.addToUserRoleMenu(userRoleMenu);
+			}
+			
+			//Keycloak Role 생성
+			boolean isOk = keyCloakApiUtil.postRole(paramEntity);
+			if(!isOk) {
+				log.error("Keycloak Role 생성 실패!");
+				log.error("Keycloak Role 생성 실패! - Role Code: {}", paramEntity.getUserRoleCode());
 			}
 		}
 		paramEntity.setUserDefinedYn("Y");
@@ -167,6 +178,12 @@ public class AuthorityService {
 		userRoleDomainService.saveUserRole(userRole);
 		userRoleDomainService.deleteUserRole(userRole);
 		
+		//Keycloak Role 삭제
+		boolean isOk = keyCloakApiUtil.deleteRole(userRole.getUserRoleCode());
+		if(!isOk) {
+			log.error("Keycloak Role 삭제 실패!");
+			log.error("Keycloak Role 삭제 실패! - Role Code: {}", userRole.getUserRoleCode());
+		}
 		return userRole.getId();
 	}
 
@@ -231,12 +248,26 @@ public class AuthorityService {
 						//신규 -> 기존 권한 변경 됨 
 						UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
 						newUserEntity.setUserRole(userRole);
+						
+						try {
+							keyCloakApiUtil.postUserRole(newUserEntity.getUserId(), userRole.getUserRoleCode());
+						} catch (Exception e) {
+							log.error("Keycloak Role 변경 오류 - UserId: {}", newUserEntity.getUserId());
+							log.error("", e);
+							e.printStackTrace();
+						}
 					} else if (  StringUtils.equals(userParam.getType(), "D")  ) {
 						// 권한별 사용자 매핑 변경
 						userRole.getUsers().stream().forEach(user -> {
 							if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
 								//권한 삭제(초기화)
 								user.setUserRole(defaultUserRole);
+								try {
+									keyCloakApiUtil.postUserRole(user.getUserId(), defaultUserRole.getUserRoleCode());
+								} catch (Exception e) {
+									log.error("Keycloak Role 변경 오류 - UserId: {}", user.getUserId());
+									log.error("", e);
+								}
 							}
 						});
 					}
