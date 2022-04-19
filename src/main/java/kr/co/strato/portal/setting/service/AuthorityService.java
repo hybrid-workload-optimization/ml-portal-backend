@@ -30,7 +30,6 @@ import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
-import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
@@ -55,9 +54,6 @@ public class AuthorityService {
 	
 	@Autowired
 	private UserDomainService userDomainService;
-	
-	@Autowired
-	private AccessService accessService;
 	
 	@Autowired
 	private ProjectUserDomainService projectUserDomainService;
@@ -274,7 +270,7 @@ public class AuthorityService {
 					
 					// 권한 변경 유저 로그아웃 처리.
 					try {
-						accessService.doLogout(userParam.getUserId());
+						keyCloakApiUtil.logoutUser(userParam.getUserId());
 						log.info("Logout due to authority change. UserID: {}", userParam.getUserId());
 						
 					} catch (Exception e) {
