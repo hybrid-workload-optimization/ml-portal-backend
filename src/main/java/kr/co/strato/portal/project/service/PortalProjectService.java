@@ -191,7 +191,8 @@ public class PortalProjectService {
                 		projectUserBuiler.createUserId(userId);
                 		projectUserBuiler.createUserName(userName);
                 		projectUserBuiler.createdAt(now);
-                		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+                		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
+                		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
                 		
                 		//ProjectUserDTO -> ProjectUserEntity
                         ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
@@ -432,7 +433,8 @@ public class PortalProjectService {
         		projectUserBuiler.projectIdx(param.getProjectIdx());
         		projectUserBuiler.createUserId(userId);
         		projectUserBuiler.createUserName(userName);
-        		projectUserBuiler.projectUserRole(user.getProjectUserRole());
+        		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
+        		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
         		if(selectUser != null) {
         			System.out.println("selectUser === " + selectUser.getUserId());
         			projectUserBuiler.createdAt(selectUser.getCreatedAt());

@@ -36,7 +36,8 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						userEntity.userName,
 						userEntity.email,
 						userEntity.organization,
-						projectUserEntity.projectUserRole,
+						//projectUserEntity.projectUserRole,
+						projectUserEntity.userRoleIdx,
 						ExpressionUtils.as(
 								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectUserEntity.createdAt, "%Y-%m-%d %H:%i"),
 								"createdAt"
@@ -49,7 +50,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				  .from(projectUserEntity)
 				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
 				  .where(projectUserEntity.projectIdx.eq(projectIdx))
-				  .orderBy(projectUserEntity.projectUserRole.desc())
+				  .orderBy(projectUserEntity.userRoleIdx.asc())
 				  .fetch();
 		
 		return result;

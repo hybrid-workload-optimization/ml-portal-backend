@@ -26,12 +26,17 @@ import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.service.AuthorityService;
 
 @RestController
 public class PortalProjectController extends CommonController {
 
 	@Autowired
 	PortalProjectService portalProjectService;
+	
+	@Autowired
+	AuthorityService authorityService;
 	
 	/**
      * Project 리스트 조회
@@ -259,5 +264,19 @@ public class PortalProjectController extends CommonController {
     	Boolean response = portalProjectService.deleteProjectUser(projectIdx, userId);
         
         return new ResponseWrapper<Boolean>(response);
+    }
+    
+    /**
+     * Project 사용자 권한 목록
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/project/user/role")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<UserRoleDto>> getProjectUserRoleList() {
+        
+    	List<UserRoleDto> response = authorityService.getProjectUserRole();
+        
+    	return new ResponseWrapper<List<UserRoleDto>>(response);
     }
 }

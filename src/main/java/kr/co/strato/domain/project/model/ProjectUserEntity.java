@@ -35,8 +35,8 @@ public class ProjectUserEntity {
 	@Column(name="created_at")
 	private String createdAt;
 	
-	@Column(name="project_user_role")
-	private String projectUserRole;
+	//@Column(name="project_user_role")
+	//private String projectUserRole;
 	
 	@Column(name="user_role_idx")
 	private Long userRoleIdx;
