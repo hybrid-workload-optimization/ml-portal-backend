@@ -73,5 +73,4 @@ public class AuthorityController {
 		Long idx = authorityService.modifyUserRole(param);
 		return new ResponseWrapper<>(idx);
 	}
-	
 }

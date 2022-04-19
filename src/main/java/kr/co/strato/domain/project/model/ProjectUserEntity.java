@@ -38,6 +38,9 @@ public class ProjectUserEntity {
 	@Column(name="project_user_role")
 	private String projectUserRole;
 	
+	@Column(name="user_role_idx")
+	private Long userRoleIdx;
+	
 	//@ManyToOne(fetch = FetchType.LAZY)
 	//@JoinColumn(name="project_idx")
 	//private ProjectEntity projectEntity;

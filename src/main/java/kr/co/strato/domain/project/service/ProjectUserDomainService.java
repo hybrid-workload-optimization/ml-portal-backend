@@ -115,4 +115,13 @@ public class ProjectUserDomainService {
 		
 		return projectUserRepository.deleteByProjectIdxAndUserIdNotIn(projectIdx, userIds);
 	}
+	
+	/**
+	 * 유저 아이디로 프로젝트 맵핑 정보 반환.
+	 * @param userId
+	 * @return
+	 */
+	public List<ProjectUserEntity> findByUserId(String userId) {
+		return projectUserRepository.findByUserId(userId);
+	}
 }

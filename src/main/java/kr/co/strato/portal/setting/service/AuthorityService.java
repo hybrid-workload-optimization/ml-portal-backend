@@ -20,6 +20,8 @@ import org.springframework.util.CollectionUtils;
 
 import kr.co.strato.domain.menu.model.MenuEntity;
 import kr.co.strato.domain.menu.service.MenuDomainService;
+import kr.co.strato.domain.project.model.ProjectUserEntity;
+import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.model.UserRoleMenuEntity;
@@ -32,6 +34,11 @@ import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
 import kr.co.strato.portal.setting.model.AuthorityViewDtoMapper;
+import kr.co.strato.portal.setting.model.UserAuthorityDto;
+import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
+import kr.co.strato.portal.setting.model.UserRoleMenuDto;
+import kr.co.strato.portal.setting.model.UserRoleMenuDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -52,6 +59,9 @@ public class AuthorityService {
 	
 	@Autowired
 	private AccessService accessService;
+	
+	@Autowired
+	private ProjectUserDomainService projectUserDomainService;
 	
 	
 	public Page<AuthorityRequestDto> getListPagingAuthorityDto(AuthorityRequestDto.ReqViewDto param, Pageable pageable) {
@@ -148,7 +158,7 @@ public class AuthorityService {
 	@Transactional
 	public Long deleteUserRole(AuthorityRequestDto.ReqDeleteDto param) {
 		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(param.getUserRoleIdx());
-		UserRoleEntity defaultUserRole = userRoleDomainService.getUserRoleByCode("PROJECT_MEMBER"); // 기본권한 조회
+		UserRoleEntity defaultUserRole = getDefaultUserRole(); // 기본권한 조회
 		if ( ObjectUtils.isEmpty(defaultUserRole) ) {
 			throw new NotFoundResourceException("user role code : PROJECT_MEMBER");
 		}
@@ -359,10 +369,78 @@ public class AuthorityService {
 	}
 	
 	/**
+	 * 기본 사용자 권한 반환.
+	 * @return
+	 */
+	private UserRoleEntity getDefaultUserRole() {
+		return userRoleDomainService.getUserRoleByCode("PROJECT_MEMBER"); // 기본권한 조회
+	}
+	
+	/**
 	 * 프로젝트 사용자가 가질 수 있는 유저 권한 리턴.
 	 * @return
 	 */
-	public List<UserRoleEntity> getProjectUserRole() {
-		return userRoleDomainService.getProjectUserRole();
+	public List<UserRoleDto> getProjectUserRole() {
+		List<UserRoleEntity> list =  userRoleDomainService.getProjectUserRole();
+		List<UserRoleDto> roleList = list
+				.stream()
+				.map(r -> UserRoleDtoMapper.INSTANCE.toDto(r))
+				.collect(Collectors.toList());
+		return roleList;
+	}
+	
+	/**
+	 * 사용자별 디폴트 권한 + 프로젝트 권한 반환.
+	 * @param userEntity
+	 * @return
+	 */
+	public UserAuthorityDto getUserRole(String userId) {	
+		UserEntity userEntity = userDomainService.getUserInfoByUserId(userId);
+		
+		UserAuthorityDto userAuthroityDto = new UserAuthorityDto();
+		
+		//디폴트 권한 설정.
+		
+		UserRoleEntity userRole = userEntity.getUserRole();
+		if(userRole == null) {
+			//권한 설정 되어있지 않은 경우 디폴트 권한 설정
+			userRole = getDefaultUserRole();
+		}
+		
+		List<UserRoleMenuEntity> entitys = userRole.getUserRoleMenus();
+		
+		List<UserRoleMenuDto> roleList = entitys
+				.stream()
+				.map(r -> UserRoleMenuDtoMapper.INSTANCE.toDto(r))
+				.collect(Collectors.toList());
+		
+		userAuthroityDto.setDefaultUserRole(roleList);
+		
+		//프로젝트 별 권한 설정
+		Map<Long, List<UserRoleMenuDto>> projectUserRole = new HashMap<>();
+		userAuthroityDto.setProjectUserRole(projectUserRole);
+		
+		
+		List<ProjectUserEntity> projectUsers = projectUserDomainService.findByUserId(userId);
+		for(ProjectUserEntity pu : projectUsers) {
+			Long projectIdx = pu.getProjectIdx();
+			
+			//TODO 사용자 권한 바뀌면 설정
+			Long userRoleIdx = pu.getUserRoleIdx();
+			
+			UserRoleEntity roleEntity = userRoleDomainService.getUserRoleById(userRoleIdx);
+			if(roleEntity != null) {
+				List<UserRoleMenuEntity> userRoleMenus = roleEntity.getUserRoleMenus();
+				List<UserRoleMenuDto> dtoList = userRoleMenus
+						.stream()
+						.map(r -> UserRoleMenuDtoMapper.INSTANCE.toDto(r))
+						.collect(Collectors.toList());
+				
+				projectUserRole.put(projectIdx, dtoList);
+			}
+		}
+		
+		
+		return userAuthroityDto;
 	}
 }

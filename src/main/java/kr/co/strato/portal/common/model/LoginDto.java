@@ -1,6 +1,7 @@
 package kr.co.strato.portal.common.model;
 
 import kr.co.strato.global.model.KeycloakToken;
+import kr.co.strato.portal.setting.model.UserAuthorityDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ public class LoginDto {
 	
 	private UserDto user;
 	private KeycloakToken token;
+	private UserAuthorityDto authority;
 	
 	
 	@Override

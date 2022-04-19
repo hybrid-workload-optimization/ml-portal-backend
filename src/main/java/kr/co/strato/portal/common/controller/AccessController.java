@@ -27,9 +27,11 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.model.LoginDto;
 import kr.co.strato.portal.common.service.AccessService;
+import kr.co.strato.portal.setting.model.UserAuthorityDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
+import kr.co.strato.portal.setting.service.AuthorityService;
 import kr.co.strato.portal.setting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +49,9 @@ public class AccessController {
 	@Autowired
 	TokenValidator tokenValidator;
 	
+	@Autowired
+	AuthorityService authorityService;
+	
 	//token 요청(로그인)
 	@PostMapping("/login")
 	public ResponseWrapper<LoginDto> doLogin(@RequestBody UserDto dto, HttpSession session, HttpServletResponse response) throws Exception {
@@ -54,12 +59,18 @@ public class AccessController {
 		LoginDto result = new LoginDto();
 		
 		try {
+			String userId = dto.getUserId();
 			ResponseEntity<KeycloakToken> data = accessService.doLogin(dto);
 			if(data.getStatusCode() == HttpStatus.OK) {
 				KeycloakToken token = data.getBody();
-				UserDto user = userService.getUserInfo(dto.getUserId());
+				UserDto user = userService.getUserInfo(userId);
 				result.setToken(token);
 				result.setUser(user);	
+				
+				//유저 권한 추가
+				UserAuthorityDto authority = authorityService.getUserRole(userId);
+				result.setAuthority(authority);
+				
 				return new ResponseWrapper<>(result);
 			}else {
 				return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
