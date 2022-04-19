@@ -37,8 +37,6 @@ import kr.co.strato.portal.setting.model.AuthorityViewDtoMapper;
 import kr.co.strato.portal.setting.model.UserAuthorityDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
-import kr.co.strato.portal.setting.model.UserRoleMenuDto;
-import kr.co.strato.portal.setting.model.UserRoleMenuDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -407,17 +405,13 @@ public class AuthorityService {
 			userRole = getDefaultUserRole();
 		}
 		
-		List<UserRoleMenuEntity> entitys = userRole.getUserRoleMenus();
+		AuthorityViewDto defaultView = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(userRole);
+		List<AuthorityViewDto.Menu> defaultMenu = getMenuTreeList(defaultView.getMenuList());
 		
-		List<UserRoleMenuDto> roleList = entitys
-				.stream()
-				.map(r -> UserRoleMenuDtoMapper.INSTANCE.toDto(r))
-				.collect(Collectors.toList());
-		
-		userAuthroityDto.setDefaultUserRole(roleList);
+		userAuthroityDto.setDefaultUserRole(defaultMenu);
 		
 		//프로젝트 별 권한 설정
-		Map<Long, List<UserRoleMenuDto>> projectUserRole = new HashMap<>();
+		Map<Long, List<AuthorityViewDto.Menu>> projectUserRole = new HashMap<>();
 		userAuthroityDto.setProjectUserRole(projectUserRole);
 		
 		
@@ -430,13 +424,10 @@ public class AuthorityService {
 			
 			UserRoleEntity roleEntity = userRoleDomainService.getUserRoleById(userRoleIdx);
 			if(roleEntity != null) {
-				List<UserRoleMenuEntity> userRoleMenus = roleEntity.getUserRoleMenus();
-				List<UserRoleMenuDto> dtoList = userRoleMenus
-						.stream()
-						.map(r -> UserRoleMenuDtoMapper.INSTANCE.toDto(r))
-						.collect(Collectors.toList());
+				AuthorityViewDto projectView = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(userRole);
+				List<AuthorityViewDto.Menu> projectMenu = getMenuTreeList(projectView.getMenuList());
 				
-				projectUserRole.put(projectIdx, dtoList);
+				projectUserRole.put(projectIdx, projectMenu);
 			}
 		}
 		

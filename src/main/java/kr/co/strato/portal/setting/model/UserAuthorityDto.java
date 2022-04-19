@@ -16,9 +16,9 @@ public class UserAuthorityDto {
 	private String userId;
 	
 	//디폴트 유저 롤
-	private List<UserRoleMenuDto> defaultUserRole;
+	private List<AuthorityViewDto.Menu> defaultUserRole;
 	
 	//프로젝트 별 유저 롤
-	private Map<Long, List<UserRoleMenuDto>> projectUserRole;
+	private Map<Long, List<AuthorityViewDto.Menu>> projectUserRole;
 	
 }
