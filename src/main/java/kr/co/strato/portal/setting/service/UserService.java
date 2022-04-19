@@ -143,12 +143,8 @@ public class UserService {
 			log.error(e.getMessage());
 		}
 		
-		
-		
-		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
-		
-		userDomainService.saveUser(entity, "patch");
-				
+		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);		
+		userDomainService.saveUser(entity, "patch");				
 		return param.getUserId();
 	}
 	
