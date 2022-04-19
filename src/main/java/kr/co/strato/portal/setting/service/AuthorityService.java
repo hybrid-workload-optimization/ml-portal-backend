@@ -28,11 +28,14 @@ import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
 import kr.co.strato.portal.setting.model.AuthorityViewDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class AuthorityService {
 	
@@ -47,6 +50,9 @@ public class AuthorityService {
 	
 	@Autowired
 	private UserDomainService userDomainService;
+	
+	@Autowired
+	private AccessService accessService;
 	
 	
 	public Page<AuthorityRequestDto> getListPagingAuthorityDto(AuthorityRequestDto.ReqViewDto param, Pageable pageable) {
@@ -160,6 +166,7 @@ public class AuthorityService {
 	//권한 수정
 	@Transactional
 	public Long modifyUserRole(AuthorityRequestDto.ReqModifyDto param) {
+		
 		//flatmap으로 변경
 		if ( !CollectionUtils.isEmpty(param.getMenuList()) ) {
 			List<AuthorityRequestDto.Menu> menuList = convertToFlatList(param.getMenuList());
@@ -211,18 +218,30 @@ public class AuthorityService {
 		// 신규 사용자 매핑
 		if ( !CollectionUtils.isEmpty(param.getUserList()) ) {
 			param.getUserList().stream().forEach(userParam -> {
-				if ( StringUtils.equals(userParam.getType(), "N") ) {
-					//신규 -> 기존 권한 변경 됨 
-					UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
-					newUserEntity.setUserRole(userRole);
-				}else if (  StringUtils.equals(userParam.getType(), "D")  ) {
-					// 권한별 사용자 매핑 변경
-					userRole.getUsers().stream().forEach(user -> {
-						if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
-							//권한 삭제(초기화)
-							user.setUserRole(defaultUserRole);
-						}
-					});
+				
+				if(userParam.getType() != null) {
+					if ( StringUtils.equals(userParam.getType(), "N") ) {
+						//신규 -> 기존 권한 변경 됨 
+						UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
+						newUserEntity.setUserRole(userRole);
+					} else if (  StringUtils.equals(userParam.getType(), "D")  ) {
+						// 권한별 사용자 매핑 변경
+						userRole.getUsers().stream().forEach(user -> {
+							if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
+								//권한 삭제(초기화)
+								user.setUserRole(defaultUserRole);
+							}
+						});
+					}
+					
+					// 권한 변경 유저 로그아웃 처리.
+					try {
+						accessService.doLogout(userParam.getUserId());
+						log.info("Logout due to authority change. UserID: {}", userParam.getUserId());
+						
+					} catch (Exception e) {
+						log.error("", e);
+					}
 				}
 			});
 		}

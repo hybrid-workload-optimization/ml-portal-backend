@@ -66,6 +66,7 @@ public class UserDto {
     public static class SearchParam{
         private Long projectId;
         private String authorityId;
+        private String notAuthorityId;
     }
     
     @Getter

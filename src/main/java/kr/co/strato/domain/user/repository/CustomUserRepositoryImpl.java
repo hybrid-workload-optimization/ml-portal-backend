@@ -53,6 +53,12 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		if(param.getAuthorityId()!= null && !"".equals(param.getAuthorityId())) {
 			builder.and(qUserRoleEntity.userRoleCode.eq(param.getAuthorityId()));
 		}
+		
+		if(param.getNotAuthorityId()!= null && !"".equals(param.getNotAuthorityId())) {
+			//해당 권한이 아닌 사용자만 리턴.
+			builder.and(qUserRoleEntity.userRoleCode.ne(param.getNotAuthorityId()));
+		}
+		
 		QueryResults<UserEntity> results = null;
 		
 		if(param.getProjectId() == null || param.getProjectId() == 0) {
