@@ -96,8 +96,8 @@ public class PodEntity {
     @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
     private List<PodReplicaSetEntity> podReplicaSet;
     
-//    @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
-//    private List<PodDaemonetEntity> podDaemonSet;
+    @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
+    private List<PodDaemonSetEntity> podDaemonSet;
     
     @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
     private List<PodJobEntity> podJob;
