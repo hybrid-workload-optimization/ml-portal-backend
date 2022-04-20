@@ -17,4 +17,8 @@ public class MenuDomainService {
 		List<MenuEntity> menuList = menuRepository.findAll();
 		return menuList;
 	}
+	
+	public MenuEntity getById(Long menuIdx) {
+		return menuRepository.getOne(menuIdx);
+	}
 }
