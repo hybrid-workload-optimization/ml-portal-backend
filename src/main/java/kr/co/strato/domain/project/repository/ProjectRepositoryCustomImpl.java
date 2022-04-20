@@ -22,6 +22,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -89,8 +90,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 	    		  .orderBy(projectEntity.createdAt.desc());
 	    
 	    
-	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN") 
-	    		&& !loginUser.getUserRole().getUserRoleCode().equals("PORTAL_ADMIN")) {
+	    if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN) 
+	    		&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
 	    	query = query.where(projectEntity.id.in(
 					 JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);
@@ -223,8 +224,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				  .where(projectEntity.deletedYn.eq("N"))
 				  .orderBy(projectEntity.createdAt.desc());
 		
-		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("SYSTEM_ADMIN")
-				&& !loginUser.getUserRole().getUserRoleCode().equals("PORTAL_ADMIN")) {
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN)
+				&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
 			query = query.where(projectEntity.id.in(
 	    		JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()), builder))
 			);

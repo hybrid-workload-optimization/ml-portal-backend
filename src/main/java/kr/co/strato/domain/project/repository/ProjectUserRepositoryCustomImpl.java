@@ -14,6 +14,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,8 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						.notIn(JPAExpressions.select(projectUserEntity.userId).from(projectUserEntity)
 								.where(projectUserEntity.projectIdx.eq(projectIdx)))
 						.and(userEntity.useYn.eq("Y"))
-						.and(userEntity.userRole.userRoleCode.ne("PORTAL_ADMIN"))
-						.and(userEntity.userRole.userRoleCode.ne("SYSTEM_ADMIN"))
+						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
+						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN))
 				)
 				.fetch();
 		
@@ -77,8 +78,8 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 		
 		List<UserEntity> result = queryFactory.select(userEntity).from(userEntity)
 				.where(userEntity.useYn.eq("Y")
-						.and(userEntity.userRole.userRoleCode.ne("PORTAL_ADMIN"))
-						.and(userEntity.userRole.userRoleCode.ne("SYSTEM_ADMIN"))
+						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
+						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN))
 				)
 				.fetch();
 		

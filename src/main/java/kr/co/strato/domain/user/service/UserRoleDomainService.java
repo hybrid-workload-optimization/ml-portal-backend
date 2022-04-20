@@ -41,7 +41,7 @@ public class UserRoleDomainService {
 	}
 
 	public List<UserRoleEntity> getAllListAuthority() {	
-		return userRoleRepository.findByUserRoleCodeNot("PORTAL_ADMIN");
+		return userRoleRepository.findByUserRoleCodeNot(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN);
 	}
 	
 	/*

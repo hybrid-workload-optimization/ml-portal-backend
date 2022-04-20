@@ -24,6 +24,9 @@ import lombok.ToString;
 @ToString(exclude = {"userRoleMenus", "users"})
 public class UserRoleEntity {
 	
+	public static String ROLE_CODE_PORTAL_ADMIN = "PORTAL_ADMIN";
+	public static String ROLE_CODE_SYSTEM_ADMIN = "SYSTEM_ADMIN";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_role_idx")

@@ -16,7 +16,6 @@ import kr.co.strato.adapter.k8s.cluster.model.ClusterInfoAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
@@ -57,7 +56,7 @@ public class WorkJobCallbackService {
 		Map<String, Object> data	= workJobCallback.getData();
 		
 		log.info("[callbackWorkJob] started >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		log.info("[callbackWorkJob] result/message/data = {}/{}/{}", result, message, data);
+		//log.info("[callbackWorkJob] result/message/data = {}/{}/{}", result, message, data);
 		
 		if (CollectionUtils.isEmpty(data)) {
 			throw new PortalException("[callbackWorkJob] data is empty");
