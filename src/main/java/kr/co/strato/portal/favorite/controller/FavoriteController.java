@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import kr.co.strato.domain.favorite.model.FavoriteEntity;
+import kr.co.strato.domain.menu.model.MenuEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.favorite.model.FavoriteDto;
@@ -32,10 +32,9 @@ public class FavoriteController extends CommonController {
 	 */
 	@GetMapping("/api/v1/favorite/list")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<List<FavoriteEntity>> getFavoriteList() {
+	public ResponseWrapper<List<MenuEntity>> getFavoriteList() {
 		UserDto user = getLoginUser();
-		String userId = "hclee@strato.co.kr";
-		List<FavoriteEntity> list = favoriteService.getFavoriteList(userId);
+		List<MenuEntity> list = favoriteService.getFavoriteList(user.getUserId());
 		return new ResponseWrapper<>(list);
 	}
 	
@@ -49,8 +48,7 @@ public class FavoriteController extends CommonController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<Long> registerFavorite(@RequestBody FavoriteDto.ReqCreateDto param) {
 		UserDto user = getLoginUser();
-		String userId = "hclee@strato.co.kr";
-		Long newId = favoriteService.registerFavorite(userId, param);
+		Long newId = favoriteService.registerFavorite(user.getUserId(), param);
 		return new ResponseWrapper<>(newId);
 	}
 
@@ -64,8 +62,7 @@ public class FavoriteController extends CommonController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<Boolean> deleteFavorite(@RequestBody FavoriteDto.ReqCreateDto param) {
 		UserDto user = getLoginUser();
-		String userId = "hclee@strato.co.kr";
-		boolean isDeleted = favoriteService.deleteFavorite(userId, param);
+		boolean isDeleted = favoriteService.deleteFavorite(user.getUserId(), param);
 		return new ResponseWrapper<>(isDeleted);
 	}	
 	

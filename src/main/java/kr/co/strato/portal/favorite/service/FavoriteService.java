@@ -1,5 +1,6 @@
 package kr.co.strato.portal.favorite.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,11 @@ public class FavoriteService {
 	 * @param userId
 	 * @return
 	 */
-	public List<FavoriteEntity> getFavoriteList(String userId) {
-		return favoriteDomainService.getList(userId);
+	public List<MenuEntity> getFavoriteList(String userId) {
+		List<FavoriteEntity> list = favoriteDomainService.getList(userId);
+		List<MenuEntity> menuList = new ArrayList<>();
+		list.forEach(e -> menuList.add(e.getMenu()));
+		return menuList;
 	}
 	
 	/**
