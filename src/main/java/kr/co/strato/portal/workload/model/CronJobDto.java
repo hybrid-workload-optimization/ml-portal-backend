@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +18,11 @@ public class CronJobDto {
 	private String schedule;
 	private String pause;
 	private String lastSchedule;
+	private String concurrencyPolicy;
 	private String createdAt;
+	private Integer active;
+	
+	private List<JobDto> activeJobs;
+	private List<JobDto> inactiveJobs;
+	
 }

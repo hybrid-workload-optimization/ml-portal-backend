@@ -1,5 +1,8 @@
 package kr.co.strato.portal.workload.service;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.batch.CronJob;
 import io.fabric8.kubernetes.api.model.batch.CronJobSpec;
 import io.fabric8.kubernetes.api.model.batch.CronJobStatus;
@@ -32,6 +36,8 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.CronJobArgDto;
 import kr.co.strato.portal.workload.model.CronJobDto;
 import kr.co.strato.portal.workload.model.CronJobDtoMapper;
+import kr.co.strato.portal.workload.model.JobDto;
+import kr.co.strato.portal.workload.model.JobDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -81,6 +87,50 @@ public class CronJobService {
 	public CronJobDto get(Long idx){
 		CronJobEntity entitiy = cronJobDomainService.getById(idx);
 		CronJobDto dto = CronJobDtoMapper.INSTANCE.toDto(entitiy);
+		
+		NamespaceEntity namespace = entitiy.getNamespaceEntity();
+		Long kubeConfigId = namespace.getCluster().getClusterId();
+		
+		CronJob cronJob = cronJobAdapterService.retrieve(kubeConfigId, namespace.getName(), dto.getName());
+		if(cronJob != null) {
+			List<ObjectReference> activeList = cronJob.getStatus().getActive();
+			Integer active = activeList.size();
+			dto.setActive(active);
+			
+			List<String> activeUids = activeList.stream().map(ref -> ref.getUid()).collect(toList());
+			
+			List<JobDto> jobs = new ArrayList<>();
+			try {
+				List<Job> list = jobAdapterService.getListFromOwnerUid(kubeConfigId, dto.getUid());
+				for(Job j : list) {
+					Integer succeeded = j.getStatus().getSucceeded();
+					Integer activeCount = j.getStatus().getActive() == null ? 0: j.getStatus().getActive();
+					
+					
+					JobDto jobDto = JobDtoMapper.INSTANCE.toDto(jobService.toEntity(j));
+					jobDto.setNamespace(namespace.getName());
+					jobDto.setPod(activeCount + "/" + succeeded);
+					jobs.add(jobDto);
+				}
+			} catch (Exception e) {
+				log.error("", e);
+			}
+		
+			List<JobDto> activeJobs = new ArrayList<>();
+			List<JobDto> inactiveJobs = new ArrayList<>();
+			for(JobDto job: jobs) {
+				String uid = job.getUid();	
+				if(activeUids.contains(uid)) {
+					activeJobs.add(job);
+				} else {
+					inactiveJobs.add(job);
+				}
+			}
+			
+			dto.setActiveJobs(activeJobs);
+			dto.setInactiveJobs(inactiveJobs);
+			dto.setLastSchedule(DateUtil.convertDateTime(cronJob.getStatus().getLastScheduleTime()));
+		}		
 		return dto;
 	}
 	
