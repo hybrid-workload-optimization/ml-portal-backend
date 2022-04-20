@@ -2,7 +2,6 @@ package kr.co.strato.portal.workload.service;
 
 import static java.util.stream.Collectors.toList;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,26 +16,30 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobSpec;
 import io.fabric8.kubernetes.api.model.batch.JobStatus;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
+import kr.co.strato.adapter.k8s.pod.model.PodMapper;
+import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;
 import kr.co.strato.portal.workload.model.JobDtoMapper;
+import kr.co.strato.portal.workload.model.PodDto;
+import kr.co.strato.portal.workload.model.PodDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -54,6 +57,9 @@ public class JobService {
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
+	
+	@Autowired
+	PodAdapterService podAdapterService;
 	
 	@Autowired
 	JobRepository jobRepository;
@@ -74,6 +80,37 @@ public class JobService {
 	public JobDto get(Long idx){
 		JobEntity entitiy = jobDomainService.getById(idx);
 		JobDto dto = JobDtoMapper.INSTANCE.toDto(entitiy);
+		
+		
+		NamespaceEntity namespace = entitiy.getNamespaceEntity();
+		Long kubeConfigId = namespace.getCluster().getClusterId();
+		
+		Job job = jobAdapterService.retrieve(kubeConfigId, namespace.getName(), entitiy.getJobName());
+		if(job != null) {
+			
+			PodSpec podSpec = job.getSpec().getTemplate().getSpec();			
+			Integer completions = job.getSpec().getCompletions();
+			Integer parallelism = job.getSpec().getParallelism();
+			
+			Integer succeeded = job.getStatus().getSucceeded();
+			Integer active = job.getStatus().getActive() == null ? 0: job.getStatus().getActive();
+			
+			List<String> images = podSpec.getContainers().stream().map(container -> container.getImage()).collect(toList());
+			
+			dto.setCompleted(completions);
+			dto.setParallel(parallelism);
+			dto.setImage(images.get(0));
+			dto.setActive(active);
+			dto.setSucceeded(succeeded);
+	        
+	        List<Pod> pods = podAdapterService.getList(kubeConfigId, null, entitiy.getJobUid(), null, null);
+	        List<PodEntity> podEntitys = pods.stream().map(e -> PodMapper.INSTANCE.toEntity(e)).collect(Collectors.toList());
+	        List<PodDto.ResListDto> dtos = podEntitys.stream().map(e -> PodDtoMapper.INSTANCE.toResListDto(e)).collect(Collectors.toList());
+	        
+	        dto.setPods(dtos);
+	        
+		}
+		
 		return dto;
 	}
 	

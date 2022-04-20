@@ -1,6 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
 import java.util.HashMap;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +19,15 @@ public class JobDto {
 	private String image;
 	private HashMap<String, Object> label;
 	private String pod;
+	
+	private Integer completed;
+	private Integer parallel;
+	
+	private Integer active;
+	private Integer succeeded;
+	
+	private List<PodDto.ResListDto> pods;
+	
+	
 	
 }
