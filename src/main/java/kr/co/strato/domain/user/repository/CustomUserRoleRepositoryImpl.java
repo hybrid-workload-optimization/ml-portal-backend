@@ -1,5 +1,7 @@
 package kr.co.strato.domain.user.repository;
 
+import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -19,9 +21,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.OrderUtil;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
-
-import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
-import static kr.co.strato.domain.user.model.QUserRoleMenuEntity.userRoleMenuEntity;
 
 public class CustomUserRoleRepositoryImpl implements CustomUserRoleRepository {
 	private final JPAQueryFactory jpaQueryFactory;

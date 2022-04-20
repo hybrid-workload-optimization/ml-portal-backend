@@ -40,15 +40,15 @@ public class UserRoleDomainService {
 		userRoleRepository.delete(entity);
 	}
 
-	public List<UserRoleEntity> getAllListAuthority() {
-		return userRoleRepository.findAll();
+	public List<UserRoleEntity> getAllListAuthority() {	
+		return userRoleRepository.findByUserRoleCodeNot("PORTAL_ADMIN");
 	}
 	
 	/*
 	 * 사용 가능한 유저 권한 목록 반환.
 	 */
 	public List<UserRoleEntity> getUseUserRole() {
-		return userRoleRepository.findByUserRole(1L, "N");
+		return userRoleRepository.findByUserRole(2L, "N");
 	}
 	
 	public List<UserRoleEntity> getProjectUserRole() {

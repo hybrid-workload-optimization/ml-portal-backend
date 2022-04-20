@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,16 +26,12 @@ import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
-import kr.co.strato.portal.setting.service.AuthorityService;
 
 @RestController
 public class PortalProjectController extends CommonController {
 
 	@Autowired
 	PortalProjectService portalProjectService;
-	
-	@Autowired
-	AuthorityService authorityService;
 	
 	/**
      * Project 리스트 조회
@@ -275,7 +270,7 @@ public class PortalProjectController extends CommonController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<UserRoleDto>> getProjectUserRoleList() {
         
-    	List<UserRoleDto> response = authorityService.getProjectUserRole();
+    	List<UserRoleDto> response = portalProjectService.getProjectUserRole();
         
     	return new ResponseWrapper<List<UserRoleDto>>(response);
     }

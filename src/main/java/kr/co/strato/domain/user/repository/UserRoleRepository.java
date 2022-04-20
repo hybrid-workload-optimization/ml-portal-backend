@@ -16,4 +16,7 @@ public interface UserRoleRepository extends JpaRepository<UserRoleEntity, Long>,
 	@Query(value = "SELECT COUNT(id) FROM UserRoleEntity WHERE userRoleName = ?1 AND groupYn = ?2")
 	public int findCountByAccessRoleNameAndGroupYn(String userRoleName, String groupYn);
 	
+	
+	public List<UserRoleEntity> findByUserRoleCodeNot(String userRoleCode);
+	
 }

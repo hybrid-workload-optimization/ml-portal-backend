@@ -35,8 +35,6 @@ import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
 import kr.co.strato.portal.setting.model.AuthorityViewDtoMapper;
 import kr.co.strato.portal.setting.model.UserAuthorityDto;
-import kr.co.strato.portal.setting.model.UserRoleDto;
-import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -401,18 +399,7 @@ public class AuthorityService {
 		return userRoleDomainService.getUserRoleByCode("PROJECT_MEMBER"); // 기본권한 조회
 	}
 	
-	/**
-	 * 프로젝트 사용자가 가질 수 있는 유저 권한 리턴.
-	 * @return
-	 */
-	public List<UserRoleDto> getProjectUserRole() {
-		List<UserRoleEntity> list =  userRoleDomainService.getProjectUserRole();
-		List<UserRoleDto> roleList = list
-				.stream()
-				.map(r -> UserRoleDtoMapper.INSTANCE.toDto(r))
-				.collect(Collectors.toList());
-		return roleList;
-	}
+	
 	
 	/**
 	 * 사용자별 디폴트 권한 + 프로젝트 권한 반환.

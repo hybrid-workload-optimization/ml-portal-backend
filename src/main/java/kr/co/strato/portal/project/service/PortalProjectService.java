@@ -20,6 +20,8 @@ import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
+import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.error.exception.AleadyUserClusterException;
 import kr.co.strato.global.error.exception.CreateProjectFailException;
@@ -42,6 +44,8 @@ import kr.co.strato.portal.project.model.mapper.ProjectDtoMapper;
 import kr.co.strato.portal.project.model.mapper.ProjectUserDtoMapper;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
+import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -60,6 +64,10 @@ public class PortalProjectService {
 	
 	@Autowired
 	ClusterService clusterService;
+	
+	
+	@Autowired
+	private UserRoleDomainService userRoleDomainService;
 	
 	/**
      * Project 리스트 조회
@@ -569,4 +577,17 @@ public class PortalProjectService {
     	//ProjectEntity -> ProjectDto
     	return ProjectDtoMapper.INSTANCE.toDto(result);
     }
+    
+    /**
+	 * 프로젝트 사용자가 가질 수 있는 유저 권한 리턴.
+	 * @return
+	 */
+	public List<UserRoleDto> getProjectUserRole() {
+		List<UserRoleEntity> list =  userRoleDomainService.getProjectUserRole();
+		List<UserRoleDto> roleList = list
+				.stream()
+				.map(r -> UserRoleDtoMapper.INSTANCE.toDto(r))
+				.collect(Collectors.toList());
+		return roleList;
+	}
 }
