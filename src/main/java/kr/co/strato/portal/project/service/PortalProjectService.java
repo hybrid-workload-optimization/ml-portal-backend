@@ -127,13 +127,11 @@ public class PortalProjectService {
     }
     
     /**
-     * 현재 사용중인 전체 User 리스트 조회
-     * @param useYn
+     * 프로젝트에 추가할 수 있는 사용자 리트는 반환.
      * @return
      */
-    public List<UserDto> getProjecUserListByUseYn(String useYn) {
-    	
-    	List<UserEntity> userList = projectUserDomainService.getProjecUserListByUseYn(useYn);
+    public List<UserDto> getAvailableProjectUserList() {
+    	List<UserEntity> userList = projectUserDomainService.getAvailableProjectUserList();
     	
     	//Entity -> DTO 변환
     	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());

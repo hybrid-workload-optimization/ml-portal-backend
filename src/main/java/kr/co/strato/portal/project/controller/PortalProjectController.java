@@ -116,10 +116,8 @@ public class PortalProjectController extends CommonController {
      */
     @GetMapping("/api/v1/project/users")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<UserDto>> getProjecUserListByUseYn() throws Exception {
-        
-    	List<UserDto> response = portalProjectService.getProjecUserListByUseYn("Y");
-        
+    public ResponseWrapper<List<UserDto>> getProjecUserListByUseYn() throws Exception {        
+    	List<UserDto> response = portalProjectService.getAvailableProjectUserList();
         return new ResponseWrapper<List<UserDto>>(response);
     }
     

@@ -49,7 +49,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				  ))
 				  .from(projectUserEntity)
 				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
-				  .where(projectUserEntity.projectIdx.eq(projectIdx))
+				  .where(projectUserEntity.projectIdx.eq(projectIdx).and(userEntity.useYn.eq("Y")))
 				  .orderBy(projectUserEntity.userRoleIdx.asc())
 				  .fetch();
 		
@@ -59,13 +59,28 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 	@Override
 	public List<UserEntity> getProjectUserListExceptUse(Long projectIdx) {
 		
-		List<UserEntity> result = queryFactory
-				.select(userEntity)
-				  .from(userEntity)
-				  .where(userEntity.userId.notIn(
-						JPAExpressions.select(projectUserEntity.userId).from(projectUserEntity).where(projectUserEntity.projectIdx.eq(projectIdx))
-				  ))
-				  .fetch();
+		List<UserEntity> result = queryFactory.select(userEntity).from(userEntity)
+				.where(userEntity.userId
+						.notIn(JPAExpressions.select(projectUserEntity.userId).from(projectUserEntity)
+								.where(projectUserEntity.projectIdx.eq(projectIdx)))
+						.and(userEntity.useYn.eq("Y"))
+						.and(userEntity.userRole.userRoleCode.ne("PORTAL_ADMIN"))
+						.and(userEntity.userRole.userRoleCode.ne("SYSTEM_ADMIN"))
+				)
+				.fetch();
+		
+		return result;
+	}
+	
+	@Override
+	public List<UserEntity> getAvailableProjectUserList() {
+		
+		List<UserEntity> result = queryFactory.select(userEntity).from(userEntity)
+				.where(userEntity.useYn.eq("Y")
+						.and(userEntity.userRole.userRoleCode.ne("PORTAL_ADMIN"))
+						.and(userEntity.userRole.userRoleCode.ne("SYSTEM_ADMIN"))
+				)
+				.fetch();
 		
 		return result;
 	}
