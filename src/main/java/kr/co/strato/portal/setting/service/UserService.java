@@ -20,6 +20,7 @@ import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.SsoConnectionException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
+import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
@@ -50,6 +51,9 @@ public class UserService {
 	
 	@Autowired
 	KeyCloakApiUtil keycloakApiUtil;
+	
+	@Autowired
+	AccessService accessService;
 	
 	@Value("${portal.front.service.url}")
 	String frontUrl;
@@ -149,14 +153,15 @@ public class UserService {
 	}
 	
 	//삭제
-	public Long deleteUser(UserDto param) {
-		
+	public Long deleteUser(UserDto param) {		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
-
 		userDomainService.deleteUser(entity);
-
-		//keycloak 연동
+		
 		try {
+			//로그아웃 처리
+			accessService.doLogout(entity.getUserId());
+			
+			//keycloak 유저 삭제
 			keyCloakApiUtil.deleteSsoUser(param);
 		} catch (Exception e) {
 			log.error(e.getMessage());
