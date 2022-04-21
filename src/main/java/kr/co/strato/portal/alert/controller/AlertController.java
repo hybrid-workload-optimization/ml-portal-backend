@@ -69,7 +69,7 @@ public class AlertController extends CommonController {
         return Flux.create(sink -> {
         	String loginUserId = userId;
         	
-        	AlertService.addConsumer(loginUserId, sink::next);
+        	alertService.addConsumer(loginUserId, sink::next);
             
             sink.onCancel(() -> {
                 System.out.println("** CANCELLED **");
@@ -77,7 +77,7 @@ public class AlertController extends CommonController {
             });
 
 	        sink.onDispose(() -> {
-	        	AlertService.removeConsumer(loginUserId);
+	        	alertService.removeConsumer(loginUserId);
 	            System.out.println("** DISPOSED **");
 	        });
         });
@@ -88,7 +88,7 @@ public class AlertController extends CommonController {
         return Flux.create(sink -> {
         	String loginUserId = "hclee@strato.co.kr";
         	
-        	AlertService.addConsumer(loginUserId, sink::next);
+        	alertService.addConsumer(loginUserId, sink::next);
         	alertService.testSSE();
         	
             sink.onCancel(() -> {
@@ -97,7 +97,7 @@ public class AlertController extends CommonController {
             });
 
 	        sink.onDispose(() -> {
-	        	AlertService.removeConsumer(loginUserId);
+	        	alertService.removeConsumer(loginUserId);
 	            System.out.println("** DISPOSED **");
 	        });
         });
