@@ -103,10 +103,10 @@ public class DaemonSetService {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(daemonSetDto.getClusterIdx());
 		
-		// k8s - post replica set
+		// k8s - post daemon set
 		List<DaemonSet> daemonSetList = daemonSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(daemonSetDto.getYaml()), "UTF-8"));
 		
-		// db - save replica set
+		// db - save daemon set
 		List<Long> result = daemonSetList.stream()
 				.map(d -> {
 					DaemonSetEntity daemonSetEntity = null;

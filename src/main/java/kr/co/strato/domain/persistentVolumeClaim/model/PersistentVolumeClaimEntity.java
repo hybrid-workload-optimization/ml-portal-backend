@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.pod.model.PodDaemonSetEntity;
 import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,10 +44,10 @@ public class PersistentVolumeClaimEntity {
 	private String uid;
 	
 	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	private String createdAt;
 	
-	@Column(name = "status")
-	private String status;
+	//@Column(name = "status")
+	//private String status;
 	
 	@Column(name = "storage_class")
 	private String storageClass;
@@ -54,9 +55,19 @@ public class PersistentVolumeClaimEntity {
 	@Column(name = "access_type")
 	private String accessType;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "namespace_idx")
-	private NamespaceEntity namespace;
+	@Column(name = "storage_capacity")
+	private String storageCapacity;
 	
+	@Column(name = "storage_request")
+	private String storageRequest;
 	
+	@Column(name = "label")
+	private String label;
+	
+	@ManyToOne
+    @JoinColumn(name = "namespace_idx")
+    private NamespaceEntity namespace;
+	
+	@OneToMany(mappedBy = "persistentVolumeClaim")
+    private List<PodPersistentVolumeClaimEntity> podPersistentVolumeClaims;
 }

@@ -1,4 +1,4 @@
-package kr.co.strato.portal.workload.controller;
+package kr.co.strato.portal.config.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,68 +18,31 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.work.model.WorkHistoryDto;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
 import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
 import kr.co.strato.portal.work.service.WorkHistoryService;
+import kr.co.strato.portal.workload.controller.DaemonSetController;
 import kr.co.strato.portal.workload.model.DaemonSetDto;
-import kr.co.strato.portal.workload.model.ReplicaSetDto;
 import kr.co.strato.portal.workload.service.DaemonSetService;
-import kr.co.strato.portal.workload.service.ReplicaSetService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class DaemonSetController {
+public class PersistentVolumeClaimController {
 
 	@Autowired
-	DaemonSetService daemonSetService;
+	PersistentVolumeClaimService persistentVolumeClaimService;
 	
 	@Autowired
 	WorkHistoryService workHistoryService;
 	
-	@GetMapping("/api/v1/workload/daemonsets")
-    public ResponseWrapper<Page<DaemonSetDto.List>> getDaemonSetList(PageRequest pageRequest, DaemonSetDto.Search search) {
-        Page<DaemonSetDto.List> results = null;
-        
-        String workTarget					= null;
-        Map<String, Object> workMetadata	= new HashMap<>();
-        WorkResult workResult				= WorkResult.SUCCESS;
-        String workMessage					= "";
-        
-        try {
-        	results = daemonSetService.getDaemonSetList(pageRequest.of(), search);
-		} catch (Exception e) {
-			workResult		= WorkResult.FAIL;
-			workMessage		= e.getMessage();
-			
-			log.error(e.getMessage(), e);
-			throw new PortalException(e.getMessage());
-		} finally {
-			try {
-				workHistoryService.registerWorkHistory(
-						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.WORKLOAD)
-						.workMenu2(WorkMenu2.DAEMON_SET)
-						.workMenu3(WorkMenu3.NONE)
-						.workAction(WorkAction.LIST)
-						.target(workTarget)
-						.meta(workMetadata)
-						.result(workResult)
-						.message(workMessage)
-						.build());
-			} catch (Exception e) {
-				// ignore
-			}
-		}
-        
-        return new ResponseWrapper<>(results);
-    }
-	
-	@PostMapping("/api/v1/workload/daemonsets")
-    public ResponseWrapper<List<Long>> registerDaemonSet(@RequestBody DaemonSetDto daemonSetDto) {
+	@PostMapping("/api/v1/config/persistentVolumeClaim")
+    public ResponseWrapper<List<Long>> registerPersistentVolumeClaim(@RequestBody PersistentVolumeClaimDto persistentVolumeClaimDto) {
         List<Long> result = null;
         
         String workTarget					= null;
@@ -87,10 +50,10 @@ public class DaemonSetController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("daemonSetDto", daemonSetDto);
+        workMetadata.put("persistentVolumeClaimDto", persistentVolumeClaimDto);
         
         try {
-        	result = daemonSetService.registerDaemonSet(daemonSetDto);
+        	result = persistentVolumeClaimService.registerPersistentVolumeClaim(persistentVolumeClaimDto);
 		} catch (Exception e) {
 			e.printStackTrace();
 			workResult		= WorkResult.FAIL;
@@ -102,8 +65,8 @@ public class DaemonSetController {
 			try {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.WORKLOAD)
-						.workMenu2(WorkMenu2.DAEMON_SET)
+						.workMenu1(WorkMenu1.CONFIG)
+						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.INSERT)
 						.target(workTarget)
@@ -119,19 +82,17 @@ public class DaemonSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/workload/daemonsets/{daemonSetIdx}")
-    public ResponseWrapper<DaemonSetDto.Detail> getDaemonSet(@PathVariable(required = true) Long daemonSetIdx) {
-		DaemonSetDto.Detail result = null;
+	@GetMapping("/api/v1/config/persistentVolumeClaims")
+    public ResponseWrapper<Page<PersistentVolumeClaimDto.List>> getPersistentVolumeClaimList(PageRequest pageRequest, PersistentVolumeClaimDto.Search search) {
+        Page<PersistentVolumeClaimDto.List> results = null;
         
-		String workTarget					= null;
+        String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("daemonSetIdx", daemonSetIdx);
-        
         try {
-        	result = daemonSetService.getDaemonSet(daemonSetIdx);
+        	results = persistentVolumeClaimService.getPersistentVolumeClaimList(pageRequest.of(), search);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -142,7 +103,47 @@ public class DaemonSetController {
 			try {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.WORKLOAD)
+						.workMenu1(WorkMenu1.CONFIG)
+						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.LIST)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+        
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/config/persistentVolumeClaims/{persistentVolumeClaimIdx}")
+    public ResponseWrapper<PersistentVolumeClaimDto.Detail> getPersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx) {
+		PersistentVolumeClaimDto.Detail result = null;
+        
+		String workTarget					= null;
+        Map<String, Object> workMetadata	= new HashMap<>();
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+        
+        workMetadata.put("daemonSetIdx", persistentVolumeClaimIdx);
+        
+        try {
+        	result = persistentVolumeClaimService.getPersistentVolumeClaim(persistentVolumeClaimIdx);
+		} catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.CONFIG)
 						.workMenu2(WorkMenu2.NONE)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.DETAIL)
@@ -159,12 +160,12 @@ public class DaemonSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/workload/daemonsets/{daemonSetIdx}/yaml")
-    public ResponseWrapper<String> getDaemonSetYaml(@PathVariable(required = true) Long daemonSetIdx) {
+	@GetMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}/yaml")
+    public ResponseWrapper<String> getPersistentVolumeClaimYaml(@PathVariable(required = true) Long persistentVolumeClaimIdx) {
 		String result = null;
         
         try {
-        	result = daemonSetService.getDaemonSetYaml(daemonSetIdx);
+        	result = persistentVolumeClaimService.getPersistentVolumeClaimYaml(persistentVolumeClaimIdx);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
@@ -173,8 +174,8 @@ public class DaemonSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@PutMapping("/api/v1/workload/daemonsets/{daemonSetIdx}")
-    public ResponseWrapper<List<Long>> updateDaemonSet(@PathVariable(required = true) Long daemonSetIdx, @RequestBody DaemonSetDto daemonSetDto) {
+	@PutMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}")
+    public ResponseWrapper<List<Long>> updatePersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx, @RequestBody PersistentVolumeClaimDto persistentVolumeClaimDto) {
 		List<Long> result = null;
         
         String workTarget					= null;
@@ -182,11 +183,11 @@ public class DaemonSetController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("daemonSetIdx", daemonSetIdx);
-        workMetadata.put("daemonSetDto", daemonSetDto);
+        workMetadata.put("persistentVolumeClaimIdx", persistentVolumeClaimIdx);
+        workMetadata.put("persistentVolumeClaimDto", persistentVolumeClaimDto);
         
         try {
-        	result = daemonSetService.updateDaemonSet(daemonSetIdx, daemonSetDto);
+        	result = persistentVolumeClaimService.updatePersistentVolumeClaim(persistentVolumeClaimIdx, persistentVolumeClaimDto);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -197,8 +198,8 @@ public class DaemonSetController {
 			try {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.WORKLOAD)
-						.workMenu2(WorkMenu2.DAEMON_SET)
+						.workMenu1(WorkMenu1.CONFIG)
+						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.UPDATE)
 						.target(workTarget)
@@ -214,8 +215,8 @@ public class DaemonSetController {
         return new ResponseWrapper<>(result);
     }
 	
-	@DeleteMapping("/api/v1/workload/daemonsets/{daemonSetIdx}")
-    public ResponseWrapper<Boolean> deleteDaemonSet(@PathVariable(required = true) Long daemonSetIdx){
+	@DeleteMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}")
+    public ResponseWrapper<Boolean> deletePersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx){
 		boolean result = true;
 		
 		String workTarget					= null;
@@ -223,10 +224,10 @@ public class DaemonSetController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("daemonSetIdx", daemonSetIdx);
+        workMetadata.put("persistentVolumeClaimIdx", persistentVolumeClaimIdx);
 
         try {
-        	daemonSetService.deleteDaemonSet(daemonSetIdx);
+        	persistentVolumeClaimService.deletePersistentVolumeClaim(persistentVolumeClaimIdx);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -237,8 +238,8 @@ public class DaemonSetController {
 			try {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
-						.workMenu1(WorkMenu1.WORKLOAD)
-						.workMenu2(WorkMenu2.DAEMON_SET)
+						.workMenu1(WorkMenu1.CONFIG)
+						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.DELETE)
 						.target(workTarget)
