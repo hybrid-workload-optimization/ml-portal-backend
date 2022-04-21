@@ -17,8 +17,10 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.alert.model.AlertDto;
 import kr.co.strato.portal.alert.service.AlertService;
 import kr.co.strato.portal.common.controller.CommonController;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 public class AlertController extends CommonController {
@@ -69,16 +71,18 @@ public class AlertController extends CommonController {
         return Flux.create(sink -> {
         	String loginUserId = userId;
         	
-        	alertService.addConsumer(loginUserId, sink::next);
+        	AlertService.addConsumer(loginUserId, sink::next);
             
             sink.onCancel(() -> {
-                System.out.println("** CANCELLED **");
+            	log.info("SSE - canceled.");
+            	log.info("SSE - UserId: {}", loginUserId);
                 sink.complete();
             });
 
 	        sink.onDispose(() -> {
-	        	alertService.removeConsumer(loginUserId);
-	            System.out.println("** DISPOSED **");
+	        	log.info("SSE - disposed.");
+            	log.info("SSE - Remove consumer userId: {}", loginUserId);
+	        	AlertService.removeConsumer(loginUserId);
 	        });
         });
     }
@@ -88,8 +92,8 @@ public class AlertController extends CommonController {
         return Flux.create(sink -> {
         	String loginUserId = "hclee@strato.co.kr";
         	
-        	alertService.addConsumer(loginUserId, sink::next);
-        	alertService.testSSE();
+        	AlertService.addConsumer(loginUserId, sink::next);
+        	AlertService.testSSE();
         	
             sink.onCancel(() -> {
                 System.out.println("** CANCELLED **");
@@ -97,7 +101,7 @@ public class AlertController extends CommonController {
             });
 
 	        sink.onDispose(() -> {
-	        	alertService.removeConsumer(loginUserId);
+	        	AlertService.removeConsumer(loginUserId);
 	            System.out.println("** DISPOSED **");
 	        });
         });

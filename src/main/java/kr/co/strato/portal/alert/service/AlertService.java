@@ -36,7 +36,7 @@ public class AlertService {
 	@Autowired
 	private AlertDomainService alertDomainService;
 	
-	private Map<String, Consumer<ServerSentEvent<AlertDto>>> consumerMap;
+	private static Map<String, Consumer<ServerSentEvent<AlertDto>>> consumerMap;
 	
 	private static Runnable testRunnable;
 	
@@ -187,22 +187,22 @@ public class AlertService {
 		return message;
 	}
 	
-	public Map<String, Consumer<ServerSentEvent<AlertDto>>> getConsumerMap() {
+	public static Map<String, Consumer<ServerSentEvent<AlertDto>>> getConsumerMap() {
 		if(consumerMap == null) {
 			consumerMap = new ConcurrentHashMap<>();
 		}
 		return consumerMap;
 	}
 	
-	public void addConsumer(String userId, Consumer<ServerSentEvent<AlertDto>> consumer) {
+	public static void addConsumer(String userId, Consumer<ServerSentEvent<AlertDto>> consumer) {
 		getConsumerMap().put(userId, consumer);
 	}
 	
-	public void removeConsumer(String userId) {
+	public static void removeConsumer(String userId) {
 		getConsumerMap().remove(userId);
 	}
 	
-	public void testSSE() {
+	public static  void testSSE() {
 		if(testRunnable == null) {
 			testRunnable = new Runnable() {
 				
