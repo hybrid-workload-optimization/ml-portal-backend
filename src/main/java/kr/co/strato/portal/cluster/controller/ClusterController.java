@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
@@ -165,7 +164,7 @@ public class ClusterController extends CommonController {
         workMetadata.put("clusterDto", clusterDto);
         
         try {
-        	result = clusterService.createCluster(clusterDto);
+        	result = clusterService.createCluster(clusterDto, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -208,7 +207,7 @@ public class ClusterController extends CommonController {
         workMetadata.put("clusterDto", clusterDto);
         
         try {
-        	result = clusterService.updateCluster(clusterIdx, clusterDto);
+        	result = clusterService.updateCluster(clusterIdx, clusterDto, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -249,7 +248,7 @@ public class ClusterController extends CommonController {
         workMetadata.put("clusterIdx", clusterIdx);
 
         try {
-        	result = clusterService.deleteCluster(clusterIdx);
+        	result = clusterService.deleteCluster(clusterIdx, getLoginUser());
 		} catch (Exception e) {			
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();

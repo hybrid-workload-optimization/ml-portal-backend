@@ -14,6 +14,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
+import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.portal.setting.model.UserDto;
 
@@ -95,6 +96,23 @@ public class ClusterDomainService {
 
 	public void delete(ClusterEntity clusterEntity) {
 		clusterMapper.deleteClusterAll(clusterEntity.getClusterIdx());
+	}
+	
+	public ClusterEntity findByClusterName(String clusterName) {
+		Optional<ClusterEntity> cluster = clusterRepository.findByClusterName(clusterName);
+		if (cluster.isPresent()) {
+			return cluster.get();
+		}
+		return null;
+	}
+	
+	/**
+	 * 클러스터와 관계 있는 유저 목록 반환.
+	 * @param clsuterIdx
+	 * @return
+	 */
+	public List<UserEntity> getClusterUsers(Long clusterIdx) {
+		return clusterRepository.getClusterUsers(clusterIdx);
 	}
 	
 }

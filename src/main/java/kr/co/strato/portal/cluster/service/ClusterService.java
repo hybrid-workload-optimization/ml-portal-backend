@@ -30,24 +30,15 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.cronjob.service.CronJobDomainService;
-import kr.co.strato.domain.deployment.service.DeploymentDomainService;
-import kr.co.strato.domain.ingress.service.IngressDomainService;
-import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
-import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
-import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
-import kr.co.strato.domain.service.service.ServiceDomainService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
-import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
-import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.PortalException;
@@ -209,12 +200,12 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Long createCluster(ClusterDto.Form clusterDto) throws Exception {
+	public Long createCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterDto.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			return createK8sCluster(clusterDto);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			return createKubesprayCluster(clusterDto);
+			return createKubesprayCluster(clusterDto, loginUser);
 		} else {
 			// aks, eks.. - not supported
 			return null;
@@ -300,18 +291,8 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	private Long createKubesprayCluster(ClusterDto.Form clusterDto) throws Exception {
-		// db - create work job
-		WorkJobDto workJobDto = WorkJobDto.builder().
-				workJobTarget(clusterDto.getClusterName())
-				.workJobType(WorkJobType.CLUSTER_CREATE)
-				.workJobStatus(WorkJobStatus.RUNNING)
-				.workJobStartAt(DateUtil.currentDateTime())
-				.workSyncYn("N")
-				.build();
+	private Long createKubesprayCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		
-		Long workJobIdx = workJobService.registerWorkJob(workJobDto);
-		log.info("[createKubesprayCluster] work job idx : {}", workJobIdx);
 		
 		// db - get kubespray version
 		String kubesprayVersion = getKubesprayVersionFromSetting();
@@ -324,6 +305,22 @@ public class ClusterService {
 		
 		clusterDomainService.register(clusterEntity);
 		log.info("[createKubesprayCluster] register cluster : {}", clusterEntity.toString());
+		
+		
+		// db - create work job
+		WorkJobDto workJobDto = WorkJobDto.builder().
+				workJobTarget(clusterDto.getClusterName())
+				.workJobType(WorkJobType.CLUSTER_CREATE)
+				.workJobStatus(WorkJobStatus.WAITING)
+				.workJobStartAt(DateUtil.currentDateTime())
+				.workSyncYn("N")
+				.createUserId(loginUser.getUserId())
+				.createUserName(loginUser.getUserName())
+				.build();
+		
+		Long workJobIdx = workJobService.registerWorkJob(workJobDto);
+		log.info("[createKubesprayCluster] work job idx : {}", workJobIdx);
+				
 		
 		// db - insert cluster's node
 		/*
@@ -374,7 +371,7 @@ public class ClusterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Long updateCluster(Long clusterIdx, ClusterDto.Form clusterDto) throws Exception {
+	public Long updateCluster(Long clusterIdx, ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		// db - get cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
@@ -382,7 +379,7 @@ public class ClusterService {
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			return updateK8sCluster(clusterEntity, clusterDto);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			return updateKubesprayCluster(clusterEntity, clusterDto);
+			return updateKubesprayCluster(clusterEntity, clusterDto, loginUser);
 		}
 		
 		return null;
@@ -413,13 +410,15 @@ public class ClusterService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
-	private Long updateKubesprayCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto) throws Exception {
+	private Long updateKubesprayCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		// db - create work job
 		WorkJobDto workJobDto = WorkJobDto.builder().
 				workJobTarget(clusterDto.getClusterName())
 				.workJobType(WorkJobType.CLUSTER_SCALE)
-				.workJobStatus(WorkJobStatus.RUNNING)
+				.workJobStatus(WorkJobStatus.WAITING)
 				.workJobStartAt(DateUtil.currentDateTime())
+				.createUserId(loginUser.getUserId())
+				.createUserName(loginUser.getUserName())
 				.workSyncYn("N")
 				.build();
 		
@@ -669,14 +668,14 @@ public class ClusterService {
 	 * @param clusterIdx
 	 * @throws Exception
 	 */
-	public Long deleteCluster(Long clusterIdx) throws Exception {
+	public Long deleteCluster(Long clusterIdx, UserDto loginUser) throws Exception {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			return deleteK8sCluster(clusterEntity);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			return deleteKubesprayCluster(clusterEntity);
+			return deleteKubesprayCluster(clusterEntity, loginUser);
 		}
 		
 		return null;
@@ -708,13 +707,15 @@ public class ClusterService {
 	 * @param clusterEntity
 	 * @throws Exception
 	 */
-	private Long deleteKubesprayCluster(ClusterEntity clusterEntity) throws Exception {
+	private Long deleteKubesprayCluster(ClusterEntity clusterEntity, UserDto loginUser) throws Exception {
 		// db - create work job
 		WorkJobDto workJobDto = WorkJobDto.builder().
 				workJobTarget(clusterEntity.getClusterName())
 				.workJobType(WorkJobType.CLUSTER_DELETE)
-				.workJobStatus(WorkJobStatus.RUNNING)
+				.workJobStatus(WorkJobStatus.WAITING)
 				.workJobStartAt(DateUtil.currentDateTime())
+				.createUserId(loginUser.getUserId())
+				.createUserName(loginUser.getUserName())
 				.workSyncYn("N")
 				.build();
 		
