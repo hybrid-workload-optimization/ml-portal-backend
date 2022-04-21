@@ -17,4 +17,6 @@ public interface ProjectUserRepository extends JpaRepository<ProjectUserEntity, 
 	public Integer deleteByProjectIdxAndUserIdNotIn(Long projectIdx, List<String> userIds);
 	
 	public List<ProjectUserEntity> findByUserId(String userId);
+	
+	public List<ProjectUserEntity> findByProjectIdx(Long projectIdx);
 }

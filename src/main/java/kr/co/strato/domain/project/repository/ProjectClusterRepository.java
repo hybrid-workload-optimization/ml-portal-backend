@@ -19,4 +19,6 @@ public interface ProjectClusterRepository extends JpaRepository<ProjectClusterEn
 	public ProjectClusterEntity findByProjectIdxAndClusterIdx(Long projectIdx, Long clusterIdx);
 	
 	public Integer deleteByProjectIdxAndClusterIdxNotIn(Long projectIdx, List<Long> clusters);
+	
+	public List<ProjectClusterEntity> findByClusterIdx(Long clusterIdx);
 }

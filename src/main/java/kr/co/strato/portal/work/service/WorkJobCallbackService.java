@@ -18,7 +18,6 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
-import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterSyncService;
@@ -35,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkJobCallbackService {
 	
 	@Autowired
-	WorkJobDomainService workJobDomainService;
+	WorkJobService workJobService;
 	
 	@Autowired
 	ClusterDomainService clusterDomainService;
@@ -68,7 +67,7 @@ public class WorkJobCallbackService {
 		}
 		
 		// get work_job information
-		WorkJobEntity workJobEntity = workJobDomainService.get(Long.valueOf(workJobIdx));
+		WorkJobEntity workJobEntity = workJobService.getWorkJob(Long.valueOf(workJobIdx));
 		if (workJobEntity == null) {
 			throw new PortalException("[callbackWorkJob] workJobIdx do not exist");
 		}
@@ -105,6 +104,21 @@ public class WorkJobCallbackService {
 			}
 		}
 		
+		Integer kubeConfigId	= null;
+		String provisioningLog	= null;
+		String state			= null;
+		
+		WorkJobState workJobState = null;
+		if (workJobData != null) {
+			kubeConfigId	= (Integer) workJobData.get("kubeConfigId");
+			provisioningLog	= (String) workJobData.get("log");
+			state			= (String) workJobData.get("state");
+			
+			if(state != null) {
+				workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
+			}
+		}
+		
 		// main work_job
 		log.info("[callbackWorkJob] workJobType={}", workJobType.name());
 		
@@ -112,17 +126,12 @@ public class WorkJobCallbackService {
 			try {
 				// Response Data 
 				if (workJobData != null) {
-					Integer kubeConfigId	= (Integer) workJobData.get("kubeConfigId");
-					String provisioningLog	= (String) workJobData.get("log");
-					String state			= (String) workJobData.get("state");
 					
 					Long clusterId = null;
 					if (kubeConfigId != null) {
 						clusterId = Long.valueOf(kubeConfigId);
 						log.info("[callbackWorkJob] clusterId : {}", clusterId);	
 					}
-					
-					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
 					
 					// k8s - get cluster's information(health + version)
 					String providerVersion = null;
@@ -165,9 +174,7 @@ public class WorkJobCallbackService {
 				// Response Data 
 				if (workJobData != null) {
 					String workJobDataLog	= (String) workJobData.get("log");
-					String state			= (String) workJobData.get("state");
 					
-					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
 					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						// db - sync(update) node
 						clusterSyncService.syncClusterNode(workJobEntity.getWorkJobReferenceIdx());
@@ -182,9 +189,7 @@ public class WorkJobCallbackService {
 				// Response Data 
 				if (workJobData != null) {
 					String workJobDataLog	= (String) workJobData.get("log");
-					String state			= (String) workJobData.get("state");
 					
-					WorkJobState workJobState = WorkJob.WorkJobState.valueOf(state.toUpperCase());
 					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						// db - delete cluster
 						ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
@@ -212,12 +217,19 @@ public class WorkJobCallbackService {
 			log.warn("[callbackWorkJob]", e);
 		}
 		
-		workJobEntity.setWorkJobStatus(workJobStatus.name());
+		if(WorkJobState.STARTED == workJobState) {
+			//시작 요청일 경우 상태를 시작으로 변경 
+			workJobEntity.setWorkJobStatus(WorkJobStatus.STARTED.name());
+		} else {
+			workJobEntity.setWorkJobStatus(workJobStatus.name());
+		}
+		
+		
 		workJobEntity.setWorkJobMessage(message);
 		workJobEntity.setWorkJobDataResponse(workJobResponse);
 		workJobEntity.setWorkJobEndAt(DateUtil.currentDateTime());
 		
-		workJobDomainService.update(workJobEntity);
+		workJobService.updateWorkJob(workJobEntity);
 	}
 
 }

@@ -467,7 +467,7 @@ public class PortalProjectService {
      * @param
      * @return
      */
-    public Boolean deleteProject(ProjectRequestDto param) throws NotFoundProjectException, AleadyUserClusterException, DeleteProjectFailException {
+    public Boolean deleteProject(ProjectRequestDto param, UserDto loginUser) throws NotFoundProjectException, AleadyUserClusterException, DeleteProjectFailException {
     	
     	boolean result = false;
     	
@@ -491,7 +491,7 @@ public class PortalProjectService {
     			} else {
     				//Cluster 테이블 삭제 및 API 인터페이스를 통한 실제 Cluster 삭제
     				try {
-    					clusterService.deleteCluster(dto.getClusterIdx());
+    					clusterService.deleteCluster(dto.getClusterIdx(), loginUser);
     				} catch(Exception e) {
     					throw new DeleteProjectFailException();
     				}

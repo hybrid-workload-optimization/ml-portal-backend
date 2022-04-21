@@ -17,13 +17,19 @@ public class WorkJob {
 		
 		// 성공
 		SUCCESS,
+		
 		// 실패
 		FAIL,
-		// 진행 중
-		RUNNING,
-		// 타임아웃(By REQUEST,RESPONSE-CALLBACK)
-		TIMEOUT;
 		
+		// 진행 중
+		//RUNNING,
+		// 타임아웃(By REQUEST,RESPONSE-CALLBACK)
+		TIMEOUT,
+		
+		//작업 대기중
+		WAITING,
+		
+		STARTED,
 	}
 	
 	public static enum WorkJobData {

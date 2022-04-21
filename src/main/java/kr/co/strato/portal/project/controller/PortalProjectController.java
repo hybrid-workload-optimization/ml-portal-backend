@@ -226,7 +226,7 @@ public class PortalProjectController extends CommonController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Boolean> deleteProject(@RequestBody ProjectRequestDto param) {
         
-    	Boolean response = portalProjectService.deleteProject(param);
+    	Boolean response = portalProjectService.deleteProject(param, getLoginUser());
         
         return new ResponseWrapper<Boolean>(response);
     }
