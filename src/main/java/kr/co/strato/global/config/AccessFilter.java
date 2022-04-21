@@ -110,7 +110,8 @@ public class AccessFilter implements Filter{
     			"/ws", 
     			"/api/v1/work-job/callback", 
     			"favicon.ico",
-    			"/users/reset/password"};
+    			"/users/reset/password",
+    			"/icons"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
