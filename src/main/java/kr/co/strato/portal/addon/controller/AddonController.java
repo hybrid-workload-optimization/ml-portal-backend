@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.addon.model.Addon;
 import kr.co.strato.portal.addon.service.AddonService;
+import kr.co.strato.portal.addon.service.AddonService3;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.UserDto;
 
@@ -36,7 +37,7 @@ public class AddonController extends CommonController {
 	@GetMapping("/api/v1/addon/detail")
 	public ResponseWrapper<Addon> getAddon(
 			@RequestParam Long clusterIdx, 
-			@RequestParam String addonId) {
+			@RequestParam String addonId) throws IOException {
 		return new ResponseWrapper<>(addonService.getAddon(clusterIdx, addonId));
 	}
 	
@@ -58,7 +59,7 @@ public class AddonController extends CommonController {
 			+"\n"
 	)
 	@PostMapping("/api/v1/addon/install")
-	public ResponseWrapper<Boolean> install(@RequestBody Map<String, Object> param) {
+	public ResponseWrapper<Boolean> install(@RequestBody Map<String, Object> param) throws IOException {
 		Long clusterIdx = Long.valueOf((int)param.get("clusterIdx"));
 		String addonId = (String)param.get("addonId");
 		Map<String, Object> parameters = null;
@@ -90,7 +91,7 @@ public class AddonController extends CommonController {
 			+"\n"
 	)
 	@DeleteMapping("/api/v1/addon/uninstall")
-	public ResponseWrapper<Boolean> uninstall(@RequestBody Map<String, Object> param) {
+	public ResponseWrapper<Boolean> uninstall(@RequestBody Map<String, Object> param) throws IOException {
 		Long clusterIdx = Long.valueOf((int)param.get("clusterIdx"));
 		String addonId = (String)param.get("addonId");
 		return new ResponseWrapper<>(addonService.uninstallAddon(clusterIdx, addonId));
