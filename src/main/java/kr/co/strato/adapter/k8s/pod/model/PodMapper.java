@@ -1,6 +1,8 @@
 package kr.co.strato.adapter.k8s.pod.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
@@ -43,6 +45,7 @@ public interface PodMapper {
             
             String ownerKind = null;
             String ownerUid = null;
+            String ownerName = null;
             Integer restart = 0;
             ContainerStatus containerStatus = null;
             if (!containerList.isEmpty()) {
@@ -55,6 +58,7 @@ public interface PodMapper {
             	String kind = ownerReference.getKind();
                 ownerKind = (kind != null) ? kind.substring(0, 1).toLowerCase() + kind.substring(1) : null;
                 ownerUid = ownerReference.getUid();
+                ownerName = ownerReference.getName();
             }
 
             //k8s Object -> Entity
@@ -176,8 +180,9 @@ public interface PodMapper {
                     .memoryLimits(memLimits)
                     .memoryRequests(memRequests)
                     .volumes(volumes)
-                    .kind(ownerKind)
+                    .ownerkind(ownerKind)
                     .ownerUid(ownerUid)
+                    .ownerName(ownerName)
                     .annotation(annotations)
                     .condition(conditions)
                     .createdAt(DateUtil.strToLocalDateTime(createAt))
