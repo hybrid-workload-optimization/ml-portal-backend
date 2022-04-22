@@ -20,7 +20,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.addon.model.Addon;
-import kr.co.strato.portal.addon.service.AddonService3;
+import kr.co.strato.portal.addon.service.AddonService;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
@@ -45,7 +45,7 @@ public class ClusterController extends CommonController {
 	WorkHistoryService workHistoryService;
 	
 	@Autowired
-	private AddonService3 addonService;
+	private AddonService addonService;
 	
 	@GetMapping("/api/v1/clusters")
     public ResponseWrapper<Page<ClusterDto.List>> getCluterList(PageRequest pageRequest){
