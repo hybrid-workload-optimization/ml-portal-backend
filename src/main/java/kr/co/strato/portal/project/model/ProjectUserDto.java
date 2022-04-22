@@ -17,6 +17,7 @@ public class ProjectUserDto {
 	private String createUserName;
 	private String createdAt;
 	private Long userRoleIdx;
+	private String userRoleName;
 	//private String projectUserRole;
 	
 	private String userName;

@@ -16,6 +16,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
@@ -30,7 +31,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 	private final JPAQueryFactory queryFactory;
 	
 	@Override
-	public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+	public List<ProjectUserDto> getProjectUserListExceptManager(Long projectIdx) {
 		
 		List<ProjectUserDto> result = queryFactory
 				.select(Projections.fields(
@@ -43,6 +44,12 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						//projectUserEntity.projectUserRole,
 						projectUserEntity.userRoleIdx,
 						ExpressionUtils.as(
+								JPAExpressions.select(userRoleEntity.userRoleName)
+				                              .from(userRoleEntity)
+				                              .where(userRoleEntity.id.eq(projectUserEntity.userRoleIdx)),
+				          		"userRoleName"
+				        ),
+						ExpressionUtils.as(
 								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectUserEntity.createdAt, "%Y-%m-%d %H:%i"),
 								"createdAt"
 						),
@@ -53,7 +60,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				  ))
 				  .from(projectUserEntity)
 				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
-				  .where(projectUserEntity.projectIdx.eq(projectIdx).and(userEntity.useYn.eq("Y")))
+				  .where(projectUserEntity.projectIdx.eq(projectIdx).and(userEntity.useYn.eq("Y")).and(projectUserEntity.userRoleIdx.ne(JPAExpressions.select(userRoleEntity.id).from(userRoleEntity).where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER)))))
 				  .orderBy(projectUserEntity.userRoleIdx.asc())
 				  .fetch();
 		
@@ -97,6 +104,65 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				.join(userRoleEntity).on(projectUserEntity.userRoleIdx.eq(userRoleEntity.id))
 				.where(projectUserEntity.projectIdx.eq(projectIdx).and(projectUserEntity.userId.eq(userId)))
 				.fetchOne();
+		return result;
+	}
+	
+	@Override
+	public ProjectUserEntity getProjectManagerInfo(Long projectIdx) {
+		
+		ProjectUserEntity result = queryFactory
+				.select(projectUserEntity).from(projectUserEntity)
+				.where(projectUserEntity.projectIdx.eq(projectIdx).and(projectUserEntity.userRoleIdx.eq(JPAExpressions.select(userRoleEntity.id).from(userRoleEntity).where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER)))))
+				.fetchOne();
+		
+		return result;
+	}
+	
+	@Override
+	public List<UserEntity> getUserWithManagerList() {
+		
+		List<UserEntity> result = queryFactory
+				.select(userEntity).from(userEntity)
+				.where(userEntity.useYn.eq("Y").and(userEntity.userRole.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER)))
+				.fetch();
+		
+		return result;
+	}
+	
+	@Override
+	public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+		
+		List<ProjectUserDto> result = queryFactory
+				.select(Projections.fields(
+						ProjectUserDto.class,
+						projectUserEntity.userId.as("userId"), 
+						projectUserEntity.projectIdx,
+						userEntity.userName,
+						userEntity.email,
+						userEntity.organization,
+						//projectUserEntity.projectUserRole,
+						projectUserEntity.userRoleIdx,
+						ExpressionUtils.as(
+								JPAExpressions.select(userRoleEntity.userRoleName)
+				                              .from(userRoleEntity)
+				                              .where(userRoleEntity.id.eq(projectUserEntity.userRoleIdx)),
+				          		"userRoleName"
+				        ),
+						ExpressionUtils.as(
+								Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectUserEntity.createdAt, "%Y-%m-%d %H:%i"),
+								"createdAt"
+						),
+						ExpressionUtils.as(
+								Expressions.numberTemplate(Integer.class, "DATEDIFF(DATE_FORMAT(NOW(), '%Y-%m-%d'), DATE_FORMAT({0}, '%Y-%m-%d'))", projectUserEntity.createdAt),
+								"addDayCount"
+						)
+				  ))
+				  .from(projectUserEntity)
+				  .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
+				  .where(projectUserEntity.projectIdx.eq(projectIdx).and(userEntity.useYn.eq("Y")))
+				  .orderBy(projectUserEntity.userRoleIdx.asc())
+				  .fetch();
+		
 		return result;
 	}
 }

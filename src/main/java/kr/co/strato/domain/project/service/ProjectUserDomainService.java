@@ -30,13 +30,13 @@ public class ProjectUserDomainService {
     }*/
 	
 	/**
-     * Project의 User 리스트 조회
+     * Project의 User 리스트 조회(Project Manager 제외)
      * @param userId
      * @return
      */
-    public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+    public List<ProjectUserDto> getProjectUserListExceptManager(Long projectIdx) {
     	
-    	return projectUserRepository.getProjectUserList(projectIdx);
+    	return projectUserRepository.getProjectUserListExceptManager(projectIdx);
     }
 	
 	/**
@@ -127,4 +127,31 @@ public class ProjectUserDomainService {
 	public List<ProjectUserEntity> findByUserId(String userId) {
 		return projectUserRepository.findByUserId(userId);
 	}
+	
+	/**
+	 * Project Manager 정보
+	 * @param projectIdx
+	 * @return
+	 */
+	public ProjectUserEntity getProjectManagerInfo(Long projectIdx) {
+		return projectUserRepository.getProjectManagerInfo(projectIdx);
+	}
+	
+	/**
+	 * 사용자 권한이 Project Manager 인 사용자 조회
+	 * @return
+	 */
+	public List<UserEntity> getUserWithManagerList() {
+		return projectUserRepository.getUserWithManagerList();
+	}
+	
+	/**
+     * Project의 User 리스트 조회
+     * @param userId
+     * @return
+     */
+    public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+    	
+    	return projectUserRepository.getProjectUserList(projectIdx);
+    }
 }

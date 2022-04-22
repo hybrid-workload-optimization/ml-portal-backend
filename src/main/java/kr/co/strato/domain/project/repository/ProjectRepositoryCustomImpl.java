@@ -4,6 +4,7 @@ import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClu
 import static kr.co.strato.domain.project.model.QProjectEntity.projectEntity;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
 import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
+import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.project.model.ProjectDto;
@@ -149,22 +151,22 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectUserEntity.userId)
 	                                            .from(projectUserEntity)
-	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(4L)),
+	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(5L)),
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id).and(projectUserEntity.userRoleIdx.eq(JPAExpressions.select(userRoleEntity.id).from(userRoleEntity).where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER))))),
 	                              "projectPmId"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(userEntity.userName)
 	                                            .from(userEntity)
 	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.userId))
-	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(4L)),
+	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(5L)),
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id).and(projectUserEntity.userRoleIdx.eq(JPAExpressions.select(userRoleEntity.id).from(userRoleEntity).where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER))))),
 	                              "projectPmName"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(userEntity.email)
 	                                            .from(userEntity)
 	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.userId))
-	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(4L)),
+	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(5L)),
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id).and(projectUserEntity.userRoleIdx.eq(JPAExpressions.select(userRoleEntity.id).from(userRoleEntity).where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER))))),
 	                              "projectPmEmail"),
 						  
 						  ExpressionUtils.as(

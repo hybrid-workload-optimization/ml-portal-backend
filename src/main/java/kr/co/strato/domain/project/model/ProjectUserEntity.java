@@ -22,6 +22,11 @@ import lombok.Setter;
 @Table(name="project_user")
 public class ProjectUserEntity {
 
+	public static String PROJECT_MANAGER = "PROJECT_MANAGER";
+	public static String PROJECT_MEMBER = "PROJECT_MEMBER";
+	public static Long PROJECT_MANAGER_ROLE_IDX = 5L;
+	public static Long PROJECT_MEMBER_ROLE_IDX = 6L;
+	
 	@Id
 	@Column(name="user_id")
 	private String userId;

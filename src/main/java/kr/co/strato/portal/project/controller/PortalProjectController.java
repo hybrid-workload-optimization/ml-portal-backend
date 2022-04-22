@@ -82,15 +82,15 @@ public class PortalProjectController extends CommonController {
     }
     
     /**
-     * Project의 User 리스트 조회
+     * Project의 User 리스트 조회(Project Manager 제외)
      * @param projectIdx
      * @return
      */
     @GetMapping("/api/v1/project/user/{projectIdx}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ProjectUserDto>> getProjectUserList(@PathVariable("projectIdx") Long projectIdx) {
+    public ResponseWrapper<List<ProjectUserDto>> getProjectUserListExceptManager(@PathVariable("projectIdx") Long projectIdx) {
         
-    	List<ProjectUserDto> response = portalProjectService.getProjectUserList(projectIdx);
+    	List<ProjectUserDto> response = portalProjectService.getProjectUserListExceptManager(projectIdx);
         
         return new ResponseWrapper<List<ProjectUserDto>> (response);
     }
@@ -271,5 +271,45 @@ public class PortalProjectController extends CommonController {
     	List<UserRoleDto> response = portalProjectService.getProjectUserRole();
         
     	return new ResponseWrapper<List<UserRoleDto>>(response);
+    }
+    
+    /**
+     * 사용자 권한 목록
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/user/role/all")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<UserRoleDto>> getUserRoleAllList() {
+        
+    	List<UserRoleDto> response = portalProjectService.getUserRoleAll();
+        
+    	return new ResponseWrapper<List<UserRoleDto>>(response);
+    }
+    
+    /**
+     * 사용자 권한이 Project Manager 인 사용자 조회
+     * @param 
+     * @return
+     */
+    @GetMapping("/api/v1/role/maanger")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<UserDto>> getUserWithManagerList() throws Exception {        
+    	List<UserDto> response = portalProjectService.getUserWithManagerList();
+        return new ResponseWrapper<List<UserDto>>(response);
+    }
+    
+    /**
+     * Project의 User 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    @GetMapping("/api/v1/project/{projectIdx}/user/all")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<ProjectUserDto>> getProjectUserList(@PathVariable("projectIdx") Long projectIdx) {
+        
+    	List<ProjectUserDto> response = portalProjectService.getProjectUserList(projectIdx);
+        
+        return new ResponseWrapper<List<ProjectUserDto>> (response);
     }
 }

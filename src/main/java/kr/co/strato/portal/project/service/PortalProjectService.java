@@ -104,13 +104,13 @@ public class PortalProjectService {
     }
     
     /**
-     * Project의 User 리스트 조회
+     * Project의 User 리스트 조회(Project Manager 제외)
      * @param projectIdx
      * @return
      */
-    public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+    public List<ProjectUserDto> getProjectUserListExceptManager(Long projectIdx) {
     	
-        return projectUserDomainService.getProjectUserList(projectIdx);
+        return projectUserDomainService.getProjectUserListExceptManager(projectIdx);
     }
     
     /**
@@ -311,7 +311,48 @@ public class PortalProjectService {
         	}
 */        	
         	
-        	result = true;
+            // Project Manager 정보 확인 및 수정
+        	List<ProjectUserDto> userList = param.getUserList();
+System.out.println("User Info 1 === " + userList.size());
+System.out.println("User Info 2 === " + userList);        	
+        	if(userList != null) {
+        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+        		ProjectUserDto pmUser = ProjectUserDtoMapper.INSTANCE.toDto(pmUserInfo);
+        		for(ProjectUserDto user : userList) {
+System.out.println("new === " + user.getUserId());  
+System.out.println("old === " + pmUser.getUserId());
+        			if(!user.getUserId().equals(pmUser.getUserId())) {
+        				
+        				// 신규 Project Manager 적용
+        				ProjectUserDtoBuilder newProjectManagerBuiler = ProjectUserDto.builder();
+        				newProjectManagerBuiler.userId(user.getUserId());
+        				newProjectManagerBuiler.projectIdx(param.getProjectIdx());
+        				newProjectManagerBuiler.createUserId(userId);
+        				newProjectManagerBuiler.createUserName(userName);
+        				newProjectManagerBuiler.createdAt(now);
+        				newProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX);
+
+                		//ProjectUserDTO -> ProjectUserEntity
+                        ProjectUserEntity newProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(newProjectManagerBuiler.build());
+        				projectUserDomainService.createProjectUser(newProjectManagerEntity);
+        				
+        				// 기존 Project Manager 를 Member로 변경
+        				ProjectUserDtoBuilder oldProjectManagerBuiler = ProjectUserDto.builder();
+        				oldProjectManagerBuiler.userId(pmUser.getUserId());
+        				oldProjectManagerBuiler.projectIdx(param.getProjectIdx());
+        				oldProjectManagerBuiler.createUserId(userId);
+        				oldProjectManagerBuiler.createUserName(userName);
+        				oldProjectManagerBuiler.createdAt(now);
+        				oldProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MEMBER_ROLE_IDX);
+        				
+        				//ProjectUserDTO -> ProjectUserEntity
+        				ProjectUserEntity oldProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(oldProjectManagerBuiler.build());
+        				projectUserDomainService.createProjectUser(oldProjectManagerEntity);
+        			}
+        		}
+        	}
+            
+            result = true;
     	} catch(Exception e) {
     		throw new UpdateProjectFailException();
     	}
@@ -403,7 +444,11 @@ public class PortalProjectService {
             //Project User 삭제
             //projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
     		List<String> duplicateIdList = new ArrayList<String>();
-    		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserList(param.getProjectIdx());
+    		
+    		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+    		duplicateIdList.add(pmUserInfo.getUserId());
+    		
+    		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserListExceptManager(param.getProjectIdx());
     		List<ProjectUserDto> reqUserList = param.getUserList();
     		for(ProjectUserDto nowUser : userList) {
     			for(ProjectUserDto reqCluster : reqUserList) {
@@ -422,8 +467,9 @@ public class PortalProjectService {
     		}
             
             //Project User 등록
-            reqUserList = param.getUserList();
-        	for(ProjectUserDto user : reqUserList) {
+            //reqUserList = param.getUserList();
+System.out.println("reqUserList === " + reqUserList.size());        	
+    		for(ProjectUserDto user : reqUserList) {
         		/*ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
         		projectUserBuiler.userId(user.getUserId());
         		projectUserBuiler.projectIdx(param.getProjectIdx());
@@ -588,4 +634,38 @@ public class PortalProjectService {
 				.collect(Collectors.toList());
 		return roleList;
 	}
+	
+	/**
+	 * 사용자가 유저 모든 권한
+	 * @return
+	 */
+	public List<UserRoleDto> getUserRoleAll() {
+		List<UserRoleEntity> list =  userRoleDomainService.getUseUserRole();
+		List<UserRoleDto> roleList = list
+				.stream()
+				.map(r -> UserRoleDtoMapper.INSTANCE.toDto(r))
+				.collect(Collectors.toList());
+		return roleList;
+	}
+	
+	/**
+     * 사용자 권한이 Project Manager 인 사용자 조회
+     * @return
+     */
+    public List<UserDto> getUserWithManagerList() {
+    	List<UserEntity> userList = projectUserDomainService.getUserWithManagerList();
+    	
+    	//Entity -> DTO 변환
+    	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    }
+    
+    /**
+     * Project의 User 리스트 조회
+     * @param projectIdx
+     * @return
+     */
+    public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
+    	
+        return projectUserDomainService.getProjectUserList(projectIdx);
+    }
 }
