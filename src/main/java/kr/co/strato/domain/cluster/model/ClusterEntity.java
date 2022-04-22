@@ -46,7 +46,7 @@ public class ClusterEntity {
 		DELETING,
 		FAILED,
 		SCALE_IN,
-		SCALE_OUT,
+		SCALE_OUT
 	}
 	
 	@Id 

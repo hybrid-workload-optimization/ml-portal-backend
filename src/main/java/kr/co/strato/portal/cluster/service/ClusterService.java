@@ -175,9 +175,18 @@ public class ClusterService {
 			} else if( pStatus.equals(ProvisioningStatus.STARTED.toString())) {
 				//배포중
 				health.setHealth("Deploying");
+			} else if(pStatus.equals(ProvisioningStatus.DELETING.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Deleting");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE_OUT.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Scale out");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE_IN.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Scale in");
 			} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
 				//배포 실패
-				health.setHealth("Deploy Fail");
+				health.setHealth("Fail");
 				health.addProbleam("Cluster deployment failed.");
 			}
 		} else {
@@ -433,74 +442,92 @@ public class ClusterService {
 		clusterEntity.setDescription(clusterDto.getDescription());
 		// TODO : update_user information
 		
-		clusterDomainService.update(clusterEntity);
-		log.info("[updateKubesprayCluster] update cluster : {}", clusterEntity.toString());
 		
-		// kubespray - scale-in/out cluster
-		boolean isScaleOut = false;
-		if (clusterDto.getNodes().size() >= clusterDto.getOriginalNodes().size()) { // scale-out
-			isScaleOut = true;
-		} else { // scale-in
-			// copy from original nodes
-			ArrayList<ClusterDto.Node> copyNodes = new ArrayList<>();
-			ArrayList<ClusterDto.Node> originalNodes = clusterDto.getOriginalNodes();
-			originalNodes.forEach(o -> {
-				ClusterDto.Node n = new ClusterDto.Node();
-				n.setName(o.getName());
-				n.setIp(o.getIp());
-				
-				ArrayList<String> roles = new ArrayList<>();
-				for (String role : o.getNodeTypes()) {
-					roles.add(role);
-				}
-				n.setNodeTypes(roles);
-				
-				copyNodes.add(n);
-			});
+		
+		
+		int changeSize = clusterDto.getNodes().size();
+		int originalSize = clusterDto.getOriginalNodes().size();
+		
+		if(changeSize != originalSize) {
+			//스케일 조정이 필요한 경우.
 			
-			// find to deleted nodes 
-			for (int i = 0; i < originalNodes.size(); i++) {
-				for (ClusterDto.Node node : clusterDto.getNodes()) {
-					// find same node : based on node's ip
-					if (originalNodes.get(i).getIp().equals(node.getIp())) {
-						originalNodes.remove(i);
+			
+			boolean isScaleOut = false;
+			
+			if(changeSize > originalSize) {
+				//Scale out
+				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.SCALE_OUT.name());
+				isScaleOut = true;
+			} else if(changeSize < originalSize) {
+				//Scale in
+				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.SCALE_IN.name());
+				
+				// copy from original nodes
+				ArrayList<ClusterDto.Node> copyNodes = new ArrayList<>();
+				ArrayList<ClusterDto.Node> originalNodes = clusterDto.getOriginalNodes();
+				originalNodes.forEach(o -> {
+					ClusterDto.Node n = new ClusterDto.Node();
+					n.setName(o.getName());
+					n.setIp(o.getIp());
+					
+					ArrayList<String> roles = new ArrayList<>();
+					for (String role : o.getNodeTypes()) {
+						roles.add(role);
+					}
+					n.setNodeTypes(roles);
+					
+					copyNodes.add(n);
+				});
+				
+				// find to deleted nodes 
+				for (int i = 0; i < originalNodes.size(); i++) {
+					for (ClusterDto.Node node : clusterDto.getNodes()) {
+						// find same node : based on node's ip
+						if (originalNodes.get(i).getIp().equals(node.getIp())) {
+							originalNodes.remove(i);
+						}
 					}
 				}
+				
+				ArrayList<String> deletedNodes = new ArrayList<>();
+				for (ClusterDto.Node node : originalNodes) {
+					deletedNodes.add(node.getName());
+				}
+				
+				// set node
+				clusterDto.setRemoveNodes(deletedNodes);
+				clusterDto.setNodes(copyNodes);
 			}
 			
-			ArrayList<String> deletedNodes = new ArrayList<>();
-			for (ClusterDto.Node node : originalNodes) {
-				deletedNodes.add(node.getName());
+			ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
+			clusterCloudDto.setKubesprayVersion(kubesprayVersion);
+			clusterCloudDto.setCallbackUrl(portalBackendServiceUrl + ":" + portalBackendServicePort + portalBackendServiceCallbackUrl);
+			clusterCloudDto.setWorkJobIdx(workJobIdx);
+			{
+				// db - update work job
+				Map<String, Object> workJobDataRequest	= new HashMap<>();
+				workJobDataRequest.put(WorkJobData.BODY.name(), clusterCloudDto);
+				
+				String workJobRequest = new ObjectMapper().writeValueAsString(workJobDataRequest);
+				log.info("[updateKubesprayCluster] work job request : {}", workJobRequest);
+				
+				workJobDto.setWorkJobIdx(workJobIdx);
+				workJobDto.setWorkJobDataRequest(workJobRequest);
+				workJobDto.setWorkJobReferenceIdx(clusterEntity.getClusterIdx());
+				
+				workJobService.updateWorkJob(workJobDto);
 			}
 			
-			// set node
-			clusterDto.setRemoveNodes(deletedNodes);
-			clusterDto.setNodes(copyNodes);
+			boolean isUpdated = isScaleOut ? clusterCloudService.scaleOutCluster(clusterCloudDto) : clusterCloudService.scaleInCluster(clusterCloudDto);
+			if (!isUpdated) {
+				throw new PortalException("Cluster scale failed");
+			}
+			
 		}
 		
-		ClusterCloudDto clusterCloudDto = ClusterDtoMapper.INSTANCE.toClusterCloudDto(clusterDto);
-		clusterCloudDto.setKubesprayVersion(kubesprayVersion);
-		clusterCloudDto.setCallbackUrl(portalBackendServiceUrl + ":" + portalBackendServicePort + portalBackendServiceCallbackUrl);
-		clusterCloudDto.setWorkJobIdx(workJobIdx);
-		{
-			// db - update work job
-			Map<String, Object> workJobDataRequest	= new HashMap<>();
-			workJobDataRequest.put(WorkJobData.BODY.name(), clusterCloudDto);
-			
-			String workJobRequest = new ObjectMapper().writeValueAsString(workJobDataRequest);
-			log.info("[updateKubesprayCluster] work job request : {}", workJobRequest);
-			
-			workJobDto.setWorkJobIdx(workJobIdx);
-			workJobDto.setWorkJobDataRequest(workJobRequest);
-			workJobDto.setWorkJobReferenceIdx(clusterEntity.getClusterIdx());
-			
-			workJobService.updateWorkJob(workJobDto);
-		}
 		
-		boolean isUpdated = isScaleOut ? clusterCloudService.scaleOutCluster(clusterCloudDto) : clusterCloudService.scaleInCluster(clusterCloudDto);
-		if (!isUpdated) {
-			throw new PortalException("Cluster scale failed");
-		}
+		clusterDomainService.update(clusterEntity);
+		log.info("[updateKubesprayCluster] update cluster : {}", clusterEntity.toString());
 		
 		return workJobIdx;
 	}
@@ -757,8 +784,12 @@ public class ClusterService {
 			log.error(e.getMessage());
 		}
 		
+		//삭제 중 상태로 업데이트
+		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.DELETING.name());
+		clusterDomainService.update(clusterEntity);
+		
 		//클러스터 삭제
-		clusterDomainService.delete(clusterEntity);
+		//clusterDomainService.delete(clusterEntity);
 		
 		return workJobIdx;
 	}
