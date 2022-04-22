@@ -1,5 +1,6 @@
 package kr.co.strato.adapter.k8s.node.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +122,50 @@ public class NodeAdapterService {
   		String nodeYaml = nonNamespaceProxy.getResourceYaml(ResourceType.node.get(), kubeConfigId,name);
   		return nodeYaml;
   	}
+    
+    /**
+	 * worker node ip 반환.
+	 * @param kubeConfigId
+	 * @return
+	 */
+	public List<String> getWorkerNodeIps(Long kubeConfigId) {
+		List<Node> list = getWorkerNodes(kubeConfigId);
+		List<String> ips = new ArrayList<>();
+		for(Node node: list) {
+			String ip = node.getStatus().getAddresses().stream()
+					.filter(addr -> addr.getType().equals("InternalIP"))
+					.map(addr -> addr.getAddress())
+					.findFirst()
+					.get();
+			
+			if(ip != null) {
+				ips.add(ip);
+			}
+		}
+		return ips;
+	}
+	
+	/**
+	 * Worker 노드 반환.
+	 * @param kubeConfigId
+	 * @return
+	 */
+	public List<Node> getWorkerNodes(Long kubeConfigId) {
+		List<Node> list = getNodeList(kubeConfigId);
+		List<Node> newList = new ArrayList<>();
+		for(Node node: list) {
+			List<String> roles = new ArrayList<>();
+			node.getMetadata().getLabels().keySet().stream()
+					.filter(l -> l.contains("node-role"))
+					.map(l -> l.split("/")[1])
+					.iterator().forEachRemaining(roles::add);
+			
+			if(roles.size() == 0 || roles.contains("worker")) {
+				newList.add(node);
+			}
+		}
+		return newList;
+	}
     
     
 }

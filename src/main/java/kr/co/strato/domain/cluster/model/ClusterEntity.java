@@ -43,7 +43,10 @@ public class ClusterEntity {
 		READY,
 		STARTED,
 		FINISHED,
-		FAILED
+		DELETING,
+		FAILED,
+		SCALE_IN,
+		SCALE_OUT,
 	}
 	
 	@Id 

@@ -173,11 +173,18 @@ public class WorkJobCallbackService {
 			try {
 				// Response Data 
 				if (workJobData != null) {
-					String workJobDataLog	= (String) workJobData.get("log");
+					//String workJobDataLog	= (String) workJobData.get("log");
 					
+					ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
 					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						// db - sync(update) node
 						clusterSyncService.syncClusterNode(workJobEntity.getWorkJobReferenceIdx());
+						
+						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+						clusterDomainService.update(clusterEntity);
+					} else if(workJobStatus == WorkJobStatus.FAIL && workJobState == WorkJobState.FINISHED) {
+						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
+						clusterDomainService.update(clusterEntity);
 					}
 				} 
 			} catch (Exception e) {
@@ -188,12 +195,17 @@ public class WorkJobCallbackService {
 			try {
 				// Response Data 
 				if (workJobData != null) {
-					String workJobDataLog	= (String) workJobData.get("log");
+					//String workJobDataLog	= (String) workJobData.get("log");
 					
+					ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
 					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						// db - delete cluster
-						ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
+						
 						clusterDomainService.delete(clusterEntity);
+					} else if(workJobStatus == WorkJobStatus.FAIL && workJobState == WorkJobState.FINISHED) {
+						//삭제 작업 실패 경우 실패 내역 DB에 업데이트
+						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
+						clusterDomainService.update(clusterEntity);
 					}
 				}
 			} catch (Exception e) {
