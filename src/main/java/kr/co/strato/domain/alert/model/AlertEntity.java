@@ -45,9 +45,6 @@ public class AlertEntity {
 	@Column(name = "confirm_yn")
 	private String confirmYn;
 	
-	@Column(name = "work_history_idx")
-	private Long workHistoryIdx;
-	
 	@Column(name = "work_job_idx")
 	private Long workJobIdx;
 	

@@ -65,10 +65,9 @@ public class AlertService {
 		List<String> userIds = new ArrayList<>();
 		
 		//클러스터 정보 가져오기
-		Long clusterIdx = null;
+		Long clusterIdx = workJobEntity.getWorkJobReferenceIdx();
 		ClusterEntity cluster = clusterDomainService.findByClusterName(clusterName);
 		if(cluster != null) {
-			clusterIdx = cluster.getClusterIdx();
 			
 			//클러스터와 연결된 프로젝트의 유저 목록 가져오기
 			List<UserEntity> list = clusterDomainService.getClusterUsers(clusterIdx);
@@ -89,7 +88,6 @@ public class AlertService {
 					.clusterName(clusterName)
 					.workJobType(workJobType.name())
 					.workJobStatus(workJobStatus.name())
-					.workHistoryIdx(workJobEntity.getWorkJobReferenceIdx())
 					.workJobIdx(workJobEntity.getWorkJobIdx())
 					.createdAt(DateUtil.currentDateTime())
 					.userId(userId)
