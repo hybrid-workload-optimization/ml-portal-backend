@@ -190,7 +190,7 @@ public class PodService extends ProjectAuthorityService {
         				PodEntity pod = PodMapper.INSTANCE.toEntity(s);
         				pod.setCluster(clusterEntity);
         				String namespaceName = pod.getNamespace().getName();
-        				String kind = pod.getOwnerkind();
+        				String kind = pod.getKind();
         				Long id = null;
         				//if (pod.getNode() != null) {
         				

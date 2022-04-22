@@ -78,7 +78,7 @@ public class PodDto {
         private int restart;
         private String status;
         private String ownerUid;        
-        private String ownerkind;        
+        private String ownerKind;        
         private String ownerName;
         
         private String clusterName;

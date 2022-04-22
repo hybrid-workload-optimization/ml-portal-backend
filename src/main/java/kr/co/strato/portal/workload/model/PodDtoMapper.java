@@ -63,6 +63,7 @@ public interface PodDtoMapper {
         @Mapping(target = "condition", source = "condition", qualifiedByName = "dataToList"),
         @Mapping(target = "images", source = "image", qualifiedByName = "stringToList"),
         @Mapping(target = "clusterName", source = "namespace.cluster.clusterName"),
+        @Mapping(target = "ownerKind", source = "kind"),
     })
     public PodDto.ResDetailDto toResDetailDto(PodEntity entity);
     

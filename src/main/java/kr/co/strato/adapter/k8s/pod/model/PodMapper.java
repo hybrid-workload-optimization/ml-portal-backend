@@ -180,7 +180,7 @@ public interface PodMapper {
                     .memoryLimits(memLimits)
                     .memoryRequests(memRequests)
                     .volumes(volumes)
-                    .ownerkind(ownerKind)
+                    .kind(ownerKind)
                     .ownerUid(ownerUid)
                     .ownerName(ownerName)
                     .annotation(annotations)

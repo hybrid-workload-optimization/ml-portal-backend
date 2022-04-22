@@ -88,7 +88,7 @@ public class PodEntity {
     
     private String ownerUid;
     
-    private String ownerkind;
+    private String kind;
     
     private String ownerName;
     
