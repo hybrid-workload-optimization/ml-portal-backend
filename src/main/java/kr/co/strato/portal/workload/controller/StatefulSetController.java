@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.controller;
 
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
 import kr.co.strato.portal.workload.model.StatefulSetDto;
 import kr.co.strato.portal.workload.service.StatefulSetService;
@@ -14,7 +15,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-public class StatefulSetController {
+public class StatefulSetController extends CommonController {
 
     @Autowired
     private StatefulSetService statefulSetService;
@@ -54,7 +55,7 @@ public class StatefulSetController {
     @GetMapping("api/v1/workload/statefulsets/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<StatefulSetDetailDto.ResDetailDto> getStatefulSet(@PathVariable Long id){
-        StatefulSetDetailDto.ResDetailDto result = statefulSetService.getStatefulSet(id);
+        StatefulSetDetailDto.ResDetailDto result = statefulSetService.getStatefulSet(id, getLoginUser());
 
         return new ResponseWrapper<>(result);
     }

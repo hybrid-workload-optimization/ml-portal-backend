@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 
 @Service
@@ -96,6 +97,16 @@ public class ProjectUserDomainService {
 	public ProjectUserEntity getProjectUser(Long projectIdx, String userId) {
 		
 		return projectUserRepository.findByProjectIdxAndUserId(projectIdx, userId);
+	}
+	
+	/**
+	 * 프로젝트 유저 권한 리턴.
+	 * @param projectIdx
+	 * @param userId
+	 * @return
+	 */
+	public UserRoleEntity getProjectUserRole(Long projectIdx, String userId) {		
+		return projectUserRepository.getProjectUserRole(projectIdx, userId);
 	}
 	
 	/**

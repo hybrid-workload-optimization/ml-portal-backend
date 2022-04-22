@@ -26,6 +26,8 @@ import kr.co.strato.adapter.k8s.endpoint.EndpointAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.service.model.ServiceEndpointEntity;
 import kr.co.strato.domain.service.model.ServiceEntity;
 import kr.co.strato.domain.service.model.ServiceType;
@@ -33,13 +35,15 @@ import kr.co.strato.domain.service.service.ServiceDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.networking.model.K8sServiceDto;
 import kr.co.strato.portal.networking.model.K8sServiceDtoMapper;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.extern.slf4j.Slf4j;
 
 @org.springframework.stereotype.Service
 @Slf4j
-public class K8sServiceService {
+public class K8sServiceService extends ProjectAuthorityService {
     @Autowired
     private ServiceDomainService serviceDomainService;
 
@@ -51,6 +55,9 @@ public class K8sServiceService {
 
     @Autowired
     private EndpointAdapterService endpointAdapterService;
+    
+    @Autowired
+   	ProjectDomainService projectDomainService;
 
 
 
@@ -155,11 +162,18 @@ public class K8sServiceService {
         return yaml;
     }
 
-    public K8sServiceDto.ResDetailDto getService(Long serviceId){
+    public K8sServiceDto.ResDetailDto getService(Long serviceId, UserDto loginUser){
         ServiceEntity service = serviceDomainService.get(serviceId);
         Long clusterId = service.getNamespace().getCluster().getClusterId();
         String clusterName = service.getNamespace().getCluster().getClusterName();
         String namespaceName = service.getNamespace().getName();
+        
+        Long clusterIdx = service.getNamespace() .getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 
         Endpoints endpoints = endpointAdapterService.get(clusterId, namespaceName, service.getServiceName());
 
@@ -171,7 +185,7 @@ public class K8sServiceService {
         }
 
         K8sServiceDto.ResDetailDto dto = K8sServiceDtoMapper.INSTANCE.toDetailDto(service, endpointEntities, clusterId, clusterName);
-
+        dto.setProjectIdx(projectIdx);
         return dto;
     }
 

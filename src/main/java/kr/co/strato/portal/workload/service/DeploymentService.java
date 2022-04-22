@@ -7,15 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.fabric8.kubernetes.api.model.apps.*;
-import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.project.model.ProjectEntity;
-import kr.co.strato.domain.project.service.ProjectDomainService;
-import kr.co.strato.global.error.exception.InternalServerException;
-import kr.co.strato.global.error.exception.PortalException;
-import kr.co.strato.global.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,28 +15,38 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentStatus;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.RollingUpdateDeployment;
 import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
-import kr.co.strato.portal.workload.model.DeploymentArgDto;
-import kr.co.strato.portal.workload.model.DeploymentDto;
-import kr.co.strato.portal.workload.model.DeploymentDtoMapper;
-import lombok.extern.slf4j.Slf4j;
+import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.deployment.service.DeploymentDomainService;
-import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.pod.repository.PodRepository;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
+import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
-import org.springframework.util.CollectionUtils;
+import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.workload.model.DeploymentArgDto;
+import kr.co.strato.portal.workload.model.DeploymentDto;
+import kr.co.strato.portal.workload.model.DeploymentDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DeploymentService {
+public class DeploymentService extends ProjectAuthorityService {	
 	@Autowired
 	DeploymentDomainService deploymentDomainService;
 	
@@ -72,6 +73,9 @@ public class DeploymentService {
 
 	@Autowired
 	private ProjectDomainService projectDomainService;
+	
+	@Autowired
+	private ProjectUserDomainService projectUserDomainService;
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -113,13 +117,18 @@ public class DeploymentService {
 	}
 	
 	//상세
-	public DeploymentDto get(Long idx){
+	public DeploymentDto get(Long idx, UserDto loginUser) {	
 		DeploymentEntity entity = deploymentDomainService.getDeploymentEntitiy(idx);
 		Long clusterId = entity.getNamespaceEntity().getCluster().getClusterId();
 		Long clusterIdx = entity.getNamespaceEntity().getCluster().getClusterIdx();
 		String clusterName = entity.getNamespaceEntity().getCluster().getClusterName();
 		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
 		String projectName = projectEntity.getProjectName();
+		
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 
 		String replicaSetUid = null;
 		Deployment deployment = null;
@@ -141,10 +150,12 @@ public class DeploymentService {
 			RollingUpdateDeployment rollingUpdateDeployment = deployment.getSpec().getStrategy().getRollingUpdate();
 
 			dto = DeploymentDtoMapper.INSTANCE.toDto(entity, clusterId, replicaSetUid, status, rollingUpdateDeployment, projectName, clusterName);
-		}else{
+		} else {
 			dto = DeploymentDtoMapper.INSTANCE.toDto(entity, clusterId, replicaSetUid, projectName, clusterName);
 		}
-
+		
+		//프로젝트 ID 추가
+		dto.setProjectIdx(projectEntity.getId());		
 		return dto;
 	}
 	

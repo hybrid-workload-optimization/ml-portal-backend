@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
@@ -30,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class ReplicaSetController {
+public class ReplicaSetController extends CommonController {
 	
 	@Autowired
 	ReplicaSetService replicaSetService;
@@ -89,7 +90,7 @@ public class ReplicaSetController {
         workMetadata.put("replicaSetIdx", replicaSetIdx);
         
         try {
-        	result = replicaSetService.getReplicaSet(replicaSetIdx);
+        	result = replicaSetService.getReplicaSet(replicaSetIdx, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();

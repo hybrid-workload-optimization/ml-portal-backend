@@ -73,6 +73,7 @@ public class K8sServiceDto {
         private List<ResEndPointListDto> endpoints;
         private Long clusterId;
         private String clusterName;
+        private Long projectIdx;
     }
 
     @Getter

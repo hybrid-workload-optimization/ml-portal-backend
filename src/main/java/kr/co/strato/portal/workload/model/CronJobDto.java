@@ -21,6 +21,7 @@ public class CronJobDto {
 	private String concurrencyPolicy;
 	private String createdAt;
 	private Integer active;
+	private Long projectIdx;
 	
 	private List<JobDto> activeJobs;
 	private List<JobDto> inactiveJobs;

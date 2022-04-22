@@ -15,16 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.workload.model.DeploymentArgDto;
-import kr.co.strato.portal.workload.model.DeploymentDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;
-import kr.co.strato.portal.workload.service.DeploymentService;
 import kr.co.strato.portal.workload.service.JobService;
 
 @RequestMapping("/api/v1/workload")
 @RestController
-public class JobController {
+public class JobController extends CommonController {
 
 	@Autowired
 	JobService jobService;
@@ -40,7 +38,7 @@ public class JobController {
 	@GetMapping("/jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<JobDto> getJob (@PathVariable(name = "idx") Long idx) {
-		JobDto result = jobService.get(idx);
+		JobDto result = jobService.get(idx, getLoginUser());
 		return new ResponseWrapper<JobDto>(result);
 	}
 	

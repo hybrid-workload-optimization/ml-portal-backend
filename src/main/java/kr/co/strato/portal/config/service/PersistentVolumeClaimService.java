@@ -1,6 +1,5 @@
 package kr.co.strato.portal.config.service;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -17,27 +16,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import kr.co.strato.adapter.k8s.persistentVolumeClaim.service.PersistentVolumeClaimAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDtoMapper;
-import kr.co.strato.portal.workload.model.DaemonSetDto;
-import kr.co.strato.portal.workload.model.DaemonSetDtoMapper;
-import kr.co.strato.portal.workload.model.PodDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class PersistentVolumeClaimService {
+public class PersistentVolumeClaimService extends ProjectAuthorityService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
@@ -50,6 +48,9 @@ public class PersistentVolumeClaimService {
 	
 	@Autowired
 	NamespaceDomainService namespaceDomainService;
+	
+	@Autowired
+	ProjectDomainService projectDomainService;
 	
 	/**
 	 * Persistent Volume Claim 등록
@@ -128,16 +129,26 @@ public class PersistentVolumeClaimService {
 	 * @return
 	 * @throws Exception
 	 */
-	public PersistentVolumeClaimDto.Detail getPersistentVolumeClaim(Long persistentVolumeClaimIdx) throws Exception {
+	public PersistentVolumeClaimDto.Detail getPersistentVolumeClaim(Long persistentVolumeClaimIdx, UserDto loginUser) throws Exception {
 		PersistentVolumeClaimEntity persistentVolumeClaimEntity = persistentVolumeClaimDomainService.get(persistentVolumeClaimIdx);
 		Long clusterId											= persistentVolumeClaimEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName									= persistentVolumeClaimEntity.getNamespace().getName();
 		String persistentVolumeClaimName						= persistentVolumeClaimEntity.getName();
 		
+		Long clusterIdx = persistentVolumeClaimEntity.getNamespace().getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
+		
+		
 		// k8s - get Persistent Volume Claim
 		PersistentVolumeClaim persistentVolumeClaim = persistentVolumeClaimAdapterService.get(clusterId, namespaceName, persistentVolumeClaimName);
 		
-		return PersistentVolumeClaimDtoMapper.INSTANCE.toDetail(persistentVolumeClaimEntity, persistentVolumeClaim);
+		PersistentVolumeClaimDto.Detail dto = PersistentVolumeClaimDtoMapper.INSTANCE.toDetail(persistentVolumeClaimEntity, persistentVolumeClaim);
+		dto.setProjectIdx(projectIdx);
+		return dto;
 	}
 	
 	/**

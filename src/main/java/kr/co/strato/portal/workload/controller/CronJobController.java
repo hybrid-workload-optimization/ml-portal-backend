@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.workload.model.CronJobArgDto;
 import kr.co.strato.portal.workload.model.CronJobDto;
 import kr.co.strato.portal.workload.service.CronJobService;
 
 @RequestMapping("/api/v1/workload")
 @RestController
-public class CronJobController {
+public class CronJobController extends CommonController {
 
 	@Autowired
 	CronJobService cronJobService;
@@ -37,7 +38,7 @@ public class CronJobController {
 	@GetMapping("/cron-jobs/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<CronJobDto> getCronJob (@PathVariable(name = "idx") Long idx) {
-		CronJobDto result = cronJobService.get(idx);
+		CronJobDto result = cronJobService.get(idx, getLoginUser());
 		return new ResponseWrapper<CronJobDto>(result);
 	}
 	

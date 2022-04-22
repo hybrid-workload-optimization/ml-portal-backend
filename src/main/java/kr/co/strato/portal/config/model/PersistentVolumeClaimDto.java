@@ -66,6 +66,7 @@ public class PersistentVolumeClaimDto {
 		private String accessType;
 		private String storageClass;
 		private String createdAt;
+		private Long projectIdx;
 	}
 	
 	@Getter

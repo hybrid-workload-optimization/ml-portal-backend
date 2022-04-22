@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.service.PodService;
 
 @RestController
-public class PodController {
+public class PodController extends CommonController {
     @Autowired
     private PodService podService;
     
@@ -50,7 +50,7 @@ public class PodController {
     @GetMapping("api/v1/pod/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<PodDto.ResDetailDto> getPodDetail(@PathVariable Long id){
-        PodDto.ResDetailDto result = podService.getPodDetail(id);
+        PodDto.ResDetailDto result = podService.getPodDetail(id, getLoginUser());
 
         return new ResponseWrapper<>(result);
     }

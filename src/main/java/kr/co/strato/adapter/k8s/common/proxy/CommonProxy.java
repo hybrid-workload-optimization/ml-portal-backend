@@ -11,5 +11,9 @@ public interface CommonProxy {
 
     @PostMapping("/common/apply")
     public String apply(@RequestBody YamlApplyParam param);
+    
+    
+    @PostMapping("/common/delete")
+    public boolean delete(@RequestBody YamlApplyParam param);
 
 }

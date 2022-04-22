@@ -1,7 +1,10 @@
 package kr.co.strato.domain.project.repository;
 
+import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
+import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
 import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
+import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
 
 import java.util.List;
 
@@ -83,6 +86,17 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 				)
 				.fetch();
 		
+		return result;
+	}
+
+	@Override
+	public UserRoleEntity getProjectUserRole(Long projectIdx, String userId) {
+		UserRoleEntity result = queryFactory
+				.select(userRoleEntity)
+				.from(projectUserEntity)
+				.join(userRoleEntity).on(projectUserEntity.userRoleIdx.eq(userRoleEntity.id))
+				.where(projectUserEntity.projectIdx.eq(projectIdx).and(projectUserEntity.userId.eq(userId)))
+				.fetchOne();
 		return result;
 	}
 }

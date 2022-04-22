@@ -30,16 +30,20 @@ import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 import kr.co.strato.domain.ingress.service.IngressDomainService;
 import kr.co.strato.domain.ingress.service.IngressRuleDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.networking.model.IngressDto;
 import kr.co.strato.portal.networking.model.IngressDtoMapper;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class IngressService {
+public class IngressService extends ProjectAuthorityService {
 
 	@Autowired
 	private IngressAdapterService ingressAdapterService;
@@ -52,6 +56,9 @@ public class IngressService {
 	
     @Autowired
     private ClusterDomainService clusterDomainService;
+    
+    @Autowired
+	ProjectDomainService projectDomainService;
 	
 	
 	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable,IngressDto.SearchParam searchParam) {
@@ -107,13 +114,21 @@ public class IngressService {
     }
 
 	
-    public IngressDto.ResDetailDto getIngressDetail(Long id){
+    public IngressDto.ResDetailDto getIngressDetail(Long id, UserDto loginUser){
     	IngressEntity ingressEntity = ingressDomainService.getDetail(id);
     	List<IngressRuleEntity> ruleList = ingressRuleDomainService.findByIngressId(id);
+    	
+    	Long clusterIdx = ingressEntity.getNamespace() .getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 
     	IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
     	List<IngressDto.RuleList> ruleDto = ruleList.stream().map(c -> IngressDtoMapper.INSTANCE.toRuleListDto(c)).collect(Collectors.toList());
     	ingressDto.setRuleList(ruleDto);
+    	ingressDto.setProjectIdx(projectIdx);
         return ingressDto;
     }
 	

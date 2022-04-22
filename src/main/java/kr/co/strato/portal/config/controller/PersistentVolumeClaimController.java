@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.work.model.WorkHistoryDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
@@ -25,15 +25,13 @@ import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
 import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
+import kr.co.strato.portal.work.model.WorkHistoryDto;
 import kr.co.strato.portal.work.service.WorkHistoryService;
-import kr.co.strato.portal.workload.controller.DaemonSetController;
-import kr.co.strato.portal.workload.model.DaemonSetDto;
-import kr.co.strato.portal.workload.service.DaemonSetService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class PersistentVolumeClaimController {
+public class PersistentVolumeClaimController extends CommonController {
 
 	@Autowired
 	PersistentVolumeClaimService persistentVolumeClaimService;
@@ -132,7 +130,7 @@ public class PersistentVolumeClaimController {
         workMetadata.put("daemonSetIdx", persistentVolumeClaimIdx);
         
         try {
-        	result = persistentVolumeClaimService.getPersistentVolumeClaim(persistentVolumeClaimIdx);
+        	result = persistentVolumeClaimService.getPersistentVolumeClaim(persistentVolumeClaimIdx, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();

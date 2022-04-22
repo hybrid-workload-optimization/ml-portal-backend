@@ -81,6 +81,7 @@ public class PodDto {
         private String kind;
         
         private String clusterName;
+        private Long projectIdx;
         
         private List<HashMap<String, Object>> condition;
     }

@@ -32,9 +32,13 @@ import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;
 import kr.co.strato.portal.workload.model.JobDtoMapper;
@@ -45,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class JobService {
+public class JobService extends ProjectAuthorityService {
 	@Autowired
 	JobDomainService jobDomainService;
 	
@@ -64,6 +68,9 @@ public class JobService {
 	@Autowired
 	JobRepository jobRepository;
 	
+	@Autowired
+	ProjectDomainService projectDomainService;
+	
 	//목록
 	public Page<JobDto> getList(PageRequest pageRequest, JobArgDto args){
 		Long clusterIdx = args.getClusterIdx();
@@ -77,13 +84,21 @@ public class JobService {
 	}
 	
 	//상세
-	public JobDto get(Long idx){
+	public JobDto get(Long idx, UserDto loginUser){
 		JobEntity entitiy = jobDomainService.getById(idx);
 		JobDto dto = JobDtoMapper.INSTANCE.toDto(entitiy);
 		
 		
 		NamespaceEntity namespace = entitiy.getNamespaceEntity();
 		Long kubeConfigId = namespace.getCluster().getClusterId();
+		
+		Long clusterIdx = namespace.getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
+		
 		
 		Job job = jobAdapterService.retrieve(kubeConfigId, namespace.getName(), entitiy.getJobName());
 		if(job != null) {
@@ -110,7 +125,7 @@ public class JobService {
 	        dto.setPods(dtos);
 	        
 		}
-		
+		dto.setProjectIdx(projectIdx);
 		return dto;
 	}
 	

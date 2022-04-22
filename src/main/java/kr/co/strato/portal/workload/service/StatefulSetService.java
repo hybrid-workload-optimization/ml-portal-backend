@@ -5,12 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
-import kr.co.strato.domain.namespace.service.NamespaceDomainService;
-import kr.co.strato.domain.project.model.ProjectClusterEntity;
-import kr.co.strato.domain.project.model.ProjectEntity;
-import kr.co.strato.domain.project.service.ProjectClusterDomainService;
-import kr.co.strato.domain.project.service.ProjectDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,11 +19,17 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDtoMapper;
 import kr.co.strato.portal.workload.model.StatefulSetDto;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class StatefulSetService {
+public class StatefulSetService extends ProjectAuthorityService {
     @Autowired
     private StatefulSetDomainService statefulSetDomainService;
 
@@ -164,10 +164,10 @@ public class StatefulSetService {
         return ids;
     }
 
-    public StatefulSetDetailDto.ResDetailDto getStatefulSet(Long statefulSetId){
+    public StatefulSetDetailDto.ResDetailDto getStatefulSet(Long statefulSetId, UserDto loginUser){
         //get statefulSet entity
         StatefulSetEntity entity = statefulSetDomainService.get(statefulSetId);
-
+        
         //get k8s statefulSet model
         String statefulSetName = entity.getStatefulSetName();
         String namespaceName = entity.getNamespace().getName();
@@ -176,11 +176,16 @@ public class StatefulSetService {
         String clusterName = entity.getNamespace().getCluster().getClusterName();
         ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
         String projectName = projectEntity.getProjectName();
+        
+        Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
         StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId, projectName, clusterName);
-
+        dto.setProjectIdx(projectName);
         return dto;
     }
 

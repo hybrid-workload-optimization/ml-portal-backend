@@ -30,9 +30,13 @@ import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.service.JobDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.CronJobArgDto;
 import kr.co.strato.portal.workload.model.CronJobDto;
 import kr.co.strato.portal.workload.model.CronJobDtoMapper;
@@ -43,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class CronJobService {
+public class CronJobService extends ProjectAuthorityService {
 	@Autowired
 	CronJobDomainService cronJobDomainService;
 	
@@ -68,6 +72,9 @@ public class CronJobService {
 	@Autowired
 	CronJobRepository cronJobRepository;
 	
+	@Autowired
+	ProjectDomainService projectDomainService;
+	
 	//목록
 	public Page<CronJobDto> getList(PageRequest pageRequest, CronJobArgDto args) {		
 		Page<CronJobEntity> entities=  cronJobRepository.getPageList(pageRequest.of(), args);
@@ -84,12 +91,19 @@ public class CronJobService {
 	}
 	
 	//상세
-	public CronJobDto get(Long idx){
+	public CronJobDto get(Long idx, UserDto loginUser){
 		CronJobEntity entitiy = cronJobDomainService.getById(idx);
-		CronJobDto dto = CronJobDtoMapper.INSTANCE.toDto(entitiy);
+		CronJobDto dto = CronJobDtoMapper.INSTANCE.toDto(entitiy);		
 		
 		NamespaceEntity namespace = entitiy.getNamespaceEntity();
 		Long kubeConfigId = namespace.getCluster().getClusterId();
+		
+		Long clusterIdx = entitiy.getNamespaceEntity().getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 		
 		CronJob cronJob = cronJobAdapterService.retrieve(kubeConfigId, namespace.getName(), dto.getName());
 		if(cronJob != null) {
@@ -131,6 +145,7 @@ public class CronJobService {
 			dto.setInactiveJobs(inactiveJobs);
 			dto.setLastSchedule(DateUtil.convertDateTime(cronJob.getStatus().getLastScheduleTime()));
 		}		
+		dto.setProjectIdx(projectIdx);
 		return dto;
 	}
 	

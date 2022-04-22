@@ -25,6 +25,7 @@ public class JobDto {
 	
 	private Integer active;
 	private Integer succeeded;
+	private Long projectIdx;
 	
 	private List<PodDto.ResListDto> pods;
 	

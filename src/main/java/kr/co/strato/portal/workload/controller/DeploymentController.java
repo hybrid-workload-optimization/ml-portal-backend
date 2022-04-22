@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
 import kr.co.strato.portal.workload.model.DeploymentDto;
 import kr.co.strato.portal.workload.service.DeploymentService;
 
 @RestController
 @RequestMapping("/api/v1/workload")
-public class DeploymentController {
+public class DeploymentController extends CommonController {
 
 	@Autowired
 	DeploymentService deploymentService;
@@ -36,7 +37,7 @@ public class DeploymentController {
 	@GetMapping("/deployments/{idx}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<DeploymentDto> getDeployment(@PathVariable(name = "idx") Long idx) {
-		DeploymentDto result = deploymentService.get(idx);
+		DeploymentDto result = deploymentService.get(idx, getLoginUser());
 		return new ResponseWrapper<DeploymentDto>(result);
 	}
 	

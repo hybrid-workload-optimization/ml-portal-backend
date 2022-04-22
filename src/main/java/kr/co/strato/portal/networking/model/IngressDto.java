@@ -62,6 +62,7 @@ public class IngressDto {
 		private Long ingressControllerIdx;
 		private List<RuleList> ruleList;
 		private String clusterName;
+		private Long projectIdx;
 	}
 
 	@Getter

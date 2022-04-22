@@ -16,30 +16,27 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
-import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import kr.co.strato.adapter.k8s.daemonset.service.DaemonSetAdapterService;
-import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
 import kr.co.strato.domain.daemonset.service.DaemonSetDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
-import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
-import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.DaemonSetDto;
 import kr.co.strato.portal.workload.model.DaemonSetDtoMapper;
 import kr.co.strato.portal.workload.model.PodDto;
-import kr.co.strato.portal.workload.model.ReplicaSetDto;
-import kr.co.strato.portal.workload.model.ReplicaSetDtoMapper;
-import kr.co.strato.portal.workload.model.ReplicaSetDto.Search;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DaemonSetService {
+public class DaemonSetService extends ProjectAuthorityService {
 
 	@Autowired
 	DaemonSetAdapterService daemonSetAdapterService;
@@ -55,6 +52,9 @@ public class DaemonSetService {
 	
 	@Autowired
 	PodService podService;
+	
+	@Autowired
+	ProjectDomainService projectDomainService;
 	
 	/**
 	 * Daemon Set 목록 조회
@@ -133,11 +133,18 @@ public class DaemonSetService {
 	 * @return
 	 * @throws Exception
 	 */
-	public DaemonSetDto.Detail getDaemonSet(Long daemonSetIdx) throws Exception {
+	public DaemonSetDto.Detail getDaemonSet(Long daemonSetIdx, UserDto loginUser) throws Exception {
 		DaemonSetEntity daemonSetEntity = daemonSetDomainService.get(daemonSetIdx);
 		Long clusterId			= daemonSetEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName	= daemonSetEntity.getNamespace().getName();
 		String daemonSetName	= daemonSetEntity.getDaemonSetName();
+		
+		Long clusterIdx = daemonSetEntity.getNamespace().getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
 		
 		// k8s - get daemon set
 		DaemonSet daemonSet = daemonSetAdapterService.get(clusterId, namespaceName, daemonSetName);
@@ -152,7 +159,7 @@ public class DaemonSetService {
 		ArrayList<PodDto.ResListDto> pods = (ArrayList)podService.getPodOwnerPodList(clusterId, searchParam);
 		
 		result.setPods(pods);
-		
+		result.setProjectIdx(projectIdx);
 		return result;
 	}
 	

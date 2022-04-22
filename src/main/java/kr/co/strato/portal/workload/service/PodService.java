@@ -23,25 +23,28 @@ import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDtoMapper;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.PodDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class PodService {
+public class PodService extends ProjectAuthorityService {
 	@Autowired
     private ClusterDomainService clusterDomainService;
 
@@ -59,6 +62,9 @@ public class PodService {
     
     @Autowired
     private NamespaceDomainService namespaceDomainService;
+    
+    @Autowired
+    private ProjectDomainService projectDomainService;
     
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createPod(PodDto.ReqCreateDto reqCreateDto){
@@ -208,11 +214,21 @@ public class PodService {
     
     
 
-    public PodDto.ResDetailDto getPodDetail(Long podId){
+    public PodDto.ResDetailDto getPodDetail(Long podId, UserDto loginUser){
     	// get pod entity
     	PodEntity entity = podDomainService.get(podId);
     	
+    	
+    	Long clusterIdx = entity.getNamespace().getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
+    	
+    	
     	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity);
+    	dto.setProjectIdx(projectIdx);
     	return dto;
     }
     

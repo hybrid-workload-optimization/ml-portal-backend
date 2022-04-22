@@ -18,6 +18,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.work.model.WorkHistoryDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
@@ -32,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class DaemonSetController {
+public class DaemonSetController extends CommonController {
 
 	@Autowired
 	DaemonSetService daemonSetService;
@@ -131,7 +132,7 @@ public class DaemonSetController {
         workMetadata.put("daemonSetIdx", daemonSetIdx);
         
         try {
-        	result = daemonSetService.getDaemonSet(daemonSetIdx);
+        	result = daemonSetService.getDaemonSet(daemonSetIdx, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();

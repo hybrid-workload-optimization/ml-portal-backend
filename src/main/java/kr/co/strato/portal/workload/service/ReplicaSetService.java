@@ -21,10 +21,14 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.ReplicaSetDto;
 import kr.co.strato.portal.workload.model.ReplicaSetDto.Search;
@@ -33,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ReplicaSetService {
+public class ReplicaSetService extends ProjectAuthorityService {
 
 	@Autowired
 	ReplicaSetAdapterService replicaSetAdapterService;
@@ -49,6 +53,9 @@ public class ReplicaSetService {
 	
 	@Autowired
 	PodService podService;
+	
+	@Autowired
+	ProjectDomainService projectDomainService;
 	
 	/**
 	 * Replica Set 목록 조회
@@ -91,11 +98,20 @@ public class ReplicaSetService {
 	 * @return
 	 * @throws Exception
 	 */
-	public ReplicaSetDto.Detail getReplicaSet(Long replicaSetIdx) throws Exception {
+	public ReplicaSetDto.Detail getReplicaSet(Long replicaSetIdx, UserDto loginUser) throws Exception {
 		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
 		Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName	= replicaSetEntity.getNamespace().getName();
 		String replicaSetName	= replicaSetEntity.getReplicaSetName();
+		
+		
+		Long clusterIdx = replicaSetEntity.getNamespace().getCluster().getClusterIdx();
+		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		Long projectIdx = projectEntity.getId();
+		
+		//메뉴 접근권한 채크.
+		chechAuthority(projectIdx, loginUser);
+		
 		
 		// k8s - get replica set
 		ReplicaSet replicaSet = replicaSetAdapterService.get(clusterId, namespaceName, replicaSetName);
@@ -110,7 +126,7 @@ public class ReplicaSetService {
 		ArrayList<PodDto.ResListDto> pods = (ArrayList)podService.getPodOwnerPodList(clusterId, searchParam);
 		
 		result.setPods(pods);
-		
+		result.setProjectIdx(projectIdx);
 		return result;
 	}
 

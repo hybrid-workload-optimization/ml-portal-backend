@@ -17,13 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.networking.model.IngressDto;
 import kr.co.strato.portal.networking.service.IngressService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class IngressController {
+public class IngressController extends CommonController {
 
 	@Autowired
 	private IngressService ingressService;
@@ -117,7 +115,7 @@ public class IngressController {
 	@GetMapping("/api/v1/networking/ingress/{id:.+}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<IngressDto.ResDetailDto> getIngressDetail(@PathVariable("id") Long id) {
-		IngressDto.ResDetailDto resBody = ingressService.getIngressDetail(id);
+		IngressDto.ResDetailDto resBody = ingressService.getIngressDetail(id, getLoginUser());
 
 		return new ResponseWrapper<>(resBody);
 	}

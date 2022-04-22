@@ -49,6 +49,7 @@ private Long projectIdx;
 		private int runningPod;
 		private int desiredPod;
 		private Long clusterId;
+		private Long projectIdx;
 		
 		private ArrayList<PodDto.ResListDto> pods;
 	}
