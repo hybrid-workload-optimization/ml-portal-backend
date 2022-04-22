@@ -18,29 +18,31 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.config.model.ConfigMapDto;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.service.ConfigMapService;
 import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
+import kr.co.strato.portal.work.model.WorkHistoryDto;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu3;
 import kr.co.strato.portal.work.model.WorkHistory.WorkResult;
-import kr.co.strato.portal.work.model.WorkHistoryDto;
 import kr.co.strato.portal.work.service.WorkHistoryService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-public class PersistentVolumeClaimController extends CommonController {
+public class ConfigMapController extends CommonController {
 
 	@Autowired
-	PersistentVolumeClaimService persistentVolumeClaimService;
+	ConfigMapService configMapService;
 	
 	@Autowired
 	WorkHistoryService workHistoryService;
 	
-	@PostMapping("/api/v1/config/persistentVolumeClaim")
-    public ResponseWrapper<List<Long>> registerPersistentVolumeClaim(@RequestBody PersistentVolumeClaimDto persistentVolumeClaimDto) {
+	@PostMapping("/api/v1/config/configMap")
+    public ResponseWrapper<List<Long>> registerConfigMap(@RequestBody ConfigMapDto configMapDto) {
         List<Long> result = null;
         
         String workTarget					= null;
@@ -48,10 +50,10 @@ public class PersistentVolumeClaimController extends CommonController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("persistentVolumeClaimDto", persistentVolumeClaimDto);
+        workMetadata.put("configMapDto", configMapDto);
         
         try {
-        	result = persistentVolumeClaimService.registerPersistentVolumeClaim(persistentVolumeClaimDto);
+        	result = configMapService.registerConfigMap(configMapDto);
 		} catch (Exception e) {
 			e.printStackTrace();
 			workResult		= WorkResult.FAIL;
@@ -64,7 +66,7 @@ public class PersistentVolumeClaimController extends CommonController {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
 						.workMenu1(WorkMenu1.CONFIG)
-						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
+						.workMenu2(WorkMenu2.CONFIG_MAP)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.INSERT)
 						.target(workTarget)
@@ -80,9 +82,9 @@ public class PersistentVolumeClaimController extends CommonController {
         return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/config/persistentVolumeClaims")
-    public ResponseWrapper<Page<PersistentVolumeClaimDto.List>> getPersistentVolumeClaimList(PageRequest pageRequest, PersistentVolumeClaimDto.Search search) {
-        Page<PersistentVolumeClaimDto.List> results = null;
+	@GetMapping("/api/v1/config/configMap")
+    public ResponseWrapper<Page<ConfigMapDto.List>> getConfigMapList(PageRequest pageRequest, ConfigMapDto.Search search) {
+        Page<ConfigMapDto.List> results = null;
         
         String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();
@@ -90,7 +92,7 @@ public class PersistentVolumeClaimController extends CommonController {
         String workMessage					= "";
         
         try {
-        	results = persistentVolumeClaimService.getPersistentVolumeClaimList(pageRequest.of(), search);
+        	results = configMapService.getConfigMapList(pageRequest.of(), search);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -102,7 +104,7 @@ public class PersistentVolumeClaimController extends CommonController {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
 						.workMenu1(WorkMenu1.CONFIG)
-						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
+						.workMenu2(WorkMenu2.CONFIG_MAP)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.LIST)
 						.target(workTarget)
@@ -118,19 +120,19 @@ public class PersistentVolumeClaimController extends CommonController {
         return new ResponseWrapper<>(results);
     }
 	
-	@GetMapping("/api/v1/config/persistentVolumeClaims/{persistentVolumeClaimIdx}")
-    public ResponseWrapper<PersistentVolumeClaimDto.Detail> getPersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx) {
-		PersistentVolumeClaimDto.Detail result = null;
+	@GetMapping("/api/v1/config/configMap/{configMapIdx}")
+    public ResponseWrapper<ConfigMapDto.Detail> getConfigMap(@PathVariable(required = true) Long configMapIdx) {
+		ConfigMapDto.Detail result = null;
         
 		String workTarget					= null;
         Map<String, Object> workMetadata	= new HashMap<>();
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("persistentVolumeClaimIdx", persistentVolumeClaimIdx);
+        workMetadata.put("configMapIdx", configMapIdx);
         
         try {
-        	result = persistentVolumeClaimService.getPersistentVolumeClaim(persistentVolumeClaimIdx, getLoginUser());
+        	result = configMapService.getConfigMap(configMapIdx, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -158,12 +160,12 @@ public class PersistentVolumeClaimController extends CommonController {
         return new ResponseWrapper<>(result);
     }
 	
-	@GetMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}/yaml")
-    public ResponseWrapper<String> getPersistentVolumeClaimYaml(@PathVariable(required = true) Long persistentVolumeClaimIdx) {
+	@GetMapping("/api/v1/config/configMap/{configMapIdx}/yaml")
+    public ResponseWrapper<String> getConfigMapYaml(@PathVariable(required = true) Long configMapIdx) {
 		String result = null;
         
         try {
-        	result = persistentVolumeClaimService.getPersistentVolumeClaimYaml(persistentVolumeClaimIdx);
+        	result = configMapService.getConfigMapYaml(configMapIdx);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new PortalException(e.getMessage());
@@ -172,8 +174,8 @@ public class PersistentVolumeClaimController extends CommonController {
         return new ResponseWrapper<>(result);
     }
 	
-	@PutMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}")
-    public ResponseWrapper<List<Long>> updatePersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx, @RequestBody PersistentVolumeClaimDto persistentVolumeClaimDto) {
+	@PutMapping("/api/v1/config/config/{configMapIdx}")
+    public ResponseWrapper<List<Long>> updateConfigMap(@PathVariable(required = true) Long configMapIdx, @RequestBody ConfigMapDto configMapDto) {
 		List<Long> result = null;
         
         String workTarget					= null;
@@ -181,11 +183,11 @@ public class PersistentVolumeClaimController extends CommonController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("persistentVolumeClaimIdx", persistentVolumeClaimIdx);
-        workMetadata.put("persistentVolumeClaimDto", persistentVolumeClaimDto);
+        workMetadata.put("configMapIdx", configMapIdx);
+        workMetadata.put("configMapDto", configMapDto);
         
         try {
-        	result = persistentVolumeClaimService.updatePersistentVolumeClaim(persistentVolumeClaimIdx, persistentVolumeClaimDto);
+        	result = configMapService.updatePersistentVolumeClaim(configMapIdx, configMapDto);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -197,7 +199,7 @@ public class PersistentVolumeClaimController extends CommonController {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
 						.workMenu1(WorkMenu1.CONFIG)
-						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
+						.workMenu2(WorkMenu2.CONFIG_MAP)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.UPDATE)
 						.target(workTarget)
@@ -213,8 +215,8 @@ public class PersistentVolumeClaimController extends CommonController {
         return new ResponseWrapper<>(result);
     }
 	
-	@DeleteMapping("/api/v1/config/persistentVolumeClaim/{persistentVolumeClaimIdx}")
-    public ResponseWrapper<Boolean> deletePersistentVolumeClaim(@PathVariable(required = true) Long persistentVolumeClaimIdx) {
+	@DeleteMapping("/api/v1/config/configMap/{configMapIdx}")
+    public ResponseWrapper<Boolean> deleteConfigMap(@PathVariable(required = true) Long configMapIdx) {
 		boolean result = true;
 		
 		String workTarget					= null;
@@ -222,10 +224,10 @@ public class PersistentVolumeClaimController extends CommonController {
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
         
-        workMetadata.put("persistentVolumeClaimIdx", persistentVolumeClaimIdx);
+        workMetadata.put("configMapIdx", configMapIdx);
 
         try {
-        	persistentVolumeClaimService.deletePersistentVolumeClaim(persistentVolumeClaimIdx);
+        	configMapService.deletePersistentVolumeClaim(configMapIdx);
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -237,7 +239,7 @@ public class PersistentVolumeClaimController extends CommonController {
 				workHistoryService.registerWorkHistory(
 						WorkHistoryDto.builder()
 						.workMenu1(WorkMenu1.CONFIG)
-						.workMenu2(WorkMenu2.PERSISTENT_VOLUME_CLAIM)
+						.workMenu2(WorkMenu2.CONFIG_MAP)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.DELETE)
 						.target(workTarget)

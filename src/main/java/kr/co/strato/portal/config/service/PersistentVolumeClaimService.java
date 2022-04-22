@@ -125,7 +125,7 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
 	/**
 	 * Persistent Volume Claim 상세 조회
 	 * 
-	 * @param daemonSetIdx
+	 * @param persistentVolumeClaimIdx
 	 * @return
 	 * @throws Exception
 	 */
@@ -159,7 +159,6 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
 	 * @throws Exception
 	 */
 	public String getPersistentVolumeClaimYaml(Long persistentVolumeClaimIdx) throws Exception {
-System.out.println("persistentVolumeClaimIdx === " + persistentVolumeClaimIdx);
 		PersistentVolumeClaimEntity persistentVolumeClaimEntity = persistentVolumeClaimDomainService.get(persistentVolumeClaimIdx);
 		Long clusterId					= persistentVolumeClaimEntity.getNamespace().getCluster().getClusterId();
 		String namespaceName			= persistentVolumeClaimEntity.getNamespace().getName();
@@ -173,8 +172,8 @@ System.out.println("persistentVolumeClaimIdx === " + persistentVolumeClaimIdx);
 	/**
 	 * Persistent Volume Claim 수정
 	 * 
-	 * @param daemonSetIdx
-	 * @param daemonSetDto
+	 * @param persistentVolumeClaimIdx
+	 * @param persistentVolumeClaimDto
 	 * @return
 	 * @throws Exception
 	 */
@@ -184,10 +183,10 @@ System.out.println("persistentVolumeClaimIdx === " + persistentVolumeClaimIdx);
 		PersistentVolumeClaimEntity persistentVolumeClaim = persistentVolumeClaimDomainService.get(persistentVolumeClaimIdx);
 		ClusterEntity cluster = persistentVolumeClaim.getNamespace().getCluster();
 		
-		// k8s - post replica set
+		// k8s - post persistent volume claim
 		List<PersistentVolumeClaim> persistentVolumeClaimList = persistentVolumeClaimAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(persistentVolumeClaimDto.getYaml()), "UTF-8"));
 		
-		// db - save replica set
+		// db - save persistent volume claim
 		List<Long> result = persistentVolumeClaimList.stream()
 				.map(d -> {
 					PersistentVolumeClaimEntity persistentVolumeClaimEntity = null;
@@ -211,7 +210,7 @@ System.out.println("persistentVolumeClaimIdx === " + persistentVolumeClaimIdx);
 	/**
 	 * Persistent Volume Claim 삭제
 	 * 
-	 * @param daemonSetIdx
+	 * @param persistentVolumeClaimIdx
 	 * @throws Exception
 	 */
 	public void deletePersistentVolumeClaim(Long persistentVolumeClaimIdx) throws Exception {
