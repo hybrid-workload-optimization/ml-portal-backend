@@ -15,10 +15,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.ObjectReference;
-import io.fabric8.kubernetes.api.model.batch.CronJob;
-import io.fabric8.kubernetes.api.model.batch.CronJobSpec;
-import io.fabric8.kubernetes.api.model.batch.CronJobStatus;
-import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
+import io.fabric8.kubernetes.api.model.batch.v1.CronJobSpec;
+import io.fabric8.kubernetes.api.model.batch.v1.CronJobStatus;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import kr.co.strato.adapter.k8s.cronjob.service.CronJobAdapterService;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
