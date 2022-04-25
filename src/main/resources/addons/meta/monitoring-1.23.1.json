@@ -1,0 +1,92 @@
+{
+  "addonId": "1",
+  "addonType": "cluster-monitoring",
+  "name": "Cluster monitoring",
+  "version": "v1.0",
+  "desc": "Provides cluster, node, and pod monitoring function using Grafana.",
+  "iconPath": "/icons/monitoring.svg",
+  "adapter": "kr.co.strato.portal.addon.adapter.ClusterMonitoringAdapter",
+  "requiredSpec": {
+  	"minKubeletVersion": "1.23.1",
+    "maxKubeletVersion": "1.23.1",
+    "hwSpec": "4Core 8GB 50GB 2Node"
+  },
+  "yamls": [
+    "addons/monitoring-1.23.1/metrics-server.yaml",
+    "addons/monitoring-1.23.1/monitoring-namespace.yaml",
+    "addons/monitoring-1.23.1/prometheus-cluster-role.yaml",
+    "addons/monitoring-1.23.1/prometheus-config-map.yaml",
+    "addons/monitoring-1.23.1/prometheus-deployment.yaml",
+    "addons/monitoring-1.23.1/prometheus-node-exporter.yaml",
+    "addons/monitoring-1.23.1/prometheus-svc.yaml",    
+    "addons/monitoring-1.23.1/kube-state-metrics-cluster-role.yaml",
+    "addons/monitoring-1.23.1/kube-state-metrics-cluster-role-binding.yaml",
+    "addons/monitoring-1.23.1/kube-state-metrics-deployment.yaml",
+    "addons/monitoring-1.23.1/kube-state-metrics-service.yaml",
+    "addons/monitoring-1.23.1/kube-state-metrics-service-account.yaml",   
+    "addons/monitoring-1.23.1/grafana-config-map.yaml",
+    "addons/monitoring-1.23.1/grafana-account-secret.yaml",
+    "addons/monitoring-1.23.1/grafana-deployment.yaml"
+  ],
+  "packages": [
+    {
+      "name": "grafana",
+      "desc": "그래프를 이용한 Cluster monitoring 화면 제공.",
+      "version": "2.34.0",
+      "image": "grafana/grafana:8.4.3",
+      "endpoints": [
+        {
+          "name": "grafana-dashboard",
+          "uri": "/d/4b545447f/cluster-monitoring?orgId=1",
+          "type": "NodePort",
+          "namespace": "monitoring",
+          "serviceName": "grafana"
+        }
+      ]      
+    },
+    {
+      "name": "prometheus",
+      "desc": "Cluster, Pod, Node Metric 수집",
+      "version": "8.4.3",
+      "image": "prom/prometheus:v2.34.0"
+    },
+    {
+      "name": "node-exporter",
+      "version": "1.3.1",
+      "image": "prom/node-exporter:v1.3.1"
+    },
+    {
+      "name": "metrics-server",
+      "version": "1.3.1",
+      "image": "k8s.gcr.io/metrics-server/metrics-server:v0.6.1"
+    },
+    {
+      "name": "kube-state-metrics",
+      "version": "2.4.2",
+      "image": "k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.4.2"
+    }
+  ],
+  "parameters": [  
+    {
+      "label": "Grafana User ID",
+      "name": "grafana-admin-user",
+      "type": "string",
+      "required": true,
+      "defaultValue": "admin"
+    },
+    {
+      "label": "Grafana User Password",
+      "name": "grafana-admin-password",
+      "type": "string",
+      "required": true,
+      "defaultValue": "admin"
+    },
+    {
+      "label": "Grafana Node Port",
+      "name": "grafana-nodePort",
+      "type": "integer",
+      "required": true,
+      "defaultValue": 30004
+    } 
+  ]
+}
