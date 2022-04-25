@@ -313,7 +313,7 @@ public class PortalProjectService {
         	
             // Project Manager 정보 확인 및 수정
         	List<ProjectUserDto> userList = param.getUserList();
-System.out.println("User Info 1 === " + userList.size());
+//System.out.println("User Info 1 === " + userList.size());
 System.out.println("User Info 2 === " + userList);        	
         	if(userList != null) {
         		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
@@ -354,6 +354,7 @@ System.out.println("old === " + pmUser.getUserId());
             
             result = true;
     	} catch(Exception e) {
+    		e.printStackTrace();
     		throw new UpdateProjectFailException();
     	}
     	
