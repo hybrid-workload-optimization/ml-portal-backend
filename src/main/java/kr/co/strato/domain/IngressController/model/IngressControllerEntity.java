@@ -1,4 +1,4 @@
-package kr.co.strato.domain.ingress.model;
+package kr.co.strato.domain.IngressController.model;
 
 import java.time.LocalDateTime;
 
@@ -37,8 +37,17 @@ public class IngressControllerEntity {
 	@Column(name = "ingress_controller_name")
 	private String name;
 	
-	@Column(name = "address")
-	private String address;
+	@Column(name = "replicas")
+	private Integer replicas;
+	
+	@Column(name = "service_type")
+	private String serviceType;
+	
+	@Column(name = "external_ip")
+	private String externalIp;
+	
+	@Column(name = "port")
+	private String port;
 
 	@Column(name = "ingress_class")
 	private String ingressClass;

@@ -17,7 +17,7 @@ public interface IngressDtoMapper {
 	@Mapping(target = "namespaceIdx" , source = "namespace.id")
 	@Mapping(target = "namespace" , source = "namespace.name")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
-	@Mapping(target = "address" , source = "ingressController.address")
+	@Mapping(target = "address" , source = "ingressController.externalIp")
 	@Mapping(target = "host" , source = "ingressController.name")
 	@Mapping(target = "clusterName" , source = "namespace.cluster.clusterName")
 	public IngressDto.ResListDto toResListDto(IngressEntity ingressEntity);
@@ -27,7 +27,7 @@ public interface IngressDtoMapper {
 	@Mapping(target = "clusterId" , source = "namespace.cluster.clusterId")
 	@Mapping(target = "clusterIdx" , source = "namespace.cluster.clusterIdx")
 	@Mapping(target = "ingressControllerIdx" , source = "ingressController.id")
-	@Mapping(target = "address" , source = "ingressController.address")
+	@Mapping(target = "address" , source = "ingressController.externalIp")
 	@Mapping(target = "host" , source = "ingressController.name")
 	@Mapping(target = "clusterName" , source = "namespace.cluster.clusterName")
 	public IngressDto.ResDetailDto toResDetailDto(IngressEntity ingressEntity);

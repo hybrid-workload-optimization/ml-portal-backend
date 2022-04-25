@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.domain.ingress.model.IngressControllerEntity;
+import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
+import kr.co.strato.domain.IngressController.repository.IngressControllerRepository;
 import kr.co.strato.domain.ingress.model.IngressEntity;
-import kr.co.strato.domain.ingress.repository.IngressControllerRepository;
 import kr.co.strato.domain.ingress.repository.IngressRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;

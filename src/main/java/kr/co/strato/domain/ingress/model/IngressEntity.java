@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
