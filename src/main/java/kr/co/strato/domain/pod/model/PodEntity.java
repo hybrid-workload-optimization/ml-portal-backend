@@ -90,8 +90,6 @@ public class PodEntity {
     
     private String kind;
     
-    private String ownerName;
-    
     @OneToMany(mappedBy = "pod", cascade = CascadeType.REMOVE)
     private List<PodStatefulSetEntity> podStatefulSet;
     

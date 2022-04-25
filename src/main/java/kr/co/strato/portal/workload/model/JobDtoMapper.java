@@ -27,7 +27,7 @@ public interface JobDtoMapper {
 		@Mapping(source = "image", target = "image"),
 		@Mapping(source = "label", target = "label", qualifiedByName = "dataToMap"),
 		@Mapping(source = "createdAt", target = "createdAt"),
-		@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName")
+		@Mapping(source = "namespaceEntity.cluster.clusterName", target = "clusterName")
 	})
 	public JobDto toDto(JobEntity entity);
 
