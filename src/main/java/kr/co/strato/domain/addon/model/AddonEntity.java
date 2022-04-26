@@ -1,7 +1,5 @@
 package kr.co.strato.domain.addon.model;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -39,7 +37,7 @@ public class AddonEntity {
 	private String installUserId;
 	
 	@Column(name = "install_at")
-	private LocalDateTime installAt;
+	private String installAt;
 	
 	/**
 	 * PK를 생성하여 리턴.

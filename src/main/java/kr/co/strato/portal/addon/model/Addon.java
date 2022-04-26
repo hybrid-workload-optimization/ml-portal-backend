@@ -9,7 +9,7 @@ import kr.co.strato.domain.addon.model.AddonEntity;
 import lombok.Data;
 
 @Data
-public class Addon {
+public class Addon{
 	private String addonId;	
 	private String addonType;
 	private String name;
@@ -29,7 +29,7 @@ public class Addon {
 	
 	private boolean installed;
 	private String installUserId;
-	private LocalDateTime installAt;
+	private String installAt;
 	
 	/**
 	 * Entity 정보 셋.
