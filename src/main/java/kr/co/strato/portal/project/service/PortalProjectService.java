@@ -378,42 +378,49 @@ System.out.println("old === " + pmUser.getUserId());
     	try {
             //Project Cluster 삭제
             //projectClusterDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
-    		List<Long> duplicateIdxList = new ArrayList<Long>();
-    		List<ProjectClusterDto> clusterList = projectClusterDomainService.getProjectClusterList(param.getProjectIdx());
     		List<ProjectClusterDto> reqClusterList = param.getClusterList();
-    		for(ProjectClusterDto nowCluster : clusterList) {
-    			for(ProjectClusterDto reqCluster : reqClusterList) {
-    				if(nowCluster.getClusterIdx().equals(reqCluster.getClusterIdx())) {
-    					duplicateIdxList.add(reqCluster.getClusterIdx());
-    					break;
-    				}
-    			}
-    		}
     		
-    		if(duplicateIdxList != null && duplicateIdxList.size() > 0) {
-    			/*for(Long idx : duplicateIdxList) {
-    				System.out.println("clusterIdx ===" + idx);
-    			}*/
-    			projectClusterDomainService.deleteRequestProjectCluster(param.getProjectIdx(), duplicateIdxList);
-    		}
-            
-            //Project Cluster 등록
-    		reqClusterList = param.getClusterList();
-        	for(ProjectClusterDto cluster : reqClusterList) {
-        		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
-        		projectClusterBuiler.projectIdx(param.getProjectIdx());
-        		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
-        		
-        		ProjectClusterEntity selectCluster = projectClusterDomainService.getProjectCluster(param.getProjectIdx(), cluster.getClusterIdx());
-        		if(selectCluster != null) {
-        			System.out.println("selectCluster === " + selectCluster.getClusterIdx());
-        			continue;
+    		System.out.println("select cluster === " + reqClusterList);    		
+    		
+    		if(!reqClusterList.isEmpty()) {
+    			List<Long> duplicateIdxList = new ArrayList<Long>();
+        		List<ProjectClusterDto> clusterList = projectClusterDomainService.getProjectClusterList(param.getProjectIdx());
+        		for(ProjectClusterDto nowCluster : clusterList) {
+        			for(ProjectClusterDto reqCluster : reqClusterList) {
+        				if(nowCluster.getClusterIdx().equals(reqCluster.getClusterIdx())) {
+        					duplicateIdxList.add(reqCluster.getClusterIdx());
+        					break;
+        				}
+        			}
         		}
         		
-        		//ProjectClusterDTO -> ProjectClusterEntity
-                ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
-                projectClusterDomainService.createProjectCluster(projectClusterEntity);
-        	}
+        		if(duplicateIdxList != null && duplicateIdxList.size() > 0) {
+        			/*for(Long idx : duplicateIdxList) {
+        				System.out.println("clusterIdx ===" + idx);
+        			}*/
+        			projectClusterDomainService.deleteRequestProjectCluster(param.getProjectIdx(), duplicateIdxList);
+        		}
+                
+                //Project Cluster 등록
+        		reqClusterList = param.getClusterList();
+            	for(ProjectClusterDto cluster : reqClusterList) {
+            		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
+            		projectClusterBuiler.projectIdx(param.getProjectIdx());
+            		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
+            		
+            		ProjectClusterEntity selectCluster = projectClusterDomainService.getProjectCluster(param.getProjectIdx(), cluster.getClusterIdx());
+            		if(selectCluster != null) {
+            			System.out.println("selectCluster === " + selectCluster.getClusterIdx());
+            			continue;
+            		}
+            		
+            		//ProjectClusterDTO -> ProjectClusterEntity
+                    ProjectClusterEntity projectClusterEntity = ProjectClusterDtoMapper.INSTANCE.toEntity(projectClusterBuiler.build());
+                    projectClusterDomainService.createProjectCluster(projectClusterEntity);
+            	}
+    		} else {
+    			projectClusterDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
+    		}
         	
         	result = true;
     	} catch(Exception e) {
