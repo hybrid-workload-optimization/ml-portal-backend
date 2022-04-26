@@ -78,7 +78,7 @@ public class EmailService {
 				message.setSubject(title);
 
 				// 메일 본문
-				message.setText(contents);
+				message.setContent(contents, "text/html; charset=euc-kr");
 
 				// 메일 전송
 				Transport.send(message);

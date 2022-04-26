@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +22,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.SsoConnectionException;
+import kr.co.strato.global.util.FileUtils;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.service.AccessService;
@@ -33,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class UserService {
+	
+	private static final String INIT_PASSWORD_TEMPLATE_PATH = "classpath:/user/mail/init-password.html";
 	
 	@Autowired
 	UserDomainService userDomainService;
@@ -60,6 +67,21 @@ public class UserService {
 	
 	@Value("${portal.backend.service.url}")
 	String backUrl;
+	
+	String INIT_PASSWORD_TEMPLATE;
+	
+	
+	@PostConstruct
+	public void init() {
+		try {
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+			Resource res = resolver.getResource(INIT_PASSWORD_TEMPLATE_PATH);
+			INIT_PASSWORD_TEMPLATE = FileUtils.readLine(res.getInputStream());
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
+	}
 	
 	//등록
 	public String postUser(UserDto param) {
@@ -96,7 +118,7 @@ public class UserService {
 		
 		
 		String title = "PaaS Portal 비밀번호 재설정";
-		String contents = genResetPasswordContents(requestCode);
+		String contents = genResetPasswordContents(email, requestCode);
 		emailService.sendMail(email, title, contents);
 	}
 	
@@ -317,13 +339,16 @@ public class UserService {
 	 * @param requestCode
 	 * @return
 	 */
-	private String genResetPasswordContents(String requestCode) {
+	private String genResetPasswordContents(String toEmail, String requestCode) {
 		String url = frontUrl;
 		if(!url.endsWith("/")) {
 			url += "/";
 		}		
 		url += "#/change-password?requestCode="+requestCode;
-		return url;
+		
+		
+		String contents = INIT_PASSWORD_TEMPLATE.replace("{E-MAIL}", toEmail).replace("{LINK}", url);
+		return contents;
 	}
 	
 
