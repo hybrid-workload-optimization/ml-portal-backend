@@ -42,190 +42,179 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class AddonService {
-	
+
 	private static final String ADDON_PATH = "classpath:/addons/meta/*.json";
-	
+
 	@Autowired
 	private AddonDomainService addonDomainService;
-	
+
 	@Autowired
-    private ClusterDomainService clusterDomainService;
-	
+	private ClusterDomainService clusterDomainService;
+
 	@Autowired
 	private ServiceAdapterService serviceAdapterService;
-	
+
 	@Autowired
-	private NodeAdapterService nodeAdapterService;	
+	private NodeAdapterService nodeAdapterService;
 
 	@Autowired
 	private CommonProxy commonProxy;
-	
+
 	private static Map<String, Addon> addons;
-	
 
 	/**
 	 * Kubelet 버전에 맞는 Addon 리스트 반환.
+	 * 
 	 * @param kubeConfigId
 	 * @return
 	 * @throws IOException
 	 */
 	public List<Addon> getAddons(Long clusterIdx) throws IOException {
-		ClusterEntity clusterEntity =  clusterDomainService.get(clusterIdx);		
-		
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+
 		String v = clusterEntity.getProviderVersion();
 		Version kubeletVersion = new Version(v);
-		
+
 		List<Addon> list = new ArrayList<>();
 		Collection<Addon> addons = getAddons().values();
-		for(Addon addon : addons) {
+		for (Addon addon : addons) {
 			boolean isSupported = true;
-			
-			
+
 			String minVersion = addon.getRequiredSpec().getMinKubeletVersion();
 			String maxVersion = addon.getRequiredSpec().getMaxKubeletVersion();
-			
-			if(minVersion != null) {
+
+			if (minVersion != null) {
 				isSupported = kubeletVersion.compareTo(new Version(minVersion)) != -1;
 			}
-			
-			if(maxVersion != null) {
+
+			if (maxVersion != null) {
 				isSupported = kubeletVersion.compareTo(new Version(minVersion)) != 1;
 			}
-			
-			
-			if(isSupported) {
+
+			if (isSupported) {
 				list.add(addon);
 			}
 		}
-		
-		if(list.size() > 0) {
+
+		if (list.size() > 0) {
 			List<AddonEntity> entitys = addonDomainService.getListByClusterId(clusterIdx);
 			Map<String, AddonEntity> addonMap = entitys.stream()
-					.collect(Collectors.toMap(
-							AddonEntity::getAddonId,
-				    		Function.identity()));
-			
-			list.stream().forEach(
-					addon -> addon.setAddonEntity(addonMap.get(addon.getAddonId())));
+					.collect(Collectors.toMap(AddonEntity::getAddonId, Function.identity()));
+
+			list.stream().forEach(addon -> addon.setAddonEntity(addonMap.get(addon.getAddonId())));
 		}
 		log.info("Addon list call. clusterIdx: {}", clusterIdx);
 		log.info("Addon list size: {}", list.size());
 		return list;
 	}
-	
+
 	/**
 	 * Addon 디테일 정보 반환.
+	 * 
 	 * @param addonId
 	 * @return
 	 * @throws IOException
 	 */
 	public Addon getAddon(Long clusterIdx, String addonId) throws IOException {
 		Long kubeConfigId = getKubeConfigId(clusterIdx);
-		
-		Addon addon = getAddons().get(addonId);	
-		if(addon == null) {
+		Addon addon = getAddons().get(addonId);
+		if (addon == null) {
 			log.error("Addon not found. - addonId: {}", addonId);
 			return null;
 		}
-		
+
 		AddonAdapter adapter = getAdapter(addon);
-		if(adapter != null) {
-			//상세 정보 셋
+		if (adapter != null) {
+			// 상세 정보 셋
 			adapter.setDetails(this, kubeConfigId, addon);
 		}
-		
+
 		AddonEntity entity = addonDomainService.getEntity(clusterIdx, addonId);
 		addon.setAddonEntity(entity);
-		
+
 		return addon;
-		
+
 	}
-	
+
 	/**
 	 * Addon 설치
+	 * 
 	 * @param kubeConfigId
 	 * @param addonId
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean installAddon(Long clusterIdx, String addonId, Map<String, Object> parameters, String userName) throws IOException {
+	public boolean installAddon(Long clusterIdx, String addonId, Map<String, Object> parameters, String userName)
+			throws IOException {
 
 		Addon addon = getAddon(clusterIdx, addonId);
-		if(addon == null) {
+		if (addon == null) {
 			return false;
 		}
-		
+
 		Long kubeConfigId = getKubeConfigId(clusterIdx);
-		
+
 		log.info("Addon install start. - KubeConfigId: {}", kubeConfigId);
 		log.info("Addon install start. - addonId: {}", addonId);
 		log.info("Addon install start. - addon name: {}", addon.getName());
-		
-		
+
 		List<String> yamls = addon.getYamls();
 		List<String> result = new ArrayList<>();
 		AddonAdapter adapter = getAdapter(addon);
-		
+
 		KubernetesClient client = new DefaultKubernetesClient();
 		boolean isOk = true;
-		for(String yamlPath : yamls) {
+		for (String yamlPath : yamls) {
 			ClassPathResource resource = new ClassPathResource(yamlPath);
 			InputStream is = resource.getInputStream();
-			
+
 			List<HasMetadata> applyList = new ArrayList<>();
-			
+
 			List<HasMetadata> resoures = client.load(is).get();
-			if(adapter != null && parameters != null) {
-				//파라메타 반영.
+			if (adapter != null && parameters != null) {
+				// 파라메타 반영.
 				adapter.setParameter(resoures, parameters);
 			}
-			
-			for(HasMetadata data : resoures) {
+
+			for (HasMetadata data : resoures) {
 				String yamlString = Serialization.asYaml(data);
-				
-				YamlApplyParam param = YamlApplyParam.builder()
-						.kubeConfigId(kubeConfigId)
-						.yaml(yamlString)
-						.build();
-				
+
+				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlString).build();
+
 				String str = commonProxy.apply(param);
-				if(str != null && str.length() > 0) {
-					List<HasMetadata> apply = new ObjectMapper().readValue(str, new TypeReference<List<HasMetadata>>(){});
+				if (str != null && str.length() > 0) {
+					List<HasMetadata> apply = new ObjectMapper().readValue(str, new TypeReference<List<HasMetadata>>() {
+					});
 					applyList.addAll(apply);
-					
-					if(apply != null) {
+
+					if (apply != null) {
 						String kind = data.getKind();
-						String name = data.getMetadata().getName();						
+						String name = data.getMetadata().getName();
 						log.info("Addon install success. - kind: {}, name: {}", kind, name);
 					}
-				}   
+				}
 				result.add(str);
 			}
-			if(resoures.size() != applyList.size()) {
+			if (resoures.size() != applyList.size()) {
 				isOk = false;
 				break;
 			}
 		}
-		
-		
-		if(!isOk) {
-			//설치 실패한 경우 rollback
+
+		if (!isOk) {
+			// 설치 실패한 경우 rollback
 			log.info("Addon install fail. - KubeConfigId: {}", kubeConfigId);
 			log.info("Addon install fail. - addonId: {}", addonId);
 			log.info("Addon install fail. - addon name: {}", addon.getName());
-			
-			for(String s : result) {				
-				YamlApplyParam param = YamlApplyParam.builder()
-						.kubeConfigId(kubeConfigId)
-						.yaml(s)
-						.build();
-				
-				
+
+			for (String s : result) {
+				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(s).build();
+
 				commonProxy.delete(param);
 				log.info("Addon install rollback - delete resource yaml: {}", s);
 			}
 		} else {
-			//설치 성공한 경우 디비 저장.
+			// 설치 성공한 경우 디비 저장.
 			AddonEntity entity = new AddonEntity();
 			entity.setClusterIdx(clusterIdx);
 			entity.setAddonId(addon.getAddonId());
@@ -237,9 +226,10 @@ public class AddonService {
 		log.info("Addon install finish. - result: {}", isOk);
 		return isOk;
 	}
-	
+
 	/**
 	 * Addon 삭제.
+	 * 
 	 * @param kubeConfigId
 	 * @param addonId
 	 * @return
@@ -247,37 +237,32 @@ public class AddonService {
 	 */
 	public boolean uninstallAddon(Long clusterIdx, String addonId) throws IOException {
 		Long kubeConfigId = getKubeConfigId(clusterIdx);
-		
-		Addon addon = getAddons().get(addonId);	
+
+		Addon addon = getAddons().get(addonId);
 		log.info("Addon uninstall start. - KubeConfigId: {}", kubeConfigId);
 		log.info("Addon uninstall start. - addonId: {}", addonId);
 		log.info("Addon uninstall start. - addon name: {}", addon.getName());
-		
-		
+
 		KubernetesClient client = new DefaultKubernetesClient();
 		List<String> yamls = addon.getYamls();
-		
+
 		boolean result = true;
-		for(String yamlPath : yamls) {
+		for (String yamlPath : yamls) {
 			ClassPathResource resource = new ClassPathResource(yamlPath);
 			InputStream is = resource.getInputStream();
-			
-			List<HasMetadata> resoures = client.load(is).get();
-			for(HasMetadata data: resoures) {
-				String yamlString = Serialization.asYaml(data);
-				
 
-				YamlApplyParam param = YamlApplyParam.builder()
-						.kubeConfigId(kubeConfigId)
-						.yaml(yamlString)
-						.build();
-				
+			List<HasMetadata> resoures = client.load(is).get();
+			for (HasMetadata data : resoures) {
+				String yamlString = Serialization.asYaml(data);
+
+				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlString).build();
+
 				boolean isDelete = commonProxy.delete(param);
-				
+
 				String kind = data.getKind();
 				String name = data.getMetadata().getName();
-				
-				if(isDelete) {
+
+				if (isDelete) {
 					log.info("Addon uninstall - Success kind: {}, name: {}", kind, name);
 				} else {
 					log.info("Addon uninstall - Fail kind: {}, name: {}", kind, name);
@@ -286,19 +271,20 @@ public class AddonService {
 			}
 		}
 		client.close();
-		
-		if(result) {
-			//DB 정보 삭제.
+
+		if (result) {
+			// DB 정보 삭제.
 			addonDomainService.delete(clusterIdx, addonId);
 		}
-		
+
 		log.info("Addon uninstall. clusterIdx: {}, addonId: {}", clusterIdx, addonId);
 		log.info("Addon uninstall result: {}", result);
 		return result;
 	}
-	
+
 	/**
 	 * Addon 설치 여부 리턴.
+	 * 
 	 * @param clusterIdx
 	 * @param addonType
 	 * @return
@@ -306,45 +292,49 @@ public class AddonService {
 	public boolean isInstall(Long clusterIdx, String addonType) {
 		return addonDomainService.getEntityByType(clusterIdx, addonType) != null;
 	}
-	
+
 	public Addon getAddonByType(Long clusterIdx, String addonType) {
 		AddonEntity entity = addonDomainService.getEntityByType(clusterIdx, addonType);
-		if(entity != null) {
+		if (entity != null) {
 			Addon addon = null;
 			try {
 				addon = getAddon(clusterIdx, entity.getAddonId());
 			} catch (IOException e) {
 				log.error("", e);
-			}			
-			addon.setAddonEntity(entity);
+			}
+			if(addon != null) {
+				addon.setAddonEntity(entity);
+			}
 			return addon;
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Cluster의 KubeConfigId 반환.
+	 * 
 	 * @param clusterIdx
 	 * @return
 	 */
 	private Long getKubeConfigId(Long clusterIdx) {
-		ClusterEntity clusterEntity =  clusterDomainService.get(clusterIdx);
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		return clusterEntity.getClusterId();
 	}
-	
+
 	/**
 	 * Addon 전체 리스트 반환.
+	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	public Map<String, Addon> getAddons() throws IOException {
-		if(addons == null) {
+		if (addons == null) {
 			addons = new HashMap<>();
 			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 			Resource[] resources = resolver.getResources(ADDON_PATH);
 			Gson gson = new Gson();
-			if(resources != null) {
-				for(Resource r : resources) {
+			if (resources != null) {
+				for (Resource r : resources) {
 					String json = FileUtils.readLine(r.getInputStream());
 					Addon addon = gson.fromJson(json, Addon.class);
 					addons.put(addon.getAddonId(), addon);
@@ -353,19 +343,20 @@ public class AddonService {
 		}
 		return addons;
 	}
-	
+
 	/**
 	 * Addon adapter 리턴.
+	 * 
 	 * @param addon
 	 * @return
 	 */
 	private AddonAdapter getAdapter(Addon addon) {
 		String a = addon.getAdapter();
-		if(a != null) {
+		if (a != null) {
 			try {
 				Class<?> clazz = Class.forName(a);
 				Constructor<?> ctor = clazz.getConstructor();
-				AddonAdapter adapter = (AddonAdapter)ctor.newInstance();
+				AddonAdapter adapter = (AddonAdapter) ctor.newInstance();
 				return adapter;
 			} catch (Exception e) {
 				log.error("", e);
@@ -373,11 +364,11 @@ public class AddonService {
 		}
 		return null;
 	}
-	
+
 	public ServiceAdapterService getServiceAdapterService() {
 		return serviceAdapterService;
 	}
-	
+
 	public NodeAdapterService getNodeAdapterService() {
 		return nodeAdapterService;
 	}
