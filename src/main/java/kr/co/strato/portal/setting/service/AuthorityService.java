@@ -3,6 +3,7 @@ package kr.co.strato.portal.setting.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -322,6 +323,21 @@ public class AuthorityService {
 	private List<AuthorityViewDto.Menu> getMenuTreeList(List<AuthorityViewDto.Menu> menuList) {
 		List<AuthorityViewDto.Menu> parentList   = new ArrayList<>();
 		List<AuthorityViewDto.Menu> childrenList = new ArrayList<>();
+		
+		
+		Iterator<AuthorityViewDto.Menu> iter =  menuList.iterator();
+		while(iter.hasNext()) {
+			AuthorityViewDto.Menu menu = iter.next();
+			String useYn = menu.getUseYn();
+			if(useYn == null || useYn.length() == 0) {
+				useYn = "N";
+			}
+			
+			if(useYn.toUpperCase().equals("N")) {
+				iter.remove();
+			}
+		}
+		
 
 		Map<Long, Long> allIdMap = new HashMap<>();
 		for ( AuthorityViewDto.Menu menu : menuList ) {

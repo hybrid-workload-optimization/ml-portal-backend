@@ -53,7 +53,7 @@ public class UserRoleDomainService {
 	
 	public List<UserRoleEntity> getProjectUserRole() {
 		UserRoleEntity projectGroup = getUserRoleByCode("PROJECT");
-		List<UserRoleEntity> list = userRoleRepository.findByParentUserRoleIdx(projectGroup.getId(), "PROJECT_MANAGER");
+		List<UserRoleEntity> list = userRoleRepository.findByParentUserRoleIdx(projectGroup.getId(), UserRoleEntity.ROLE_CODE_PROJECT_MANAGER);
 		return list;
 	}
 
