@@ -10,6 +10,7 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.strato.adapter.k8s.ingressController.model.CreateIngressControllerParam;
@@ -79,7 +80,7 @@ public interface IngressControllerDtoMapper {
     default List<String> jsonToArray(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            List<String> list = mapper.readValue(json, List.class);
+            List<String> list = mapper.readValue(json, new TypeReference<List<String>>() {});
 
             return list;
         } catch (JsonProcessingException e) {
@@ -91,7 +92,7 @@ public interface IngressControllerDtoMapper {
     default List<ServicePort> jsonToPort(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            List<ServicePort> list = mapper.readValue(json, List.class);
+            List<ServicePort> list = mapper.readValue(json, new TypeReference<List<ServicePort>>() {});
 
             return list;
         } catch (JsonProcessingException e) {
