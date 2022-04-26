@@ -193,6 +193,14 @@ public class ClusterNodeService {
 		List<String> roles = new ArrayList<>();
 		n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
 				.map(l -> l.split("/")[1]).iterator().forEachRemaining(roles::add);
+		if(roles.size() == 0) {
+			roles.add("worker");
+		}
+		
+		if(roles.contains("control-plane")) {
+			roles.remove("control-plane");
+		}
+		
 		
 		String role = mapper.writeValueAsString(roles);
 		
