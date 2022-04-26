@@ -38,8 +38,6 @@ public class IngressDto {
 		private LocalDateTime createdAt;
 		private Long namespaceIdx;
 		private String namespace;
-		private String address;
-		private String host;
 		private Long ingressControllerIdx;
 		private String clusterName;
 	}
@@ -85,6 +83,7 @@ public class IngressDto {
 		private String pathType;
 		private String service;
 		private String port;
+		private List<String> endpoints;
 
 	}
 }

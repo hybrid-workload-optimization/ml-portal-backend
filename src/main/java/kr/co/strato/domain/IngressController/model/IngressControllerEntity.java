@@ -29,6 +29,9 @@ import lombok.ToString;
 @ToString
 @Table(name = "ingress_controller")
 public class IngressControllerEntity {
+	public static final String SERVICE_TYPE_NODE_PORT = "NodePort";
+	public static final String SERVICE_TYPE_EXTERNAL_IPS = "ExternalIPs";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ingress_controller_idx")

@@ -29,6 +29,8 @@ import lombok.ToString;
 @ToString
 @Table(name = "ingress")
 public class IngressEntity {
+	public static final String INGRESS_NAME_NGINX = "nginx";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ingress_idx")

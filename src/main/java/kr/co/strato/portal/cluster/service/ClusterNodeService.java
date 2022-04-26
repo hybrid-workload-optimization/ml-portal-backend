@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.Node;
@@ -290,5 +292,27 @@ public class ClusterNodeService {
 		
 		return nodeEntity;
 		}
+	
+	public List<String> getWorkerNodeIps(Long clusterIdx) {
+		List<String> ips = new ArrayList<>();
+		ObjectMapper mapper = new ObjectMapper();
+		List<NodeEntity> nodes = getNodeList(clusterIdx);
+		for(NodeEntity n : nodes) {
+			String role = n.getRole();
+			
+			try {
+				List<String> map = mapper.readValue(role, new TypeReference<List<String>>() {});
+				if(map.size() == 0 || map.contains("worker")) {
+					ips.add(n.getIp());
+				}
+				
+			} catch (JsonMappingException e) {
+				e.printStackTrace();
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+		}
+		return ips;
+	}
     
 }

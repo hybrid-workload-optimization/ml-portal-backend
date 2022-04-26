@@ -1,7 +1,5 @@
 package kr.co.strato.domain.ingress.model;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -44,13 +42,12 @@ public class IngressRuleEntity {
 	
 	private String service;
 	
+	private String endpoint;
+	
 	private int port;
-
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ingress_idx")
 	private IngressEntity ingress;
 	
-	
-
 }
