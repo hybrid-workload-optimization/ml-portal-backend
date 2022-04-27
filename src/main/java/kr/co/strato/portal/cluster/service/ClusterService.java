@@ -301,7 +301,7 @@ public class ClusterService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	private Long createKubesprayCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
-		
+		String loginUserId = loginUser.getUserId();
 		
 		// db - get kubespray version
 		String kubesprayVersion = getKubesprayVersionFromSetting();
@@ -311,6 +311,7 @@ public class ClusterService {
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.READY.name());
+		clusterEntity.setCreateUserId(loginUserId);
 		
 		clusterDomainService.register(clusterEntity);
 		log.info("[createKubesprayCluster] register cluster : {}", clusterEntity.toString());
@@ -323,7 +324,7 @@ public class ClusterService {
 				.workJobStatus(WorkJobStatus.WAITING)
 				.workJobStartAt(DateUtil.currentDateTime())
 				.workSyncYn("N")
-				.createUserId(loginUser.getUserId())
+				.createUserId(loginUserId)
 				.createUserName(loginUser.getUserName())
 				.build();
 		
@@ -571,6 +572,11 @@ public class ClusterService {
 		
 		// 2. add info by workJobIdx
 		detail.setWorkJobIdx(workJobIdx);
+		
+		ClusterHealthAdapterDto health = getClusterStatus(clusterEntity.getClusterId(), clusterEntity.getProvisioningStatus());
+		
+		detail.setStatus(health.getHealth());
+		detail.setProblem((ArrayList<String>)health.getProblem());
 		
 		return detail;
 	}
