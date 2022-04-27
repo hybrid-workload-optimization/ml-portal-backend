@@ -324,7 +324,7 @@ public class AuthorityService {
 		List<AuthorityViewDto.Menu> parentList   = new ArrayList<>();
 		List<AuthorityViewDto.Menu> childrenList = new ArrayList<>();
 		
-		
+		Map<Long, Long> allIdMap = new HashMap<>();
 		Iterator<AuthorityViewDto.Menu> iter =  menuList.iterator();
 		while(iter.hasNext()) {
 			AuthorityViewDto.Menu menu = iter.next();
@@ -335,13 +335,9 @@ public class AuthorityService {
 			
 			if(useYn.toUpperCase().equals("N")) {
 				iter.remove();
+			} else {
+				allIdMap.put(menu.getMenuIdx(), menu.getMenuIdx());
 			}
-		}
-		
-
-		Map<Long, Long> allIdMap = new HashMap<>();
-		for ( AuthorityViewDto.Menu menu : menuList ) {
-			allIdMap.put(menu.getMenuIdx(), menu.getMenuIdx());
 		}
 
 		for ( AuthorityViewDto.Menu menu : menuList ) {
