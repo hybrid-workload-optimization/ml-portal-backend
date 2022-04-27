@@ -16,13 +16,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
+import kr.co.strato.portal.setting.model.UserAuthorityDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.AuthorityService;
 
 @RestController
 @RequestMapping("/api/v1/setting-authority")
-public class AuthorityController {
+public class AuthorityController extends CommonController {
 	
 	@Autowired
 	private AuthorityService authorityService;
@@ -72,5 +75,16 @@ public class AuthorityController {
 	public ResponseWrapper<Long> patchAuthority(@RequestBody AuthorityRequestDto.ReqModifyDto param) {
 		Long idx = authorityService.modifyUserRole(param);
 		return new ResponseWrapper<>(idx);
+	}
+	
+	@GetMapping("/user-authorities")
+	public ResponseWrapper<UserAuthorityDto> getUserAuthorities() {
+		UserAuthorityDto authority = null;
+		UserDto loginUser = getLoginUser();
+		if(loginUser != null) {
+			String userId = loginUser.getUserId();
+			authority = authorityService.getUserRole(userId);
+		}		
+		return new ResponseWrapper<>(authority);
 	}
 }
