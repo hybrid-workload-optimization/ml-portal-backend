@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.menu.model.MenuEntity;
@@ -34,7 +34,7 @@ public class FavoriteEntity {
 	@Column(name = "user_id")
 	private String userId;
 
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "menu_idx")
 	private MenuEntity menu;
 	

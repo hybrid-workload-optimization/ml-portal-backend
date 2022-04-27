@@ -90,7 +90,7 @@ public class AccessFilter implements Filter{
 				request.getSession(false);
 				response.sendError(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else {			
+		} else {		
 			chain.doFilter(request, response);
 		}
     }
@@ -111,7 +111,8 @@ public class AccessFilter implements Filter{
     			"/api/v1/work-job/callback", 
     			"favicon.ico",
     			"/users/reset/password",
-    			"/icons"};
+    			"/icons",
+    			"/api/v1/alert/receive"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션

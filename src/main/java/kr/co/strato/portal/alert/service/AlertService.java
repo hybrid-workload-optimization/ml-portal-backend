@@ -1,8 +1,10 @@
 package kr.co.strato.portal.alert.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,9 +38,11 @@ public class AlertService {
 	@Autowired
 	private AlertDomainService alertDomainService;
 	
-	private static Map<String, Consumer<ServerSentEvent<AlertDto>>> consumerMap;
+	private static Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> consumerMap;
 	
-	private static Runnable testRunnable;
+	private static Runnable ssePingRunnable;
+	
+	public static int test_id=200;
 	
 
 	public void alert(String[] targetUserIds, String message) {
@@ -99,12 +103,13 @@ public class AlertService {
 			//Client 전송 SSE
 			AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
 			
-			Map<String, Consumer<ServerSentEvent<AlertDto>>> consumerMap = getConsumerMap();
-			Consumer<ServerSentEvent<AlertDto>> consumer = consumerMap.get(userId);
-			if(consumer != null) {
-				
-				//Client로 sse 이벤트 전달.
-				consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+			List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(userId);
+			if(list != null) {
+				for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+					if(consumer != null) {
+						consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+					}
+				}
 			}
 		}		
 	}
@@ -185,7 +190,7 @@ public class AlertService {
 		return message;
 	}
 	
-	public static Map<String, Consumer<ServerSentEvent<AlertDto>>> getConsumerMap() {
+	public static Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> getConsumerMap() {
 		if(consumerMap == null) {
 			consumerMap = new ConcurrentHashMap<>();
 		}
@@ -193,49 +198,98 @@ public class AlertService {
 	}
 	
 	public static void addConsumer(String userId, Consumer<ServerSentEvent<AlertDto>> consumer) {
-		getConsumerMap().put(userId, consumer);
+		List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(userId);
+		if(list == null) {
+			list = Collections.synchronizedList(new ArrayList<Consumer<ServerSentEvent<AlertDto>>>());
+			getConsumerMap().put(userId, list);
+		}
+		
+		if(!list.contains(consumer)) {
+			list.add(consumer);
+			
+			//sse ping 실행.
+			startSsePing();
+		}
 	}
 	
-	public static void removeConsumer(String userId) {
-		getConsumerMap().remove(userId);
+	public static void removeConsumer(String userId, Consumer<ServerSentEvent<AlertDto>> consumer) {
+		List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(userId);
+		if(list == null) {
+			return;
+		}
+		
+		if(list.contains(consumer)) {
+			list.remove(consumer);
+		}
+		
+		if(list.size() == 0) {
+			getConsumerMap().remove(userId);
+		}
 	}
 	
-	public static  void testSSE() {
-		if(testRunnable == null) {
-			testRunnable = new Runnable() {
+	/**
+	 * SSE 연결 확인을 위해 1분에 한번씩 null 데이터를 발송.
+	 */
+	public static void startSsePing() {
+		if(ssePingRunnable == null) {
+			log.info("SSE-Ping Start");
+			ssePingRunnable = new Runnable() {
 				
 				@Override
 				public void run() {
 					while(true) {
-						AlertDto dto = AlertDto.builder()
-								.alertIdx(1L)
-								.clusterIdx(51L)
-								.clusterName("cluster-cmp-prod")
-								.createdAt("2022-04-15 16:13:38")
-								.workJobStatus(WorkJobStatus.STARTED)
-								.workJobType(WorkJobType.CLUSTER_CREATE)
-								.confirmYn("N")
-								.build();
-						
-						Consumer<ServerSentEvent<AlertDto>> consumer = getConsumerMap().get("hclee@strato.co.kr");
-						if(consumer != null) {
-							consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+						Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> map = getConsumerMap();
+						if(map.size() == 0) {
+							ssePingRunnable = null;
+							log.info("SSE-Ping Stop - Consumer size: 0");
+							break;
 						}
 						
-						
-						
-						try {
-							Thread.sleep(3000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						Set<String> keySet = map.keySet();
+						for(String key : keySet) {
+							List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
+							if(list != null) {
+								for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+									if(consumer != null) {
+										consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+									}
+								}
+							}
+							try {
+								Thread.sleep(3000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}
 			};
 			
 			ExecutorService executorService = Executors.newSingleThreadExecutor();
-			executorService.submit(testRunnable);
+			executorService.submit(ssePingRunnable);
+		}
+	}
+	
+	public void sendTest() {
+		test_id++;
+		Long id = Long.valueOf(test_id);
+		AlertDto dto = AlertDto.builder()
+				.alertIdx(id)
+				.clusterIdx(51L)
+				.clusterName("cluster-cmp-prod")
+				.createdAt("2022-04-15 16:13:38")
+				.workJobStatus(WorkJobStatus.STARTED)
+				.workJobType(WorkJobType.CLUSTER_CREATE)
+				.confirmYn("N")
+				.build();
+		
+		List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get("hclee@strato.co.kr");
+		if(list != null) {
+			for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+				if(consumer != null) {
+					consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+				}
+			}
 		}
 	}
 }

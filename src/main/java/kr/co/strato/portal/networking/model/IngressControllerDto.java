@@ -41,6 +41,7 @@ public class IngressControllerDto {
 		private String createdAt;
 		private boolean isDefault;
 		private Long clusterIdx;
+		private String clusterName;
 	}
 
 	@Getter

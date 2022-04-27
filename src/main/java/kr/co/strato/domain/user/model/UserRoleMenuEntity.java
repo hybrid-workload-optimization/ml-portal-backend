@@ -11,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Where;
+
 import kr.co.strato.domain.menu.model.MenuEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,5 +52,6 @@ public class UserRoleMenuEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "menu_idx")
+	@Where(clause = "use_yn = 'Y'")
 	private MenuEntity menu;
 }

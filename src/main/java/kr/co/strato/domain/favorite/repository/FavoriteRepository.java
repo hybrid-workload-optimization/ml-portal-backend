@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.co.strato.domain.favorite.model.FavoriteEntity;
 import kr.co.strato.domain.menu.model.MenuEntity;
 
-public interface FavoriteRepository extends JpaRepository<FavoriteEntity, Long> {
+public interface FavoriteRepository extends JpaRepository<FavoriteEntity, Long>, CustomFavoriteRepository {
 	
 	public List<FavoriteEntity> findByUserId(String userId);
 	
