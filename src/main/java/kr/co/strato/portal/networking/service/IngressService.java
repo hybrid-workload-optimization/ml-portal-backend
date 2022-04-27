@@ -325,7 +325,7 @@ public class IngressService extends ProjectAuthorityService {
 							Integer p = port.getPort();
 							
 							for(String ip: workerIps) {
-								String endpoint = String.format("%s://%s:%d/%s", prot, ip, p, path);
+								String endpoint = String.format("%s://%s:%d%s", prot, ip, p, path);
 								endpoints.add(endpoint);
 							}
 						}
@@ -335,7 +335,7 @@ public class IngressService extends ProjectAuthorityService {
 						
 						List<String> ips = dto.getExternalIp();
 						for(String ip: ips) {
-							String endpoint = String.format("%s://%s/%s", protocol, ip, path);
+							String endpoint = String.format("%s://%s%s", protocol, ip, path);
 							endpoints.add(endpoint);
 						}
 					}
@@ -344,7 +344,7 @@ public class IngressService extends ProjectAuthorityService {
 				}
 			} 
 		} else {
-			String endpoint = String.format("%s://%s/%s", protocol, host, path);
+			String endpoint = String.format("%s://%s%s", protocol, host, path);
 			endpoints.add(endpoint);
 		}
 		return endpoints;
