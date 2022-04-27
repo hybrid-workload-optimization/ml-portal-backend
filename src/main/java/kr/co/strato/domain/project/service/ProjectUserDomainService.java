@@ -31,7 +31,7 @@ public class ProjectUserDomainService {
 	
 	/**
      * Project의 User 리스트 조회(Project Manager 제외)
-     * @param userId
+     * @param projectIdx
      * @return
      */
     public List<ProjectUserDto> getProjectUserListExceptManager(Long projectIdx) {
@@ -153,5 +153,15 @@ public class ProjectUserDomainService {
     public List<ProjectUserDto> getProjectUserList(Long projectIdx) {
     	
     	return projectUserRepository.getProjectUserList(projectIdx);
+    }
+    
+    /**
+     * Project의 User 삭제(Project Manager 제외)
+     * @param projectIdx
+     * @return
+     */
+    public Integer deleteProjectUserExceptManager(Long projectIdx) {
+    	
+    	return projectUserRepository.deleteByProjectIdxAndUserRoleIdxNot(projectIdx, ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX);
     }
 }

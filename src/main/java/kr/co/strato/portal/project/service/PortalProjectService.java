@@ -450,62 +450,54 @@ System.out.println("old === " + pmUser.getUserId());
     	
     	try {
             //Project User 삭제
-            //projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
-    		List<String> duplicateIdList = new ArrayList<String>();
-    		
-    		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
-    		duplicateIdList.add(pmUserInfo.getUserId());
-    		
-    		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserListExceptManager(param.getProjectIdx());
     		List<ProjectUserDto> reqUserList = param.getUserList();
-    		for(ProjectUserDto nowUser : userList) {
-    			for(ProjectUserDto reqCluster : reqUserList) {
-    				if(nowUser.getUserId().equals(reqCluster.getUserId())) {
-    					duplicateIdList.add(reqCluster.getUserId());
-    					break;
-    				}
-    			}
-    		}
-    		
-    		if(duplicateIdList != null && duplicateIdList.size() > 0) {
-    			/*for(String id : duplicateIdList) {
-    				System.out.println("userId ===" + id);
-    			}*/
-    			projectUserDomainService.deleteRequestProjectUser(param.getProjectIdx(), duplicateIdList);
-    		}
-            
-            //Project User 등록
-            //reqUserList = param.getUserList();
-System.out.println("reqUserList === " + reqUserList.size());        	
-    		for(ProjectUserDto user : reqUserList) {
-        		/*ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
-        		projectUserBuiler.userId(user.getUserId());
-        		projectUserBuiler.projectIdx(param.getProjectIdx());
-        		projectUserBuiler.createUserId(userId);
-        		projectUserBuiler.createUserName(userName);
-        		projectUserBuiler.createdAt(now);
-        		projectUserBuiler.projectUserRole(user.getProjectUserRole());*/
+    		if(!reqUserList.isEmpty()) {
+    			//projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
+        		List<String> duplicateIdList = new ArrayList<String>();
         		
-        		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(param.getProjectIdx(), user.getUserId());
+        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+        		duplicateIdList.add(pmUserInfo.getUserId());
         		
-        		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
-        		projectUserBuiler.userId(user.getUserId());
-        		projectUserBuiler.projectIdx(param.getProjectIdx());
-        		projectUserBuiler.createUserId(userId);
-        		projectUserBuiler.createUserName(userName);
-        		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
-        		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
-        		if(selectUser != null) {
-        			System.out.println("selectUser === " + selectUser.getUserId());
-        			projectUserBuiler.createdAt(selectUser.getCreatedAt());
-        		} else {
-            		projectUserBuiler.createdAt(now);
+        		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserListExceptManager(param.getProjectIdx());
+        		
+        		for(ProjectUserDto nowUser : userList) {
+        			for(ProjectUserDto reqCluster : reqUserList) {
+        				if(nowUser.getUserId().equals(reqCluster.getUserId())) {
+        					duplicateIdList.add(reqCluster.getUserId());
+        					break;
+        				}
+        			}
         		}
         		
-        		//ProjectUserDTO -> ProjectUserEntity
-                ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
-        		projectUserDomainService.createProjectUser(projectUserEntity);
-        	}
+        		if(duplicateIdList != null && duplicateIdList.size() > 0) {
+        			projectUserDomainService.deleteRequestProjectUser(param.getProjectIdx(), duplicateIdList);
+        		}
+                
+                //Project User 등록
+        		for(ProjectUserDto user : reqUserList) {
+            		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(param.getProjectIdx(), user.getUserId());
+            		
+            		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
+            		projectUserBuiler.userId(user.getUserId());
+            		projectUserBuiler.projectIdx(param.getProjectIdx());
+            		projectUserBuiler.createUserId(userId);
+            		projectUserBuiler.createUserName(userName);
+            		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
+            		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
+            		if(selectUser != null) {
+            			System.out.println("selectUser === " + selectUser.getUserId());
+            			projectUserBuiler.createdAt(selectUser.getCreatedAt());
+            		} else {
+                		projectUserBuiler.createdAt(now);
+            		}
+            		
+            		//ProjectUserDTO -> ProjectUserEntity
+                    ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+            		projectUserDomainService.createProjectUser(projectUserEntity);
+            	}
+    		} else {
+    			projectUserDomainService.deleteProjectUserExceptManager(param.getProjectIdx());
+    		}
         	
         	result = true;
     	} catch(Exception e) {
