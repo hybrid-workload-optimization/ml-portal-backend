@@ -27,6 +27,7 @@ public interface IngressControllerDtoMapper {
 	@Mapping(target = "port",		 source = "port", 				qualifiedByName = "jsonToPort")
 	@Mapping(target = "default",	 source = "defaultYn", 		qualifiedByName = "stringToBoolean")
 	@Mapping(target = "clusterIdx",	 source = "cluster.clusterIdx")
+	@Mapping(target = "clusterName",	 source = "cluster.clusterName")
 	public IngressControllerDto.ResListDto toResListDto(IngressControllerEntity ingressEntity);
 	
 	@Mapping(target = "externalIp",	 source = "dto.externalIp",		qualifiedByName = "ipsToString")

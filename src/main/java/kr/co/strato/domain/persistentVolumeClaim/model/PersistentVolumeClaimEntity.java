@@ -61,9 +61,6 @@ public class PersistentVolumeClaimEntity {
 	@Column(name = "storage_request")
 	private String storageRequest;
 	
-	@Column(name = "label")
-	private String label;
-	
 	@ManyToOne
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;

@@ -248,7 +248,13 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
         String accessType = null;
         List<String> accessList = p.getSpec().getAccessModes();
         if(accessList != null && accessList.size() > 0) {
-        	accessType = accessList.get(0);
+        	for(int i = 0; i < accessList.size(); i++) {
+        		if(i == 0) {
+        			accessType = accessList.get(i);
+        		} else {
+        			accessType = accessType + ", " + accessList.get(i);
+        		}
+        	}
         }
         String storageClass = p.getSpec().getStorageClassName();
         String createAt		= p.getMetadata().getCreationTimestamp();
@@ -290,7 +296,6 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
         PersistentVolumeClaimEntity result = PersistentVolumeClaimEntity.builder()
                 .name(name)
                 .uid(uid)
-                .label(label)
                 //.status(stauts)
                 .storageCapacity(storageCapacity)
                 .storageRequest(storageRequest)

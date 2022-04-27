@@ -11,7 +11,9 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.model.UserRoleMenuEntity;
 import kr.co.strato.global.error.exception.PermissionDenyException;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.portal.config.service.ConfigMapService;
 import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
+import kr.co.strato.portal.config.service.SecretService;
 import kr.co.strato.portal.networking.service.IngressService;
 import kr.co.strato.portal.networking.service.K8sServiceService;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -108,6 +110,14 @@ public class ProjectAuthorityService {
 		//CONFIG		
 		else if(this instanceof PersistentVolumeClaimService) {
 			menuCode = 105010L;
+		}
+		
+		else if(this instanceof ConfigMapService) {
+			menuCode = 105020L;
+		}
+		
+		else if(this instanceof SecretService) {
+			menuCode = 105030L;
 		}
 		
 		//NETWORKING
