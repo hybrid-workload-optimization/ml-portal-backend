@@ -2,6 +2,7 @@ package kr.co.strato.portal.alert.controller;
 
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
@@ -66,12 +68,12 @@ public class AlertController extends CommonController {
 	 * @return
 	 */
 	@GetMapping(path = "/alert/receive", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AlertDto>> receiveAlert() {
-		String userId = getLoginUser().getUserId();
+    public Flux<ServerSentEvent<AlertDto>> receiveAlert(@RequestParam String userId) {
         return Flux.create(sink -> {
         	String loginUserId = userId;
         	
-        	AlertService.addConsumer(loginUserId, sink::next);
+        	Consumer<ServerSentEvent<AlertDto>> consumer = sink::next;
+        	AlertService.addConsumer(loginUserId, consumer);
             
             sink.onCancel(() -> {
             	log.info("SSE - canceled.");
@@ -82,28 +84,13 @@ public class AlertController extends CommonController {
 	        sink.onDispose(() -> {
 	        	log.info("SSE - disposed.");
             	log.info("SSE - Remove consumer userId: {}", loginUserId);
-	        	AlertService.removeConsumer(loginUserId);
+	        	AlertService.removeConsumer(loginUserId, consumer);
 	        });
         });
     }
 	
-	@GetMapping(path = "/alert/test", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AlertDto>> receiveTest() {
-        return Flux.create(sink -> {
-        	String loginUserId = "hclee@strato.co.kr";
-        	
-        	AlertService.addConsumer(loginUserId, sink::next);
-        	AlertService.testSSE();
-        	
-            sink.onCancel(() -> {
-                System.out.println("** CANCELLED **");
-                sink.complete();
-            });
-
-	        sink.onDispose(() -> {
-	        	AlertService.removeConsumer(loginUserId);
-	            System.out.println("** DISPOSED **");
-	        });
-        });
-    }
+	@GetMapping(path = "/alert/send/test")
+	public void sendTest() {
+		alertService.sendTest();
+	}
 }
