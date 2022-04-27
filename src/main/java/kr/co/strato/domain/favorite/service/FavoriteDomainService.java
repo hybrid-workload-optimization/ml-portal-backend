@@ -41,7 +41,7 @@ public class FavoriteDomainService {
 	 * @return
 	 */
 	public List<FavoriteEntity> getList(String userId) {
-		return favoriteRepository.findByUserId(userId);
+		return favoriteRepository.getFavoriteList(userId);
 	}
 	
 	
