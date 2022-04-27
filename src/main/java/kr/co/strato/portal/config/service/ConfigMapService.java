@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -134,10 +137,9 @@ public class ConfigMapService extends ProjectAuthorityService {
 	 */
 	public ConfigMapDto.Detail getConfigMap(Long configMapIdx, UserDto loginUser) throws Exception {
 		ConfigMapEntity configMapEntity = configMapDomainService.get(configMapIdx);
-System.out.println("configMapEntity === " + configMapEntity.getData());		
-		Long clusterId			= configMapEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName	= configMapEntity.getNamespace().getName();
-		String configMapName	= configMapEntity.getName();
+		//Long clusterId			= configMapEntity.getNamespace().getCluster().getClusterId();
+		//String namespaceName	= configMapEntity.getNamespace().getName();
+		//String configMapName	= configMapEntity.getName();
 		
 		Long clusterIdx = configMapEntity.getNamespace().getCluster().getClusterIdx();
 		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
@@ -150,7 +152,18 @@ System.out.println("configMapEntity === " + configMapEntity.getData());
 		//ConfigMap configMap = configMapAdapterService.get(clusterId, namespaceName, configMapName);
 		
 		ConfigMapDto.Detail dto = ConfigMapDtoMapper.INSTANCE.toDetail(configMapEntity);
-		System.out.println("data === " + dto.getData());
+		
+		String data = "";
+		if(!"".equals(dto.getData()) && dto.getData() != null) {
+			GsonBuilder builder = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting();
+	        Gson gson = builder.create();
+	        Map user = gson.fromJson(dto.getData(), Map.class);
+	        data = gson.toJson(user);
+		} else {
+			data = dto.getData();
+		}
+		
+		dto.setData(data);
 		dto.setProjectIdx(projectIdx);
 		return dto;
 	}

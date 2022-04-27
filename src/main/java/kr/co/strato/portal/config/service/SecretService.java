@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -148,6 +150,18 @@ public class SecretService extends ProjectAuthorityService {
 		//Secret secret = secretAdapterService.get(clusterId, namespaceName, secretName);
 		
 		SecretDto.Detail dto = SecretDtoMapper.INSTANCE.toDetail(secretEntity);
+		
+		String data = "";
+		if(!"".equals(dto.getData()) && dto.getData() != null) {
+			GsonBuilder builder = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting();
+	        Gson gson = builder.create();
+	        Map user = gson.fromJson(dto.getData(), Map.class);
+	        data = gson.toJson(user);
+		} else {
+			data = dto.getData();
+		}
+		
+		dto.setData(data);
 		dto.setProjectIdx(projectIdx);
 		return dto;
 	}
