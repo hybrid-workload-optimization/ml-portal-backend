@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/v1/access-manage")
 @Slf4j
-public class AccessController {
+public class AccessController extends CommonController {
 	
 	@Autowired
 	AccessService accessService;
@@ -82,6 +82,17 @@ public class AccessController {
 			log.error(e.getMessage(), e);
 			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
 		}
+	}
+	
+	@PostMapping("/user-authority")
+	public ResponseWrapper<UserAuthorityDto> getUserAuthority() {
+		UserAuthorityDto authority = null;
+		UserDto loginUser = getLoginUser();
+		if(loginUser != null) {
+			String userId = loginUser.getUserId();
+			authority = authorityService.getUserRole(userId);
+		}		
+		return new ResponseWrapper<>(authority);
 	}
 	
 	//token refresh 요청
