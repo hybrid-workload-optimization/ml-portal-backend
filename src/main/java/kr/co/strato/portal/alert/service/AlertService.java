@@ -256,7 +256,8 @@ public class AlertService {
 								}
 							}
 							try {
-								Thread.sleep(3000);
+								//1분에 한번씩 핑 테스트
+								Thread.sleep(1000 * 60);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
