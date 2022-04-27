@@ -43,7 +43,6 @@ public class PersistentVolumeClaimDto {
 		private Long id;
 		private String name;
 		private String namespace;
-		private HashMap<String, Object> label;
 		private String status;
 		private String storageCapacity;
 		private String storageRequest;

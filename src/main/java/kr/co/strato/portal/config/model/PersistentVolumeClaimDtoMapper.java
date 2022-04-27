@@ -31,7 +31,7 @@ public interface PersistentVolumeClaimDtoMapper {
     
     @Mapping(target = "name", 				source = "p.name")
     @Mapping(target = "namespace",			source = "p.namespace.name")
-    @Mapping(target = "label",				source = "p.label",			qualifiedByName = "jsonToMap")
+    //@Mapping(target = "label",				source = "p.label",			qualifiedByName = "jsonToMap")
     @Mapping(target = "storageCapacity",	source = "p.storageCapacity")
     @Mapping(target = "storageRequest",		source = "p.storageRequest")
     @Mapping(target = "accessType",		    source = "p.accessType")
@@ -41,7 +41,7 @@ public interface PersistentVolumeClaimDtoMapper {
     
     @Mapping(target = "name", 				source = "p.name")
     @Mapping(target = "namespace",			source = "p.namespace.name")
-    @Mapping(target = "label",				source = "p.label",			qualifiedByName = "jsonToMap")
+    //@Mapping(target = "label",				source = "p.label",			qualifiedByName = "jsonToMap")
     @Mapping(target = "status",				source = "k8s.status.phase")
     @Mapping(target = "storageCapacity",	source = "p.storageCapacity")
     @Mapping(target = "storageRequest",		source = "p.storageRequest")
