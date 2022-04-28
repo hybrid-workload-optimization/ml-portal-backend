@@ -63,7 +63,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectUserEntity.userId.count())
 	                                            .from(projectUserEntity)
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
+	                                            .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), userEntity.useYn.eq("Y")),
 	                              "userCount"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectUserEntity.userId)
@@ -146,7 +147,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectUserEntity.userId.count())
 	                                            .from(projectUserEntity)
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)),
+	                                            .join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), userEntity.useYn.eq("Y")),
 	                              "userCount"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectUserEntity.userId)
