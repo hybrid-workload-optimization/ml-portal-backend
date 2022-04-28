@@ -1,5 +1,6 @@
 package kr.co.strato.domain.IngressController.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.repository.IngressControllerRepository;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 
 @Service
 public class IngressControllerDomainService {
@@ -29,8 +31,22 @@ public class IngressControllerDomainService {
 		return null;
 	}
 	
+	/**
+	 * Default 컨트롤러가 존재하는지 리턴.
+	 * @param entity
+	 * @return
+	 */
+	public boolean isExistDefaultController(ClusterEntity entity) {
+		List<IngressControllerEntity> list = ingressControllerRepository.findByClusterAndDefaultYn(entity, "Y");
+		return list.size() > 0;
+	}
+	
 	public Page<IngressControllerEntity> getList(Pageable pageable, Long clusterIdx) {
 		return ingressControllerRepository.getList(pageable, clusterIdx);
+	}
+	
+	public List<IngressControllerEntity> getList(ClusterEntity entity) {
+		return ingressControllerRepository.findByCluster(entity);
 	}
 	
 	public void deleteById(Long ingressControllerIdx) {

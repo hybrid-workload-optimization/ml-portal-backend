@@ -39,8 +39,23 @@ public class IngressControllerService {
 	 * @param provider
 	 * @return
 	 */
-	public String[] types(String provider) {
-		return ingressControllerAdapterService.types(provider);
+	public List<String> types(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		List<String> names = ingressControllerAdapterService.types(cluster.getProvider());
+		List<IngressControllerEntity> list = ingressControllerDomainService.getList(cluster);
+		List<String> installedNames = list.stream().map(ic -> ic.getName()).collect(Collectors.toList());
+		names.removeAll(installedNames);
+		return names;
+	}
+	
+	/**
+	 * 디폴트 컨트롤러 존재여부 반환.
+	 * @param clusterIdx
+	 * @return
+	 */
+	public boolean isExistDefaultController(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		return ingressControllerDomainService.isExistDefaultController(cluster);
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class IngressControllerAdapterService {
 	 * @param provider
 	 * @return
 	 */
-	public String[] types(String provider) {
+	public List<String> types(String provider) {
 		return ingressControllerProxy.types(provider);
 	}
 

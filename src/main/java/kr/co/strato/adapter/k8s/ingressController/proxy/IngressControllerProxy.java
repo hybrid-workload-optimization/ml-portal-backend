@@ -17,7 +17,7 @@ import kr.co.strato.adapter.k8s.ingressController.model.IngressController;
 public interface IngressControllerProxy {
 	
 	@GetMapping("/ingressController/type")
-	public String[] types(@RequestParam("provider") String provider);
+	public List<String> types(@RequestParam("provider") String provider);
 
 	@PostMapping("/ingressController/create")
 	public String create(@RequestBody CreateIngressControllerParam param);
