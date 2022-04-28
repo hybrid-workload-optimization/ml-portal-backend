@@ -316,8 +316,8 @@ public class IngressService extends ProjectAuthorityService {
 					String serviceType = dto.getServiceType();
 					if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_NODE_PORT)) {
 						//Node Port
-						Long kubeConfigId = ingress.getNamespace().getCluster().getClusterId();						
-						List<String> workerIps = clusterNodeService.getWorkerNodeIps(kubeConfigId);
+						Long clusterIdx = ingress.getNamespace().getCluster().getClusterIdx();																
+						List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
 						
 						List<ServicePort> ports = dto.getPort();
 						for(ServicePort port : ports) {
