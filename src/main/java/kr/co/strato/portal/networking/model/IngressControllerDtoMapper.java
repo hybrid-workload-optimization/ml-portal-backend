@@ -39,6 +39,7 @@ public interface IngressControllerDtoMapper {
 	@Mapping(target = "externalIp",	 source = "dto.externalIp",		qualifiedByName = "ipsToString")
 	@Mapping(target = "port",		 source = "dto", 			qualifiedByName = "dtoToPort")
 	@Mapping(target = "defaultYn",   source = "dto.default", 		qualifiedByName = "booleanToString")
+	@Mapping(target = "ingressClass",		 source = "dto.name")
 	@Mapping(target = "cluster.clusterIdx",   source = "clusterIdx")
 	public IngressControllerEntity toEntity(IngressControllerDto.ReqCreateDto dto, Long clusterIdx);
 	

@@ -99,6 +99,9 @@ public class IngressControllerService {
 		log.info(param.toString());
 		
 		ClusterEntity cluster = clusterDomainService.get(param.getClusterIdx());
+		
+		IngressControllerEntity oldEntity = ingressControllerDomainService.getIngressControllerById(param.getId());
+		
 		Long clusterIdx = cluster.getClusterIdx();
 		Long kubeConfigIdx = cluster.getClusterId();
 		
@@ -109,6 +112,7 @@ public class IngressControllerService {
 		if(str != null && str.length() > 0) {
 			//DB저장
 			IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
+			entity.setCreatedAt(oldEntity.getCreatedAt());
 			return ingressControllerDomainService.update(entity);
 		}
 		
@@ -155,7 +159,10 @@ public class IngressControllerService {
 	 */
 	public Page<IngressControllerDto.ResListDto> getList(Pageable pageable, Long clusterIdx) {		
 		Page<IngressControllerEntity> list = ingressControllerDomainService.getList(pageable, clusterIdx);
-		List<IngressControllerDto.ResListDto> dlist = list.getContent().stream().map(IngressControllerDtoMapper.INSTANCE::toResListDto).collect(Collectors.toList());
+		List<IngressControllerDto.ResListDto> dlist = list.getContent()
+				.stream()
+				.map(IngressControllerDtoMapper.INSTANCE::toResListDto)
+				.collect(Collectors.toList());
 		Page<IngressControllerDto.ResListDto> page = new PageImpl<>(dlist, pageable, list.getTotalElements());
 		return page;
 	}

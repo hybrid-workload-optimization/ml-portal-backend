@@ -17,6 +17,7 @@ public class IngressControllerDto {
 	@Setter
 	@NoArgsConstructor
 	public static class ReqCreateDto {
+		private Long id;
 		private Long clusterIdx;
 		private String name;	
 		private Integer replicas;
