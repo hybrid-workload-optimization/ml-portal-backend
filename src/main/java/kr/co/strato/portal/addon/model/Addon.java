@@ -1,6 +1,5 @@
 package kr.co.strato.portal.addon.model;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -40,6 +39,8 @@ public class Addon{
 			setInstalled(true);
 			setInstallUserId(addonEntity.getInstallUserId());
 			setInstallAt(addonEntity.getInstallAt());
+		} else {
+			setInstalled(false);
 		}
 	}
 	
