@@ -24,7 +24,7 @@ public class IngressControllerDto {
 		private String serviceType;
 		private Integer httpPort;
 		private Integer httpsPort;
-		private boolean isDefault;
+		private Boolean isDefault;
 		private List<String> externalIp;
 	}
 

@@ -19,7 +19,7 @@ public class CreateIngressControllerParam {
 	private Integer replicas;
 	private Integer httpPort;
 	private Integer httpsPort;
-	private boolean isDefault;
+	private Boolean isDefault;
 	private String serviceType;
 	private List<String> externalIPs;
 }
