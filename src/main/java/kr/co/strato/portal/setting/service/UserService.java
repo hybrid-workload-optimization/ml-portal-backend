@@ -22,6 +22,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.SsoConnectionException;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.global.util.FileUtils;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
@@ -135,9 +136,6 @@ public class UserService {
 		return null;
 	}
 	
-	
-	
-	
 	//수정
 	public String patchUser(UserDto param) {
 		String userId = param.getUserId();
@@ -242,10 +240,10 @@ public class UserService {
 	
 	
 	// 비밀번호 변경
-	public void patchUserPassword(UserDto param) {
+	public void patchUserPassword(String userId, String password) {
 
 		try {
-			keyCloakApiUtil.updatePasswordSsoUser(param);
+			keyCloakApiUtil.updatePasswordSsoUser(userId, password);
 		}catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -315,7 +313,7 @@ public class UserService {
 					user.setUserId(id);
 					user.setUserPassword(password);
 					
-					patchUserPassword(user);
+					patchUserPassword(user.getUserId(), user.getUserPassword());
 					userDomainService.deleteResetPasswordRequest(id);
 					
 					result = "success";
@@ -378,6 +376,33 @@ public class UserService {
 		return url;
 	}
 	*/
+	
+	/**
+	 * 유저 정보 업데이트
+	 * @param changeUserDto
+	 * @param loginUser
+	 * @return
+	 */
+	public UserDto updateUser(UserDto.ChangeUserDto changeUserDto, UserDto loginUser) {
+		String userId = changeUserDto.getUserId();
+		UserEntity entity = userDomainService.getUserInfoByUserId(changeUserDto.getUserId());
+		if(entity != null) {
+			//패스워드 변경
+			patchUserPassword(changeUserDto.getUserId(), changeUserDto.getUserPassword());
+			
+			//디비 정보 변경.
+			entity.setUserName(changeUserDto.getUserName());
+			entity.setContact(changeUserDto.getContact());
+			entity.setOrganization(changeUserDto.getOrganization());
+			entity.setUpdateUserId(loginUser.getUserId());
+			entity.setUpdateUserName(loginUser.getUserName());			
+			userDomainService.saveUser(entity, "patch");
+			
+			return UserDtoMapper.INSTANCE.toDto(entity);
+		}
+		log.error("유저 정보 수정 실패! 유저가 존재하지 않습니다. UserId: {}", userId);
+		return null;
+	}
 	
 
 }

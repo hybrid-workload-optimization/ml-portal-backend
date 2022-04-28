@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +32,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.validation.TokenValidator;
+import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
@@ -46,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/v1/user-manage")
 @Slf4j
-public class UserController {
+public class UserController extends CommonController {
 	
 	@Autowired
 	UserService userService;
@@ -304,7 +306,7 @@ public class UserController {
 		
 		param.setUseYn("Y");
 		try {
-			userService.patchUserPassword(param);
+			userService.patchUserPassword(param.getUserId(), param.getUserPassword());
 		}catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -376,6 +378,44 @@ public class UserController {
 	}
 	*/
 	
-	
+	//수정
+	@PutMapping("/user")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<UserDto> patchUser(@RequestBody UserDto.ChangeUserDto changeUserDto){
+		String workTarget					= null;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> meta = mapper.convertValue(changeUserDto, Map.class);
+        Map<String, Object> workMetadata	= meta;
+        WorkResult workResult				= WorkResult.SUCCESS;
+        String workMessage					= "";
+
+        UserDto userDto = null;
+		try {
+			userDto = userService.updateUser(changeUserDto, getLoginUser());
+		} catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.UPDATE)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		return new ResponseWrapper<>(userDto);
+	}
 	
 }

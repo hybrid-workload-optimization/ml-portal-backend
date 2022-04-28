@@ -520,9 +520,8 @@ public class KeyCloakApiUtil {
 	}
 	
 	// 비밀번호 수정
-	public boolean updatePasswordSsoUser(UserDto user) throws Exception {
+	public boolean updatePasswordSsoUser(String userId, String password) throws Exception {
 		boolean result = false;
-		String userId = getUserInfoByUserId(user.getUserId()).getId();;
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
 		String URI = replaceUri(uriUpdateUser, "id", userId);
@@ -530,7 +529,7 @@ public class KeyCloakApiUtil {
 //		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
 		String ssoUser = "{ 'type' : 'password' , " 
 						+	"'temporary' : false , " 
-						+ "'value' : '"+ user.getUserPassword()  + "'}";
+						+ "'value' : '"+ password  + "'}";
 						
 
 		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);

@@ -1,9 +1,5 @@
 package kr.co.strato.portal.setting.model;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-
-import kr.co.strato.domain.user.model.UserRoleEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +30,30 @@ public class UserDto {
 	private String useYn;
 	private UserRole userRole;
 	
+	public UserDto(String userId, String userName, String email, String organization, String useYn, UserRole userRole) {
+		this.userId = userId;
+		this.userName = userName;
+		this.email = email;
+		this.organization = organization;
+		this.useYn = useYn;
+		this.userRole = userRole;
+	}
+	
+	@Getter
+	@Setter
+	@ToString
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Builder
+	public static class ChangeUserDto {
+		private String userId;
+		private String userPassword;
+		private String userName;
+		private String organization;
+		private String contact;
+	}
+	
+	
 	@Getter
 	@Setter
 	@ToString
@@ -49,14 +69,7 @@ public class UserDto {
 		private Long parentUserRoleIdx;
 	}
 	
-	public UserDto(String userId, String userName, String email, String organization, String useYn, UserRole userRole) {
-		this.userId = userId;
-		this.userName = userName;
-		this.email = email;
-		this.organization = organization;
-		this.useYn = useYn;
-		this.userRole = userRole;
-	}
+	
 	
     @Getter
     @Setter
