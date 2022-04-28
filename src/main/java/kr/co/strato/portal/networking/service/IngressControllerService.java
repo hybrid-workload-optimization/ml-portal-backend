@@ -17,6 +17,7 @@ import kr.co.strato.domain.IngressController.service.IngressControllerDomainServ
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.networking.model.IngressControllerDto;
 import kr.co.strato.portal.networking.model.IngressControllerDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,7 @@ public class IngressControllerService {
 		if(str != null && str.length() > 0) {
 			//DB저장
 			IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
+			entity.setCreatedAt(DateUtil.currentDateTime());
 			return ingressControllerDomainService.registry(entity);
 		}
 		

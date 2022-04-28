@@ -25,6 +25,7 @@ import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
+import kr.co.strato.domain.IngressController.service.IngressControllerDomainService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.ingress.model.IngressEntity;
@@ -58,6 +59,9 @@ public class IngressService extends ProjectAuthorityService {
 
 	@Autowired
 	private IngressRuleDomainService ingressRuleDomainService;
+	
+	@Autowired
+	private IngressControllerDomainService ingressControllerDomainService;
 	
 	@Autowired
 	private ClusterNodeService clusterNodeService;
@@ -214,27 +218,21 @@ public class IngressService extends ProjectAuthorityService {
 		String ingressClass = i.getSpec().getIngressClassName();
 		String createdAt = i.getMetadata().getCreationTimestamp();
 
-		IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
+		//IngressControllerEntity ingressControllerEntity = new IngressControllerEntity();
 
 		NamespaceEntity namespaceEntity = ingressDomainService.findByName(i.getMetadata().getNamespace(), clusterIdx);
-		if (ingressClass != null) {
-
-			List<Ingress> ingressClassK8s = ingressAdapterService.getIngressClassName(clusterId, ingressClass);
-			for (Ingress ic : ingressClassK8s) {
-				ingressClass = ic.getMetadata().getName();
-			}
-
-			ingressControllerEntity = ingressDomainService.findIngressControllerByName(ingressClass);
-
-		} else {
-			ingressControllerEntity = ingressDomainService.findByDefaultYn("Y");
+		if(ingressClass == null) {
 			ingressClass = "default";
 		}
+		
+		
 
-		IngressEntity ingress = IngressEntity.builder().name(name).uid(uid).ingressClass(ingressClass)
-				.ingressController(ingressControllerEntity).createdAt(DateUtil.strToLocalDateTime(createdAt))
+		IngressEntity ingress = IngressEntity.builder()
+				.name(name)
+				.uid(uid)
+				.ingressClass(ingressClass)
+				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.namespace(namespaceEntity).build();
-
 		return ingress;
 	}
 
@@ -291,6 +289,20 @@ public class IngressService extends ProjectAuthorityService {
 		}
 	}
 	
+	
+	public IngressControllerEntity getIngressController(IngressEntity ingress) {
+		ClusterEntity cluster = ingress.getNamespace().getCluster();
+		String ingressClass = ingress.getIngressClass();
+		
+		IngressControllerEntity ingressController = null;
+		if(ingressClass.equals("default")) {
+			ingressController = ingressControllerDomainService.getDefaultController(cluster);
+		} else {
+			ingressController = ingressControllerDomainService.getIngressController(cluster, ingressClass);
+		}
+		return ingressController;
+	}
+	
 	/**
 	 * endpoint 리스트 반환.
 	 * @param protocol
@@ -301,21 +313,33 @@ public class IngressService extends ProjectAuthorityService {
 	 */
 	private List<String> endpoints(String protocol, String host, String path, IngressEntity ingress) {		
 		List<String> endpoints = new ArrayList<>();
-		if(host == null) {
-			//엔드포인트 조회 후 아이피 넣어야함.
-			IngressControllerEntity ingressController = ingress.getIngressController();
-			
-			if(ingressController != null) {
-				String ingressControllerName = ingressController.getName();
-				if(ingressControllerName.equals(IngressEntity.INGRESS_NAME_NGINX)) {
-					IngressControllerDto.ResListDto  dto = IngressControllerDtoMapper.INSTANCE.toResListDto(ingressController);
-					
-					//ingressController가 존재하는 경우에만 Endpoint가 존재함.
-					//ingress 생성 후 ingressController를 설치한 경우라면 해당 ingress를 업데이트 해야 동작함.
-					
-					String serviceType = dto.getServiceType();
-					if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_NODE_PORT)) {
-						//Node Port
+		
+		//엔드포인트 조회 후 아이피 넣어야함.
+		IngressControllerEntity ingressController = getIngressController(ingress);
+		
+		if(ingressController != null) {
+			String ingressControllerName = ingressController.getName();
+			if(ingressControllerName.equals(IngressEntity.INGRESS_NAME_NGINX)) {
+				IngressControllerDto.ResListDto  dto = IngressControllerDtoMapper.INSTANCE.toResListDto(ingressController);
+				
+				//ingressController가 존재하는 경우에만 Endpoint가 존재함.
+				//ingress 생성 후 ingressController를 설치한 경우라면 해당 ingress를 업데이트 해야 동작함.
+				
+				String serviceType = dto.getServiceType();
+				if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_NODE_PORT)) {
+					//Node Port
+					if(host != null) {
+						//host가 지정된 경우.
+						List<ServicePort> ports = dto.getPort();
+						for(ServicePort port : ports) {
+							String prot = port.getProtocol();
+							Integer p = port.getPort();
+							
+							String endpoint = String.format("%s://%s:%d%s", prot, host, p, path);
+							endpoints.add(endpoint);
+						}
+					} else {
+						//ip							
 						Long clusterIdx = ingress.getNamespace().getCluster().getClusterIdx();																
 						List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
 						
@@ -329,24 +353,29 @@ public class IngressService extends ProjectAuthorityService {
 								endpoints.add(endpoint);
 							}
 						}
-						
-					} else if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_EXTERNAL_IPS)) {
-						//ExternalIps
-						
+					}
+				} else if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_EXTERNAL_IPS)) {
+					//ExternalIps					
+					if(host != null) {
+						String endpoint = String.format("%s://%s%s", protocol, host, path);
+						endpoints.add(endpoint);
+					} else {
 						List<String> ips = dto.getExternalIp();
 						for(String ip: ips) {
 							String endpoint = String.format("%s://%s%s", protocol, ip, path);
 							endpoints.add(endpoint);
 						}
 					}
-				} else {
-					log.error("Unknown ingress type: {}", ingressControllerName);
+					
 				}
-			} 
+			} else {
+				log.error("Unknown ingress type: {}", ingressControllerName);
+			}
 		} else {
-			String endpoint = String.format("%s://%s%s", protocol, host, path);
-			endpoints.add(endpoint);
+			//클러스터에 Ingress Controller가 설치 되지 않은 경우
+			//Endpoint는 존재하지 않음.
 		}
+		
 		return endpoints;
 	}
 

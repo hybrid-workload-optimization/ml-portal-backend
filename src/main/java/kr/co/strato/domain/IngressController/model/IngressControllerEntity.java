@@ -56,7 +56,7 @@ public class IngressControllerEntity {
 	private String ingressClass;
 	
 	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+	private String createdAt;
 	
 	@Column(name = "default_yn")
 	private String defaultYn;

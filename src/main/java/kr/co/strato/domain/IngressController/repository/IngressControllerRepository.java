@@ -17,4 +17,6 @@ public interface IngressControllerRepository extends JpaRepository<IngressContro
 	
 	public List<IngressControllerEntity> findByClusterAndDefaultYn(ClusterEntity cluster, String defaultYn);
 	
+	public IngressControllerEntity findByClusterAndName(ClusterEntity cluster, String name);
+	
 } 

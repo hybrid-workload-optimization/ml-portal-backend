@@ -41,6 +41,21 @@ public class IngressControllerDomainService {
 		return list.size() > 0;
 	}
 	
+	public IngressControllerEntity getDefaultController(ClusterEntity entity) {
+		List<IngressControllerEntity> list = ingressControllerRepository.findByClusterAndDefaultYn(entity, "Y");
+		if(list.size() > 0) {
+			return list.get(0);
+		}
+		return null;
+	}
+	
+	
+	public IngressControllerEntity getIngressController(ClusterEntity entity, String name) {
+		IngressControllerEntity ingressController = ingressControllerRepository.findByClusterAndName(entity, name);
+		return ingressController;
+	}
+	
+	
 	public Page<IngressControllerEntity> getList(Pageable pageable, Long clusterIdx) {
 		return ingressControllerRepository.getList(pageable, clusterIdx);
 	}

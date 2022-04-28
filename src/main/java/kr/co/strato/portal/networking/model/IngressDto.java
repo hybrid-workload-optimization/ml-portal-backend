@@ -5,7 +5,6 @@ import java.util.List;
 
 import kr.co.strato.global.validation.annotation.K8sKind;
 import kr.co.strato.global.validation.model.K8sKindType;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,7 +37,6 @@ public class IngressDto {
 		private LocalDateTime createdAt;
 		private Long namespaceIdx;
 		private String namespace;
-		private Long ingressControllerIdx;
 		private String clusterName;
 	}
 
@@ -57,7 +55,6 @@ public class IngressDto {
 		private String host;
 		private Long clusterId;
 		private Long clusterIdx;
-		private Long ingressControllerIdx;
 		private List<RuleList> ruleList;
 		private String clusterName;
 		private Long projectIdx;
