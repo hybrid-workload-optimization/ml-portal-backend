@@ -65,7 +65,7 @@ public class UserDomainService {
 			Optional<UserEntity> pUser = userRepository.findByUserId(entity.getUserId());
 			if(pUser.isPresent()) {
 				if(entity.getUserName() != null && !"".equals(entity.getUserName())) {
-					pUser.get().setContact(entity.getUserName());
+					pUser.get().setUserName(entity.getUserName());
 				}
 				if(entity.getContact() != null && !"".equals(entity.getContact())) {
 					pUser.get().setContact(entity.getContact());
