@@ -418,4 +418,20 @@ public class UserController extends CommonController {
 		return new ResponseWrapper<>(userDto);
 	}
 	
+	//수정
+	@GetMapping("/user/menu")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<List<UserDto.UserMenuDto>> userMenu(){
+		
+        List<UserDto.UserMenuDto> userMenuDto = null;
+		try {
+			userMenuDto = userService.getUserMenu(getLoginUser().getUserId());
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		}
+		
+		return new ResponseWrapper<>(userMenuDto);
+	}
+	
 }

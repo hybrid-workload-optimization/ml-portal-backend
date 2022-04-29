@@ -1,5 +1,7 @@
 package kr.co.strato.domain.user.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,5 +12,5 @@ public interface CustomUserRepository {
 	
 	Page<UserEntity> getListUserWithParam(Pageable pageable, UserDto.SearchParam param);
 	
-
+	List<UserDto.UserMenuDto> getUserMenu(String userId);
 }

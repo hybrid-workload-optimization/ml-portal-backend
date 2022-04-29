@@ -1,5 +1,6 @@
 package kr.co.strato.domain.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.javassist.NotFoundException;
@@ -16,6 +17,7 @@ import kr.co.strato.domain.user.repository.UserResetPasswordRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.SearchParam;
 import lombok.extern.slf4j.Slf4j;
 
@@ -207,5 +209,12 @@ public class UserDomainService {
 	public void deleteResetPasswordRequest(String userId) {
 		resetPasswordRepostory.deleteByUserId(userId);
 	}
-
+	
+	/**
+	 * 사용자의 메뉴 접근 현황
+	 * @param userId
+	 */
+	public List<UserDto.UserMenuDto> getUserMenu(String userId) {
+		return userRepository.getUserMenu(userId);
+	}
 }

@@ -103,4 +103,17 @@ public class UserDto {
         private String userId;
         private String userPassword;
     }
+    
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class UserMenuDto {
+        private String userId;
+        private String menuName;
+        private Long userRoleMenuIdx;
+        private String viewableYn;
+        private String writableYn;
+    }
 }

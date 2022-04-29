@@ -1,5 +1,11 @@
 package kr.co.strato.domain.user.repository;
 
+import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
+import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
+import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
+import static kr.co.strato.domain.user.model.QUserRoleMenuEntity.userRoleMenuEntity;
+import static kr.co.strato.domain.menu.model.QMenuEntity.menuEntity;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -12,13 +18,20 @@ import org.springframework.data.domain.Pageable;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.project.model.QProjectUserEntity;
 import kr.co.strato.domain.user.model.QUserEntity;
 import kr.co.strato.domain.user.model.QUserRoleEntity;
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.SearchParam;
 
 public class CustomUserRepositoryImpl implements CustomUserRepository {
@@ -94,6 +107,27 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		
 		return new PageImpl<>(list, pageable, total);
 
+	}
+	
+	@Override
+	public List<UserDto.UserMenuDto> getUserMenu(String userId) {
+		
+		List<UserDto.UserMenuDto> result = jpaQueryFactory
+				.select(Projections.fields(
+						UserDto.UserMenuDto.class,
+						userEntity.userId, 
+						menuEntity.menuName,
+						userRoleMenuEntity.viewableYn,
+						userRoleMenuEntity.writableYn
+				  ))
+				  .from(userEntity)
+				  .join(userRoleEntity).on(userEntity.userRole.id.eq(userRoleEntity.id))
+				  .join(userRoleMenuEntity).on(userRoleEntity.id.eq(userRoleMenuEntity.userRole.id))
+				  .join(menuEntity).on(userRoleMenuEntity.menu.menuIdx.eq(menuEntity.menuIdx))
+				  .where(userEntity.userId.eq(userId))
+				  .fetch();
+		
+		return result;
 	}
 
 }

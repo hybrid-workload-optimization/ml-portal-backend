@@ -409,5 +409,14 @@ public class UserService {
 		return null;
 	}
 	
-
+	/**
+	 * 사용자의 메뉴 접근 현황
+	 * @param userId
+	 * @return
+	 */
+	public List<UserDto.UserMenuDto> getUserMenu(String userId) {
+		List<UserDto.UserMenuDto> userMenu = userDomainService.getUserMenu(userId);
+		
+		return userMenu;
+	}
 }
