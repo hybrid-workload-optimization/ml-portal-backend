@@ -387,8 +387,13 @@ public class UserService {
 		String userId = changeUserDto.getUserId();
 		UserEntity entity = userDomainService.getUserInfoByUserId(changeUserDto.getUserId());
 		if(entity != null) {
-			//패스워드 변경
-			patchUserPassword(changeUserDto.getUserId(), changeUserDto.getUserPassword());
+			
+			String password = changeUserDto.getUserPassword();
+			if(password != null && password.length() > 0) {
+				//패스워드 변경
+				patchUserPassword(changeUserDto.getUserId(), password);
+			}
+			
 			
 			//디비 정보 변경.
 			entity.setUserName(changeUserDto.getUserName());
