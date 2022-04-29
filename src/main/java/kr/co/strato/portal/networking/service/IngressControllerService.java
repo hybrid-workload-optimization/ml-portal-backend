@@ -34,6 +34,9 @@ public class IngressControllerService {
 	private IngressControllerDomainService ingressControllerDomainService;
 	
 	@Autowired
+	private IngressService ingressService;
+	
+	@Autowired
 	private ClusterDomainService clusterDomainService;
 
 	/**
@@ -82,7 +85,13 @@ public class IngressControllerService {
 			//DB저장
 			IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
 			entity.setCreatedAt(DateUtil.currentDateTime());
-			return ingressControllerDomainService.registry(entity);
+			
+			Long id = ingressControllerDomainService.registry(entity);
+			
+			//IngressRule 업데이트
+			updateIngressRule(entity);
+			
+			return id;
 		}
 		
 		log.info("Ingress Controller - Create fail. k8s 리소스 생성 실패");
@@ -155,7 +164,13 @@ public class IngressControllerService {
 			//DB저장
 			IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
 			entity.setCreatedAt(oldEntity.getCreatedAt());
-			return ingressControllerDomainService.update(entity);
+			
+			Long id = ingressControllerDomainService.update(entity);
+			
+			//IngressRule 업데이트
+			updateIngressRule(entity);			
+			
+			return id;
 		}
 		
 		log.info("Ingress Controller - Update fail. k8s 리소스 수정 실패");
@@ -184,10 +199,14 @@ public class IngressControllerService {
 			//k8s 리소스 삭제
 			boolean isOk = ingressControllerAdapterService.remove(deleteParam);
 			log.info("Ingress Controller - K8S resource remove result: {}", isOk);
-			log.info("Ingress Controller - K8S resource remove ID: {}", ingressControllerIdx);
+			log.info("Ingress Controller - K8S resource remove ID: {}", ingressControllerIdx);		
 			
 			//DB 정보 삭제
 			ingressControllerDomainService.deleteById(ingressControllerIdx);
+			
+			//IngressRule 업데이트
+			updateIngressRule(entity);
+			
 			return true;
 		}
 		
@@ -207,6 +226,15 @@ public class IngressControllerService {
 				.collect(Collectors.toList());
 		Page<IngressControllerDto.ResListDto> page = new PageImpl<>(dlist, pageable, list.getTotalElements());
 		return page;
+	}
+	
+	/**
+	 * ingressController와 연결된 Ingress 리스트 반환.
+	 * @param ingressController
+	 * @return
+	 */
+	public void updateIngressRule(IngressControllerEntity ingressController) {
+		ingressService.updateIngressRule(ingressController);
 	}
 	
 }

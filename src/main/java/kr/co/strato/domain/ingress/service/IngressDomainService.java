@@ -1,6 +1,7 @@
 package kr.co.strato.domain.ingress.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,4 +94,12 @@ public class IngressDomainService {
 		return ingressRepository.deleteByNamespace(namespace);
 	}
 	
+	/**
+	 * IngressController를 사용하는 Ingress 리스트 반환.
+	 * @param ingressController
+	 * @return
+	 */
+	public List<IngressEntity> getIngressByIngressController(IngressControllerEntity ingressController) {
+		return ingressRepository.getIngress(ingressController);
+	}
 }

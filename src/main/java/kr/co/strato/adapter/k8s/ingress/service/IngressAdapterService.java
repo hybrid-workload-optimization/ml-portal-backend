@@ -128,4 +128,23 @@ public class IngressAdapterService {
 		}
 	}
     
+    /**
+     * Ingress 반환.
+     * @param clusterId
+     * @param namespaceName
+     * @param ingressName
+     * @return
+     * @throws Exception
+     */
+    public Ingress get(Long clusterId, String namespaceName, String ingressName) throws Exception {
+		log.debug("[Get Ingress] request : {}/{}/{}", clusterId, namespaceName, ingressName);
+		String response = inNamespaceProxy.getResource(ResourceType.ingress.get(), clusterId, namespaceName, ingressName);
+		log.debug("[Get Ingress] response : {}", response);
+		
+		ObjectMapper mapper = new ObjectMapper(); 
+		Ingress result = mapper.readValue(response, new TypeReference<Ingress>(){});
+		
+		return result;
+	}
+    
 }

@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
@@ -162,6 +163,8 @@ public class IngressService extends ProjectAuthorityService {
 			try {
 				// k8s Object -> Entity
 				IngressEntity ingress = toEntity(i, clusterId, clusterIdx);
+				ingress.setCluster(clusterEntity);
+				
 				// save
 				Long id = ingressDomainService.register(ingress);
 
@@ -190,6 +193,7 @@ public class IngressService extends ProjectAuthorityService {
 		List<Long> ids = ingress.stream().map(i -> {
 			try {
 				IngressEntity updateIngress = toEntity(i, clusterId, clusterIdx);
+				updateIngress.setCluster(clusterEntity);
 
 				Long id = ingressDomainService.update(updateIngress, ingressId);
 
@@ -209,7 +213,7 @@ public class IngressService extends ProjectAuthorityService {
 			}
 		}).collect(Collectors.toList());
 		return ids;
-	}
+	}	
 
 	private IngressEntity toEntity(Ingress i, Long clusterId, Long clusterIdx) throws JsonProcessingException {
 		// k8s Object -> Entity
@@ -377,6 +381,56 @@ public class IngressService extends ProjectAuthorityService {
 		}
 		
 		return endpoints;
+	}
+	
+	/**
+	 * IngressController에 소속된 모든 ingress 룰 업데이트
+	 * IngressController 생성, 수정, 삭제 only
+	 * @param ingressControllerEntity
+	 * @throws Exception
+	 */
+	public void updateIngressRule(IngressControllerEntity ingressControllerEntity) {
+		List<IngressEntity> list = ingressDomainService.getIngressByIngressController(ingressControllerEntity);
+		if(list != null) {
+			list.forEach(i -> {
+				try {
+					updateIngressRule(i);
+				} catch (Exception e) {
+					log.error("", e);
+				}
+			});
+		}
+	}
+	
+	
+	/**
+	 * Ingress Rule 업데이트
+	 * IngressController 생성, 수정, 삭제 only
+	 * @param ingressEntity
+	 * @throws Exception
+	 */
+	public void updateIngressRule(IngressEntity ingressEntity) throws Exception {
+		Long id = ingressEntity.getId();
+		Long kubeConfigId = ingressEntity.getCluster().getClusterId();
+		String namespace = ingressEntity.getNamespace().getName();
+		String name = ingressEntity.getName();
+		
+		//기존 룰 삭제
+		boolean ruleDel = ingressRuleDomainService.delete(id);
+		if (ruleDel) {
+			Ingress ingress = null;
+			try {
+				ingress = ingressAdapterService.get(kubeConfigId, namespace, name);
+				
+				//ingressController 반영을 위해 ingress update.			
+				String yaml =  Serialization.asYaml(ingress);
+				ingressAdapterService.registerIngress(kubeConfigId, yaml);
+			} catch(Exception e) {
+				log.error("", e);
+			}
+			// ingress rule save
+			ingressRuleRegister(ingress, id);
+		}
 	}
 
 }

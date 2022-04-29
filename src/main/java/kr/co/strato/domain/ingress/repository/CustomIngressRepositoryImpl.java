@@ -9,27 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.cluster.model.QClusterEntity;
-import kr.co.strato.domain.cronjob.model.QCronJobEntity;
-import kr.co.strato.domain.deployment.model.QDeploymentEntity;
 import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.QIngressEntity;
 import kr.co.strato.domain.ingress.model.QIngressRuleEntity;
-import kr.co.strato.domain.job.model.QJobEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
-import kr.co.strato.domain.persistentVolumeClaim.model.QPersistentVolumeClaimEntity;
-import kr.co.strato.domain.pod.model.QPodEntity;
-import kr.co.strato.domain.pod.model.QPodJobEntity;
-import kr.co.strato.domain.pod.model.QPodPersistentVolumeClaimEntity;
-import kr.co.strato.domain.pod.model.QPodReplicaSetEntity;
-import kr.co.strato.domain.pod.model.QPodStatefulSetEntity;
-import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
-import kr.co.strato.domain.service.model.QServiceEndpointEntity;
-import kr.co.strato.domain.service.model.QServiceEntity;
-import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
 
 public class CustomIngressRepositoryImpl implements CustomIngressRepository{
     private final JPAQueryFactory jpaQueryFactory;
@@ -89,5 +76,31 @@ public class CustomIngressRepositoryImpl implements CustomIngressRepository{
           .execute();
     	  
     }
+    
+    @Override
+	public List<IngressEntity> getIngress(IngressControllerEntity ingressController) {
+        QIngressEntity qIngressEntity = QIngressEntity.ingressEntity;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        BooleanBuilder builderIngressClass = new BooleanBuilder();
+        builder.and(qIngressEntity.cluster.clusterIdx.eq(ingressController.getCluster().getClusterIdx()));
+        builder.and(builderIngressClass);
+        
+        
+        builderIngressClass.and(qIngressEntity.ingressClass.eq(ingressController.getIngressClass()));
+        if(ingressController.getDefaultYn().equals("Y")) {
+        	builderIngressClass.or(qIngressEntity.ingressClass.eq("default"));
+        }
+
+        QueryResults<IngressEntity> results =
+                jpaQueryFactory
+                        .select(qIngressEntity)
+                        .from(qIngressEntity)
+                        .where(builder)
+                        .fetchResults();
+
+        List<IngressEntity> content = results.getResults();
+        return content;
+	}
 
 }
