@@ -6,13 +6,14 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.repository.CronJobRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class CronJobDomainService {
+public class CronJobDomainService implements InNamespaceDomainService {
 	
 	@Autowired
 	CronJobRepository cronJobRepository;
@@ -40,5 +41,11 @@ public class CronJobDomainService {
 	
 	public Integer deleteByNamespaceEntity(NamespaceEntity namespace) {
 		return cronJobRepository.deleteByNamespaceEntity(namespace);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = cronJobRepository.getCronJob(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

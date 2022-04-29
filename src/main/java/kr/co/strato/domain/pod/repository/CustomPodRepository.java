@@ -20,4 +20,6 @@ public interface CustomPodRepository {
 //	public DaemonSetEntity getPodDaemonSet(Long podId);
 	public ReplicaSetEntity getPodReplicaSet(Long podId);
 	public JobEntity getPodJob(Long podId);
+	
+	public PodEntity getPod(Long clusterIdx, String namespace, String name);
 }

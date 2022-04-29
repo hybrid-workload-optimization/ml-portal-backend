@@ -9,7 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.pod.repository.PodRepository;
@@ -17,9 +19,10 @@ import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.domain.statefulset.repository.StatefulSetRepository;
 import kr.co.strato.global.error.exception.NoArgumentsRequiredForMethod;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
+import kr.co.strato.portal.common.service.InNamespaceService;
 
 @Service
-public class StatefulSetDomainService {
+public class StatefulSetDomainService implements InNamespaceDomainService {
     @Autowired
     private StatefulSetRepository statefulSetRepository;
     
@@ -114,5 +117,11 @@ public class StatefulSetDomainService {
 		list.forEach((e) -> {
 			delete(e.getId());
 		});
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object entity = statefulSetRepository.getStatefulSet(clusterIdx, namespace, name);
+		return entity != null;
 	}
 }

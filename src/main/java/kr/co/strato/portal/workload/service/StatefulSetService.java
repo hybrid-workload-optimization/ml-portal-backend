@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -28,6 +29,7 @@ import kr.co.strato.domain.statefulset.service.StatefulSetDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.StatefulSetDetailDto;
@@ -38,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class StatefulSetService extends ProjectAuthorityService {
+public class StatefulSetService extends InNamespaceService {
     @Autowired
     private StatefulSetDomainService statefulSetDomainService;
 
@@ -53,11 +55,18 @@ public class StatefulSetService extends ProjectAuthorityService {
 
     @Autowired
     private ProjectDomainService projectDomainService;
+    
+    @Autowired
+	ProjectAuthorityService projectAuthorityService;
+    
 
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createStatefulSet(StatefulSetDto.ReqCreateDto reqCreateDto){
         Long clusterIdx = reqCreateDto.getClusterIdx();
         ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+        
+        //이름 중복 채크
+        duplicateCheckResourceCreation(clusterIdx, reqCreateDto.getYaml());
 
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
 
@@ -180,7 +189,7 @@ public class StatefulSetService extends ProjectAuthorityService {
         Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+        projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
@@ -231,4 +240,9 @@ public class StatefulSetService extends ProjectAuthorityService {
 
         return statefulSet;
     }
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return statefulSetDomainService;
+	}
 }

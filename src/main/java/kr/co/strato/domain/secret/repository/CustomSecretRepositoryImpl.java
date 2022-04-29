@@ -11,6 +11,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.configMap.model.ConfigMapEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.secret.model.QSecretEntity;
 import kr.co.strato.domain.secret.model.SecretEntity;
@@ -55,5 +56,24 @@ public class CustomSecretRepositoryImpl implements CustomSecretRepository {
         long total = results.getTotal();
 
         return new PageImpl<>(content, pageable, total);
+	}
+
+	@Override
+	public SecretEntity getSecret(Long clusterIdx, String namespace, String name) {
+		QSecretEntity qEntity = QSecretEntity.secretEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.name.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		SecretEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
 	}
 }

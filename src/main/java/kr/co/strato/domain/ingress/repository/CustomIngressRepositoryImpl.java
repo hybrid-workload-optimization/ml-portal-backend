@@ -103,4 +103,23 @@ public class CustomIngressRepositoryImpl implements CustomIngressRepository{
         return content;
 	}
 
+	@Override
+	public IngressEntity getIngress(Long clusterIdx, String namespace, String name) {
+		QIngressEntity qEntity = QIngressEntity.ingressEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.name.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		IngressEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
+
 }

@@ -13,6 +13,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -40,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class PodDomainService {
+public class PodDomainService implements InNamespaceDomainService {
     @Autowired
     private PodRepository podRepository;
     
@@ -300,4 +301,10 @@ public class PodDomainService {
     	List<PodEntity> pods = podRepository.findByNode(nodeEntity);
 		pods.forEach(pod -> podRepository.delete(pod));
     }
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object entity = podRepository.getPod(clusterIdx, namespace, name);
+		return entity != null;
+	}
 }

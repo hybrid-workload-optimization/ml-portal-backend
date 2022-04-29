@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -16,7 +17,7 @@ import kr.co.strato.domain.replicaset.repository.ReplicaSetRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class DeploymentDomainService {
+public class DeploymentDomainService implements InNamespaceDomainService {
 	
 	@Autowired
 	DeploymentRepository deploymentRepository;
@@ -69,5 +70,11 @@ public class DeploymentDomainService {
 		deployments.forEach((e) -> {
 			delete(e.getDeploymentIdx());
 		});
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		DeploymentEntity entity = deploymentRepository.getDeployment(clusterIdx, namespace, name);
+		return entity != null;
 	}
 }

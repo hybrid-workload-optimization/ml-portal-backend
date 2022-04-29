@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -27,6 +28,7 @@ import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.PodDto;
@@ -37,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ReplicaSetService extends ProjectAuthorityService {
+public class ReplicaSetService extends InNamespaceService {
 
 	@Autowired
 	ReplicaSetAdapterService replicaSetAdapterService;
@@ -56,6 +58,9 @@ public class ReplicaSetService extends ProjectAuthorityService {
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
 	
 	/**
 	 * Replica Set 목록 조회
@@ -110,7 +115,7 @@ public class ReplicaSetService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 		
 		
 		// k8s - get replica set
@@ -140,6 +145,9 @@ public class ReplicaSetService extends ProjectAuthorityService {
 	public List<Long> registerReplicaSet(ReplicaSetDto replicaSetDto) throws Exception {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(replicaSetDto.getClusterIdx());
+		
+		//이름 중복 채크
+		duplicateCheckResourceCreation(cluster.getClusterId(), replicaSetDto.getYaml());
 		
 		// k8s - post replica set
 		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
@@ -281,6 +289,11 @@ public class ReplicaSetService extends ProjectAuthorityService {
 		String yaml = replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
 		
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return replicaSetDomainService;
 	}
 
 }

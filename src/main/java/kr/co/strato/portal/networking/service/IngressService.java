@@ -29,6 +29,7 @@ import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.service.IngressControllerDomainService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 import kr.co.strato.domain.ingress.service.IngressDomainService;
@@ -40,6 +41,7 @@ import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.networking.model.IngressControllerDto;
 import kr.co.strato.portal.networking.model.IngressControllerDtoMapper;
@@ -50,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class IngressService extends ProjectAuthorityService {
+public class IngressService extends InNamespaceService {
 
 	@Autowired
 	private IngressAdapterService ingressAdapterService;
@@ -72,6 +74,9 @@ public class IngressService extends ProjectAuthorityService {
 
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
 
 	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable, IngressDto.SearchParam searchParam) {
 		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable, searchParam.getClusterIdx(),
@@ -135,7 +140,7 @@ public class IngressService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 
 		// 메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 
 		IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
 		List<IngressDto.RuleList> ruleDto = ruleList.stream().map(c -> IngressDtoMapper.INSTANCE.toRuleListDto(c))
@@ -152,10 +157,14 @@ public class IngressService extends ProjectAuthorityService {
 	}
 
 	public List<Long> registerIngress(IngressDto.ReqCreateDto yamlApplyParam) {
+		Long clusterIdx = yamlApplyParam.getKubeConfigId();
+		
+		//이름 중복 채크
+		duplicateCheckResourceCreation(clusterIdx, yamlApplyParam.getYaml());
+		
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
-		ClusterEntity clusterEntity = clusterDomainService.get(yamlApplyParam.getKubeConfigId());
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
-		Long clusterIdx = clusterEntity.getClusterIdx();
 		List<Ingress> ingressList = ingressAdapterService.registerIngress(clusterId, yamlDecode);
 		List<Long> ids = new ArrayList<>();
 
@@ -431,6 +440,11 @@ public class IngressService extends ProjectAuthorityService {
 			// ingress rule save
 			ingressRuleRegister(ingress, id);
 		}
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return ingressDomainService;
 	}
 
 }

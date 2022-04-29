@@ -15,8 +15,6 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.replicaset.model.QReplicaSetEntity;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
-import kr.co.strato.domain.statefulset.model.QStatefulSetEntity;
-import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 
 public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepository {
 
@@ -81,4 +79,23 @@ public class CustomReplicaSetRepositoryImpl implements CustomReplicaSetRepositor
 
 		return results;
     }
+
+	@Override
+	public ReplicaSetEntity getReplicaSet(Long clusterIdx, String namespace, String name) {
+		QReplicaSetEntity qEntity = QReplicaSetEntity.replicaSetEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		 
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.replicaSetName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		ReplicaSetEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }

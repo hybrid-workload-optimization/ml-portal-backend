@@ -11,4 +11,6 @@ public interface CustomJobRepository {
 	public JobEntity findByUidAndNamespaceIdx(String jobUid, NamespaceEntity namespaceEntity);
 	
 	Page<JobEntity> getPageList(Pageable pageable, JobArgDto args);
+	
+	public JobEntity getJob(Long clusterIdx, String namespace, String name);
 }

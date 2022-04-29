@@ -23,6 +23,7 @@ import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
 import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.deployment.service.DeploymentDomainService;
@@ -31,12 +32,12 @@ import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.pod.repository.PodRepository;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
-import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.replicaset.service.ReplicaSetDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
@@ -46,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DeploymentService extends ProjectAuthorityService {	
+public class DeploymentService extends InNamespaceService {	
 	@Autowired
 	DeploymentDomainService deploymentDomainService;
 	
@@ -75,7 +76,8 @@ public class DeploymentService extends ProjectAuthorityService {
 	private ProjectDomainService projectDomainService;
 	
 	@Autowired
-	private ProjectUserDomainService projectUserDomainService;
+	private ProjectAuthorityService projectauthorityService;
+	
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto args){
@@ -128,7 +130,7 @@ public class DeploymentService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectauthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 
 		String replicaSetUid = null;
 		Deployment deployment = null;
@@ -186,8 +188,12 @@ public class DeploymentService extends ProjectAuthorityService {
 			
 	
 	//생성
-	public void create(DeploymentArgDto deploymentArgDto){
+	public void create(DeploymentArgDto deploymentArgDto) {
 		Long clusterIdx = deploymentArgDto.getClusterIdx();
+		
+		//이름 중복 채크
+		duplicateCheckResourceCreation(clusterIdx, deploymentArgDto.getYaml());
+		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		deploymentArgDto.setClusterId(clusterIdx);
 		
@@ -392,5 +398,10 @@ public class DeploymentService extends ProjectAuthorityService {
 				.build();
 
 		return result;
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return deploymentDomainService;
 	}
 }

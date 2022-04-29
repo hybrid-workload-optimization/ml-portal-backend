@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import kr.co.strato.adapter.k8s.daemonset.service.DaemonSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
 import kr.co.strato.domain.daemonset.service.DaemonSetDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -27,6 +28,7 @@ import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.DaemonSetDto;
@@ -36,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DaemonSetService extends ProjectAuthorityService {
+public class DaemonSetService extends InNamespaceService {
 
 	@Autowired
 	DaemonSetAdapterService daemonSetAdapterService;
@@ -55,6 +57,9 @@ public class DaemonSetService extends ProjectAuthorityService {
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
 	
 	/**
 	 * Daemon Set 목록 조회
@@ -100,6 +105,9 @@ public class DaemonSetService extends ProjectAuthorityService {
 	 */
 	public List<Long> registerDaemonSet(DaemonSetDto daemonSetDto) throws Exception {
 		
+		//이름 중복 채크.
+		duplicateCheckResourceCreation(daemonSetDto.getClusterIdx(), daemonSetDto.getYaml());
+		
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(daemonSetDto.getClusterIdx());
 		
@@ -144,7 +152,7 @@ public class DaemonSetService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 		
 		// k8s - get daemon set
 		DaemonSet daemonSet = daemonSetAdapterService.get(clusterId, namespaceName, daemonSetName);
@@ -282,5 +290,10 @@ public class DaemonSetService extends ProjectAuthorityService {
                 .build();
 
         return result;
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return daemonSetDomainService;
 	}
 }

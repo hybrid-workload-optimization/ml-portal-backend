@@ -11,19 +11,7 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.model.UserRoleMenuEntity;
 import kr.co.strato.global.error.exception.PermissionDenyException;
 import kr.co.strato.global.error.exception.PortalException;
-import kr.co.strato.portal.config.service.ConfigMapService;
-import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
-import kr.co.strato.portal.config.service.SecretService;
-import kr.co.strato.portal.networking.service.IngressService;
-import kr.co.strato.portal.networking.service.K8sServiceService;
 import kr.co.strato.portal.setting.model.UserDto;
-import kr.co.strato.portal.workload.service.CronJobService;
-import kr.co.strato.portal.workload.service.DaemonSetService;
-import kr.co.strato.portal.workload.service.DeploymentService;
-import kr.co.strato.portal.workload.service.JobService;
-import kr.co.strato.portal.workload.service.PodService;
-import kr.co.strato.portal.workload.service.ReplicaSetService;
-import kr.co.strato.portal.workload.service.StatefulSetService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,10 +21,6 @@ public class ProjectAuthorityService {
 	@Autowired
 	private ProjectUserDomainService projectUserDomainService;
 	
-	public void chechAuthority(Long projectIdx, UserDto loginUser) {
-		Long menuCode = getMenuCode();
-		chechAuthority(menuCode, projectIdx, loginUser);
-	}
 	
 	/**
 	 * 접근 권한이 있는지 확인하여 권한이 없는경우 11003 에러 발생
@@ -60,7 +44,7 @@ public class ProjectAuthorityService {
 		List<UserRoleMenuEntity> list = roleEntity.getUserRoleMenus();
 		for(UserRoleMenuEntity userRole: list) {
 			MenuEntity memu = userRole.getMenu();
-			System.out.println(memu.getMenuIdx());
+			
 			if(memu.getMenuIdx().equals(menuCode)) {
 				isCheck = true;
 				String viewYn = userRole.getViewableYn().toUpperCase();
@@ -85,48 +69,5 @@ public class ProjectAuthorityService {
 			log.error("Detail Page - menuCode: {}", menuCode);
 			throw new PortalException();
 		}
-	}
-	
-	private Long getMenuCode() {
-		Long menuCode = null;
-		
-		//WORKLOAD
-		if(this instanceof DeploymentService) {
-			menuCode = 103010L;
-		} else if(this instanceof CronJobService) {
-			menuCode = 103040L;
-		} else if(this instanceof DaemonSetService) {
-			menuCode = 103070L;
-		} else if(this instanceof JobService) {
-			menuCode = 103050L;
-		} else if(this instanceof PodService) {
-			menuCode = 103030L;
-		} else if(this instanceof ReplicaSetService) {
-			menuCode = 103060L;
-		} else if(this instanceof StatefulSetService) {
-			menuCode = 103020L;
-		} 
-		
-		//CONFIG		
-		else if(this instanceof PersistentVolumeClaimService) {
-			menuCode = 105010L;
-		}
-		
-		else if(this instanceof ConfigMapService) {
-			menuCode = 105020L;
-		}
-		
-		else if(this instanceof SecretService) {
-			menuCode = 105030L;
-		}
-		
-		//NETWORKING
-		else if(this instanceof IngressService) {
-			menuCode = 104020L;
-		} else if(this instanceof K8sServiceService) {
-			menuCode = 104010L;
-		}
-		
-		return menuCode;
 	}
 }

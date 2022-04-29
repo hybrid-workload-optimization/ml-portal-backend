@@ -8,4 +8,5 @@ import kr.co.strato.domain.secret.model.SecretEntity;
 public interface CustomSecretRepository {
 
 	public Page<SecretEntity> getSecretList(Pageable pageable, Long projectIdx, Long clusterIdx, Long namespaceIdx);
+	public SecretEntity getSecret(Long clusterIdx, String namespace, String name);
 }

@@ -10,15 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.adapter.k8s.common.model.ResourceType;
-import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
-import kr.co.strato.domain.persistentVolumeClaim.repository.CustomPersistentVolumeClaimRepository;
 import kr.co.strato.domain.persistentVolumeClaim.repository.PersistentVolumeClaimRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class PersistentVolumeClaimDomainService {
+public class PersistentVolumeClaimDomainService implements InNamespaceDomainService {
 
 	@Autowired
 	private PersistentVolumeClaimRepository persistentVolumeClaimRepository;
@@ -50,5 +48,11 @@ public class PersistentVolumeClaimDomainService {
 	
 	public void delete(PersistentVolumeClaimEntity persistentVolumeClaimEntity) {
 		persistentVolumeClaimRepository.delete(persistentVolumeClaimEntity);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = persistentVolumeClaimRepository.getPersistentVolumeClaim(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

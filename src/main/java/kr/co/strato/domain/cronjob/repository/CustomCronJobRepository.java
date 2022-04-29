@@ -8,4 +8,5 @@ import kr.co.strato.portal.workload.model.CronJobArgDto;
 
 public interface CustomCronJobRepository {
 	Page<CronJobEntity> getPageList(Pageable pageable, CronJobArgDto args);
+	public CronJobEntity getCronJob(Long clusterIdx, String namespace, String name);
 }

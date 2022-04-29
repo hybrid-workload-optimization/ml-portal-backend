@@ -7,13 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.domain.configMap.model.ConfigMapEntity;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.secret.model.SecretEntity;
 import kr.co.strato.domain.secret.repository.SecretRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class SecretDomainService {
+public class SecretDomainService implements InNamespaceDomainService {
 
 	@Autowired
 	private SecretRepository secretRepository;
@@ -39,5 +39,11 @@ public class SecretDomainService {
 	
 	public void delete(SecretEntity secretEntity) {
 		secretRepository.delete(secretEntity);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = secretRepository.getSecret(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

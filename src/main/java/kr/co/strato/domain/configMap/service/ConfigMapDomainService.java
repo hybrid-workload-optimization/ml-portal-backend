@@ -7,14 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.configMap.model.ConfigMapEntity;
 import kr.co.strato.domain.configMap.repository.ConfigMapRepository;
-import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
-import kr.co.strato.domain.persistentVolumeClaim.repository.PersistentVolumeClaimRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class ConfigMapDomainService {
+public class ConfigMapDomainService implements InNamespaceDomainService {
 
 	@Autowired
 	private ConfigMapRepository configMapRepository;
@@ -40,5 +39,11 @@ public class ConfigMapDomainService {
 	
 	public void delete(ConfigMapEntity configMapEntity) {
 		configMapRepository.delete(configMapEntity);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = configMapRepository.getConfigMap(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

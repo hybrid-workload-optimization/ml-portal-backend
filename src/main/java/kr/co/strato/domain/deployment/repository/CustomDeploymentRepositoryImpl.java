@@ -2,7 +2,6 @@ package kr.co.strato.domain.deployment.repository;
 
 import java.util.List;
 
-import kr.co.strato.domain.cluster.model.QClusterEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -11,9 +10,11 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.model.QDeploymentEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
+import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
 
 public class CustomDeploymentRepositoryImpl  implements CustomDeploymentRepository{
@@ -54,4 +55,23 @@ public class CustomDeploymentRepositoryImpl  implements CustomDeploymentReposito
 
         return new PageImpl<>(content, pageable, total);
     }
+
+	@Override
+	public DeploymentEntity getDeployment(Long clusterIdx, String namespace, String name) {
+		QDeploymentEntity qDeploymentEntity = QDeploymentEntity.deploymentEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qDeploymentEntity.deploymentName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		DeploymentEntity results = jpaQueryFactory
+				.selectFrom(qDeploymentEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qDeploymentEntity.namespaceEntity.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }

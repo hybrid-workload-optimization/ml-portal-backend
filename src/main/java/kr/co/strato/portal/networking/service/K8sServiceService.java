@@ -26,6 +26,7 @@ import kr.co.strato.adapter.k8s.endpoint.EndpointAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.service.model.ServiceEndpointEntity;
@@ -35,6 +36,7 @@ import kr.co.strato.domain.service.service.ServiceDomainService;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.networking.model.K8sServiceDto;
 import kr.co.strato.portal.networking.model.K8sServiceDtoMapper;
@@ -43,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @org.springframework.stereotype.Service
 @Slf4j
-public class K8sServiceService extends ProjectAuthorityService {
+public class K8sServiceService extends InNamespaceService {
     @Autowired
     private ServiceDomainService serviceDomainService;
 
@@ -58,6 +60,9 @@ public class K8sServiceService extends ProjectAuthorityService {
     
     @Autowired
    	ProjectDomainService projectDomainService;
+    
+    @Autowired
+	ProjectAuthorityService projectAuthorityService;
 
 
 
@@ -79,6 +84,10 @@ public class K8sServiceService extends ProjectAuthorityService {
     @Transactional(rollbackFor = Exception.class)
     public List<Long> createService(K8sServiceDto.ReqCreateDto reqCreateDto){
         Long clusterIdx = reqCreateDto.getClusterIdx();
+        
+        //이름 중복 채크
+        duplicateCheckResourceCreation(clusterIdx, reqCreateDto.getYaml());
+        
         ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 
         String yaml = Base64Util.decode(reqCreateDto.getYaml());
@@ -173,7 +182,7 @@ public class K8sServiceService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 
         Endpoints endpoints = endpointAdapterService.get(clusterId, namespaceName, service.getServiceName());
 
@@ -265,5 +274,10 @@ public class K8sServiceService extends ProjectAuthorityService {
 
         return entities;
     }
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return serviceDomainService;
+	}
 
 }

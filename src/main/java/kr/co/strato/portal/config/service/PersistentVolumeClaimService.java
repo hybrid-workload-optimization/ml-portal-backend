@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.persistentVolumeClaim.service.PersistentVolumeClaimAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
@@ -27,6 +28,7 @@ import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.config.model.PersistentVolumeClaimDtoMapper;
@@ -35,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class PersistentVolumeClaimService extends ProjectAuthorityService {
+public class PersistentVolumeClaimService extends InNamespaceService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
@@ -52,6 +54,9 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
 	@Autowired
 	ProjectDomainService projectDomainService;
 	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
+	
 	/**
 	 * Persistent Volume Claim 등록
 	 * 
@@ -60,6 +65,9 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
 	 * @throws Exception
 	 */
 	public List<Long> registerPersistentVolumeClaim(PersistentVolumeClaimDto persistentVolumeClaimDto) throws Exception {
+		
+		//이름 중복 채크
+		duplicateCheckResourceCreation(persistentVolumeClaimDto.getClusterIdx(), persistentVolumeClaimDto.getYaml());
 		
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(persistentVolumeClaimDto.getClusterIdx());
@@ -140,7 +148,7 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 		
 		
 		// k8s - get Persistent Volume Claim
@@ -306,5 +314,10 @@ public class PersistentVolumeClaimService extends ProjectAuthorityService {
                 .build();
 
         return result;
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return persistentVolumeClaimDomainService;
 	}
 }

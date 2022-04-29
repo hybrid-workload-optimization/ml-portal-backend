@@ -19,4 +19,6 @@ public interface CustomIngressRepository {
      */
     public List<IngressEntity> getIngress(IngressControllerEntity ingressController);
     
+    public IngressEntity getIngress(Long clusterIdx, String namespace, String name);
+    
 }

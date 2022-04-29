@@ -56,4 +56,23 @@ public class CustomDaemonSetRepositoryImpl implements CustomDaemonSetRepository 
 
         return new PageImpl<>(content, pageable, total);
 	}
+
+	@Override
+	public DaemonSetEntity getDaemonSet(Long clusterIdx, String namespace, String name) {
+		QDaemonSetEntity qEntity = QDaemonSetEntity.daemonSetEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.daemonSetName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		DaemonSetEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }

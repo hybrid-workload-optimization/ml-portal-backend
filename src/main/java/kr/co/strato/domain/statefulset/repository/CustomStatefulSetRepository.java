@@ -10,4 +10,6 @@ public interface CustomStatefulSetRepository {
     public Page<StatefulSetEntity> getStatefulSetList(Pageable pageable, Long projectId, Long clusterId, Long namespaceId);
     
     public StatefulSetEntity findByUidAndNamespaceIdx(String statefulSetUid, NamespaceEntity namespaceEntity);
+    
+    public StatefulSetEntity getStatefulSet(Long clusterIdx, String namespace, String name);
 }

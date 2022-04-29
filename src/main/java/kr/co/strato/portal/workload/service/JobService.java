@@ -26,6 +26,7 @@ import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.repository.JobRepository;
 import kr.co.strato.domain.job.service.JobDomainService;
@@ -37,6 +38,7 @@ import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.JobArgDto;
@@ -49,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class JobService extends ProjectAuthorityService {
+public class JobService extends InNamespaceService {
 	@Autowired
 	JobDomainService jobDomainService;
 	
@@ -70,6 +72,9 @@ public class JobService extends ProjectAuthorityService {
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
 	
 	//목록
 	public Page<JobDto> getList(PageRequest pageRequest, JobArgDto args){
@@ -97,7 +102,7 @@ public class JobService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 		
 		
 		Job job = jobAdapterService.retrieve(kubeConfigId, namespace.getName(), entitiy.getJobName());
@@ -168,6 +173,9 @@ public class JobService extends ProjectAuthorityService {
 	private void save(JobArgDto jobArgDto){
 		Long clusterIdx = jobArgDto.getClusterIdx();
 		String yaml = jobArgDto.getYaml();
+		
+		 //이름 중복 채크
+        duplicateCheckResourceCreation(clusterIdx, yaml);
 		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
@@ -276,4 +284,9 @@ public class JobService extends ProjectAuthorityService {
 
         return deploymentEntity;
     }
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return jobDomainService;
+	}
 }

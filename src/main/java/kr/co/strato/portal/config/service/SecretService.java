@@ -16,14 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
-import kr.co.strato.adapter.k8s.configMap.service.ConfigMapAdapterService;
 import kr.co.strato.adapter.k8s.secret.service.SecretAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.configMap.model.ConfigMapEntity;
-import kr.co.strato.domain.configMap.service.ConfigMapDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -32,9 +29,8 @@ import kr.co.strato.domain.secret.model.SecretEntity;
 import kr.co.strato.domain.secret.service.SecretDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
-import kr.co.strato.portal.config.model.ConfigMapDto;
-import kr.co.strato.portal.config.model.ConfigMapDtoMapper;
 import kr.co.strato.portal.config.model.SecretDto;
 import kr.co.strato.portal.config.model.SecretDtoMapper;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -42,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class SecretService extends ProjectAuthorityService {
+public class SecretService extends InNamespaceService {
 
 	@Autowired
 	ClusterDomainService clusterDomainService;
@@ -59,6 +55,9 @@ public class SecretService extends ProjectAuthorityService {
 	@Autowired
 	ProjectDomainService projectDomainService;
 	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
+	
 	/**
 	 * Secret 등록
 	 * 
@@ -67,6 +66,9 @@ public class SecretService extends ProjectAuthorityService {
 	 * @throws Exception
 	 */
 	public List<Long> registerSecret(SecretDto secretDto) throws Exception {
+		
+		//이름 중복 채크
+		duplicateCheckResourceCreation(secretDto.getClusterIdx(), secretDto.getYaml());
 		
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(secretDto.getClusterIdx());
@@ -144,7 +146,7 @@ public class SecretService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode() ,projectIdx, loginUser);
 		
 		// k8s - get secret
 		//Secret secret = secretAdapterService.get(clusterId, namespaceName, secretName);
@@ -280,5 +282,10 @@ public class SecretService extends ProjectAuthorityService {
                 .build();
 
         return result;
+	}
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return secretDomainService;
 	}
 }

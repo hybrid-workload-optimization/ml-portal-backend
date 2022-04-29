@@ -8,4 +8,5 @@ import kr.co.strato.portal.workload.model.DeploymentArgDto;
 
 public interface CustomDeploymentRepository {
 	public Page<DeploymentEntity> getDeploymentPageList(Pageable pageable, DeploymentArgDto args);
+	public DeploymentEntity getDeployment(Long clusterIdx, String namespace, String name);
 }

@@ -163,5 +163,26 @@ public class CustomPodRepositoryImpl implements CustomPodRepository {
 		List<PodEntity> content = results.getResults();
 		return content;
 	}
+
+
+	@Override
+	public PodEntity getPod(Long clusterIdx, String namespace, String name) {
+		QPodEntity qEntity = QPodEntity.podEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		 
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.podName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		PodEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 	
 }

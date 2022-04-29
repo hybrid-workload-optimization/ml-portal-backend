@@ -55,4 +55,23 @@ public class CustomCronJobRepositoryImpl  implements CustomCronJobRepository{
 
         return new PageImpl<>(content, pageable, total);
     }
+
+	@Override
+	public CronJobEntity getCronJob(Long clusterIdx, String namespace, String name) {
+		QCronJobEntity qEntity = QCronJobEntity.cronJobEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.cronJobName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		CronJobEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespaceEntity.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }

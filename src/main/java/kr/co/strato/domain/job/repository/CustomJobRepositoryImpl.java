@@ -80,4 +80,23 @@ public class CustomJobRepositoryImpl  implements CustomJobRepository{
         return new PageImpl<>(content, pageable, total);
     }
 
+	@Override
+	public JobEntity getJob(Long clusterIdx, String namespace, String name) {
+		QJobEntity qEntity = QJobEntity.jobEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.jobName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		JobEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespaceEntity.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
+
 }

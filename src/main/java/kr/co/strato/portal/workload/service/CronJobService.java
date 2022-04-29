@@ -23,6 +23,7 @@ import kr.co.strato.adapter.k8s.cronjob.service.CronJobAdapterService;
 import kr.co.strato.adapter.k8s.job.service.JobAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.repository.CronJobRepository;
 import kr.co.strato.domain.cronjob.service.CronJobDomainService;
@@ -35,6 +36,7 @@ import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.CronJobArgDto;
@@ -47,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class CronJobService extends ProjectAuthorityService {
+public class CronJobService extends InNamespaceService {
 	@Autowired
 	CronJobDomainService cronJobDomainService;
 	
@@ -74,6 +76,9 @@ public class CronJobService extends ProjectAuthorityService {
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	ProjectAuthorityService projectAuthorityService;
 	
 	//목록
 	public Page<CronJobDto> getList(PageRequest pageRequest, CronJobArgDto args) {		
@@ -103,7 +108,7 @@ public class CronJobService extends ProjectAuthorityService {
 		Long projectIdx = projectEntity.getId();
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
 		
 		CronJob cronJob = cronJobAdapterService.retrieve(kubeConfigId, namespace.getName(), dto.getName());
 		if(cronJob != null) {
@@ -188,6 +193,9 @@ public class CronJobService extends ProjectAuthorityService {
 	private void save(CronJobArgDto cronJobArgDto){
 		Long clusterIdx = cronJobArgDto.getClusterIdx();
 		String yaml = cronJobArgDto.getYaml();
+		
+		//이름 중복 채크
+        duplicateCheckResourceCreation(clusterIdx, cronJobArgDto.getYaml());
 		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
@@ -299,4 +307,9 @@ public class CronJobService extends ProjectAuthorityService {
 
         return entity;
     }
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		return cronJobDomainService;
+	}
 }

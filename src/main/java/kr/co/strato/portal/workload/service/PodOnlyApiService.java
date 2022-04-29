@@ -18,6 +18,7 @@ import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
@@ -25,6 +26,7 @@ import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.util.Base64Util;
+import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.PodDto;
@@ -35,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class PodOnlyApiService extends ProjectAuthorityService {
+public class PodOnlyApiService extends InNamespaceService {
 	
 	@Autowired
     private ClusterDomainService clusterDomainService;
@@ -51,6 +53,9 @@ public class PodOnlyApiService extends ProjectAuthorityService {
     
     @Autowired
     private NamespaceDomainService namespaceDomainService;
+    
+    @Autowired
+	private ProjectAuthorityService projectAuthorityService;
     
     /**
      * 파드 생성
@@ -136,7 +141,7 @@ public class PodOnlyApiService extends ProjectAuthorityService {
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 		
 		//메뉴 접근권한 채크.
-		chechAuthority(projectIdx, loginUser);
+		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
     	
 		Pod pod = podAdapterService.get(cluster.getClusterId(), namespace, podName);
 		PodEntity entity = PodMapper.INSTANCE.toEntity(pod);
@@ -199,6 +204,12 @@ public class PodOnlyApiService extends ProjectAuthorityService {
     	}    	
     	return dtoList;
     }
+
+	@Override
+	protected InNamespaceDomainService getDomainService() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
     
 }

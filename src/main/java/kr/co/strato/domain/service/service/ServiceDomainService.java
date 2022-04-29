@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.domain.service.model.ServiceEndpointEntity;
@@ -18,7 +19,7 @@ import kr.co.strato.domain.service.repository.ServiceRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class ServiceDomainService {
+public class ServiceDomainService implements InNamespaceDomainService {
 
     @Autowired
     private ServiceRepository serviceRepository;
@@ -136,4 +137,10 @@ public class ServiceDomainService {
     	List<ServiceEntity> list = serviceRepository.findByNamespace(namespace);
     	list.forEach(s ->  delete(s));
     }
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = serviceRepository.getService(clusterIdx, namespace, name);
+		return obj != null;
+	}
 }

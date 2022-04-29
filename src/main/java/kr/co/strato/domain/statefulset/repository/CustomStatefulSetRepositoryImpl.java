@@ -78,5 +78,24 @@ public class CustomStatefulSetRepositoryImpl implements CustomStatefulSetReposit
 
 		return results;
     }
+
+	@Override
+	public StatefulSetEntity getStatefulSet(Long clusterIdx, String namespace, String name) {
+		QStatefulSetEntity qEntity = QStatefulSetEntity.statefulSetEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		 
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.statefulSetName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		StatefulSetEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
     
 }

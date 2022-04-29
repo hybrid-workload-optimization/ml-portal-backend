@@ -8,14 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
 import kr.co.strato.domain.daemonset.repository.DaemonSetRepository;
 import kr.co.strato.domain.pod.repository.PodRepository;
-import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class DaemonSetDomainService {
+public class DaemonSetDomainService implements InNamespaceDomainService {
 
 	@Autowired
 	DaemonSetRepository daemonSetRepository;
@@ -46,5 +46,11 @@ public class DaemonSetDomainService {
 		//파드 삭제
 		podRepository.deleteByOwnerUidAndKind(daemonSetEntity.getDaemonSetUid(), ResourceType.daemonSet.get());
 		daemonSetRepository.delete(daemonSetEntity);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = daemonSetRepository.getDaemonSet(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

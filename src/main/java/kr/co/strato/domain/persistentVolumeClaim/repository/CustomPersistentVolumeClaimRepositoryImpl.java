@@ -78,4 +78,23 @@ public class CustomPersistentVolumeClaimRepositoryImpl implements CustomPersiste
 		
 		return content;
 	}
+
+	@Override
+	public PersistentVolumeClaimEntity getPersistentVolumeClaim(Long clusterIdx, String namespace, String name) {
+		QPersistentVolumeClaimEntity qEntity = QPersistentVolumeClaimEntity.persistentVolumeClaimEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		 
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.name.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		PersistentVolumeClaimEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }

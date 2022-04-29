@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.repository.IngressControllerRepository;
+import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.repository.IngressRepository;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -18,7 +19,7 @@ import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class IngressDomainService {
+public class IngressDomainService implements InNamespaceDomainService {
 	
 	@Autowired
 	private IngressRepository ingressRepository;
@@ -101,5 +102,10 @@ public class IngressDomainService {
 	 */
 	public List<IngressEntity> getIngressByIngressController(IngressControllerEntity ingressController) {
 		return ingressRepository.getIngress(ingressController);
+	}
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
+		Object obj = ingressRepository.getIngress(clusterIdx, namespace, name);
+		return obj != null;
 	}
 }

@@ -1,18 +1,19 @@
 package kr.co.strato.domain.service.repository;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import kr.co.strato.domain.cluster.model.QClusterEntity;
-import kr.co.strato.domain.namespace.model.QNamespaceEntity;
-import kr.co.strato.domain.service.model.QServiceEntity;
-import kr.co.strato.domain.service.model.ServiceEntity;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import kr.co.strato.domain.cluster.model.QClusterEntity;
+import kr.co.strato.domain.namespace.model.QNamespaceEntity;
+import kr.co.strato.domain.service.model.QServiceEntity;
+import kr.co.strato.domain.service.model.ServiceEntity;
 
 public class CustomServiceRepositoryImpl implements  CustomServiceRepository{
     private final JPAQueryFactory jpaQueryFactory;
@@ -52,4 +53,23 @@ public class CustomServiceRepositoryImpl implements  CustomServiceRepository{
 
         return new PageImpl<>(content, pageable, total);
     }
+
+	@Override
+	public ServiceEntity getService(Long clusterIdx, String namespace, String name) {
+		QServiceEntity qEntity = QServiceEntity.serviceEntity;
+		QNamespaceEntity qNamespaceEntity = QNamespaceEntity.namespaceEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(qEntity.serviceName.eq(name));	
+		builder.and(qNamespaceEntity.name.eq(namespace));
+		builder.and(qNamespaceEntity.cluster.clusterIdx.eq(clusterIdx));
+		
+		ServiceEntity results = jpaQueryFactory
+				.selectFrom(qEntity)
+                .join(qNamespaceEntity).on(qNamespaceEntity.id.eq(qEntity.namespace.id))
+				.where(builder)
+				.fetchOne();
+		
+		return results;
+	}
 }
