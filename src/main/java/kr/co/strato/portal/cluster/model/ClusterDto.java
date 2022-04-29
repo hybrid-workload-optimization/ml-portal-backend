@@ -92,8 +92,6 @@ public class ClusterDto {
 		private String provisioningType;
 		private String provisioningStatus;
 		private String provisioningLog;
-		// k8s
-		private String kubeConfig;
 		// kubespray
 		private String provisioningUser;
 		private ArrayList<Node> nodes;	

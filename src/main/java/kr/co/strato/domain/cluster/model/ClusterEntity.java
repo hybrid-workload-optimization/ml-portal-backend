@@ -63,9 +63,6 @@ public class ClusterEntity {
 	@Column(name = "provider_version")
 	private String providerVersion;
 	
-	@Column(name = "kube_config", columnDefinition = "text")
-	private String kubeConfig;
-	
 	@Column(length = 2000)
 	private String description;
 	

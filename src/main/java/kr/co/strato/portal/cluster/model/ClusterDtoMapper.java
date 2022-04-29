@@ -33,7 +33,6 @@ public interface ClusterDtoMapper {
 	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
 	public ClusterDto.List toList(ClusterEntity c);
 	
-	@Mapping(target = "kubeConfig",		source = "c.kubeConfig")
 	@Mapping(target = "description",	source = "c.description")
     @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
 	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
