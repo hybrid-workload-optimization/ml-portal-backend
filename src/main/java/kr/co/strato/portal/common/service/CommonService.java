@@ -1,9 +1,27 @@
 package kr.co.strato.portal.common.service;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kr.co.strato.portal.config.service.ConfigMapService;
+import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
+import kr.co.strato.portal.config.service.SecretService;
+import kr.co.strato.portal.networking.service.IngressService;
+import kr.co.strato.portal.networking.service.K8sServiceService;
+import kr.co.strato.portal.workload.service.CronJobService;
+import kr.co.strato.portal.workload.service.DaemonSetService;
 import kr.co.strato.portal.workload.service.DeploymentService;
+import kr.co.strato.portal.workload.service.JobService;
+import kr.co.strato.portal.workload.service.PodService;
+import kr.co.strato.portal.workload.service.ReplicaSetService;
+import kr.co.strato.portal.workload.service.StatefulSetService;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 public class CommonService {
 	
 	private KubernetesClient client;
@@ -16,6 +34,22 @@ public class CommonService {
 		return client;
 	}
 	
+	public String base64Decoding(String encodedString) {
+		return base64Decoding(encodedString, "UTF-8");
+	}
+	
+	public String base64Decoding(String encodedString, String charset) {
+		Decoder decoder = Base64.getDecoder();
+		byte[] decodedBytes1 = decoder.decode(encodedString.getBytes());
+		String decodedString = null;
+		try {
+			decodedString = new String(decodedBytes1, charset);
+		} catch (UnsupportedEncodingException e) {
+			log.error("", e);
+		}
+		return decodedString;
+	}
+	
 	protected Long getMenuCode() {
 		Long menuCode = null;
 		
@@ -24,7 +58,7 @@ public class CommonService {
 			menuCode = 103010L;
 		} 
 		
-		/*
+		
 		else if(this instanceof CronJobService) {
 			menuCode = 103040L;
 		} else if(this instanceof DaemonSetService) {
@@ -58,7 +92,7 @@ public class CommonService {
 		} else if(this instanceof K8sServiceService) {
 			menuCode = 104010L;
 		}
-		*/
+		
 		return menuCode;
 	}
 	

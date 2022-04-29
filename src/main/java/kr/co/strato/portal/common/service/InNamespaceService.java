@@ -2,10 +2,7 @@ package kr.co.strato.portal.common.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
 import java.util.List;
-import java.util.Base64.Decoder;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -52,22 +49,6 @@ public abstract class InNamespaceService extends CommonService {
 				log.error("중복 채크 에러. 도메인 서비스가 선언되어 있지 않습니다.");
 			}
 		}
-	}
-	
-	public String base64Decoding(String encodedString) {
-		return base64Decoding(encodedString, "UTF-8");
-	}
-	
-	public String base64Decoding(String encodedString, String charset) {
-		Decoder decoder = Base64.getDecoder();
-		byte[] decodedBytes1 = decoder.decode(encodedString.getBytes());
-		String decodedString = null;
-		try {
-			decodedString = new String(decodedBytes1, charset);
-		} catch (UnsupportedEncodingException e) {
-			log.error("", e);
-		}
-		return decodedString;
 	}
 	
 	/**
