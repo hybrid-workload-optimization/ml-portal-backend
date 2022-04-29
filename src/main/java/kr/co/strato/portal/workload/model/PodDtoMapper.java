@@ -18,12 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetStatus;
-import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.job.model.JobEntity;
-import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.pod.model.PodEntity;
-import kr.co.strato.domain.project.model.ProjectClusterEntity;
-import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.replicaset.model.ReplicaSetEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 

@@ -147,6 +147,8 @@ public class PodOnlyApiService extends InNamespaceService {
 		PodEntity entity = PodMapper.INSTANCE.toEntity(pod);
     	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity);
     	dto.setProjectIdx(projectIdx);
+    	dto.setClusterId(clusterIdx);
+    	dto.setClusterName(cluster.getClusterName());
     	return dto;
     }
     
