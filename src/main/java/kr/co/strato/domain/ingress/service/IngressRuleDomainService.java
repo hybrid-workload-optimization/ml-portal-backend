@@ -2,14 +2,12 @@ package kr.co.strato.domain.ingress.service;
 
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.repository.IngressControllerRepository;
-import kr.co.strato.domain.ingress.model.IngressEntity;
 import kr.co.strato.domain.ingress.model.IngressRuleEntity;
 import kr.co.strato.domain.ingress.repository.IngressRuleRepository;
 import kr.co.strato.global.error.exception.InternalServerException;
