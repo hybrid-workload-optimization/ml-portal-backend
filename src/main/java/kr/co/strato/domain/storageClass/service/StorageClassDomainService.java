@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
-import kr.co.strato.domain.namespace.model.NamespaceEntity;
+import kr.co.strato.domain.common.service.NonNamespaceDomainService;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.repository.PersistentVolumeRepository;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -18,7 +18,7 @@ import kr.co.strato.domain.storageClass.repository.StorageClassRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class StorageClassDomainService {
+public class StorageClassDomainService extends NonNamespaceDomainService {
 
 	@Autowired
 	private StorageClassRepository storageClassRepository;
@@ -89,6 +89,12 @@ public class StorageClassDomainService {
 
 	public Integer deleteByCluster(ClusterEntity cluster) {
 		return storageClassRepository.deleteByCluster(cluster);
+	}
+
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String name) {
+		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
+		return storageClassRepository.findByNameAndCluster(name, cluster) != null;
 	}
 
 }

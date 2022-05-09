@@ -27,20 +27,21 @@ import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.persistentVolume.service.PersistentVolumeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.NonNamespaceDomainService;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDtoMapper;
+import kr.co.strato.portal.common.service.NonNamespaceService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class ClusterPersistentVolumeService {
+public class ClusterPersistentVolumeService extends NonNamespaceService {
 
 	@Autowired
 	private PersistentVolumeAdapterService persistentVolumeAdapterService;
@@ -98,6 +99,11 @@ public class ClusterPersistentVolumeService {
 	
 	public List<Long> registerClusterPersistentVolume(ClusterPersistentVolumeDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getClusterIdx();
+		
+		//이름 중복채크
+		duplicateCheckResourceCreation(clusterIdx, yamlApplyParam.getYaml());
+		
+		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		
@@ -237,8 +243,8 @@ public class ClusterPersistentVolumeService {
 
         return clusterPersistentVolume;
     }
-	
-	
-	
-
+	@Override
+	protected NonNamespaceDomainService getDomainService() {
+		return persistentVolumeDomainService;
+	}
 }

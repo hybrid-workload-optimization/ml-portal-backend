@@ -41,6 +41,8 @@ import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
+import kr.co.strato.global.error.exception.BadRequestException;
+import kr.co.strato.global.error.exception.DuplicateResourceNameException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
@@ -303,6 +305,22 @@ public class ClusterService {
 	private Long createKubesprayCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		String loginUserId = loginUser.getUserId();
 		
+		boolean masterCheck = masterCheck(clusterDto.getNodes());
+		if(!masterCheck) {
+			//마스터가 홀수로 지정되지 않은 경우 에러 발생.
+			log.error("마스터 노드가 짝수로 설정 되었습니다.");
+			
+			throw new BadRequestException();
+		}
+		
+		boolean isDup = duplicateCheck(clusterDto.getNodes());
+		if(isDup) {
+			log.error("중복되는 노드 정보가 존재합니다.");
+			
+			//리소스 중복 에러 발생.
+			throw new DuplicateResourceNameException();
+		}
+		
 		// db - get kubespray version
 		String kubesprayVersion = getKubesprayVersionFromSetting();
 		log.info("[createKubesprayCluster] kubespray version : {}", kubesprayVersion);
@@ -452,6 +470,22 @@ public class ClusterService {
 		if(changeSize != originalSize) {
 			//스케일 조정이 필요한 경우.
 			
+			boolean masterCheck = masterCheck(clusterDto.getNodes());
+			if(!masterCheck) {
+				//마스터가 홀수로 지정되지 않은 경우 에러 발생.
+				log.error("마스터 노드가 짝수로 설정 되었습니다.");
+				
+				throw new BadRequestException();
+			}
+			
+			//중복되는 노드 정보가 존재하는지 채크
+			boolean isDup = duplicateCheck(clusterDto.getNodes());
+			if(isDup) {
+				log.error("중복되는 노드 정보가 존재합니다.");
+				
+				//리소스 중복 에러 발생.
+				throw new DuplicateResourceNameException();
+			}
 			
 			boolean isScaleOut = false;
 			
@@ -809,6 +843,54 @@ public class ClusterService {
 	 */
 	public boolean isClusterDuplication(String name) throws Exception {
 		return clusterDomainService.isClusterDuplication(name);
+	}
+	
+	/**
+	 * 노드 정보 중복 채크
+	 * @param nodes
+	 * @return
+	 */
+	private boolean duplicateCheck(ArrayList<Node> nodes) {
+		Map<String, List<Node>> nameMap = new HashMap<>();
+		Map<String, List<Node>> ipMap = new HashMap<>();
+		
+		for(Node n : nodes) {
+			String name = n.getName();
+			String ip = n.getIp();
+			
+			List<Node> nameList = nameMap.get(name);
+			if(nameList == null) {
+				nameList = new ArrayList<>();
+				nameList.add(n);
+				
+				nameMap.put(name, nameList);
+			} else {
+				//이름 중복
+				return true;
+			}
+			
+			List<Node> ipList = ipMap.get(ip);
+			if(ipList == null) {
+				ipList = new ArrayList<>();
+				ipList.add(n);
+				
+				ipMap.put(ip, ipList);
+			} else {
+				//ip 중복
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean masterCheck(ArrayList<Node> nodes) {
+		int masterCount = 0;
+		for(Node n : nodes) {
+			if(n.getNodeTypes().contains("master")) {
+				masterCount++;
+			}
+		}		
+		return masterCount%2 == 1;
 	}
 
 	/**

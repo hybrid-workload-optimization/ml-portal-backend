@@ -11,4 +11,6 @@ public interface StorageClassRepository extends JpaRepository<StorageClassEntity
 	@Transactional
 	public Integer deleteByCluster(ClusterEntity cluster);
 	
+	public StorageClassEntity findByNameAndCluster(String name, ClusterEntity cluster);
+	
 }

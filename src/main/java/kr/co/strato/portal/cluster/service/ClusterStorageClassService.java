@@ -19,6 +19,7 @@ import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.storageClass.service.StorageClassAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.common.service.NonNamespaceDomainService;
 import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
 import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.storageClass.model.StorageClassEntity;
@@ -28,11 +29,12 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDto;
 import kr.co.strato.portal.cluster.model.ClusterStorageClassDtoMapper;
+import kr.co.strato.portal.common.service.NonNamespaceService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class ClusterStorageClassService {
+public class ClusterStorageClassService extends NonNamespaceService {
 
 	@Autowired
 	private StorageClassAdapterService storageClassAdapterService;
@@ -116,6 +118,11 @@ public class ClusterStorageClassService {
 	
 	public List<Long> registerClusterStorageClass(ClusterStorageClassDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getClusterIdx();
+		
+		//이름 중복채크
+		duplicateCheckResourceCreation(clusterIdx, yamlApplyParam.getYaml());
+		
+		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
@@ -190,6 +197,10 @@ public class ClusterStorageClassService {
 
 	        return clusterStorageClass;
 	    }
-		
+
+	@Override
+	protected NonNamespaceDomainService getDomainService() {
+		return storageClassDomainService;
+	}
 	
 }

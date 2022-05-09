@@ -10,12 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.common.service.NonNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.repository.NamespaceRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 
 @Service
-public class NamespaceDomainService {
+public class NamespaceDomainService extends NonNamespaceDomainService {
 	
 	@Autowired
 	private NamespaceRepository namespaceRepository;
@@ -85,6 +86,14 @@ public class NamespaceDomainService {
 	public void deleteByClusterIdx(Long clusterIdx) {
 		List<NamespaceEntity> list = findByClusterIdx(clusterIdx);
 		list.forEach(n -> delete(n.getId()));
+	}
+	
+	
+	@Override
+	public boolean isDuplicateName(Long clusterIdx, String name) {
+		ClusterEntity cluster = ClusterEntity.builder().clusterIdx(clusterIdx).build();
+		List<NamespaceEntity> list = findByNameAndClusterIdx(name, cluster);
+		return list != null && list.size() > 0;
 	}
 	
 }

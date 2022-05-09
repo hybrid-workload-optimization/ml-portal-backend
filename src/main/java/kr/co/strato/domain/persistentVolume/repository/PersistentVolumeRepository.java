@@ -11,4 +11,6 @@ public interface PersistentVolumeRepository extends JpaRepository<PersistentVolu
 	@Transactional
 	public Integer deleteByCluster(ClusterEntity cluster);
 	
+	public PersistentVolumeEntity findByNameAndCluster(String name, ClusterEntity cluster);
+	
 }
