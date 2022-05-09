@@ -231,6 +231,8 @@ public class AlertService {
 	 * SSE 연결 확인을 위해 1분에 한번씩 null 데이터를 발송.
 	 */
 	public static void startSsePing() {
+		boolean isNull = ssePingRunnable == null;
+		log.info("ssePingRunnable is null: {}", isNull);
 		if(ssePingRunnable == null) {
 			log.info("SSE-Ping Start");
 			ssePingRunnable = new Runnable() {
