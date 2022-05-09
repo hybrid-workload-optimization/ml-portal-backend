@@ -292,10 +292,15 @@ public class PortalProjectController extends CommonController {
      * @param 
      * @return
      */
-    @GetMapping("/api/v1/role/maanger")
+    @GetMapping("/api/v1/project/{projectIdx}/maanger")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<UserDto>> getUserWithManagerList() throws Exception {        
-    	List<UserDto> response = portalProjectService.getUserWithManagerList();
+    public ResponseWrapper<List<UserDto>> getUserWithManagerList(@PathVariable("projectIdx") Long projectIdx) throws Exception {        
+    	
+    	if(projectIdx == 0) {
+    		projectIdx = null;
+    	}
+    	
+    	List<UserDto> response = portalProjectService.getUserWithManagerList(projectIdx);
         return new ResponseWrapper<List<UserDto>>(response);
     }
     

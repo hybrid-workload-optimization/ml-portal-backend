@@ -652,8 +652,8 @@ System.out.println("old === " + pmUser.getUserId());
      * 사용자 권한이 Project Manager 인 사용자 조회
      * @return
      */
-    public List<UserDto> getUserWithManagerList() {
-    	List<UserEntity> userList = projectUserDomainService.getUserWithManagerList();
+    public List<UserDto> getUserWithManagerList(Long projectIdx) {
+    	List<UserEntity> userList = projectUserDomainService.getUserWithManagerList(projectIdx);
     	
     	//Entity -> DTO 변환
     	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());

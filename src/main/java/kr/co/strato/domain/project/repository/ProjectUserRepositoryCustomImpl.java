@@ -165,4 +165,17 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 		
 		return result;
 	}
+	
+	@Override
+	public UserEntity getProjectManager(Long projectIdx) {
+		
+		UserEntity result = queryFactory
+				.select(userEntity)
+				.from(projectUserEntity)
+				.join(userEntity).on(projectUserEntity.userId.eq(userEntity.userId))
+				.where(projectUserEntity.projectIdx.eq(projectIdx).and(projectUserEntity.userRoleIdx.eq(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX)))
+				.fetchOne();
+		
+		return result;
+	}
 }

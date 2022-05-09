@@ -141,8 +141,18 @@ public class ProjectUserDomainService {
 	 * 사용자 권한이 Project Manager 인 사용자 조회
 	 * @return
 	 */
-	public List<UserEntity> getUserWithManagerList() {
-		return projectUserRepository.getUserWithManagerList();
+	public List<UserEntity> getUserWithManagerList(Long projectIdx) {
+		
+		//List<UserEntity> result = projectUserRepository.getUserWithManagerList();
+		List<UserEntity> result = projectUserRepository.getAvailableProjectUserList();
+		if(projectIdx != null) {
+			UserEntity managerInfo = projectUserRepository.getProjectManager(projectIdx);
+			if(result != null && result.size() > 0) {
+				result.add(managerInfo);
+			}
+		}
+		
+		return result;
 	}
 	
 	/**

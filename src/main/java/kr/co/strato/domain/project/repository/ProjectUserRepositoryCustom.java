@@ -30,4 +30,6 @@ public interface ProjectUserRepositoryCustom {
 	public List<UserEntity> getUserWithManagerList();
 	
 	public List<ProjectUserDto> getProjectUserList(Long projectIdx);
+	
+	public UserEntity getProjectManager(Long projectIdx);
 }
