@@ -22,6 +22,7 @@ public interface SecretDtoMapper {
     @Mapping(target = "uid",				source = "s.uid")
 	@Mapping(target = "data",				source = "s.data")
     @Mapping(target = "createdAt",			source = "s.createdAt")
+	@Mapping(target = "clusterName",		source = "s.namespace.cluster.clusterName")
     public SecretDto.Detail toDetail(SecretEntity s);
 	
 	/*@Named("jsonToMap")

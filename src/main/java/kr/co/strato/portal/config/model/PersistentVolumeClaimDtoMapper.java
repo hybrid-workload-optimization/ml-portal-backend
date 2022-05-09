@@ -60,7 +60,7 @@ public interface PersistentVolumeClaimDtoMapper {
     @Mapping(target = "accessType",		    source = "p.accessType")
     @Mapping(target = "storageClass",		source = "p.storageClass")
     @Mapping(target = "createdAt",			source = "p.createdAt")
-    @Mapping(target = "clusterName",			source = "p.namespace.cluster.clusterName")
+    @Mapping(target = "clusterName",		source = "p.namespace.cluster.clusterName")
     @Mapping(target = "clusterIdx",			source = "p.namespace.cluster.clusterIdx")
     public PersistentVolumeClaimDto.Detail toDetail(PersistentVolumeClaimEntity p, PersistentVolumeClaim k8s);
     

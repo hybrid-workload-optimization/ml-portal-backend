@@ -1,7 +1,5 @@
 package kr.co.strato.portal.config.model;
 
-import java.util.HashMap;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +34,7 @@ public class ConfigMapDto {
 		private String data;
 		private String createdAt;
 		private Long projectIdx;
+		private String clusterName;
 	}
 	
 	@Getter

@@ -36,6 +36,7 @@ public class SecretDto {
 		private String data;
 		private String createdAt;
 		private Long projectIdx;
+		private String clusterName;
 	}
 	
 	@Getter

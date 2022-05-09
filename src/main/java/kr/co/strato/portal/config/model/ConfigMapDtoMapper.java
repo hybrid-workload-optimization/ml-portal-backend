@@ -32,6 +32,7 @@ public interface ConfigMapDtoMapper {
     @Mapping(target = "uid",				source = "c.uid")
 	@Mapping(target = "data",				source = "c.data")
     @Mapping(target = "createdAt",			source = "c.createdAt")
+	@Mapping(target = "clusterName",		source = "c.namespace.cluster.clusterName")
     public ConfigMapDto.Detail toDetail(ConfigMapEntity c);
     
     /*@Named("jsonToMap")
