@@ -29,5 +29,6 @@ public class DeploymentDto {
 	private String replicaSetUid;
 	private String projectName;
 	private String clusterName;
+	private Long clusterIdx;
 	private Long projectIdx;
 }

@@ -37,6 +37,7 @@ public class StatefulSetDetailDto {
         private String clusterId;
         private String projectName;
         private String clusterName;
+        private Long clusterIdx;
         private String projectIdx;
     }
 

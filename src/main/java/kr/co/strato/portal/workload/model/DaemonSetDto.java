@@ -50,6 +50,8 @@ private Long projectIdx;
 		private int desiredPod;
 		private Long clusterId;
 		private Long projectIdx;
+		private Long clusterIdx;
+		private String clusterName;
 		
 		private ArrayList<PodDto.ResListDto> pods;
 	}

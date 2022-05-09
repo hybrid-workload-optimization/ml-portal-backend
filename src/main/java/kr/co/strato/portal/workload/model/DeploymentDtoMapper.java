@@ -48,7 +48,8 @@ public interface DeploymentDtoMapper {
 			@Mapping(source = "clusterId", target = "clusterId"),
 			@Mapping(source = "replicaSetUid", target = "replicaSetUid"),
 			@Mapping(source = "projectName", target = "projectName"),
-			@Mapping(source = "clusterName", target = "clusterName")
+			@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName"),
+			@Mapping(source = "entity.namespaceEntity.cluster.clusterIdx", target = "clusterIdx")
 	})
 	public DeploymentDto toDto(DeploymentEntity entity, Long clusterId, String replicaSetUid, String projectName, String clusterName);
 
@@ -67,7 +68,8 @@ public interface DeploymentDtoMapper {
 			@Mapping(source = "rollingUpdateDeployment", target = "maxSurge", qualifiedByName = "getMaxSurge"),
 			@Mapping(source = "rollingUpdateDeployment", target = "maxUnavailable", qualifiedByName = "getMaxUnavailable"),
 			@Mapping(source = "projectName", target = "projectName"),
-			@Mapping(source = "clusterName", target = "clusterName")
+			@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName"),
+			@Mapping(source = "entity.namespaceEntity.cluster.clusterIdx", target = "clusterIdx")
 	})
 	public DeploymentDto toDto(DeploymentEntity entity, Long clusterId, String replicaSetUid, DeploymentStatus status, RollingUpdateDeployment rollingUpdateDeployment, String projectName, String clusterName);
 

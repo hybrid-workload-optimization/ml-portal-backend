@@ -34,7 +34,8 @@ public interface K8sServiceDtoMapper {
     @Mapping(target = "namespaceName", source = "service.namespace.name")
     @Mapping(target = "endpoints", source = "endpoints")
     @Mapping(target = "clusterId", source = "clusterId")
-    @Mapping(target = "clusterName", source = "clusterName")
+    @Mapping(target = "clusterName", source = "service.namespace.cluster.clusterName")
+    @Mapping(target = "clusterIdx", source = "service.namespace.cluster.clusterIdx")
     public K8sServiceDto.ResDetailDto toDetailDto(ServiceEntity service, List<ServiceEndpointEntity> endpoints, Long clusterId, String clusterName);
 
     @Named("stringToMap")

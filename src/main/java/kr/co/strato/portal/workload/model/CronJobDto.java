@@ -12,6 +12,7 @@ public class CronJobDto {
 	private String name;
 	private String uid;
 	private String label;
+	private Long clusterIdx;
 	private String clusterName;
 	private Long namespaceIdx;
 	private String namespace;

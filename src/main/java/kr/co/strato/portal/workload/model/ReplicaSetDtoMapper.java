@@ -51,6 +51,7 @@ public interface ReplicaSetDtoMapper {
 	@Mapping(target = "runningPod",			source = "k8s.status.readyReplicas")
     @Mapping(target = "desiredPod",			source = "k8s.status.replicas")
 	@Mapping(target = "clusterName",		source = "r.namespace.cluster.clusterName")
+	@Mapping(target = "clusterIdx",		source = "r.namespace.cluster.clusterIdx")
 	@Mapping(target = "clusterId",			source = "r.namespace.cluster.clusterId")
     public ReplicaSetDto.Detail toDetail(ReplicaSetEntity r, ReplicaSet k8s);
 	

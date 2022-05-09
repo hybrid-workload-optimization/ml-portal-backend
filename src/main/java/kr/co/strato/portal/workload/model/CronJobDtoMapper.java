@@ -24,7 +24,8 @@ public interface CronJobDtoMapper {
 		@Mapping(source = "lastSchedule", target = "lastSchedule"),
 		@Mapping(source = "createdAt", target = "createdAt"),
 		@Mapping(source = "concurrencyPolicy", target = "concurrencyPolicy"),
-		@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName")
+		@Mapping(source = "entity.namespaceEntity.cluster.clusterName", target = "clusterName"),
+		@Mapping(source = "entity.namespaceEntity.cluster.clusterIdx", target = "clusterIdx")
 	})
 	@Named("toDto")
 	public CronJobDto toDto(CronJobEntity entity);

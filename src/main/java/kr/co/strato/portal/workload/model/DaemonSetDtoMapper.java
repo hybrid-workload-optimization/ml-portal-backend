@@ -52,6 +52,8 @@ public interface DaemonSetDtoMapper {
 	@Mapping(target = "image",				source = "d.image")
 	@Mapping(target = "runningPod",			source = "k8s.status.numberReady")
     @Mapping(target = "desiredPod",			source = "k8s.status.desiredNumberScheduled")
+	@Mapping(target = "clusterName",		source = "d.namespace.cluster.clusterName")
+	@Mapping(target = "clusterIdx",		source = "d.namespace.cluster.clusterIdx")
     public DaemonSetDto.Detail toDetail(DaemonSetEntity d, DaemonSet k8s);
 	
 	@Named("jsonToMap")
