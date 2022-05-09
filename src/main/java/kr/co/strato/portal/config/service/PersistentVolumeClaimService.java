@@ -159,6 +159,23 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 		return dto;
 	}
 	
+	public PersistentVolumeClaimDto.Detail getPersistentVolumeClaim(Long clusterIdx, String namespace, String pvcName) throws Exception {
+		PersistentVolumeClaimEntity persistentVolumeClaimEntity = persistentVolumeClaimDomainService.getPersistentVolumeClaim(clusterIdx, namespace, pvcName);
+		if(persistentVolumeClaimEntity != null) {
+			// k8s - get Persistent Volume Claim
+			PersistentVolumeClaim persistentVolumeClaim = persistentVolumeClaimAdapterService.get(clusterIdx, namespace, pvcName);
+			
+			ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
+			Long projectIdx = projectEntity.getId();
+			
+			
+			PersistentVolumeClaimDto.Detail dto = PersistentVolumeClaimDtoMapper.INSTANCE.toDetail(persistentVolumeClaimEntity, persistentVolumeClaim);
+			dto.setProjectIdx(projectIdx);
+			return dto;
+		}
+		return null;
+	}
+	
 	/**
 	 * Persistent Volume Claim Yaml 조회
 	 * 

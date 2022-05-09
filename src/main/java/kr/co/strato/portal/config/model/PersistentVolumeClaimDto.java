@@ -1,13 +1,7 @@
 package kr.co.strato.portal.config.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
-import kr.co.strato.portal.workload.model.PodDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -66,6 +60,8 @@ public class PersistentVolumeClaimDto {
 		private String storageClass;
 		private String createdAt;
 		private Long projectIdx;
+		private String clusterName;
+		private Long clusterIdx;
 	}
 	
 	@Getter

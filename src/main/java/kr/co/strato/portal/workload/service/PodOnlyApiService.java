@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
@@ -21,6 +24,8 @@ import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
+import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
+import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -28,6 +33,9 @@ import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.model.PersistentVolumeClaimDtoMapper;
+import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.PodDto;
 import kr.co.strato.portal.workload.model.PodDto.ApiOwnerSearchParam;
@@ -56,6 +64,9 @@ public class PodOnlyApiService extends InNamespaceService {
     
     @Autowired
 	private ProjectAuthorityService projectAuthorityService;
+    
+    @Autowired
+    private PersistentVolumeClaimService pvcService;
     
     /**
      * 파드 생성
@@ -145,10 +156,42 @@ public class PodOnlyApiService extends InNamespaceService {
     	
 		Pod pod = podAdapterService.get(cluster.getClusterId(), namespace, podName);
 		PodEntity entity = PodMapper.INSTANCE.toEntity(pod);
+		
     	PodDto.ResDetailDto dto = PodDtoMapper.INSTANCE.toResDetailDto(entity);
     	dto.setProjectIdx(projectIdx);
     	dto.setClusterId(clusterIdx);
     	dto.setClusterName(cluster.getClusterName());
+    	
+    	
+		OwnerReference owner = pod.getMetadata().getOwnerReferences().get(0);
+		if(owner != null) {
+			String ownerName = owner.getName();
+			String ownerKind = owner.getKind();
+			String ownerUid = owner.getUid();
+			
+			
+			dto.setOwnerName(ownerName);
+			dto.setOwnerKind(ownerKind);
+			dto.setOwnerUid(ownerUid);
+		}
+		
+		List<String> pvcNames = pod.getSpec().getVolumes().stream()
+				.map(v -> v.getPersistentVolumeClaim())
+				.filter(p -> p != null)
+				.map(p -> p.getClaimName())
+				.collect(toList());
+		
+		List<PersistentVolumeClaimDto.Detail> pvcList = new ArrayList<>();
+		for(String pvcName : pvcNames) {
+			try {
+				PersistentVolumeClaimDto.Detail pvcDto = pvcService.getPersistentVolumeClaim(clusterIdx, namespace, pvcName);
+				pvcList.add(pvcDto);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		dto.setPvcList(pvcList);		
     	return dto;
     }
     

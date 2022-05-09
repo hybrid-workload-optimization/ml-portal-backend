@@ -49,6 +49,11 @@ public class PersistentVolumeClaimDomainService implements InNamespaceDomainServ
 	public void delete(PersistentVolumeClaimEntity persistentVolumeClaimEntity) {
 		persistentVolumeClaimRepository.delete(persistentVolumeClaimEntity);
 	}
+	
+	public PersistentVolumeClaimEntity getPersistentVolumeClaim(Long clusterIdx, String namespace, String name) {
+		PersistentVolumeClaimEntity pvc = persistentVolumeClaimRepository.getPersistentVolumeClaim(clusterIdx, namespace, name);
+		return pvc;
+	}
 
 	@Override
 	public boolean isDuplicateName(Long clusterIdx, String namespace, String name) {
