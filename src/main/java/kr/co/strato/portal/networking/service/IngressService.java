@@ -1,5 +1,7 @@
 package kr.co.strato.portal.networking.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,13 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressSpec;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
@@ -37,6 +42,7 @@ import kr.co.strato.domain.ingress.service.IngressRuleDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
+import kr.co.strato.global.error.exception.DuplicateIngressPathException;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
@@ -163,6 +169,16 @@ public class IngressService extends InNamespaceService {
 		duplicateCheckResourceCreation(clusterIdx, yamlApplyParam.getYaml());
 		
 		String yamlDecode = Base64Util.decode(yamlApplyParam.getYaml());
+		
+		
+		
+		//ingress path 중복 채크
+		boolean isDuplicateIngressPath = duplicateCheckIngressPath(clusterIdx, yamlDecode);
+		if(isDuplicateIngressPath) {
+			log.error("중복된 Ingress path 입니다.");
+			throw new DuplicateIngressPathException();
+		}
+		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		Long clusterId = clusterEntity.getClusterId();
 		List<Ingress> ingressList = ingressAdapterService.registerIngress(clusterId, yamlDecode);
@@ -189,13 +205,71 @@ public class IngressService extends InNamespaceService {
 
 		return ids;
 	}
+	
+	/**
+	 * Ingress path 중복 채크
+	 * @param yamlDecode
+	 * @return
+	 */
+	private boolean duplicateCheckIngressPath(Long clusterIdx, String yamlDecode) {
+		KubernetesClient client = getClient();
+		
+		//base64 decoding
+		InputStream is = new ByteArrayInputStream(yamlDecode.getBytes());
+		List<HasMetadata> ress = client.load(is).get();
+		
+		List<String> paths = new ArrayList<>();
+		for(HasMetadata data : ress) {
+			if(data instanceof Ingress) {
+				Ingress ingress = (Ingress) data;
+				
+				String namespace = ingress.getMetadata().getNamespace();
+				if(namespace == null) {
+					namespace = "default";
+				}
+				
+				
+				
+				IngressSpec spec = ingress.getSpec();
+				List<IngressRule> rules = spec.getRules();
+				for(IngressRule rule: rules) {
+					HTTPIngressRuleValue ruleValue = rule.getHttp();
+
+					
+					List<HTTPIngressPath> rulePaths = ruleValue.getPaths();
+					for(HTTPIngressPath rulePath : rulePaths) {
+						String path = rulePath.getPath();
+						
+						if(paths.contains(path)) {
+							//이미 중복 발생.
+							return true;
+						} else {
+							paths.add(path);
+						}
+					}
+				}
+			}
+		}
+		
+		if(paths.size() > 0) {
+			return ingressRuleDomainService.duplicateCheckIngressPath(clusterIdx, paths);
+		}
+		return false;
+	}
 
 	public List<Long> updateIngress(Long ingressId, YamlApplyParam yamlApplyParam) {
 		String yaml = Base64Util.decode(yamlApplyParam.getYaml());
-
+		
 		ClusterEntity clusterEntity = clusterDomainService.get(yamlApplyParam.getKubeConfigId());
 		Long clusterId = clusterEntity.getClusterId();
 		Long clusterIdx = clusterEntity.getClusterIdx();
+		
+		//ingress path 중복 채크
+		boolean isDuplicateIngressPath = duplicateCheckIngressPath(clusterIdx, yaml);
+		if(isDuplicateIngressPath) {
+			log.error("중복된 Ingress path 입니다.");
+			throw new DuplicateIngressPathException();
+		}
 
 		List<Ingress> ingress = ingressAdapterService.registerIngress(clusterId, yaml);
 

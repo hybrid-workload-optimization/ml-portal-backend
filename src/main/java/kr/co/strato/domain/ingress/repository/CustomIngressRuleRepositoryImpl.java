@@ -60,4 +60,26 @@ public class CustomIngressRuleRepositoryImpl implements CustomIngressRuleReposit
     	  
     }
 
+	@Override
+	public List<String> getIngressPath(Long clusterIdx) {
+		QIngressRuleEntity qIngressRuleEntity = QIngressRuleEntity.ingressRuleEntity;
+        QIngressEntity qIngressEntity = QIngressEntity.ingressEntity;
+
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if(clusterIdx != null && clusterIdx > 0L){
+            builder.and(qIngressEntity.cluster.clusterId.eq(clusterIdx));
+        }
+
+        QueryResults<String> results =
+                jpaQueryFactory
+                        .select(qIngressRuleEntity.path)
+                        .from(qIngressEntity)
+                        .leftJoin(qIngressRuleEntity).on(qIngressRuleEntity.ingress.id.eq(qIngressEntity.id))
+                        .where(builder)
+                        .fetchResults();
+        List<String> content = results.getResults();
+		return content;
+	}
+
 }

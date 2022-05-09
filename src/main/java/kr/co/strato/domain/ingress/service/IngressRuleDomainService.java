@@ -55,5 +55,21 @@ public class IngressRuleDomainService {
     	IngressControllerEntity ingressControllerEntity  = 	ingressControllerRepository.findByName(ingressClassName);
 		return ingressControllerEntity.getId();
 	}
+    
+    /**
+     * path 중복 여부 채크.
+     * @param clusterIdx
+     * @param paths
+     * @return
+     */
+    public boolean duplicateCheckIngressPath(Long clusterIdx, List<String> paths) {
+    	List<String> ingressPaths = ingressRuleRepository.getIngressPath(clusterIdx);
+    	for(String p : paths) {
+    		if(ingressPaths.contains(p)) {
+    			return true;
+    		}
+    	}
+    	return false; 
+    }
 	
 }

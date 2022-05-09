@@ -4,7 +4,8 @@ import kr.co.strato.global.model.ResponseType;
 
 public enum ResourceErrorType implements ResponseType {
 	
-	DUPLICATE_RESOURCE_NAME("30001", "중복된 리소스 이름입니다.", null);
+	DUPLICATE_RESOURCE_NAME("30001", "중복된 리소스 이름입니다.", null),
+	DUPLICATE_INGRESS_PATH("30002", "중복된 Ingress Path입니다.", null);
 
     private String code;
     private String message;
