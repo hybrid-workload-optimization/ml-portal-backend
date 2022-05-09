@@ -78,6 +78,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN))
 				)
+				.orderBy(userEntity.userRole.parentUserRoleIdx.asc(), userEntity.userName.asc())
 				.fetch();
 		
 		return result;
@@ -91,6 +92,7 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN))
 				)
+				.orderBy(userEntity.userRole.parentUserRoleIdx.asc(), userEntity.userName.asc())
 				.fetch();
 		
 		return result;
