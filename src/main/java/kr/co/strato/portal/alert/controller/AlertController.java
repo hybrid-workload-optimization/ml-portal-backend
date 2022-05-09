@@ -72,6 +72,9 @@ public class AlertController extends CommonController {
         return Flux.create(sink -> {
         	String loginUserId = userId;
         	
+        	log.info("SSE - registry");
+        	log.info("SSE - UserId: {}", loginUserId);
+        	
         	Consumer<ServerSentEvent<AlertDto>> consumer = sink::next;
         	AlertService.addConsumer(loginUserId, consumer);
             
