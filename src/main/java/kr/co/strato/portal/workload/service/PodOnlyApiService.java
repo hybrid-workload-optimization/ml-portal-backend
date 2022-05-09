@@ -182,7 +182,9 @@ public class PodOnlyApiService extends InNamespaceService {
 		for(String pvcName : pvcNames) {
 			try {
 				PersistentVolumeClaimDto.Detail pvcDto = pvcService.getPersistentVolumeClaim(clusterIdx, namespace, pvcName);
-				pvcList.add(pvcDto);
+				if (pvcDto != null) {
+					pvcList.add(pvcDto);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

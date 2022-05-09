@@ -13,6 +13,7 @@ public class JobDto {
 	private String name;
 	private String uid;
 	private Long clusterIdx;
+	private Long clusterId;
 	private String clusterName;
 	private Long namespaceIdx;
 	private String namespace;

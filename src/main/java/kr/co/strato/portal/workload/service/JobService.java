@@ -98,6 +98,7 @@ public class JobService extends InNamespaceService {
 		Long kubeConfigId = namespace.getCluster().getClusterId();
 		
 		Long clusterIdx = namespace.getCluster().getClusterIdx();
+		Long clusterId = namespace.getCluster().getClusterId();
 		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
 		Long projectIdx = projectEntity.getId();
 		
@@ -122,6 +123,7 @@ public class JobService extends InNamespaceService {
 			dto.setImage(images.get(0));
 			dto.setActive(active);
 			dto.setSucceeded(succeeded);
+			dto.setClusterId(clusterId);
 	        
 	        List<Pod> pods = podAdapterService.getList(kubeConfigId, null, entitiy.getJobUid(), null, null);
 	        List<PodEntity> podEntitys = pods.stream().map(e -> PodMapper.INSTANCE.toEntity(e)).collect(Collectors.toList());
