@@ -193,7 +193,7 @@ public class StatefulSetService extends InNamespaceService {
 
         StatefulSet k8sStatefulSet = statefulSetAdapterService.get(clusterId, namespaceName, statefulSetName);
 
-        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId, projectName, clusterName);
+        StatefulSetDetailDto.ResDetailDto dto = StatefulSetDetailDtoMapper.INSTANCE.toResDetailDto(entity, k8sStatefulSet, clusterId, projectName, clusterName, clusterIdx);
         dto.setProjectIdx(projectName);
         return dto;
     }

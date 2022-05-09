@@ -236,7 +236,7 @@ public class PodOnlyApiService extends InNamespaceService {
 		String namespace = searchParam.getNamespaceName();
 		Map<String, String> selector = searchParam.getSelector();
 		
-    	List<Pod> k8sPods = podAdapterService.getList(searchParam.getClusterIdx(), nodeName, ownerUid, namespace, selector);
+    	List<Pod> k8sPods = podAdapterService.getList(searchParam.getClusterId(), nodeName, ownerUid, namespace, selector);
     	List<PodDto.ResListDto> dtoList = new ArrayList<>();
     	
     	for(Pod k8sPod : k8sPods) {

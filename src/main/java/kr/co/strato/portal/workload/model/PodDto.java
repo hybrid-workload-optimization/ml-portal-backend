@@ -133,7 +133,7 @@ public class PodDto {
     @Setter
     @NoArgsConstructor
     public static class ApiOwnerSearchParam {
-    	private Long clusterIdx;
+    	private Long clusterId;
         private String nodeName;
         private String namespaceName;
         private Map<String, String> selector;
