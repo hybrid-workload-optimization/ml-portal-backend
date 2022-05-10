@@ -120,6 +120,21 @@ public class ClusterStorageClassService extends NonNamespaceService {
          return yaml;
      }
     
+    
+    public String getYaml(Long id){
+    	StorageClassEntity eEntity = storageClassDomainService.getDetail(id);
+        String yaml = eEntity.getYaml();
+        
+        if(yaml == null) {
+        	 String name = eEntity.getName();
+             Long clusterId = eEntity.getCluster().getClusterId();
+
+             yaml = storageClassAdapterService.getStorageClassYaml(clusterId, name);
+        }
+        yaml = Base64Util.encode(yaml);
+        return yaml;
+    }
+    
 	
 	public List<Long> registerClusterStorageClass(ClusterStorageClassDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getClusterIdx();

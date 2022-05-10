@@ -21,7 +21,6 @@ import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
 import kr.co.strato.portal.cluster.model.ClusterPersistentVolumeDto;
 import kr.co.strato.portal.cluster.service.ClusterPersistentVolumeService;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,13 @@ public class ClusterPersistentVolumeController {
         return new ResponseWrapper<>(results);
     }
 
+	@GetMapping("api/v1/cluster/clusterPersistentVolume/{id}/yaml")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<String> getPersistentVolumeYaml(@PathVariable Long id){
+        String result = persistentVolumeService.getYaml(id);
 
+        return new ResponseWrapper<>(result);
+    }
 	
 	@GetMapping("/api/v1/cluster/clusterPersistentVolumesYaml")
 	@ResponseStatus(HttpStatus.OK)

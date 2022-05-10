@@ -88,6 +88,20 @@ public class ClusterNamespaceService extends NonNamespaceService {
         return yaml;
     }
    
+   public String getYaml(Long id){
+	   NamespaceEntity eEntity = namespaceDomainService.get(id);
+       String yaml = eEntity.getYaml();
+       
+       if(yaml == null) {
+       	 	String name = eEntity.getName();
+            Long clusterId = eEntity.getCluster().getClusterId();
+
+            yaml = namespaceAdapterService.getNamespaceYaml(clusterId, name);
+       }
+       yaml = Base64Util.encode(yaml);
+       return yaml;
+   }
+   
 	public List<Long> registerClusterNamespace(ClusterNamespaceDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getClusterIdx();
 		

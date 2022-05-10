@@ -22,7 +22,6 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterNamespaceDto;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterNamespaceService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,6 +61,13 @@ public class ClusterNamespaceController {
         return new ResponseWrapper<>(results);
     }
 
+	@GetMapping("api/v1/cluster/clusterNamespaces/{id}/yaml")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<String> getNamespaceYaml(@PathVariable Long id){
+        String result = namespaceService.getYaml(id);
+
+        return new ResponseWrapper<>(result);
+    }
 
 	
 	@GetMapping("/api/v1/cluster/clusterNamespacesYaml")

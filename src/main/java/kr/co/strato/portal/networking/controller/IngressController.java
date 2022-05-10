@@ -62,6 +62,13 @@ public class IngressController extends CommonController {
         return new ResponseWrapper<>(results);
     }
 
+	@GetMapping("api/v1/networking/ingress/{id}/yaml")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<String> getIngressYaml(@PathVariable Long id){
+        String result = ingressService.getYaml(id);
+
+        return new ResponseWrapper<>(result);
+    }
 
 	
 	@GetMapping("/api/v1/networking/ingresssYaml")

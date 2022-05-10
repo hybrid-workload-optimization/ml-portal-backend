@@ -96,6 +96,21 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
      	return yaml;
      }
     
+    
+    public String getYaml(Long id){
+    	PersistentVolumeEntity eEntity = persistentVolumeDomainService.getDetail(id);
+        String yaml = eEntity.getYaml();
+        
+        if(yaml == null) {
+        	 String name = eEntity.getName();
+             Long clusterId = eEntity.getCluster().getClusterId();
+
+             yaml = persistentVolumeAdapterService.getPersistentVolumeYaml(clusterId, name);
+        }
+        yaml = Base64Util.encode(yaml);
+        return yaml;
+    }
+    
 	
 	public List<Long> registerClusterPersistentVolume(ClusterPersistentVolumeDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getClusterIdx();
