@@ -1,11 +1,9 @@
 package kr.co.strato.domain.persistentVolumeClaim.model;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,7 +13,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
-import kr.co.strato.domain.pod.model.PodDaemonSetEntity;
 import kr.co.strato.domain.pod.model.PodPersistentVolumeClaimEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,4 +64,6 @@ public class PersistentVolumeClaimEntity {
 	
 	@OneToMany(mappedBy = "persistentVolumeClaim")
     private List<PodPersistentVolumeClaimEntity> podPersistentVolumeClaims;
+	
+	private String yaml;
 }

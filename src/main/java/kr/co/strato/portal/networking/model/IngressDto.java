@@ -58,6 +58,7 @@ public class IngressDto {
 		private List<RuleList> ruleList;
 		private String clusterName;
 		private Long projectIdx;
+		private String yaml;
 	}
 
 	@Getter

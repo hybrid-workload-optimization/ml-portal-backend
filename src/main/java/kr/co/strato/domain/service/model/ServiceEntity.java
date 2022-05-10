@@ -51,6 +51,8 @@ public class ServiceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name =  "namespace_idx")
     private NamespaceEntity namespace;
+    
+    private String yaml;
 
 
 

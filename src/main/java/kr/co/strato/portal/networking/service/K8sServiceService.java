@@ -98,6 +98,8 @@ public class K8sServiceService extends InNamespaceService {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 ServiceEntity serviceEntity = toEntity(s);
+                serviceEntity.setYaml(yaml);
+                
                 Endpoints endpoints = endpointAdapterService.get(clusterId, namespaceName, serviceEntity.getServiceName());
                 List<ServiceEndpointEntity> serviceEndpoints = toEntities(endpoints);
                 Long serviceId = serviceDomainService.register(serviceEntity, serviceEndpoints, clusterEntity, namespaceName);
@@ -127,6 +129,8 @@ public class K8sServiceService extends InNamespaceService {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 ServiceEntity serviceEntity = toEntity(s);
+                serviceEntity.setYaml(yaml);
+                
                 Endpoints endpoints = endpointAdapterService.get(clusterId, namespaceName, serviceEntity.getServiceName());
                 List<ServiceEndpointEntity> serviceEndpoints = toEntities(endpoints);
 
@@ -160,14 +164,16 @@ public class K8sServiceService extends InNamespaceService {
 
     public String getServiceYaml(Long serviceId){
         ServiceEntity serviceEntity = serviceDomainService.get(serviceId);
+        String yaml = serviceEntity.getYaml();
+        
+        if(yaml == null) {
+        	 String serviceName = serviceEntity.getServiceName();
+             String namespaceName = serviceEntity.getNamespace().getName();
+             Long clusterId = serviceEntity.getNamespace().getCluster().getClusterId();
 
-        String serviceName = serviceEntity.getServiceName();
-        String namespaceName = serviceEntity.getNamespace().getName();
-        Long clusterId = serviceEntity.getNamespace().getCluster().getClusterId();
-
-        String yaml = serviceAdapterService.getYaml(clusterId, namespaceName, serviceName);
+             yaml = serviceAdapterService.getYaml(clusterId, namespaceName, serviceName);
+        }
         yaml = Base64Util.encode(yaml);
-
         return yaml;
     }
 

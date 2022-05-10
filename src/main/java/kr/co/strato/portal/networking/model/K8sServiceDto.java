@@ -75,6 +75,7 @@ public class K8sServiceDto {
         private String clusterName;
         private Long clusterIdx;
         private Long projectIdx;
+        private String yaml;
     }
 
     @Getter

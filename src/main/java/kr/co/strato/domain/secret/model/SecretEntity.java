@@ -48,4 +48,6 @@ public class SecretEntity {
 	@ManyToOne
     @JoinColumn(name = "namespace_idx")
     private NamespaceEntity namespace;
+	
+	private String yaml;
 }

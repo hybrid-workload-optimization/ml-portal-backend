@@ -161,6 +161,23 @@ public class IngressService extends InNamespaceService {
 		yaml = Base64Util.encode(yaml);
 		return yaml;
 	}
+	
+	
+	public String getYaml(Long serviceId){
+		IngressEntity eEntity = ingressDomainService.get(serviceId);
+        String yaml = eEntity.getYaml();
+        
+        if(yaml == null) {
+        	 String name = eEntity.getName();
+             String namespaceName = eEntity.getNamespace().getName();
+             Long clusterId = eEntity.getNamespace().getCluster().getClusterId();
+
+             yaml = ingressAdapterService.getIngressYaml(clusterId, namespaceName, name);
+        }
+        yaml = Base64Util.encode(yaml);
+        return yaml;
+    }
+	
 
 	public List<Long> registerIngress(IngressDto.ReqCreateDto yamlApplyParam) {
 		Long clusterIdx = yamlApplyParam.getKubeConfigId();
@@ -189,6 +206,7 @@ public class IngressService extends InNamespaceService {
 				// k8s Object -> Entity
 				IngressEntity ingress = toEntity(i, clusterId, clusterIdx);
 				ingress.setCluster(clusterEntity);
+				ingress.setYaml(yamlDecode);
 				
 				// save
 				Long id = ingressDomainService.register(ingress);
@@ -279,6 +297,7 @@ public class IngressService extends InNamespaceService {
 			try {
 				IngressEntity updateIngress = toEntity(i, clusterId, clusterIdx);
 				updateIngress.setCluster(clusterEntity);
+				updateIngress.setYaml(yaml);
 
 				Long id = ingressDomainService.update(updateIngress, ingressId);
 

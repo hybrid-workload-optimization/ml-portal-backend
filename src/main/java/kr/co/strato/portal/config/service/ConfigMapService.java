@@ -73,8 +73,11 @@ public class ConfigMapService extends InNamespaceService {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(configMapDto.getClusterIdx());
 		
+		
+		String yaml = new String(Base64.getDecoder().decode(configMapDto.getYaml()), "UTF-8");
+		
 		// k8s - post config map
-		List<ConfigMap> configMapList = configMapAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(configMapDto.getYaml()), "UTF-8"));
+		List<ConfigMap> configMapList = configMapAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save config map
 		List<Long> result = configMapList.stream()
@@ -82,6 +85,7 @@ public class ConfigMapService extends InNamespaceService {
 					ConfigMapEntity configMapEntity = null;
 					try {
 						configMapEntity = toConfigMapEntity(cluster, c);
+						configMapEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -177,12 +181,14 @@ public class ConfigMapService extends InNamespaceService {
 	 */
 	public String getConfigMapYaml(Long configMapIdx) throws Exception {
 		ConfigMapEntity configMapEntity = configMapDomainService.get(configMapIdx);
-		Long clusterId		 = configMapEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName = configMapEntity.getNamespace().getName();
-        String configMapName = configMapEntity.getName();
-        
-		String yaml = configMapAdapterService.getYaml(clusterId, namespaceName, configMapName);
-		
+		String yaml = configMapEntity.getYaml();
+		if(yaml == null) {
+			Long clusterId		 = configMapEntity.getNamespace().getCluster().getClusterId();
+			String namespaceName = configMapEntity.getNamespace().getName();
+	        String configMapName = configMapEntity.getName();
+	        
+			yaml = configMapAdapterService.getYaml(clusterId, namespaceName, configMapName);
+		}
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 	
@@ -200,8 +206,10 @@ public class ConfigMapService extends InNamespaceService {
 		ConfigMapEntity configMap = configMapDomainService.get(configMapIdx);
 		ClusterEntity cluster = configMap.getNamespace().getCluster();
 		
+		String yaml = new String(Base64.getDecoder().decode(configMapDto.getYaml()), "UTF-8");
+		
 		// k8s - post config map
-		List<ConfigMap> configMapList = configMapAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(configMapDto.getYaml()), "UTF-8"));
+		List<ConfigMap> configMapList = configMapAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save config map
 		List<Long> result = configMapList.stream()
@@ -210,6 +218,7 @@ public class ConfigMapService extends InNamespaceService {
 					try {
 						configMapEntity = toConfigMapEntity(cluster, c);
 						configMapEntity.setId(configMapIdx);
+						configMapEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());

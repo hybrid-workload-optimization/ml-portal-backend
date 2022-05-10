@@ -73,8 +73,10 @@ public class SecretService extends InNamespaceService {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(secretDto.getClusterIdx());
 		
+		String yaml = new String(Base64.getDecoder().decode(secretDto.getYaml()), "UTF-8");
+		
 		// k8s - post secret
-		List<Secret> secretList = secretAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(secretDto.getYaml()), "UTF-8"));
+		List<Secret> secretList = secretAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save config map
 		List<Long> result = secretList.stream()
@@ -82,6 +84,7 @@ public class SecretService extends InNamespaceService {
 					SecretEntity secretEntity = null;
 					try {
 						secretEntity = toSecretEntity(cluster, s);
+						secretEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -177,12 +180,14 @@ public class SecretService extends InNamespaceService {
 	 */
 	public String getSecretYaml(Long secretIdx) throws Exception {
 		SecretEntity secretEntity = secretDomainService.get(secretIdx);
-		Long clusterId		 = secretEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName = secretEntity.getNamespace().getName();
-        String secretName = secretEntity.getName();
-        
-		String yaml = secretAdapterService.getYaml(clusterId, namespaceName, secretName);
-		
+		String yaml = secretEntity.getYaml();
+		if(yaml == null) {
+			Long clusterId		 = secretEntity.getNamespace().getCluster().getClusterId();
+			String namespaceName = secretEntity.getNamespace().getName();
+	        String secretName = secretEntity.getName();
+	        
+			yaml = secretAdapterService.getYaml(clusterId, namespaceName, secretName);
+		}
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 	
@@ -200,8 +205,10 @@ public class SecretService extends InNamespaceService {
 		SecretEntity secret = secretDomainService.get(secretIdx);
 		ClusterEntity cluster = secret.getNamespace().getCluster();
 		
+		String yaml = new String(Base64.getDecoder().decode(secretDto.getYaml()), "UTF-8");
+		
 		// k8s - post secret
-		List<Secret> secretList = secretAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(secretDto.getYaml()), "UTF-8"));
+		List<Secret> secretList = secretAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save config map
 		List<Long> result = secretList.stream()
@@ -210,6 +217,7 @@ public class SecretService extends InNamespaceService {
 					try {
 						secertEntity = toSecretEntity(cluster, s);
 						secertEntity.setId(secretIdx);
+						secertEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());

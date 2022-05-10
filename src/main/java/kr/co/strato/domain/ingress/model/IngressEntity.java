@@ -57,5 +57,7 @@ public class IngressEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cluster_idx")
 	private ClusterEntity cluster;
+	
+	private String yaml;
 
 }

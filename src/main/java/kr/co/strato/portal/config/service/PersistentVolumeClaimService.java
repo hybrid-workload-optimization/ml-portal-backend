@@ -72,8 +72,10 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(persistentVolumeClaimDto.getClusterIdx());
 		
+		String yaml = new String(Base64.getDecoder().decode(persistentVolumeClaimDto.getYaml()), "UTF-8");
+		
 		// k8s - post persistent volume claim
-		List<PersistentVolumeClaim> persistentVolumeClaimList = persistentVolumeClaimAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(persistentVolumeClaimDto.getYaml()), "UTF-8"));
+		List<PersistentVolumeClaim> persistentVolumeClaimList = persistentVolumeClaimAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save persistent volume claim
 		List<Long> result = persistentVolumeClaimList.stream()
@@ -81,6 +83,7 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 					PersistentVolumeClaimEntity persistentVolumeClaimEntity = null;
 					try {
 						persistentVolumeClaimEntity = toPersistentVolumeClaimEntity(cluster, p);
+						persistentVolumeClaimEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -185,12 +188,14 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 	 */
 	public String getPersistentVolumeClaimYaml(Long persistentVolumeClaimIdx) throws Exception {
 		PersistentVolumeClaimEntity persistentVolumeClaimEntity = persistentVolumeClaimDomainService.get(persistentVolumeClaimIdx);
-		Long clusterId					= persistentVolumeClaimEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName			= persistentVolumeClaimEntity.getNamespace().getName();
-        String persistentVolumeClaimName= persistentVolumeClaimEntity.getName();
-        
-		String yaml = persistentVolumeClaimAdapterService.getYaml(clusterId, namespaceName, persistentVolumeClaimName);
-		
+		String yaml = persistentVolumeClaimEntity.getYaml();
+		if(yaml == null) {
+			Long clusterId					= persistentVolumeClaimEntity.getNamespace().getCluster().getClusterId();
+			String namespaceName			= persistentVolumeClaimEntity.getNamespace().getName();
+	        String persistentVolumeClaimName= persistentVolumeClaimEntity.getName();
+	        
+			yaml = persistentVolumeClaimAdapterService.getYaml(clusterId, namespaceName, persistentVolumeClaimName);
+		}
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 	
@@ -208,8 +213,10 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 		PersistentVolumeClaimEntity persistentVolumeClaim = persistentVolumeClaimDomainService.get(persistentVolumeClaimIdx);
 		ClusterEntity cluster = persistentVolumeClaim.getNamespace().getCluster();
 		
+		String yaml = new String(Base64.getDecoder().decode(persistentVolumeClaimDto.getYaml()), "UTF-8");
+		
 		// k8s - post persistent volume claim
-		List<PersistentVolumeClaim> persistentVolumeClaimList = persistentVolumeClaimAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(persistentVolumeClaimDto.getYaml()), "UTF-8"));
+		List<PersistentVolumeClaim> persistentVolumeClaimList = persistentVolumeClaimAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save persistent volume claim
 		List<Long> result = persistentVolumeClaimList.stream()
@@ -218,6 +225,7 @@ public class PersistentVolumeClaimService extends InNamespaceService {
 					try {
 						persistentVolumeClaimEntity = toPersistentVolumeClaimEntity(cluster, d);
 						persistentVolumeClaimEntity.setId(persistentVolumeClaimIdx);
+						persistentVolumeClaimEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());

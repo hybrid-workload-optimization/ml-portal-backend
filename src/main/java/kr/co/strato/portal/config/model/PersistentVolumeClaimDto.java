@@ -62,6 +62,7 @@ public class PersistentVolumeClaimDto {
 		private Long projectIdx;
 		private String clusterName;
 		private Long clusterIdx;
+		private String yaml;
 	}
 	
 	@Getter
