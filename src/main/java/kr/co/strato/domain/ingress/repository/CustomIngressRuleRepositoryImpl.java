@@ -68,7 +68,7 @@ public class CustomIngressRuleRepositoryImpl implements CustomIngressRuleReposit
 
         BooleanBuilder builder = new BooleanBuilder();
         if(clusterIdx != null && clusterIdx > 0L){
-            builder.and(qIngressEntity.cluster.clusterId.eq(clusterIdx));
+            builder.and(qIngressEntity.cluster.clusterIdx.eq(clusterIdx));
         }
 
         QueryResults<String> results =
