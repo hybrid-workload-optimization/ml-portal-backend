@@ -201,9 +201,8 @@ public class PodOnlyApiService extends InNamespaceService {
      * @param podName
      * @return
      */
-    public Boolean deletePod(Long clusterIdx, String namespace, String podName) {
-    	ClusterEntity cluster = clusterDomainService.get(clusterIdx);
-    	return podAdapterService.delete(cluster.getClusterId(), namespace, podName);
+    public Boolean deletePod(Long clusterId, String namespace, String podName) {
+    	return podAdapterService.delete(clusterId, namespace, podName);
     }
     
     /**

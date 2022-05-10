@@ -67,7 +67,7 @@ public class PodOnlyApiController extends CommonController {
     @DeleteMapping("api/v1/pod/api")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<Boolean> deletePod(@RequestBody ApiSearchParam param) {
-    	Boolean result = podService.deletePod(param.getClusterIdx(), param.getNamespace(), param.getPodName());
+    	Boolean result = podService.deletePod(param.getClusterId(), param.getNamespace(), param.getPodName());
         return new ResponseWrapper<>(result);
     }
     
@@ -85,7 +85,7 @@ public class PodOnlyApiController extends CommonController {
     @GetMapping("api/v1/pod/api/yaml")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<String> getPodYaml(@RequestBody ApiSearchParam param) {
-    	String result = podService.getPodtYaml(param.getClusterIdx(), param.getNamespace(), param.getPodName());
+    	String result = podService.getPodtYaml(param.getClusterId(), param.getNamespace(), param.getPodName());
         return new ResponseWrapper<>(result);
     }
     

@@ -118,7 +118,7 @@ public class PodDto {
     @Setter
     @NoArgsConstructor
     public static class ApiSearchParam {
-    	private Long clusterIdx;
+    	private Long clusterId;
     	private String namespace;
     	private String podName;
     }
