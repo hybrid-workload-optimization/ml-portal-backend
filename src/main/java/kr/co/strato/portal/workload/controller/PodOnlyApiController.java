@@ -82,7 +82,7 @@ public class PodOnlyApiController extends CommonController {
     	return result;
     }
     
-    @GetMapping("api/v1/pod/api/yaml")
+    @PostMapping("api/v1/pod/api/yaml")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<String> getPodYaml(@RequestBody ApiSearchParam param) {
     	String result = podService.getPodtYaml(param.getClusterId(), param.getNamespace(), param.getPodName());
