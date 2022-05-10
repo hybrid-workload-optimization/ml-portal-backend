@@ -61,6 +61,7 @@ public class ClusterStorageClassDto {
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
     	private List<PvList> pvList;
+    	private String yaml;
     }
 	
 	@Getter

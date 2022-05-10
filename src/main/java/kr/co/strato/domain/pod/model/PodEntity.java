@@ -120,4 +120,6 @@ public class PodEntity {
     
     @Transient
     private List<Volume> volumes;
+    
+    private String yaml;
 }

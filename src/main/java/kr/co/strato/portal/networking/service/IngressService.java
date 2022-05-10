@@ -264,12 +264,14 @@ public class IngressService extends InNamespaceService {
 		Long clusterId = clusterEntity.getClusterId();
 		Long clusterIdx = clusterEntity.getClusterIdx();
 		
+		/*
 		//ingress path 중복 채크
 		boolean isDuplicateIngressPath = duplicateCheckIngressPath(clusterIdx, yaml);
 		if(isDuplicateIngressPath) {
 			log.error("중복된 Ingress path 입니다.");
 			throw new DuplicateIngressPathException();
 		}
+		*/
 
 		List<Ingress> ingress = ingressAdapterService.registerIngress(clusterId, yaml);
 

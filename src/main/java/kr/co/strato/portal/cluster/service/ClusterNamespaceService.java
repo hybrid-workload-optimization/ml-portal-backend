@@ -104,6 +104,8 @@ public class ClusterNamespaceService extends NonNamespaceService {
 		for (Namespace n : clusterNamespaces) {
 			try {
 				NamespaceEntity namespace = toEntity(n, clusterIdx);
+				namespace.setYaml(yamlDecode);
+				
 				// save
 				Long id = namespaceDomainService.register(namespace);
 				ids.add(id);
@@ -127,6 +129,7 @@ public class ClusterNamespaceService extends NonNamespaceService {
         List<Long> ids = namespaces.stream().map( n -> {
             try {
             	NamespaceEntity updatePersistentVolume = toEntity(n,clusterId);
+            	updatePersistentVolume.setYaml(yaml);
 
                 Long id = namespaceDomainService.update(updatePersistentVolume, namespaceId);
 

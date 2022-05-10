@@ -71,4 +71,6 @@ public class ReplicaSetEntity {
     
     @OneToMany(mappedBy = "replicaSet")
     private List<PodReplicaSetEntity> podReplicaSets;
+    
+    private String yaml;
 }

@@ -39,6 +39,7 @@ public class StatefulSetDetailDto {
         private String clusterName;
         private Long clusterIdx;
         private String projectIdx;
+        private String yaml;
     }
 
     @Getter

@@ -161,9 +161,10 @@ public class CronJobService extends InNamespaceService {
 		String namespaceName = null;
 		Long clusterId = null;
 		
-		
+		String yaml = null;
 		CronJobEntity entitiy = cronJobDomainService.getById(idx);
 		if(entitiy != null) {
+			yaml = entitiy.getYaml();
 			name = entitiy.getCronJobName();
 			NamespaceEntity namespaceEntity = entitiy.getNamespaceEntity();
 			if(namespaceEntity != null) {
@@ -174,7 +175,10 @@ public class CronJobService extends InNamespaceService {
 					clusterId = cluster.getClusterId(); 
 			}
 		}
-		String yaml = cronJobAdapterService.getYaml(clusterId, namespaceName, name);
+		
+		if(yaml == null) {
+			yaml = cronJobAdapterService.getYaml(clusterId, namespaceName, name);
+		}
 		if(yaml != null)
 			yaml = Base64Util.encode(yaml);
 		return yaml;
@@ -240,6 +244,7 @@ public class CronJobService extends InNamespaceService {
 					log.error("크론잡 저장 실패", e);
 				}
 				
+				cronJobEntity.setYaml(Base64Util.decode(yaml));
 				cronJobDomainService.save(cronJobEntity);
 			}
 			

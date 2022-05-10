@@ -76,7 +76,7 @@ public class StatefulSetService extends InNamespaceService {
             try {
                 String namespaceName = s.getMetadata().getNamespace();
                 StatefulSetEntity statefulSet = toEntity(s);
-
+                statefulSet.setYaml(yaml);
                 Long id = statefulSetDomainService.register(statefulSet, clusterIdx, namespaceName);
 
                 return id;
@@ -157,6 +157,7 @@ public class StatefulSetService extends InNamespaceService {
         List<Long> ids = statefulSets.stream().map( s -> {
             try {
                 StatefulSetEntity updateStatefulSet = toEntity(s);
+                updateStatefulSet.setYaml(yaml);
 
                 Long id = statefulSetDomainService.update(statefulSetId, updateStatefulSet);
 
@@ -201,15 +202,17 @@ public class StatefulSetService extends InNamespaceService {
     public String getStatefulSetYaml(Long statefulSetId){
         //get statefulSet entity
         StatefulSetEntity entity = statefulSetDomainService.get(statefulSetId);
+        String yaml = entity.getYaml();
+        
+        if(yaml == null) {
+        	 //get k8s statefulSet model
+            String statefulSetName = entity.getStatefulSetName();
+            String namespaceName = entity.getNamespace().getName();
+            Long clusterId = entity.getNamespace().getCluster().getClusterId();
 
-        //get k8s statefulSet model
-        String statefulSetName = entity.getStatefulSetName();
-        String namespaceName = entity.getNamespace().getName();
-        Long clusterId = entity.getNamespace().getCluster().getClusterId();
-
-        String yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
+            yaml = statefulSetAdapterService.getYaml(clusterId, namespaceName, statefulSetName);
+        }
         yaml = Base64Util.encode(yaml);
-
         return yaml;
     }
 

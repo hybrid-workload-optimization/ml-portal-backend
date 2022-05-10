@@ -68,4 +68,6 @@ public class CronJobEntity {
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "namespace_idx")
 	private NamespaceEntity namespaceEntity;
+	
+	private String yaml;
 }

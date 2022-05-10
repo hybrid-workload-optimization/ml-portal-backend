@@ -15,7 +15,6 @@ import javax.persistence.Table;
 
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.pod.model.PodDaemonSetEntity;
-import kr.co.strato.domain.pod.model.PodReplicaSetEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -62,4 +61,6 @@ public class DaemonSetEntity {
 	
 	@OneToMany(mappedBy = "daemonSet")
     private List<PodDaemonSetEntity> podDaemonSets;
+	
+	private String yaml;
 }

@@ -54,6 +54,8 @@ public class ReplicaSetDto {
 		private Long projectIdx;
 		
 		private ArrayList<PodDto.ResListDto> pods;
+		
+		private String yaml;
 	}
 	
 	@Getter

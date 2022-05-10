@@ -63,7 +63,7 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 	public List<PersistentVolume> getClusterPersistentVolumeListSet(Long clusterId) {
 		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.getPersistentVolumeList(clusterId);
 		
-		synClusterPersistentVolumeSave(persistentVolumeList,clusterId);
+		synClusterPersistentVolumeSave(persistentVolumeList, clusterId);
 		return persistentVolumeList;
 	}
 
@@ -111,7 +111,7 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 		List<PersistentVolume> persistentVolumeList = persistentVolumeAdapterService.registerPersistentVolume(clusterEntity.getClusterId(),	yamlDecode);
 		
 		//yamlApplyParam.getKubeConfigId() -> clusterId 임시저장
-		List<Long> ids = synClusterPersistentVolumeSave(persistentVolumeList, clusterIdx);
+		List<Long> ids = synClusterPersistentVolumeSave(persistentVolumeList, clusterIdx, yamlDecode);
 		return ids;
 	}
 	
@@ -125,6 +125,8 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
         List<Long> ids = persistentVolumes.stream().map( pv -> {
             try {
                 PersistentVolumeEntity updatePersistentVolume = toEntity(pv,clusterId);
+                updatePersistentVolume.setYaml(yaml);
+                
                 Long id = persistentVolumeDomainService.update(updatePersistentVolume, PersistentVolumeId);
 
                 return id;
@@ -140,11 +142,17 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
     }
 	
 	public List<Long> synClusterPersistentVolumeSave(List<PersistentVolume> persistentVolumeList, Long clusterIdx) {
+		return synClusterPersistentVolumeSave(persistentVolumeList, clusterIdx, null);
+	}
+	
+	public List<Long> synClusterPersistentVolumeSave(List<PersistentVolume> persistentVolumeList, Long clusterIdx, String yaml) {
 		List<Long> ids = new ArrayList<>();
 		for (PersistentVolume pv : persistentVolumeList) {
 			try {
 				// k8s Object -> Entity
 				PersistentVolumeEntity clusterPersistentVolume = toEntity(pv,clusterIdx);
+				clusterPersistentVolume.setYaml(yaml);
+				
 				// save
 				Long id = persistentVolumeDomainService.register(clusterPersistentVolume);
 				ids.add(id);

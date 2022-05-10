@@ -64,11 +64,16 @@ public class ClusterStorageClassService extends NonNamespaceService {
 	}
 
 	public List<Long> synClusterStorageClassSave(List<StorageClass> storageClassList, Long clusterId) {
+		return synClusterStorageClassSave(storageClassList, clusterId, null);
+	}
+	
+	public List<Long> synClusterStorageClassSave(List<StorageClass> storageClassList, Long clusterId, String yaml) {
 		List<Long> ids = new ArrayList<>();
 		for (StorageClass sc : storageClassList) {
 			try {
 				StorageClassEntity clusterStorageClass = toEntity(sc,clusterId);
-
+				clusterStorageClass.setYaml(yaml);
+				
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);
 				ids.add(id);
@@ -134,6 +139,7 @@ public class ClusterStorageClassService extends NonNamespaceService {
 			try {
 				// k8s Object -> Entity
 				StorageClassEntity clusterStorageClass = toEntity(sc, clusterIdx);
+				clusterStorageClass.setYaml(yamlDecode);
 
 				// save
 				Long id = storageClassDomainService.register(clusterStorageClass);
@@ -157,6 +163,7 @@ public class ClusterStorageClassService extends NonNamespaceService {
         List<Long> ids = storageClass.stream().map( sc -> {
             try {
             	StorageClassEntity updatestorageClass = toEntity(sc,clusterId);
+            	updatestorageClass.setYaml(yaml);
 
                 Long id = storageClassDomainService.update(updatestorageClass, storageClassId);
 

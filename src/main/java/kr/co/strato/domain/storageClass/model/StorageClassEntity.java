@@ -54,6 +54,9 @@ public class StorageClassEntity {
 	private String annotation;
 	@Lob
 	private String label;
+	
+	@Column(name = "yaml")
+	private String yaml;
 
 	
 }

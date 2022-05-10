@@ -111,8 +111,10 @@ public class DaemonSetService extends InNamespaceService {
 		// get clusterId(kubeConfigId)
 		ClusterEntity cluster = clusterDomainService.get(daemonSetDto.getClusterIdx());
 		
+		String yaml = new String(Base64.getDecoder().decode(daemonSetDto.getYaml()), "UTF-8");
+		
 		// k8s - post daemon set
-		List<DaemonSet> daemonSetList = daemonSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(daemonSetDto.getYaml()), "UTF-8"));
+		List<DaemonSet> daemonSetList = daemonSetAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save daemon set
 		List<Long> result = daemonSetList.stream()
@@ -120,6 +122,7 @@ public class DaemonSetService extends InNamespaceService {
 					DaemonSetEntity daemonSetEntity = null;
 					try {
 						daemonSetEntity = toDaemonSetEntity(cluster, d);
+						daemonSetEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -180,12 +183,14 @@ public class DaemonSetService extends InNamespaceService {
 	 */
 	public String getDaemonSetYaml(Long daemonSetIdx) throws Exception {
 		DaemonSetEntity daemonSetEntity = daemonSetDomainService.get(daemonSetIdx);
-		Long clusterId			= daemonSetEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName	= daemonSetEntity.getNamespace().getName();
-        String daemonSetName	= daemonSetEntity.getDaemonSetName();
-        
-		String yaml = daemonSetAdapterService.getYaml(clusterId, namespaceName, daemonSetName);
-		
+		String yaml = daemonSetEntity.getYaml();
+		if(yaml == null) {
+			Long clusterId			= daemonSetEntity.getNamespace().getCluster().getClusterId();
+			String namespaceName	= daemonSetEntity.getNamespace().getName();
+	        String daemonSetName	= daemonSetEntity.getDaemonSetName();
+	        
+			yaml = daemonSetAdapterService.getYaml(clusterId, namespaceName, daemonSetName);
+		}		
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 	
@@ -203,8 +208,11 @@ public class DaemonSetService extends InNamespaceService {
 		DaemonSetEntity daemonSet = daemonSetDomainService.get(daemonSetIdx);
 		ClusterEntity cluster = daemonSet.getNamespace().getCluster();
 		
+		
+		String yaml = new String(Base64.getDecoder().decode(daemonSetDto.getYaml()), "UTF-8");
+		
 		// k8s - post replica set
-		List<DaemonSet> daemonSetList = daemonSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(daemonSetDto.getYaml()), "UTF-8"));
+		List<DaemonSet> daemonSetList = daemonSetAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save replica set
 		List<Long> result = daemonSetList.stream()
@@ -213,6 +221,7 @@ public class DaemonSetService extends InNamespaceService {
 					try {
 						daemonSetEntity = toDaemonSetEntity(cluster, d);
 						daemonSetEntity.setDaemonSetIdx(daemonSetIdx);
+						daemonSetEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());

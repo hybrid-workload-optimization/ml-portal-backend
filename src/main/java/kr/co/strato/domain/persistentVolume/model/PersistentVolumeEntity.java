@@ -77,4 +77,7 @@ public class PersistentVolumeEntity {
 	@JoinColumn(name = "cluster_idx")
 	private ClusterEntity cluster;
 	
+	@Column(name = "yaml")
+	private String yaml;
+	
 }

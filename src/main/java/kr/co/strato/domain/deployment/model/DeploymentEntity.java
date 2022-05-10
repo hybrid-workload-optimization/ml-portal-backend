@@ -78,5 +78,8 @@ public class DeploymentEntity {
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "namespace_idx")
 	private NamespaceEntity namespaceEntity;
+	
+	@Column(name = "yaml")
+	private String yaml;
 
 }

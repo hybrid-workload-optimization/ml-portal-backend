@@ -149,8 +149,10 @@ public class ReplicaSetService extends InNamespaceService {
 		//이름 중복 채크
 		duplicateCheckResourceCreation(cluster.getClusterId(), replicaSetDto.getYaml());
 		
+		String yaml = new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8");
+		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
@@ -158,6 +160,7 @@ public class ReplicaSetService extends InNamespaceService {
 					ReplicaSetEntity replicaSetEntity = null;
 					try {
 						replicaSetEntity = toReplicaSetEntity(cluster, r);
+						replicaSetEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -185,8 +188,10 @@ public class ReplicaSetService extends InNamespaceService {
 		ReplicaSetEntity replicaSet = replicaSetDomainService.get(replicaSetIdx);
 		ClusterEntity cluster = replicaSet.getNamespace().getCluster();
 		
+		String yaml = new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8");
+		
 		// k8s - post replica set
-		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), new String(Base64.getDecoder().decode(replicaSetDto.getYaml()), "UTF-8"));
+		List<ReplicaSet> replicaSetList = replicaSetAdapterService.create(cluster.getClusterId(), yaml);
 		
 		// db - save replica set
 		List<Long> result = replicaSetList.stream()
@@ -195,6 +200,7 @@ public class ReplicaSetService extends InNamespaceService {
 					try {
 						replicaSetEntity = toReplicaSetEntity(cluster, r);
 						replicaSetEntity.setReplicaSetIdx(replicaSetIdx);
+						replicaSetEntity.setYaml(yaml);
 					} catch (PortalException e) {
 						log.error(e.getMessage(), e);
 						throw new PortalException(e.getErrorType().getDetail());
@@ -282,12 +288,14 @@ public class ReplicaSetService extends InNamespaceService {
 	 */
 	public String getReplicaSetYaml(Long replicaSetIdx) throws Exception {
 		ReplicaSetEntity replicaSetEntity = replicaSetDomainService.get(replicaSetIdx);
-		Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
-		String namespaceName	= replicaSetEntity.getNamespace().getName();
-        String replicaSetName	= replicaSetEntity.getReplicaSetName();
-        
-		String yaml = replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
-		
+		String yaml = replicaSetEntity.getYaml();
+		if(yaml == null) {
+			Long clusterId			= replicaSetEntity.getNamespace().getCluster().getClusterId();
+			String namespaceName	= replicaSetEntity.getNamespace().getName();
+	        String replicaSetName	= replicaSetEntity.getReplicaSetName();
+	        
+			yaml = replicaSetAdapterService.getYaml(clusterId, namespaceName, replicaSetName);
+		}
 		return Base64.getEncoder().encodeToString(yaml.getBytes());
 	}
 

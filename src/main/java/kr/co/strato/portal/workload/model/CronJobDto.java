@@ -27,4 +27,6 @@ public class CronJobDto {
 	private List<JobDto> activeJobs;
 	private List<JobDto> inactiveJobs;
 	
+	private String yaml;
+	
 }

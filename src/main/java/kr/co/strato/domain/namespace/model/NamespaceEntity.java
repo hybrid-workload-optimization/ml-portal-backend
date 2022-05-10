@@ -54,4 +54,7 @@ public class NamespaceEntity {
 	private String annotation;
 	@Lob
 	private String label;
+	
+	@Column(name = "yaml")
+	private String yaml;
 }

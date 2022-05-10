@@ -76,6 +76,7 @@ public class ClusterPersistentVolumeDto {
     	private Long clusterId;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
+    	private String yaml;
     }
 	
 	@Getter

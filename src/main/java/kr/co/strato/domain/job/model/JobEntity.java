@@ -72,4 +72,6 @@ public class JobEntity {
 	
 	@OneToMany(mappedBy = "job")
     private List<PodJobEntity> podJobs;
+	
+	private String yaml;
 }

@@ -54,6 +54,8 @@ private Long projectIdx;
 		private String clusterName;
 		
 		private ArrayList<PodDto.ResListDto> pods;
+		
+		private String yaml;
 	}
 	
 	@Getter

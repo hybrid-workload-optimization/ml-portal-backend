@@ -167,9 +167,11 @@ public class DeploymentService extends InNamespaceService {
 		String name = null;
 		String namespaceName = null;
 		Long clusterId = null;
-
+		
+		String yaml = null; 
 		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(idx);
 		if (entitiy != null) {
+			yaml = entitiy.getYaml();
 			name = entitiy.getDeploymentName();
 			NamespaceEntity namespaceEntity = entitiy.getNamespaceEntity();
 			if (namespaceEntity != null) {
@@ -180,7 +182,10 @@ public class DeploymentService extends InNamespaceService {
 					clusterId = cluster.getClusterId();
 			}
 		}
-		String yaml = deploymentAdapterService.getYaml(clusterId, namespaceName, name);
+		
+		if(yaml == null) {
+			yaml = deploymentAdapterService.getYaml(clusterId, namespaceName, name);
+		}
 		if (yaml != null)
 			yaml = Base64Util.encode(yaml);
 		return yaml;
@@ -238,6 +243,7 @@ public class DeploymentService extends InNamespaceService {
 				if(deploymentArgDto.getDeploymentIdx() != null)
 					deploymentEntity.setDeploymentIdx(deploymentArgDto.getDeploymentIdx());
 				
+				deploymentEntity.setYaml(Base64Util.decode(yaml));
 				deploymentDomainService.save(deploymentEntity);
 			}
 

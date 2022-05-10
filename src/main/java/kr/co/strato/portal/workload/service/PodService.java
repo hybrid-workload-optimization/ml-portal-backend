@@ -90,6 +90,7 @@ public class PodService extends InNamespaceService {
                 Pod k8sPodDetail = podAdapterService.get(cluster.getClusterId(), namespaceName, pod.getPodName());
                 
                 PodEntity podDetail = PodMapper.INSTANCE.toEntity(k8sPodDetail);
+                podDetail.setYaml(yaml);
                 Long id = podDomainService.register(podDetail, cluster, namespaceName, null);
                 podDomainService.update(id, podDetail);
                 
@@ -117,7 +118,7 @@ public class PodService extends InNamespaceService {
                 String namespaceName = s.getMetadata().getNamespace();
                 // ownerReferences 추가
                 PodEntity pod = PodMapper.INSTANCE.toEntity(s);
-
+                pod.setYaml(yaml);
 				Long id = podDomainService.update(podId, pod);
                 return id;
             } catch (Exception e) {
@@ -338,15 +339,16 @@ public class PodService extends InNamespaceService {
     public String getPodtYaml(Long podId) {
     	//get statefulSet entity
         PodEntity entity = podDomainService.get(podId);
+        String yaml = entity.getYaml();
+        if(yaml == null) {
+        	 //get k8s statefulSet model
+            String podName = entity.getPodName();
+            String namespaceName = entity.getNamespace().getName();
+            Long clusterId = entity.getNamespace().getCluster().getClusterId();
 
-        //get k8s statefulSet model
-        String podName = entity.getPodName();
-        String namespaceName = entity.getNamespace().getName();
-        Long clusterId = entity.getNamespace().getCluster().getClusterId();
-
-        String yaml = podAdapterService.getYaml(clusterId, namespaceName, podName);
+            yaml = podAdapterService.getYaml(clusterId, namespaceName, podName);
+        }
         yaml = Base64Util.encode(yaml);
-
         return yaml;
     }
 

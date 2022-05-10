@@ -137,15 +137,16 @@ public class JobService extends InNamespaceService {
 	}
 	
 	//yaml 조회
-	public String getYaml(Long idx){
-		
+	public String getYaml(Long idx){		
 		String jobName = null;
 		String namespaceName = null;
 		Long clusterId = null;
 		
-		
+		String yaml = null;
 		JobEntity entitiy = jobDomainService.getById(idx);
 		if(entitiy != null) {
+			yaml = entitiy.getYaml();
+			
 			jobName = entitiy.getJobName();
 			NamespaceEntity namespaceEntity = entitiy.getNamespaceEntity();
 			if(namespaceEntity != null) {
@@ -156,7 +157,10 @@ public class JobService extends InNamespaceService {
 					clusterId = cluster.getClusterId(); 
 			}
 		}
-		String yaml = jobAdapterService.getYaml(clusterId, namespaceName, jobName);
+		
+		if(yaml == null) {
+			yaml = jobAdapterService.getYaml(clusterId, namespaceName, jobName);
+		}
 		if(yaml != null)
 			yaml = Base64Util.encode(yaml);
 		return yaml;
@@ -202,6 +206,7 @@ public class JobService extends InNamespaceService {
 				if(jobArgDto.getJobIdx() != null)
 					jobEntity.setJobIdx(jobArgDto.getJobIdx());
 				
+				jobEntity.setYaml(Base64Util.decode(yaml));
 				jobDomainService.save(jobEntity);
 			}
 			
