@@ -259,13 +259,16 @@ public class PortalProjectService {
     	}
     	
     	try {
+    		
+    		ProjectEntity oldEntity = projectInfo.get();
+    		
         	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
         	projectBuiler.id(param.getProjectIdx());
         	projectBuiler.projectName(param.getProjectName());
         	projectBuiler.description(param.getDescription());
         	projectBuiler.createUserId(userId);
         	projectBuiler.createUserName(userName);
-        	projectBuiler.createdAt(now);
+        	projectBuiler.createdAt(oldEntity.getCreatedAt());
         	projectBuiler.updateUserId(userId);
         	projectBuiler.updateUserName(userName);
         	projectBuiler.updatedAt(now);
