@@ -103,7 +103,7 @@ public class AlertService {
 			//Client 전송 SSE
 			AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
 			
-			List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(userId);
+			List<Consumer<ServerSentEvent<AlertDto>>> list = (List<Consumer<ServerSentEvent<AlertDto>>>)((ArrayList)getConsumerMap().get(userId)).clone();
 			if(list != null) {
 				for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
 					if(consumer != null) {
