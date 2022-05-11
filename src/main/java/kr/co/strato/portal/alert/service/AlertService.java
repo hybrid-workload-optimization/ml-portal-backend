@@ -87,35 +87,50 @@ public class AlertService {
 		}
 		
 		for(String userId : userIds) {
-			AlertEntity entity = AlertEntity.builder()
-					.clusterIdx(clusterIdx)
-					.clusterName(clusterName)
-					.workJobType(workJobType.name())
-					.workJobStatus(workJobStatus.name())
-					.workJobIdx(workJobEntity.getWorkJobIdx())
-					.createdAt(DateUtil.currentDateTime())
-					.userId(userId)
-					.confirmYn("N")
-					.build();
-			//DB 저장
-			alertDomainService.register(entity);
+			try {
+				AlertEntity entity = AlertEntity.builder()
+						.clusterIdx(clusterIdx)
+						.clusterName(clusterName)
+						.workJobType(workJobType.name())
+						.workJobStatus(workJobStatus.name())
+						.workJobIdx(workJobEntity.getWorkJobIdx())
+						.createdAt(DateUtil.currentDateTime())
+						.userId(userId)
+						.confirmYn("N")
+						.build();
+				//DB 저장
+				alertDomainService.register(entity);
 
-			//Client 전송 SSE
-			AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
-			
-			List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
-			if(l != null && l.size() > 0) {
+				//Client 전송 SSE
+				AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
 				
-				//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
-				List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
-				copyList.addAll(l);
-				
-				for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
-					if(consumer != null) {
-						consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+				List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
+				if(l != null && l.size() > 0) {
+					
+					int consumerSize = 0;
+					//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
+					List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
+					copyList.addAll(l);
+					
+					
+					for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
+						if(consumer != null) {
+							try {
+								consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+								consumerSize ++;
+								log.info("alert - 전송");
+								log.info("alert - UserId: {}, count: {}", userId, consumerSize);
+							} catch (Exception e) {
+								log.error("", e);
+							}
+						}
 					}
 				}
+				
+			} catch (Exception e) {
+				log.error("", e);
 			}
+			
 		}		
 	}
 	
@@ -224,7 +239,8 @@ public class AlertService {
 		}
 		
 		if(list.contains(consumer)) {
-			list.remove(consumer);
+			boolean isDelete = list.remove(consumer);
+			log.info("SSE - Remove result: {}", isDelete);
 		}
 		
 		if(list.size() == 0) {
@@ -238,6 +254,13 @@ public class AlertService {
 	public static void startSsePing() {
 		boolean isNull = ssePingRunnable == null;
 		log.info("ssePingRunnable is null: {}", isNull);
+		log.info("consumer size: {}", consumerMap.size());
+		
+		Set<String> keys = consumerMap.keySet();
+		for(String id : keys) {
+			log.info("id: {}, size: {}", id, consumerMap.get(id).size());
+		}
+		
 		if(ssePingRunnable == null) {
 			log.info("SSE-Ping Start");
 			ssePingRunnable = new Runnable() {
@@ -245,29 +268,42 @@ public class AlertService {
 				@Override
 				public void run() {
 					while(true) {
-						Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> map = getConsumerMap();
-						if(map.size() == 0) {
-							ssePingRunnable = null;
-							log.info("SSE-Ping Stop - Consumer size: 0");
-							break;
-						}
-						
-						Set<String> keySet = map.keySet();
-						for(String key : keySet) {
-							List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
-							if(list != null) {
-								for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
-									if(consumer != null) {
-										consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+						try {
+							Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> map = getConsumerMap();
+							if(map.size() == 0) {
+								ssePingRunnable = null;
+								log.info("SSE-Ping Stop - Consumer size: 0");
+								break;
+							}
+							
+							Set<String> keySet = map.keySet();
+							for(String key : keySet) {
+								List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
+								if(list != null && list.size() > 0) {
+									
+									List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
+									copyList.addAll(list);
+									
+									int consumerSize = 0;
+									for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
+										if(consumer != null) {
+											try {
+												consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+												consumerSize ++;
+												log.info("ping alert - 전송");
+												log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+											} catch (Exception e) {
+												log.error("", e);
+											}
+										}
 									}
 								}
+								//30초에 한번씩 핑 테스트
+								//nginx 연결 유지
+								Thread.sleep(1000 * 30);
 							}
-							try {
-								//1분에 한번씩 핑 테스트
-								Thread.sleep(1000 * 60);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+						} catch (Exception e) {
+							log.error("", e);
 						}
 					}
 				}
