@@ -202,7 +202,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 				.select(projectEntity)
 				 .from(projectEntity)
 				 .join(projectClusterEntity).on(projectEntity.id.eq(projectClusterEntity.projectIdx))
-				 .where(projectClusterEntity.clusterIdx.eq(clusterIdx))
+				 .where(projectClusterEntity.clusterIdx.eq(clusterIdx).and(projectEntity.deletedYn.eq("N")))
 				 .fetchOne();
 		
 		return result;

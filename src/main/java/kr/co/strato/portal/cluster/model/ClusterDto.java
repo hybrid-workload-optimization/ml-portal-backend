@@ -96,6 +96,7 @@ public class ClusterDto {
 		private ArrayList<Node> nodes;	
 		// work job
 		private Long workJobIdx;
+		private Long projectIdx;
 	}
 	
 	@Getter

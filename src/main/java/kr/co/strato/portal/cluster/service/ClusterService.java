@@ -37,6 +37,8 @@ import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
@@ -101,6 +103,9 @@ public class ClusterService {
 	
 	@Autowired
 	NodeAdapterService nodeAdapterService;
+	
+	@Autowired
+	ProjectDomainService projectDomainService;
 	
 	@Value("${portal.backend.service.url}")
 	String portalBackendServiceUrl;
@@ -214,7 +219,7 @@ public class ClusterService {
 	public Long createCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterDto.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			return createK8sCluster(clusterDto);
+			return createK8sCluster(clusterDto, loginUser);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
 			return createKubesprayCluster(clusterDto, loginUser);
 		} else {
@@ -231,7 +236,7 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	private Long createK8sCluster(ClusterDto.Form clusterDto) throws Exception {
+	private Long createK8sCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		// k8s - post cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
@@ -265,6 +270,8 @@ public class ClusterService {
 		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+		clusterEntity.setCreateUserId(loginUser.getUserId());
+		clusterEntity.setCreateUserName(loginUser.getUserName());
 		
 		clusterDomainService.register(clusterEntity);
 		
@@ -330,6 +337,7 @@ public class ClusterService {
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.READY.name());
 		clusterEntity.setCreateUserId(loginUserId);
+		clusterEntity.setCreateUserName(loginUser.getUserName());
 		
 		clusterDomainService.register(clusterEntity);
 		log.info("[createKubesprayCluster] register cluster : {}", clusterEntity.toString());
@@ -405,7 +413,7 @@ public class ClusterService {
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			return updateK8sCluster(clusterEntity, clusterDto);
+			return updateK8sCluster(clusterEntity, clusterDto, loginUser);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
 			return updateKubesprayCluster(clusterEntity, clusterDto, loginUser);
 		}
@@ -413,7 +421,7 @@ public class ClusterService {
 		return null;
 	}
 
-	private Long updateK8sCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto) throws Exception {
+	private Long updateK8sCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		// k8s - update cluster
 		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 				.provider(clusterDto.getProvider())
@@ -430,7 +438,8 @@ public class ClusterService {
 		//clusterEntity.setClusterName(clusterDto.getClusterName());
 		//clusterEntity.setKubeConfig(clusterDto.getKubeConfig());
 		clusterEntity.setDescription(clusterDto.getDescription());
-		// TODO : update_user information
+		clusterEntity.setUpdateUserId(loginUser.getUserId());
+		clusterEntity.setCreateUserName(loginUser.getUserName());
 		
 		clusterDomainService.update(clusterEntity);
 		
@@ -612,6 +621,11 @@ public class ClusterService {
 		detail.setStatus(health.getHealth());
 		detail.setProblem((ArrayList<String>)health.getProblem());
 		
+		ProjectEntity projectEntity =  projectDomainService.getProjectDetailByClusterId(clusterIdx);
+		if(projectEntity != null) {
+			//프로젝트에 소속된 클러스터는 권한 관리를 위해 프로젝트 아이디를 넣어 보냄.
+			detail.setProjectIdx(projectEntity.getId());
+		}
 		return detail;
 	}
 	

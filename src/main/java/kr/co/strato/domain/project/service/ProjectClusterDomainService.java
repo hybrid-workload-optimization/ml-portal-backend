@@ -10,8 +10,6 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
-import kr.co.strato.domain.project.repository.ProjectUserRepository;
-import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 
 @Service
