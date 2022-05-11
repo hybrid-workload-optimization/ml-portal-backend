@@ -89,7 +89,7 @@ public class PodOnlyApiService extends InNamespaceService {
      */
     public List<String> updatePod(ApiReqUpdateDto updateDto){
         String yaml = Base64Util.decode(updateDto.getYaml());        
-        ClusterEntity cluster = podDomainService.getClusterEntity(updateDto.getClusterIdx());
+        ClusterEntity cluster = clusterDomainService.get(updateDto.getClusterIdx());
         Long clusterId = cluster.getClusterId();
 
         List<Pod> pods = podAdapterService.update(clusterId, yaml);
@@ -159,18 +159,19 @@ public class PodOnlyApiService extends InNamespaceService {
     	dto.setClusterId(cluster.getClusterId());
     	dto.setClusterName(cluster.getClusterName());
     	
-    	
-		OwnerReference owner = pod.getMetadata().getOwnerReferences().get(0);
-		if(owner != null) {
-			String ownerName = owner.getName();
-			String ownerKind = owner.getKind();
-			String ownerUid = owner.getUid();
-			
-			
-			dto.setOwnerName(ownerName);
-			dto.setOwnerKind(ownerKind);
-			dto.setOwnerUid(ownerUid);
-		}
+    	if (!pod.getMetadata().getOwnerReferences().isEmpty()) {
+			OwnerReference owner = pod.getMetadata().getOwnerReferences().get(0);
+			if(owner != null) {
+				String ownerName = owner.getName();
+				String ownerKind = owner.getKind();
+				String ownerUid = owner.getUid();
+				
+				
+				dto.setOwnerName(ownerName);
+				dto.setOwnerKind(ownerKind);
+				dto.setOwnerUid(ownerUid);
+			}
+    	}
 		
 		List<String> pvcNames = pod.getSpec().getVolumes().stream()
 				.map(v -> v.getPersistentVolumeClaim())
