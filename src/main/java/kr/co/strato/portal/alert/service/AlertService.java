@@ -259,35 +259,35 @@ public class AlertService {
 				@Override
 				public void run() {
 					while(true) {
-						Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> map = getConsumerMap();
-						if(map.size() == 0) {
-							ssePingRunnable = null;
-							log.info("SSE-Ping Stop - Consumer size: 0");
-							break;
-						}
-						
-						Set<String> keySet = map.keySet();
-						for(String key : keySet) {
-							List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
-							if(list != null) {
-								int consumerSize = 0;
-								for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
-									if(consumer != null) {
-										consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
-										
-										consumerSize ++;
-										log.info("ping alert - 전송");
-										log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+						try {
+							Map<String, List<Consumer<ServerSentEvent<AlertDto>>>> map = getConsumerMap();
+							if(map.size() == 0) {
+								ssePingRunnable = null;
+								log.info("SSE-Ping Stop - Consumer size: 0");
+								break;
+							}
+							
+							Set<String> keySet = map.keySet();
+							for(String key : keySet) {
+								List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
+								if(list != null) {
+									int consumerSize = 0;
+									for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+										if(consumer != null) {
+											consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+											
+											consumerSize ++;
+											log.info("ping alert - 전송");
+											log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+										}
 									}
 								}
-							}
-							try {
 								//30초에 한번씩 핑 테스트
 								//nginx 연결 유지
 								Thread.sleep(1000 * 30);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
 							}
+						} catch (Exception e) {
+							log.error("", e);
 						}
 					}
 				}
