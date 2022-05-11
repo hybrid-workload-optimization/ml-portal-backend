@@ -112,7 +112,7 @@ public class AccessFilter implements Filter{
     			"favicon.ico",
     			"/users/reset/password",
     			"/icons",
-    			"/api/v1/alert/receive"};
+    			"/sse"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
