@@ -224,7 +224,7 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 		}
 		
 		String resourceName = "";
-		int size = 0;
+		String size = "";
 		Map<String, Quantity> capacity = pv.getSpec().getCapacity();
 		Set<String> keys = capacity.keySet();
 		Iterator<String> iter = keys.iterator();
@@ -235,10 +235,10 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 			resourceName = key;
 			
 			String storageAmount = v.getAmount().replaceAll("[^0-9]", "");
-			//String formatAmount = v.getFormat();
-			//String c = storageAmount + formatAmount;
+			String formatAmount = v.getFormat();
+			String c = storageAmount + formatAmount;
 			
-			size = Integer.parseInt(storageAmount);
+			size = c;
 		}
 		pv.getSpec().getCapacity().size();
 		
@@ -259,7 +259,9 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 				.accessMode(accessModes).claim(claim).reclaim(reclaim).reclaimPolicy(reclaimPolicy)
 				.storageClass(storageClassEntity)
 				.resourceName(resourceName)
-				.type(type).path(path).size(size)
+				.type(type)
+				.path(path)
+				.size(size)
 				.cluster(clusterEntity)
 				.annotation(annotations).label(label)
 				.build();

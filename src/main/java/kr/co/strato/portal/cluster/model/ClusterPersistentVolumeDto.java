@@ -45,7 +45,7 @@ public class ClusterPersistentVolumeDto {
 		private String type;
 		private String path;
 		private String resourceName;
-		private int size;
+		private String size;
     	private Long clusterIdx;
     	private HashMap<String, Object> annotation;
     	private HashMap<String, Object> label;
@@ -71,7 +71,7 @@ public class ClusterPersistentVolumeDto {
 		private String type;
 		private String path;
 		private String resourceName;
-		private int size;
+		private String size;
     	private Long clusterIdx;
     	private Long clusterId;
     	private HashMap<String, Object> annotation;

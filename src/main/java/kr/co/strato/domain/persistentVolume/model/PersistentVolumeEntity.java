@@ -66,7 +66,7 @@ public class PersistentVolumeEntity {
 	@Column(name = "resource_name")
 	private String resourceName;
 	
-	private int size;
+	private String size;
 
 	@Lob
 	private String annotation;
