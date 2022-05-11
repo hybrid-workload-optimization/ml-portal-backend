@@ -1,5 +1,7 @@
 package kr.co.strato.domain.alert.model;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -49,8 +51,8 @@ public class AlertEntity {
 	private Long workJobIdx;
 	
 	@Column(name = "created_at")
-	private String createdAt;
+	private LocalDateTime createdAt;
 	
 	@Column(name = "updated_at")
-	private String updatedAt;
+	private LocalDateTime updatedAt;
 }

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.domain.alert.model.AlertEntity;
 
-public interface AlertRepository extends JpaRepository<AlertEntity, Long> {
+public interface AlertRepository extends JpaRepository<AlertEntity, Long>, CustomAlertRepository {
 	
 	public List<AlertEntity> findByUserIdOrderByCreatedAtDesc(String userId);
 	

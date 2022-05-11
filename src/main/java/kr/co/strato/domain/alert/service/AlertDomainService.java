@@ -21,7 +21,7 @@ public class AlertDomainService {
 	}
 	
 	public List<AlertEntity> getList(String userId) {
-		return alertRepository.findByUserIdOrderByCreatedAtDesc(userId);
+		return alertRepository.getAlerts(userId);
 	}
 	
 	public boolean delete(Long alertIdx) {

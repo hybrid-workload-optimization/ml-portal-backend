@@ -1,5 +1,6 @@
 package kr.co.strato.portal.alert.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -94,7 +95,7 @@ public class AlertService {
 						.workJobType(workJobType.name())
 						.workJobStatus(workJobStatus.name())
 						.workJobIdx(workJobEntity.getWorkJobIdx())
-						.createdAt(DateUtil.currentDateTime())
+						.createdAt(LocalDateTime.now())
 						.userId(userId)
 						.confirmYn("N")
 						.build();
