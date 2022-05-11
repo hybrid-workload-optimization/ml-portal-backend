@@ -270,9 +270,13 @@ public class AlertService {
 							Set<String> keySet = map.keySet();
 							for(String key : keySet) {
 								List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
-								if(list != null) {
+								if(list != null && list.size() > 0) {
+									
+									List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
+									copyList.addAll(list);
+									
 									int consumerSize = 0;
-									for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+									for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
 										if(consumer != null) {
 											consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
 											
