@@ -103,9 +103,14 @@ public class AlertService {
 			//Client 전송 SSE
 			AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
 			
-			List<Consumer<ServerSentEvent<AlertDto>>> list = (List<Consumer<ServerSentEvent<AlertDto>>>)((ArrayList)getConsumerMap().get(userId)).clone();
-			if(list != null) {
-				for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
+			List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
+			if(l != null && l.size() > 0) {
+				
+				//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
+				List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
+				copyList.addAll(l);
+				
+				for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
 					if(consumer != null) {
 						consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
 					}
