@@ -179,41 +179,45 @@ public class JobService extends InNamespaceService {
 	private void save(JobArgDto jobArgDto){
 		Long clusterIdx = jobArgDto.getClusterIdx();
 		String yaml = jobArgDto.getYaml();
+		Long jobIdx = jobArgDto.getJobIdx();
+		ClusterEntity clusterEntity = null;
 		
-		 //이름 중복 채크
-        duplicateCheckResourceCreation(clusterIdx, yaml);
+		if(jobIdx == null) {
+			//생성 시 이름 중복 채크
+			duplicateCheckResourceCreation(clusterIdx, yaml);			
+			clusterEntity = clusterDomainService.get(clusterIdx);
+			
+		} else {
+			JobEntity entity = jobDomainService.getById(jobIdx);
+			clusterEntity = entity.getNamespaceEntity().getCluster();
+		}
 		
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-		Long clusterId = clusterEntity.getClusterId();
-		List<Job> jobs = jobAdapterService.create(clusterId, yaml);
+		
+		List<Job> jobs = jobAdapterService.create(clusterEntity.getClusterId(), yaml);
 
 		//job 저장.
-		List<JobEntity> eneities = jobs.stream().map(e -> {
+		for(Job job : jobs) {
 			JobEntity jobEntity = null;
 			try {
-				jobEntity = toEntity(e);
+				jobEntity = toEntity(job);
 			} catch (JsonProcessingException ex) {
 				log.debug(yaml);
 			}
 			
 			if(jobEntity != null) {
-				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(e.getMetadata().getNamespace(), clusterEntity);
+				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(job.getMetadata().getNamespace(), clusterEntity);
 				if(namespaceEntities != null && namespaceEntities.size() > 0){
 					jobEntity.setNamespaceEntity(namespaceEntities.get(0));
 				}
 				
 				//수정시
-				if(jobArgDto.getJobIdx() != null)
-					jobEntity.setJobIdx(jobArgDto.getJobIdx());
+				if(jobIdx!= null)
+					jobEntity.setJobIdx(jobIdx);
 				
 				jobEntity.setYaml(Base64Util.decode(yaml));
 				jobDomainService.save(jobEntity);
 			}
-			
-			return jobEntity;
-		}).collect(Collectors.toList());
-		
-		//TODO 이어지는 작업 확인
+		}
 	}
 	
 	

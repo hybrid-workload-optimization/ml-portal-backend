@@ -44,7 +44,7 @@ public class JobDomainService implements InNamespaceDomainService {
 	}
 	
 	public void deleteByCronJobIdx(Long cronJobIdx) {
-		deleteByCronJobIdx(cronJobIdx);
+		jobRepository.deleteByCronJobIdx(cronJobIdx);
 	}
 
 	@Override

@@ -197,61 +197,62 @@ public class CronJobService extends InNamespaceService {
 	private void save(CronJobArgDto cronJobArgDto){
 		Long clusterIdx = cronJobArgDto.getClusterIdx();
 		String yaml = cronJobArgDto.getYaml();
+		Long cronJobIdx = cronJobArgDto.getJobIdx();
+		ClusterEntity clusterEntity = null;
 		
-		//이름 중복 채크
-        duplicateCheckResourceCreation(clusterIdx, cronJobArgDto.getYaml());
+		if(cronJobIdx == null) {
+			//생성 시 이름 중복 채크
+			duplicateCheckResourceCreation(clusterIdx, yaml);			
+			clusterEntity = clusterDomainService.get(clusterIdx);
+			
+		} else {
+			CronJobEntity entity = cronJobDomainService.getById(cronJobIdx);
+			clusterEntity = entity.getNamespaceEntity().getCluster();
+		}
 		
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-		Long clusterId = clusterEntity.getClusterId();
-		
-		List<CronJob> jobs = cronJobAdapterService.create(clusterId, yaml);
+		List<CronJob> jobs = cronJobAdapterService.create(clusterEntity.getClusterId(), yaml);
 		
 		
-		//job 저장.
-		List<CronJobEntity> eneities = jobs.stream().map(e -> {
+		for(CronJob cronJob: jobs) {
 			CronJobEntity cronJobEntity = null;
 			try {
-				cronJobEntity = toEntity(clusterEntity, e);
+				cronJobEntity = toEntity(clusterEntity, cronJob);
 			} catch (JsonProcessingException ex) {
 				log.debug(yaml);
 			}
 			
 			if(cronJobEntity != null) {
-				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(e.getMetadata().getNamespace(), clusterEntity);
+				List<NamespaceEntity> namespaceEntities = namespaceDomainService.findByNameAndClusterIdx(cronJob.getMetadata().getNamespace(), clusterEntity);
 				if(namespaceEntities != null && namespaceEntities.size() > 0){
 					cronJobEntity.setNamespaceEntity(namespaceEntities.get(0));
 				}
 				
 				//수정시
-				if(cronJobArgDto.getJobIdx() != null)
-					cronJobEntity.setCronJobIdx(cronJobArgDto.getJobIdx());
+				if(cronJobIdx != null) {
+					cronJobEntity.setCronJobIdx(cronJobIdx);
+					
+					//수정 시에는 기존 잡 목록 삭제
+					jobDomainService.deleteByCronJobIdx(cronJobIdx);
+				}
+				
+				cronJobEntity.setYaml(Base64Util.decode(yaml));
+				cronJobDomainService.save(cronJobEntity);
+					
 				
 				try {
 					List<Job> jobsList = jobAdapterService.getListFromOwnerUid(clusterEntity.getClusterId(), cronJobEntity.getCronJobUid());
 					for(Job j: jobsList) {
 						JobEntity job = jobService.toEntity(j);
-						//수정 시에는 기존 잡 목록 삭제
-						if(cronJobArgDto.getJobIdx() != null) {
-							jobDomainService.deleteByCronJobIdx(cronJobArgDto.getJobIdx());
-						}
-						
 						job.setCronJobIdx(cronJobEntity.getCronJobIdx());
 						jobDomainService.save(job);
 						cronJobEntity.setJobEntity(job);
 					}				
 					
 				} catch (Exception e1) {
-					log.error("크론잡 저장 실패", e);
+					log.error("크론잡 저장 실패", cronJob);
 				}
-				
-				cronJobEntity.setYaml(Base64Util.decode(yaml));
-				cronJobDomainService.save(cronJobEntity);
 			}
-			
-			return cronJobEntity;
-		}).collect(Collectors.toList());
-		
-		//TODO 이어지는 작업 확인
+		}
 	}
 	
 	
