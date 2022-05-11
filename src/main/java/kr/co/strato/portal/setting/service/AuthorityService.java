@@ -450,7 +450,7 @@ public class AuthorityService {
 			
 			UserRoleEntity roleEntity = userRoleDomainService.getUserRoleById(userRoleIdx);
 			if(roleEntity != null) {
-				AuthorityViewDto projectView = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(userRole);
+				AuthorityViewDto projectView = AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDto(roleEntity);
 				List<AuthorityViewDto.Menu> projectMenu = getMenuTreeList(projectView.getMenuList());
 				
 				projectUserRole.put(projectIdx, projectMenu);
