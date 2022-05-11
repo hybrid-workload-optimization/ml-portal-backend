@@ -106,13 +106,19 @@ public class AlertService {
 			List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
 			if(l != null && l.size() > 0) {
 				
+				int consumerSize = 0;
 				//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
 				List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
 				copyList.addAll(l);
 				
+				
 				for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
 					if(consumer != null) {
 						consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+						
+						consumerSize ++;
+						log.info("alert - 전송");
+						log.info("alert - UserId: {}, count: {}", userId, consumerSize);
 					}
 				}
 			}
@@ -224,7 +230,8 @@ public class AlertService {
 		}
 		
 		if(list.contains(consumer)) {
-			list.remove(consumer);
+			boolean isDelete = list.remove(consumer);
+			log.info("SSE - Remove result: {}", isDelete);
 		}
 		
 		if(list.size() == 0) {
@@ -238,6 +245,13 @@ public class AlertService {
 	public static void startSsePing() {
 		boolean isNull = ssePingRunnable == null;
 		log.info("ssePingRunnable is null: {}", isNull);
+		log.info("consumer size: {}", consumerMap.size());
+		
+		Set<String> keys = consumerMap.keySet();
+		for(String id : keys) {
+			log.info("id: {}, size: {}", id, consumerMap.get(id).size());
+		}
+		
 		if(ssePingRunnable == null) {
 			log.info("SSE-Ping Start");
 			ssePingRunnable = new Runnable() {
@@ -256,15 +270,21 @@ public class AlertService {
 						for(String key : keySet) {
 							List<Consumer<ServerSentEvent<AlertDto>>> list = getConsumerMap().get(key);
 							if(list != null) {
+								int consumerSize = 0;
 								for(Consumer<ServerSentEvent<AlertDto>> consumer : list) {
 									if(consumer != null) {
 										consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+										
+										consumerSize ++;
+										log.info("ping alert - 전송");
+										log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
 									}
 								}
 							}
 							try {
-								//1분에 한번씩 핑 테스트
-								Thread.sleep(1000 * 60);
+								//30초에 한번씩 핑 테스트
+								//nginx 연결 유지
+								Thread.sleep(1000 * 30);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
