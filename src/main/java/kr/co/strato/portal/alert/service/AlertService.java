@@ -87,41 +87,50 @@ public class AlertService {
 		}
 		
 		for(String userId : userIds) {
-			AlertEntity entity = AlertEntity.builder()
-					.clusterIdx(clusterIdx)
-					.clusterName(clusterName)
-					.workJobType(workJobType.name())
-					.workJobStatus(workJobStatus.name())
-					.workJobIdx(workJobEntity.getWorkJobIdx())
-					.createdAt(DateUtil.currentDateTime())
-					.userId(userId)
-					.confirmYn("N")
-					.build();
-			//DB 저장
-			alertDomainService.register(entity);
+			try {
+				AlertEntity entity = AlertEntity.builder()
+						.clusterIdx(clusterIdx)
+						.clusterName(clusterName)
+						.workJobType(workJobType.name())
+						.workJobStatus(workJobStatus.name())
+						.workJobIdx(workJobEntity.getWorkJobIdx())
+						.createdAt(DateUtil.currentDateTime())
+						.userId(userId)
+						.confirmYn("N")
+						.build();
+				//DB 저장
+				alertDomainService.register(entity);
 
-			//Client 전송 SSE
-			AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
-			
-			List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
-			if(l != null && l.size() > 0) {
+				//Client 전송 SSE
+				AlertDto dto = AlertDtoMapper.INSTANCE.toDto(entity);
 				
-				int consumerSize = 0;
-				//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
-				List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
-				copyList.addAll(l);
-				
-				
-				for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
-					if(consumer != null) {
-						consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
-						
-						consumerSize ++;
-						log.info("alert - 전송");
-						log.info("alert - UserId: {}, count: {}", userId, consumerSize);
+				List<Consumer<ServerSentEvent<AlertDto>>> l = getConsumerMap().get(userId);
+				if(l != null && l.size() > 0) {
+					
+					int consumerSize = 0;
+					//for 루프중 consumer가 삭제 됐을때 에러를 방지하기 위해 새로운 배열로 복사 후 진행.
+					List<Consumer<ServerSentEvent<AlertDto>>> copyList = new ArrayList<>();
+					copyList.addAll(l);
+					
+					
+					for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
+						if(consumer != null) {
+							try {
+								consumer.accept(ServerSentEvent.<AlertDto>builder().data(dto).build());
+								consumerSize ++;
+								log.info("alert - 전송");
+								log.info("alert - UserId: {}, count: {}", userId, consumerSize);
+							} catch (Exception e) {
+								log.error("", e);
+							}
+						}
 					}
 				}
+				
+			} catch (Exception e) {
+				log.error("", e);
 			}
+			
 		}		
 	}
 	
@@ -278,11 +287,14 @@ public class AlertService {
 									int consumerSize = 0;
 									for(Consumer<ServerSentEvent<AlertDto>> consumer : copyList) {
 										if(consumer != null) {
-											consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
-											
-											consumerSize ++;
-											log.info("ping alert - 전송");
-											log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+											try {
+												consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
+												consumerSize ++;
+												log.info("ping alert - 전송");
+												log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+											} catch (Exception e) {
+												log.error("", e);
+											}
 										}
 									}
 								}
