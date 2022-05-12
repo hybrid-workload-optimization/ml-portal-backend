@@ -32,6 +32,7 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -412,16 +413,15 @@ public class KeyCloakApiUtil {
 	public boolean createSsoUser(UserDto user) throws Exception {
 		String uriCreateUser = keycloakUrl + URI_SET_USER;
 		String ssoToken = getTokenByManager();
-		// 최초 가입시에는 임시 비밀번호로 생성
-//		String pw = CryptoUtil.encryptAES256(keycloakTempPw, MASTER_KEY);
-		String ssoUser = "{ 'username' : '" + user.getUserId() + "',"
-				+ " 'email' : '" + user.getEmail() + "',"
-				+ " 'firstName' : '" + user.getUserName() + "',"
-				+ " 'enabled' : true," + ""
-				+ " 'credentials' : ["
-						+ "{'type' : 'password'," + " 'value': '" + keycloakTempPw + "'," + " 'temporary': false}" + "]}";
 		
-		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
+		JSONObject param = new JSONObject();
+		param.put("username", user.getUserId());
+		param.put("email", user.getEmail());
+		param.put("firstName", user.getUserName());
+		param.put("enabled", "false");
+		
+		
+		//org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
 		boolean result = false;
 
 		try {
@@ -432,7 +432,7 @@ public class KeyCloakApiUtil {
 			httpPost.addHeader("Authorization", ssoToken);
 
 			// string 값으로 변환 할 때 char-set 설정
-			StringEntity users = new StringEntity(ssoUserInfo.toString(), "UTF-8");
+			StringEntity users = new StringEntity(param.toString(), "UTF-8");
 
 			httpPost.setEntity(users);
 
@@ -474,7 +474,7 @@ public class KeyCloakApiUtil {
 	public boolean updateSsoUser(UserDto user, String token) throws Exception {
 		
 		boolean result = false;
-		String userId = getUserInfoByUserId(user.getUserId()).getId();;
+		String userId = getUserInfoByUserId(user.getUserId()).getId();
 		
 		String uriUpdateUser = keycloakUrl + URI_UPDATE_USER;
 		
@@ -519,20 +519,20 @@ public class KeyCloakApiUtil {
 		return result;
 	}
 	
-	// 비밀번호 수정
-	public boolean updatePasswordSsoUser(String userId, String password) throws Exception {
-		boolean result = false;
+	//유저 정보 수정
+	public boolean enableSsoUser(String userId, boolean enable) throws Exception {
 		
-		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
-		String URI = replaceUri(uriUpdateUser, "id", userId);
+		boolean result = false;
+		String id = getUserInfoByUserId(userId).getId();
+		
+		String uriUpdateUser = keycloakUrl + URI_UPDATE_USER;
+		
+		String URI = replaceUri(uriUpdateUser, "id", id);		
 		String ssoToken = getTokenByManager();
-//		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
-		String ssoUser = "{ 'type' : 'password' , " 
-						+	"'temporary' : false , " 
-						+ "'value' : '"+ password  + "'}";
-						
-
-		org.json.JSONObject ssoUserInfo = new org.json.JSONObject(ssoUser);
+		
+		JSONObject param = new JSONObject();
+		param.put("username", userId);
+		param.put("enabled", String.valueOf(enable));
 		
 		try {
 
@@ -542,7 +542,51 @@ public class KeyCloakApiUtil {
 			httpPut.addHeader("Authorization", ssoToken);
 
 			// string 값으로 변환 할 때 char-set 설정
-			StringEntity users = new StringEntity(ssoUserInfo.toString(), "UTF-8");
+			StringEntity users = new StringEntity(param.toString(), "UTF-8");
+
+			httpPut.setEntity(users);
+
+			HttpResponse response = httpClient.execute(httpPut);
+
+			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
+				result = true;
+			} else {
+				result = false;
+			}
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	// 비밀번호 수정
+	public boolean updatePasswordSsoUser(String userId, String password) throws Exception {
+		boolean result = false;
+		
+		String uriUpdateUser = keycloakUrl + URI_UPDATE_PASSWORD;
+		KeycloakUser keycloakUser = getUserInfoByUserId(userId);
+		String id = keycloakUser.getId();
+		
+		String URI = replaceUri(uriUpdateUser, "id", id);
+		String ssoToken = getTokenByManager();
+//		String pw = CryptoUtil.encryptAES256(user.getUserPassword(), MASTER_KEY);
+						
+		JSONObject param = new JSONObject();
+		param.put("type", "password");
+		param.put("temporary", "false");
+		param.put("value", password);
+		
+		try {
+
+			HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpPut httpPut = new HttpPut(URI);
+			httpPut.addHeader("Content-Type", "application/json");
+			httpPut.addHeader("Authorization", ssoToken);
+
+			// string 값으로 변환 할 때 char-set 설정
+			StringEntity users = new StringEntity(param.toString(), "UTF-8");
 
 			httpPut.setEntity(users);
 

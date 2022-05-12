@@ -100,6 +100,8 @@ public class UserDomainService {
 		}
 	}
 	
+	
+	
 	/**
 	 * 유저 삭제
 	 * @param user
@@ -153,11 +155,8 @@ public class UserDomainService {
 	 * @return
 	 * @throws NotFoundException 
 	 */
-	public UserEntity getUserInfoByUserId(String userId) {
-//		return userRepository.findByUserId(userId);
-		// 사용중인 user만 검색하기 위해 useYn  추가
-		
-		Optional<UserEntity> user = userRepository.findByUserIdAndUseYn(userId, "Y"); 
+	public UserEntity getUserInfoByUserId(String userId) {		
+		Optional<UserEntity> user = userRepository.findByUserId(userId); 
 		if(user.isPresent()) {
 			return user.get();
 		}else {
@@ -170,7 +169,7 @@ public class UserDomainService {
 	 * @param userName
 	 * @return
 	 */
-	public Page<UserEntity> getUserListByUserName(String userName, Pageable pageable){
+	public Page<UserEntity> getUserListByUserName(String userName, Pageable pageable) {
 		
 		return userRepository.findByUserName(userName, pageable);
 	}
@@ -216,5 +215,21 @@ public class UserDomainService {
 	 */
 	public List<UserDto.UserMenuDto> getUserMenu(String userId) {
 		return userRepository.getUserMenu(userId);
+	}
+	
+	/**
+	 * 사용자 활성화.
+	 * @param userId
+	 */
+	public void enableUser(String userId, String useYn) {
+		userRepository.setUseYnByUser(useYn, userId);
+	}
+	
+	/**
+	 * 유저 정보 수정
+	 * @param entity
+	 */
+	public void updateUser(UserEntity entity) {
+		userRepository.save(entity);	
 	}
 }

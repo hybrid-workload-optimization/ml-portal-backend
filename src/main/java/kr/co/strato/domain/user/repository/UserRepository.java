@@ -6,6 +6,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.domain.user.model.UserEntity;
 
@@ -22,4 +25,9 @@ public interface UserRepository extends JpaRepository<UserEntity, String>, Custo
 	List<UserEntity> findByUseYn(String useYn);
 	
 	Page<UserEntity> findByUseYn(String useYn, Pageable pageable);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update user u set u.use_yn = ?1 where u.user_id = ?2", nativeQuery = true)
+	int setUseYnByUser(String useYn, String userId);
 }

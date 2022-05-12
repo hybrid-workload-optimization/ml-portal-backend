@@ -53,6 +53,17 @@ public class UserDto {
 		private String contact;
 	}
 	
+	@Getter
+	@Setter
+	@ToString
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Builder
+	public static class EnableUserDto {
+		private String userId;
+		private String useYn;
+	}
+	
 	
 	@Getter
 	@Setter

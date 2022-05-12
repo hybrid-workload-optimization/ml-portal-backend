@@ -35,6 +35,7 @@ import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserRoleDto;
+import kr.co.strato.portal.setting.model.UserDto.EnableUserDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
@@ -180,6 +181,46 @@ public class UserController extends CommonController {
 						.workMenu2(WorkMenu2.USER)
 						.workMenu3(WorkMenu3.NONE)
 						.workAction(WorkAction.DELETE)
+						.target(workTarget)
+						.meta(workMetadata)
+						.result(workResult)
+						.message(workMessage)
+						.build());
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		
+		return new ResponseWrapper<>(param.getUserId());
+	}
+	
+	//유저 활성화/비활성화
+	@PutMapping("/user/enable")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> enableUser(@RequestBody EnableUserDto param){
+		
+		String workTarget = null;
+        Map<String, Object> workMetadata = new HashMap<>();
+        workMetadata.put("userId", param.getUserId());
+        WorkResult workResult = WorkResult.SUCCESS;
+        String workMessage = "";
+
+		try {
+			userService.enableUser(param, getLoginUser());
+		} catch (Exception e) {
+			workResult		= WorkResult.FAIL;
+			workMessage		= e.getMessage();
+			
+			log.error(e.getMessage(), e);
+			throw new PortalException(e.getMessage());
+		} finally {
+			try {
+				workHistoryService.registerWorkHistory(
+						WorkHistoryDto.builder()
+						.workMenu1(WorkMenu1.SETTING)
+						.workMenu2(WorkMenu2.USER)
+						.workMenu3(WorkMenu3.NONE)
+						.workAction(WorkAction.UPDATE)
 						.target(workTarget)
 						.meta(workMetadata)
 						.result(workResult)

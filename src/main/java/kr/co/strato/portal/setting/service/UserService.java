@@ -22,12 +22,12 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.SsoConnectionException;
-import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.global.util.FileUtils;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.model.UserDto.EnableUserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
 import kr.co.strato.portal.setting.model.UserDto.UserRole;
@@ -95,6 +95,8 @@ public class UserService {
 			throw new SsoConnectionException(e.getMessage());
 		}		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
+		//최초 가입 유저는 미사용 처리.
+		entity.setUseYn("N");
 		userDomainService.saveUser(entity, "post");
 		
 		//패스워드 초기화 이메일 전송
@@ -181,14 +183,48 @@ public class UserService {
 			//로그아웃 처리
 			accessService.doLogout(entity.getUserId());
 			
-			//keycloak 유저 삭제
-			keyCloakApiUtil.deleteSsoUser(param);
+			//keycloak 유저 비활성화
+			keyCloakApiUtil.enableSsoUser(param.getUserId(), false);
+			
+			//keyCloakApiUtil.deleteSsoUser(param);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
 		
 		
 		return 0L;
+	}
+	
+	/**
+	 * 유저 활성화 / 비활성화
+	 * @param param
+	 * @param loginUser
+	 * @return
+	 */
+	public boolean enableUser(EnableUserDto param, UserDto loginUser) {
+		String userId = param.getUserId();
+		String useYn = param.getUseYn();
+		try {			
+			//keycloak 유저 활성화
+			boolean isEnable = useYn.equals("Y")? true : false;
+			boolean isOk = keyCloakApiUtil.enableSsoUser(userId, isEnable);
+			if(isOk) {
+				
+				//DB 활성화
+				UserEntity user = userDomainService.getUserInfoByUserId(userId);
+				user.setUpdateUserName(loginUser.getUserName());
+				user.setUpdateUserId(loginUser.getUserId());
+				user.setUpdatedAt(LocalDateTime.now());
+				user.setUseYn(useYn);
+				
+				userDomainService.updateUser(user);
+				return true;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	/*
@@ -313,10 +349,33 @@ public class UserService {
 					user.setUserId(id);
 					user.setUserPassword(password);
 					
-					patchUserPassword(user.getUserId(), user.getUserPassword());
-					userDomainService.deleteResetPasswordRequest(id);
 					
-					result = "success";
+					boolean enableOk = false;
+					boolean changeOk = false;
+					try {
+						//계정 활성화.
+						enableOk = keyCloakApiUtil.enableSsoUser(user.getUserId(), true);
+						log.info("계정 활성화 - userId: {}", id);
+						log.info("계정 활성화 - result: {}", enableOk);
+						
+						changeOk = keyCloakApiUtil.updatePasswordSsoUser(id, password);
+						log.info("패스워드 변경 - userId: {}", id);
+						log.info("패스워드 변경 - result: {}", changeOk);
+						
+					} catch (Exception e) {
+						log.error("", e);
+					}
+					
+					if(enableOk && changeOk) {
+						//사용자 사용 설정: use_yn: Y로 설정
+						userDomainService.enableUser(id, "Y");
+						result = "success";
+						
+						//패스워드 변경 요청 코드 삭제.
+						userDomainService.deleteResetPasswordRequest(id);
+					} else {
+						result = "fail";
+					}
 				} else {
 					//1시간 경과
 					result = "expiry";
