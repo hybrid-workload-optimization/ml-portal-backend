@@ -64,7 +64,7 @@ public class ClusterStorageClassController {
 	
 	@GetMapping("api/v1/cluster/clusterStorageClasss/{id}/yaml")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<String> getPersistentVolumeYaml(@PathVariable Long id){
+    public ResponseWrapper<String> getClusterStorageClassYaml(@PathVariable Long id){
         String result = storageClassService.getYaml(id);
 
         return new ResponseWrapper<>(result);

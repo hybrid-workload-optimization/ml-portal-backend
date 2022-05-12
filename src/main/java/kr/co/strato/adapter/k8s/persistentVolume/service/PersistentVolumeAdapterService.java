@@ -69,7 +69,7 @@ public class PersistentVolumeAdapterService {
             throw new InternalServerException("json 파싱 에러");
         }catch (Exception e){
             log.error(e.getMessage(), e);
-            throw new InternalServerException("k8s interface 통신 에러 - ㅔersistentVolume 생성 에러");
+            throw new InternalServerException("k8s interface 통신 에러 - PersistentVolume 생성 에러");
         }
     }
     
