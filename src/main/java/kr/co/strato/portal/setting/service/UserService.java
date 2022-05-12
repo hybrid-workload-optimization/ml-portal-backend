@@ -405,7 +405,13 @@ public class UserService {
 		url += "#/change-password?requestCode="+requestCode;
 		
 		
-		String contents = INIT_PASSWORD_TEMPLATE.replace("{E-MAIL}", toEmail).replace("{LINK}", url);
+		String icon = frontUrl;
+		if(!icon.endsWith("/")) {
+			icon += "/";
+		}		
+		icon += "favicon_strato.png";
+		
+		String contents = INIT_PASSWORD_TEMPLATE.replace("{ICON}", icon).replace("{E-MAIL}", toEmail).replace("{LINK}", url);
 		return contents;
 	}
 	
