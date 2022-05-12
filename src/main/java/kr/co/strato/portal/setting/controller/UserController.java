@@ -197,16 +197,17 @@ public class UserController extends CommonController {
 	//유저 활성화/비활성화
 	@PutMapping("/user/enable")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<String> enableUser(@RequestBody EnableUserDto param){
-		
+	public ResponseWrapper<UserDto> enableUser(@RequestBody EnableUserDto param){
 		String workTarget = null;
         Map<String, Object> workMetadata = new HashMap<>();
         workMetadata.put("userId", param.getUserId());
         WorkResult workResult = WorkResult.SUCCESS;
         String workMessage = "";
+        
+        UserDto user = null;
 
 		try {
-			userService.enableUser(param, getLoginUser());
+			user = userService.enableUser(param, getLoginUser());
 		} catch (Exception e) {
 			workResult		= WorkResult.FAIL;
 			workMessage		= e.getMessage();
@@ -230,8 +231,7 @@ public class UserController extends CommonController {
 				// ignore
 			}
 		}
-		
-		return new ResponseWrapper<>(param.getUserId());
+		return new ResponseWrapper<>(user);
 	}
 	
 	//목록

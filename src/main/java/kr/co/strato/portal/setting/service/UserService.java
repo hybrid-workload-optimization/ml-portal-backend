@@ -201,7 +201,7 @@ public class UserService {
 	 * @param loginUser
 	 * @return
 	 */
-	public boolean enableUser(EnableUserDto param, UserDto loginUser) {
+	public UserDto enableUser(EnableUserDto param, UserDto loginUser) {
 		String userId = param.getUserId();
 		String useYn = param.getUseYn();
 		try {			
@@ -218,13 +218,14 @@ public class UserService {
 				user.setUseYn(useYn);
 				
 				userDomainService.updateUser(user);
-				return true;
+				UserDto userDto = UserDtoMapper.INSTANCE.toDto(user);
+				return userDto;
 			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 	
 	/*
