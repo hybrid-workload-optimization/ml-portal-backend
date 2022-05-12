@@ -61,7 +61,7 @@ public class UserDto {
 	@Builder
 	public static class EnableUserDto {
 		private String userId;
-		private String useYn;
+		private boolean enable;
 	}
 	
 	

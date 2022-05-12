@@ -203,12 +203,14 @@ public class UserService {
 	 */
 	public UserDto enableUser(EnableUserDto param, UserDto loginUser) {
 		String userId = param.getUserId();
-		String useYn = param.getUseYn();
+		boolean enable = param.isEnable();
+		
 		try {			
-			//keycloak 유저 활성화
-			boolean isEnable = useYn.equals("Y")? true : false;
-			boolean isOk = keyCloakApiUtil.enableSsoUser(userId, isEnable);
+			//keycloak 유저 활성화			
+			boolean isOk = keyCloakApiUtil.enableSsoUser(userId, enable);
 			if(isOk) {
+				
+				String useYn = enable? "Y" : "N";
 				
 				//DB 활성화
 				UserEntity user = userDomainService.getUserInfoByUserId(userId);
