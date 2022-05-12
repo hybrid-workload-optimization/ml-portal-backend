@@ -19,6 +19,7 @@ public class ProjectRequestDto {
 	private String loginName;
 	
 	private String projectName;
+	private ProjectUserDto projectManager;
 	private String description;
 	
 	private List<ProjectClusterDto> clusterList;
