@@ -35,7 +35,6 @@ public class ConfigMapDto {
 		private String createdAt;
 		private Long projectIdx;
 		private String clusterName;
-		private String yaml;
 	}
 	
 	@Getter

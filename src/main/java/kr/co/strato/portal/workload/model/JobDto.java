@@ -30,5 +30,4 @@ public class JobDto {
 	private Long projectIdx;
 	
 	private List<PodDto.ResListDto> pods;
-	private String yaml;	
 }

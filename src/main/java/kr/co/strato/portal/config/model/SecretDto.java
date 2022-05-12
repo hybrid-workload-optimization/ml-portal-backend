@@ -37,7 +37,6 @@ public class SecretDto {
 		private String createdAt;
 		private Long projectIdx;
 		private String clusterName;
-		private String yaml;
 	}
 	
 	@Getter

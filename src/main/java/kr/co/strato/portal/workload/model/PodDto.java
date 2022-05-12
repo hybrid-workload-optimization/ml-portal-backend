@@ -87,8 +87,6 @@ public class PodDto {
         
         private List<HashMap<String, Object>> condition;
         private List<PersistentVolumeClaimDto.Detail> pvcList;
-        
-        private String yaml;
     }
     
     @Getter
