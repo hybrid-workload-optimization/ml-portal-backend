@@ -411,14 +411,16 @@ public class ClusterService {
 		// db - get cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
+		/*
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			return updateK8sCluster(clusterEntity, clusterDto, loginUser);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			return updateKubesprayCluster(clusterEntity, clusterDto, loginUser);
+			
 		}
-		
-		return null;
+		*/
+		//업데이트는 모두 Kubespray로 통일.
+		return updateKubesprayCluster(clusterEntity, clusterDto, loginUser);
 	}
 
 	private Long updateK8sCluster(ClusterEntity clusterEntity, ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
@@ -596,6 +598,7 @@ public class ClusterService {
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
 			try {
+				addKubesprayClusterInfo(clusterEntity, detail);
 				addK8sClusterInfo(clusterEntity, detail);
 			} catch (Exception e) {
 				log.error("", e);
