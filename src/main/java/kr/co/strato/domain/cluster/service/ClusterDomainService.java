@@ -52,6 +52,14 @@ public class ClusterDomainService {
 		}
 	}
 	
+	public ClusterEntity getNullable(Long clusterIdx) {
+		Optional<ClusterEntity> cluster = clusterRepository.findById(clusterIdx);
+		if (cluster.isPresent()) {
+			return cluster.get();
+		} 
+		return null;
+	}
+	
 	public Page<ClusterEntity> getList(UserDto loginUser, Pageable pageable) {
 		return clusterRepository.getUserClusterList(pageable, loginUser);
 	}

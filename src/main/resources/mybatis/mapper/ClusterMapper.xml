@@ -71,7 +71,7 @@
 	<!-- cron_job -->
 	delete from cron_job where cron_job_idx in
 	(
-		select cron_job_idx from job where namespace_idx in
+		select cron_job_idx from cron_job where namespace_idx in
 		(
 			select namespace_idx from namespace where cluster_idx = #{clusterIdx}
 		)

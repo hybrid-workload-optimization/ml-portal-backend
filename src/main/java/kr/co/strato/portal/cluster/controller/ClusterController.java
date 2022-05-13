@@ -451,4 +451,9 @@ public class ClusterController extends CommonController {
 		String addonType = "cluster-monitoring";
 		return new ResponseWrapper<>(addonService.getAddonByType(clusterIdx, addonType));
 	}
+	
+	@GetMapping("/api/v1/test/delete")
+	public void delete(@RequestParam Long clusterIdx) {
+		clusterService.deleteClusterDB(clusterIdx);
+	}
 }

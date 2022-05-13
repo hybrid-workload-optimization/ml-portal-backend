@@ -147,7 +147,7 @@ public class ClusterService {
 	
 	public ClusterDto.Status getClusterStatus(Long clusterIdx) {
 		ClusterDto.Status status = new ClusterDto.Status();
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		ClusterEntity clusterEntity = clusterDomainService.getNullable(clusterIdx);
 		if(clusterEntity != null) {
 			Long kubeConfigId = clusterEntity.getClusterId();
 			String pStatus = clusterEntity.getProvisioningStatus();
@@ -157,6 +157,8 @@ public class ClusterService {
 			status.setClusterIdx(clusterIdx);
 			status.setStatus(health.getHealth());
 			status.setProblem(status.getProblem());
+		} else {
+			status.setStatus("deleted");
 		}
 		return status;
 	}
@@ -968,6 +970,11 @@ public class ClusterService {
 	public Page<ClusterNodeDto.ResListDto> getClusterIngressList(Long clusterIdx, Pageable pageable) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public void deleteClusterDB(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		clusterDomainService.delete(cluster);
 	}
 
 }
