@@ -294,11 +294,17 @@ public class UserService {
 		ResetRequestResult result = new ResetRequestResult();
 		UserEntity entity = userDomainService.getUserInfoByEmail(email);
 		if(entity != null) {
-			String userId = entity.getUserId();
-			requestResetPassword(userId, email);
+			if(entity.getUseYn().equals("Y")) {
+				String userId = entity.getUserId();
+				requestResetPassword(userId, email);
+				
+				result.setResult("success");
+				result.setUserId(userId);
+			} else {
+				result.setResult("fail");
+				result.setReason("disable user");
+			}
 			
-			result.setResult("success");
-			result.setUserId(userId);
 		} else {
 			result.setResult("fail");
 			result.setReason("unknown user");
