@@ -292,7 +292,7 @@ public class UserService {
 	
 	public ResetRequestResult requestResetPassword(String email) {
 		ResetRequestResult result = new ResetRequestResult();
-		UserEntity entity = userDomainService.getUserInfoByEmail(email);
+		UserEntity entity = userDomainService.getUserInfoByEmailNullable(email);
 		if(entity != null) {
 			if(entity.getUseYn().equals("Y")) {
 				String userId = entity.getUserId();

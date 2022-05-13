@@ -149,6 +149,14 @@ public class UserDomainService {
 		}
 	}
 	
+	public UserEntity getUserInfoByEmailNullable(String email) {
+		Optional<UserEntity> user = userRepository.findByEmail(email);
+		if(user.isPresent()) {
+			return user.get();
+		}
+		return null;
+	}
+	
 	/**
 	 * UserId로 검색 > 단일
 	 * @param userId
