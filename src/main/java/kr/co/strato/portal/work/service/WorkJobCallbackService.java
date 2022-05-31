@@ -178,7 +178,13 @@ public class WorkJobCallbackService {
 					ClusterEntity clusterEntity = clusterDomainService.get(workJobEntity.getWorkJobReferenceIdx());
 					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
 						// db - sync(update) node
-						clusterSyncService.syncClusterNode(workJobEntity.getWorkJobReferenceIdx());
+						try {
+							clusterSyncService.syncClusterNode(workJobEntity.getWorkJobReferenceIdx());
+						} catch (Exception e) {
+							log.error("[callbackWorkJob] Cluster sync failed");
+							log.error("[callbackWorkJob]", e);
+						}
+						
 						
 						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
 						clusterDomainService.update(clusterEntity);
