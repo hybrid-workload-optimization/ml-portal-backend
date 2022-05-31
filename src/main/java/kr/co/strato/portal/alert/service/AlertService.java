@@ -291,8 +291,8 @@ public class AlertService {
 											try {
 												consumer.accept(ServerSentEvent.<AlertDto>builder().data(new AlertDto()).build());
 												consumerSize ++;
-												log.info("ping alert - 전송");
-												log.info("ping alert - UserId: {}, count: {}", key, consumerSize);
+												log.debug("ping alert - 전송");
+												log.debug("ping alert - UserId: {}, count: {}", key, consumerSize);
 											} catch (Exception e) {
 												log.error("", e);
 											}
