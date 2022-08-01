@@ -285,5 +285,28 @@ public class K8sServiceService extends InNamespaceService {
 	protected InNamespaceDomainService getDomainService() {
 		return serviceDomainService;
 	}
+	
+	@Override
+	public Long mlResourceApply(Long clusterIdx, Long resourceId, String yaml) {
+		if(resourceId == null) {
+			K8sServiceDto.ReqCreateDto reqCreateDto = new K8sServiceDto.ReqCreateDto();
+			reqCreateDto.setClusterIdx(clusterIdx);
+			reqCreateDto.setYaml(yaml);
+			
+			List<Long> list = createService(reqCreateDto);
+			return list.get(0);
+		} else {
+			K8sServiceDto.ReqUpdateDto reqUpdateDto = new K8sServiceDto.ReqUpdateDto();
+			reqUpdateDto.setYaml(yaml);
+			
+			List<Long> list = updateService(resourceId, reqUpdateDto);
+			return list.get(0);
+		}
+	}
+	
+	@Override
+	public boolean delete(Long resourceId, String yaml) {
+		return deleteService(resourceId);
+	}
 
 }

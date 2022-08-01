@@ -368,7 +368,6 @@ public class IngressService extends InNamespaceService {
 
 					Integer portNumber = servicebackendPort.getNumber();
 
-					
 					List<String> endpoints = endpoints(protocol, host, path, ingress);				
 					String endpointStr = null;
 					try {

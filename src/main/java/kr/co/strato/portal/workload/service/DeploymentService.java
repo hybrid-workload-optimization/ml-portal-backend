@@ -215,13 +215,13 @@ public class DeploymentService extends InNamespaceService {
 		save(deploymentArgDto, clusterEntity);
 	}
 	
-	private void save(DeploymentArgDto deploymentArgDto, ClusterEntity clusterEntity){
+	private Long save(DeploymentArgDto deploymentArgDto, ClusterEntity clusterEntity){
 		String yaml = deploymentArgDto.getYaml();
-		
+		Long deploymentIdx = null;
 		List<Deployment> deployments = deploymentAdapterService.create(clusterEntity.getClusterId(), yaml);
-
+		
 		//deployment 저장.
-		List<DeploymentEntity> eneities = deployments.stream().map(d -> {
+		for(Deployment d : deployments) {
 			DeploymentEntity deploymentEntity = null;
 			NamespaceEntity namespaceEntity = null;
 
@@ -244,9 +244,10 @@ public class DeploymentService extends InNamespaceService {
 					deploymentEntity.setDeploymentIdx(deploymentArgDto.getDeploymentIdx());
 				
 				deploymentEntity.setYaml(Base64Util.decode(yaml));
-				deploymentDomainService.save(deploymentEntity);
+				DeploymentEntity entity = deploymentDomainService.save(deploymentEntity);
+				deploymentIdx = entity.getDeploymentIdx();
 			}
-
+			
 			//레플리카셋 저장
 			try{
 				List<ReplicaSet> replicaSets = replicaSetAdapterService.getListFromOwnerUid(clusterEntity.getClusterId(), deploymentEntity.getDeploymentUid());
@@ -264,14 +265,15 @@ public class DeploymentService extends InNamespaceService {
 						}
 						replicaSetDomainService.register(replicaSetEntity);
 					} catch (Exception e) {
-						log.error("레플리카셋 저장 실패", e);
+						log.error("디플로이먼트 저장 실패", e);
 					}
 				});
 			}catch (Exception e) {
-				log.error("레플리카셋 저장 실패", e);
+				log.error("디플로이먼트 저장 실패", e);
 			}
-			return deploymentEntity;
-		}).collect(Collectors.toList());
+		}
+		
+		return deploymentIdx;
 	}
 	
 	//삭제
@@ -409,5 +411,25 @@ public class DeploymentService extends InNamespaceService {
 	@Override
 	protected InNamespaceDomainService getDomainService() {
 		return deploymentDomainService;
+	}
+	
+	@Override
+	public Long mlResourceApply(Long clusterIdx, Long resourceId, String yaml) {
+		DeploymentArgDto deploymentArgDto = new DeploymentArgDto();
+		deploymentArgDto.setClusterIdx(clusterIdx);
+		deploymentArgDto.setYaml(Base64Util.encode(yaml));
+		deploymentArgDto.setDeploymentIdx(resourceId);
+		
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		return save(deploymentArgDto, clusterEntity);
+	}
+	
+	@Override
+	public boolean delete(Long resourceId, String yaml) {
+		DeploymentArgDto deploymentArgDto = new DeploymentArgDto();
+		deploymentArgDto.setDeploymentIdx(resourceId);
+		
+		delete(deploymentArgDto);
+		return true;
 	}
 }

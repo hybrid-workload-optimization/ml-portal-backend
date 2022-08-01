@@ -84,6 +84,9 @@ dependencies {
 	implementation group: 'io.fabric8', name: 'kubernetes-model-storageclass', version: '5.11.2'
 	implementation group: 'io.fabric8', name: 'kubernetes-model-node', version: '5.11.2'
 	implementation group: 'io.fabric8', name: 'kubernetes-model-common', version: '5.11.2'
+	
+	implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
+	
 }
 
 // queryDSL Q파일 생성 위치 지정

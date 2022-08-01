@@ -4,11 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 
+import org.springframework.stereotype.Service;
+
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kr.co.strato.adapter.k8s.common.service.CommonAdapterService;
 import kr.co.strato.portal.config.service.ConfigMapService;
 import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
 import kr.co.strato.portal.config.service.SecretService;
+import kr.co.strato.portal.machineLearning.service.MLServiceInterface;
 import kr.co.strato.portal.networking.service.IngressService;
 import kr.co.strato.portal.networking.service.K8sServiceService;
 import kr.co.strato.portal.workload.service.CronJobService;
@@ -20,11 +24,13 @@ import kr.co.strato.portal.workload.service.ReplicaSetService;
 import kr.co.strato.portal.workload.service.StatefulSetService;
 import lombok.extern.slf4j.Slf4j;
 
-
+@Service
 @Slf4j
-public class CommonService {
+public class CommonService implements MLServiceInterface {
 	
 	private KubernetesClient client;
+	
+	private CommonAdapterService commonAdapterService;
 	
 	
 	protected KubernetesClient getClient() { 
@@ -94,6 +100,17 @@ public class CommonService {
 		}
 		
 		return menuCode;
+	}
+
+	@Override
+	public Long mlResourceApply(Long clusterIdx, Long resourceId, String yaml) {
+		commonAdapterService.create(clusterIdx, yaml);
+		return -1L;
+	}
+
+	@Override
+	public boolean delete(Long resourceId, String yaml) {		
+		return commonAdapterService.delete(resourceId, yaml);
 	}
 	
 }

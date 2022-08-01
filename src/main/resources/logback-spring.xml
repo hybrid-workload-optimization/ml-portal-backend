@@ -26,18 +26,22 @@
 		<appender-ref ref="CONSOLE"/>
 		<!-- <appender-ref ref="ROLLING_FILE"/> -->
 	</logger>
-
-    <logger name="org.hibernate.type" additivity="false">
-		<level value="info"/>
+	
+	
+	<logger name="org.hibernate.type" additivity="false">
+		<level value="debug"/>
 		<appender-ref ref="CONSOLE"/>
-		<!-- <appender-ref ref="ROLLING_FILE"/> -->
+		<appender-ref ref="ROLLING_FILE"/>
 	</logger>
+	
+    
 	
 	<logger name="kr.co.strato" additivity="false">
 		<level value="debug"/>
 		<appender-ref ref="CONSOLE"/>
 		<appender-ref ref="ROLLING_FILE"/>
 	</logger>
+	
 	
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

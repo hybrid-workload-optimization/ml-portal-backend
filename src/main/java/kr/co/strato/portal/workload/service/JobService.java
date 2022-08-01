@@ -40,6 +40,7 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.machineLearning.service.MLServiceInterface;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;
@@ -51,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class JobService extends InNamespaceService {
+public class JobService extends InNamespaceService implements MLServiceInterface {
 	@Autowired
 	JobDomainService jobDomainService;
 	
@@ -176,7 +177,7 @@ public class JobService extends InNamespaceService {
 		save(jobArgDto);
 	}
 	
-	private void save(JobArgDto jobArgDto){
+	private Long save(JobArgDto jobArgDto){
 		Long clusterIdx = jobArgDto.getClusterIdx();
 		String yaml = jobArgDto.getYaml();
 		Long jobIdx = jobArgDto.getJobIdx();
@@ -215,9 +216,11 @@ public class JobService extends InNamespaceService {
 					jobEntity.setJobIdx(jobIdx);
 				
 				jobEntity.setYaml(Base64Util.decode(yaml));
-				jobDomainService.save(jobEntity);
+				JobEntity entity = jobDomainService.save(jobEntity);
+				return entity.getJobIdx();
 			}
 		}
+		return -1L;
 	}
 	
 	
@@ -299,5 +302,23 @@ public class JobService extends InNamespaceService {
 	@Override
 	protected InNamespaceDomainService getDomainService() {
 		return jobDomainService;
+	}
+
+	@Override
+	public Long mlResourceApply(Long clusterIdx, Long resourceId, String yaml) {
+		JobArgDto jobDto = new JobArgDto();
+		jobDto.setClusterIdx(clusterIdx);
+		jobDto.setYaml(Base64Util.encode(yaml));
+		jobDto.setJobIdx(resourceId);
+		return save(jobDto);
+	}
+	
+	@Override
+	public boolean delete(Long resourceId, String yaml) {
+		JobArgDto jobArgDto = new JobArgDto();
+		jobArgDto.setJobIdx(resourceId);
+		
+		delete(jobArgDto);
+		return true;
 	}
 }
