@@ -44,7 +44,6 @@ public class AccessFilter implements Filter{
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
         
-        
         String path = request.getServletPath();
         if(path.contains("?")) {
         	path = path.split("?")[0];
@@ -93,6 +92,8 @@ public class AccessFilter implements Filter{
 		} else {		
 			chain.doFilter(request, response);
 		}
+		
+		chain.doFilter(request, response);
     }
 	
     @Override
@@ -112,7 +113,8 @@ public class AccessFilter implements Filter{
     			"favicon.ico",
     			"/users/reset/password",
     			"/icons",
-    			"/sse"};
+    			"/sse",
+    			"/api/v1/ml"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
