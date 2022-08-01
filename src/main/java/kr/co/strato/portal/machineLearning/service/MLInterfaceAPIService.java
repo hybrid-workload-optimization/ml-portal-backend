@@ -249,12 +249,19 @@ public class MLInterfaceAPIService {
 			
 		}
 		
-		return 108L;
+		return 118L;
+	}
+	
+	public String getPrometheusUrl(Long clusterId) {
+		String url = "http://210.217.178.117:30005/";
+		return url;
 	}
 	
 	
 	private MLServiceInterface getServiceInterface(String kind) {
 		return serviceFactory.getMLServiceInterface(kind);
 	}
+	
+	
 }
  

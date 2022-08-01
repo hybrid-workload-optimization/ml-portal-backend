@@ -80,7 +80,8 @@ public class MLInterfaceAPIController {
 	 */
 	@GetMapping("/api/v1/ml/cluster/{clusterId}/prometheusUrl")
 	public ResponseWrapper<String> getPrometheusUrl(@PathVariable("clusterId") Long clusterId) {
-		return null;
+		String url = apiService.getPrometheusUrl(clusterId);
+		return new ResponseWrapper<>(url);
 	}
 	
 	
