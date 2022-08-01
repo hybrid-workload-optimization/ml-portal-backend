@@ -92,8 +92,6 @@ public class AccessFilter implements Filter{
 		} else {		
 			chain.doFilter(request, response);
 		}
-		
-		chain.doFilter(request, response);
     }
 	
     @Override
