@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,9 @@ public class AccessFilter implements Filter{
 	
 	@Autowired
 	AccessService accessService;
+	
+	@Value("${ml.api.token}")
+	String ML_API_TOKEN;
 	
     @Override
     public void init(FilterConfig fc) throws ServletException {
@@ -54,11 +58,19 @@ public class AccessFilter implements Filter{
         if(strTimestamp != null) {
         	timestamp = Long.parseLong(strTimestamp);	
         }
-
+        
 		String acToken = request.getHeader("access-token");
 		
 		if(!checkPath(path, method)) {
 			if(acToken != null) {
+				
+				//41번 과제 API 인증 토큰
+				if(acToken.equals(ML_API_TOKEN)) {
+					chain.doFilter(request, response);
+					return;
+				}
+				
+				
 				String token = null;
 				try {
 					token = tokenValidator.decrypt(acToken, timestamp, path, method);
@@ -111,8 +123,7 @@ public class AccessFilter implements Filter{
     			"favicon.ico",
     			"/users/reset/password",
     			"/icons",
-    			"/sse",
-    			"/api/v1/ml"};
+    			"/sse"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
