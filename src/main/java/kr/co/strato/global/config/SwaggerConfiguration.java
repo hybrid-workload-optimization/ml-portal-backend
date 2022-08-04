@@ -39,8 +39,7 @@ public class SwaggerConfiguration {
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal.machineLearning"))
 				.paths(PathSelectors.any())
-				.build()
-				.useDefaultResponseMessages(false);
+				.build();
 	}
 
 	private ApiKey apiKey() {
