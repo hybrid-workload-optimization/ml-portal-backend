@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@Configuration
-@EnableSwagger2
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfiguration {
 
 	public static final String AUTHORIZATION_HEADER = "Authorization";
