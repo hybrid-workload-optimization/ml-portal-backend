@@ -253,7 +253,7 @@ public class MLInterfaceAPIService {
 	}
 	
 	public String getPrometheusUrl(Long clusterId) {
-		String url = "http://210.217.178.117:30015/";
+		String url = "http://210.217.178.114:30015/";
 		return url;
 	}
 	
