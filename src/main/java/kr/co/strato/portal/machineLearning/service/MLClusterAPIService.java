@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
 import kr.co.strato.domain.machineLearning.service.MLClusterDomainService;
 import kr.co.strato.portal.machineLearning.model.MLClusterDto;
@@ -17,6 +18,9 @@ public class MLClusterAPIService {
 	
 	@Autowired
 	private MLClusterDomainService mlClusterDomainService;
+	
+	@Autowired
+	private NodeAdapterService nodeAdapterService;
 
 	/**
 	 * Service Cluster 리스트 반환.
@@ -44,8 +48,18 @@ public class MLClusterAPIService {
 	}
 	
 	public String getPrometheusUrl(Long clusterId) {
+		/*
+		MLClusterEntity entity = mlClusterDomainService.get(clusterId);
+		
+		String host = "external-ip";
+		List<String> nodeIps = nodeAdapterService.getWorkerNodeIps(entity.getCluster().getClusterId());
+		if(nodeIps != null && nodeIps.size() > 0) {
+			host = nodeIps.get(0);
+		}
+		
+		String url = String.format("http://%s:30005", host);
+		*/
 		String url = "http://210.217.178.114:30015/";
 		return url;
-	}
-	
+	}	
 }
