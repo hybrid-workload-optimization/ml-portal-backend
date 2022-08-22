@@ -33,6 +33,15 @@ public class MLDomainService {
 		return mlRepository.getMLList(userId, name);
     }
 	
+	public MLEntity get(Long id) {
+		Optional<MLEntity> ml = mlRepository.findById(id);
+		if (ml.isPresent()) {
+			return ml.get();
+		} else {
+			throw new NotFoundResourceException("mlIdx : " + id);
+		}
+	}
+	
 	public MLEntity get(String mlId) {
 		Optional<MLEntity> ml = mlRepository.findByMlId(mlId);
 		if (ml.isPresent()) {
