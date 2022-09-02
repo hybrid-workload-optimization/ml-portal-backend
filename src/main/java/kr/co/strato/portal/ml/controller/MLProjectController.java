@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.controller;
+package kr.co.strato.portal.ml.controller;
 
 import java.util.List;
 
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.machineLearning.model.MLDto;
-import kr.co.strato.portal.machineLearning.model.MLProjectDto;
-import kr.co.strato.portal.machineLearning.service.MLProjectService;
+import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLProjectDto;
+import kr.co.strato.portal.ml.service.MLProjectService;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;

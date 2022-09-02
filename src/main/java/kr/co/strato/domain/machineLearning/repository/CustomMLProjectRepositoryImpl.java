@@ -28,7 +28,7 @@ import kr.co.strato.domain.machineLearning.model.QMLProjectEntity;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.machineLearning.model.MLProjectDto;
+import kr.co.strato.portal.ml.model.MLProjectDto;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.RequiredArgsConstructor;

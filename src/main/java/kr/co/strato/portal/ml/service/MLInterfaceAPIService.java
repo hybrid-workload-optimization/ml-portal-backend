@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.service;
+package kr.co.strato.portal.ml.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +26,11 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.machineLearning.model.MLClusterType;
-import kr.co.strato.portal.machineLearning.model.MLDto;
-import kr.co.strato.portal.machineLearning.model.MLDto.ListArg;
-import kr.co.strato.portal.machineLearning.model.MLDtoMapper;
-import kr.co.strato.portal.machineLearning.model.MLResourceDto;
-import kr.co.strato.portal.machineLearning.model.MLStepCode;
+import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.model.MLDtoMapper;
+import kr.co.strato.portal.ml.model.MLResourceDto;
+import kr.co.strato.portal.ml.model.MLStepCode;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -56,69 +55,110 @@ public class MLInterfaceAPIService {
 	@Autowired
 	private CallbackService callbackService;
 	
+	@Autowired
+	private MLClusterAPIService mlClusterAPIService;
+	
 	public String apply(MLDto.ApplyArg applyDto) {
+		log.info("ML apply start.");
 		boolean isNew = false;
+		Long mlClusterIdx = null;
 		if(applyDto.getMlId() == null) {
 			//새로운 mlId 생성
 			String newMlId = genMlId();
 			applyDto.setMlId(newMlId);
 			
 			isNew = true;
+		} else {
+			MLEntity entity = mlDomainService.get(applyDto.getMlId());
+			mlClusterIdx = entity.getMlClusterIdx();
 		}
 		
+		String mlName = applyDto.getName();
 		String mlId = applyDto.getMlId();
 		String yamStr = Base64Util.decode(applyDto.getYaml());
 		String stepCode = applyDto.getMlStepCode();
 		
-		MLClusterEntity mlClusterEntity = getCluster(stepCode, yamStr);
-		Long clusterIdx = mlClusterEntity.getCluster().getClusterIdx();
-		String now = DateUtil.currentDateTime();
+		log.info("ML ID: {}", mlId);
+		log.info("ML Name: {}", mlName);
+		log.info("StepCode: {}", stepCode);
+		log.info("Yaml: {}", yamStr);
 		
-		MLEntity entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
-		entity.setClusterIdx(clusterIdx);
-		entity.setUpdatedAt(now);
-		if(isNew) {
-			entity.setCreatedAt(now);
-			entity.setStatus("Started");
+		//클러스터 선택
+		MLClusterEntity mlClusterEntity = null;
+		
+		if(mlClusterIdx == null) {
+			mlClusterEntity = getCluster(mlName, stepCode, yamStr);
+		} else {
+			mlClusterEntity = mlClusterDomainService.get(mlClusterIdx);
 		}
 		
-		entity.setYaml(yamStr);
-		
-		Long mlIdx = mlDomainService.save(entity);
-		
-		
-		Yaml yaml = new Yaml();
-		for(Object object : yaml.loadAll(yamStr)) {
-			if(object instanceof Map) {
-				Map map = (Map) object;
-				
-				//Resource apply
-				applyResource(map, mlIdx, clusterIdx, now, isNew);
-			} else {
-				log.error("yaml 파일이 잘못되었습니다.");
+		ClusterEntity clusterEntity = mlClusterEntity.getCluster();
+		if(mlClusterEntity != null 
+				&& clusterEntity.getProvisioningStatus().equals(ClusterEntity.ProvisioningStatus.FINISHED.name())) {
+			
+			mlClusterIdx = mlClusterEntity.getId();
+			Long clusterIdx = clusterEntity.getClusterIdx();
+			String now = DateUtil.currentDateTime();
+			
+			MLEntity entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
+			entity.setMlClusterIdx(mlClusterIdx);
+			entity.setClusterIdx(clusterIdx);
+			entity.setUpdatedAt(now);
+			if(isNew) {
+				entity.setCreatedAt(now);
+				entity.setStatus("Started");
 			}
+			
+			entity.setYaml(yamStr);
+			
+			try {
+				Long mlIdx = mlDomainService.save(entity);
+				
+				
+				Yaml yaml = new Yaml();
+				for(Object object : yaml.loadAll(yamStr)) {
+					if(object instanceof Map) {
+						Map map = (Map) object;
+						
+						//Resource apply
+						applyResource(map, mlIdx, clusterIdx, now, isNew);
+					} else {
+						log.error("yaml 파일이 잘못되었습니다.");
+					}
+				}
+				
+				//시작됨으로 클러스터 상태 변경.
+				mlClusterEntity.setStatus(MLClusterEntity.ClusterStatus.STARTED.name());
+				mlClusterDomainService.save(mlClusterEntity);
+				
+				//MLCluster, ML mapping 정보 저장
+				now = DateUtil.currentDateTime();
+				MLClusterMappingEntity mappingEntity = new MLClusterMappingEntity();
+				mappingEntity.setMlCluster(mlClusterEntity);
+				mappingEntity.setMl(entity);
+				mappingEntity.setCreatedAt(now);
+				mappingEntity.setUpdatedAt(now);
+				mlClusterMappingDomainService.save(mappingEntity);
+				
+				
+					//callback 발송
+					//임시코드: async로 바꾼후 로직 변경 필요.
+				String callbackUrl = applyDto.getCallbackUrl();
+				if(callbackUrl != null) {
+					MLDto.Detail detail = getMl(mlId);
+					callbackService.sendCallback(callbackUrl, new ResponseWrapper<>(detail));
+				}
+				
+				return mlId;
+			} catch (Exception e) {
+				log.error("", e);
+			}
+			
+		} else {
+			log.error("ML apply fail - Cluster provisioning fail.");
 		}
-		
-		
-		//MLCluster, ML mapping 정보 저장
-		now = DateUtil.currentDateTime();
-		MLClusterMappingEntity mappingEntity = new MLClusterMappingEntity();
-		mappingEntity.setMlCluster(mlClusterEntity);
-		mappingEntity.setMl(entity);
-		mappingEntity.setCreatedAt(now);
-		mappingEntity.setUpdatedAt(now);
-		mlClusterMappingDomainService.save(mappingEntity);
-		
-		
-		//callback 발송
-		//임시코드: async로 바꾼후 로직 변경 필요.
-		String callbackUrl = applyDto.getCallbackUrl();
-		if(callbackUrl != null) {
-			MLDto.Detail detail = getMl(mlId);
-			callbackService.sendCallback(callbackUrl, new ResponseWrapper<>(detail));
-		}
-		
-		return mlId;
+		log.info("ML apply finish.");
+		return null;		
 	}
 	
 	private void applyResource(Map map, Long mlIdx, Long clusterIdx, String createAt, boolean isNew) {
@@ -152,6 +192,10 @@ public class MLInterfaceAPIService {
 		if(serviceInterface != null) {
 			resourceId = serviceInterface.mlResourceApply(clusterIdx, resourceId, output);
 		}
+		
+		log.info("Apply Resource");
+		log.info("ID: {}, Kind: {}", resourceId, kind);
+		log.info("Yaml: {}", output);
 		
 		resEntity.setUpdatedAt(createAt);
 		resEntity.setClusterIdx(clusterIdx);
@@ -240,6 +284,9 @@ public class MLInterfaceAPIService {
 		entity.setUpdatedAt(DateUtil.currentDateTime());
 		entity.setStatus("finished");
 		mlDomainService.save(entity);
+		
+		//클러스터 삭제 처리
+		mlClusterAPIService.deleteMlCluster(entity.getMlClusterIdx());
 	}
 	
 	/**
@@ -281,36 +328,20 @@ public class MLInterfaceAPIService {
 	 * @param yaml
 	 * @return
 	 */
-	public MLClusterEntity getCluster(String stepCode, String yaml) {
+	public MLClusterEntity getCluster(String mlName, String stepCode, String yaml) {
 		MLClusterEntity mlClusterEntity = null;
 		if(stepCode.equals(MLStepCode.SERVICE.getCode())) {
 			//서비스인 경우 서비스 클러스터로 실행.
 			//서비스 클러스터 목록 중 수용할 수 있는 클러스터 시뮬레이션 후 적절한 클러스터 선택.
 			
 		} else {
-			//나머지는 클러스터 생성 후 실행.
-			
-			//AI를 이용한 클러스터 구성 추천 받은 후 클러스터 생성.
-			Long clusterId = 118L;
-			ClusterEntity clusterEntity = new ClusterEntity();
-			clusterEntity.setClusterIdx(clusterId);
-			
-			
-			String now = DateUtil.currentDateTime();	
-			
-			mlClusterEntity = new MLClusterEntity();
-			mlClusterEntity.setCluster(clusterEntity);
-			mlClusterEntity.setClusterType(MLClusterType.JOB_CLUSTER.getType());
-			mlClusterEntity.setCreatedAt(now);
-			mlClusterEntity.setUpdatedAt(now);
-			mlClusterEntity.setStatus("RUN");
-			
-			mlClusterDomainService.save(mlClusterEntity);
+			//나머지는 클러스터 생성 후 실행.			
+			mlClusterEntity = mlClusterAPIService.provisioningJobCluster(mlName, yaml);
 		}
 		
-		
 		return mlClusterEntity;
-	}	
+	}
+	
 	
 	private MLServiceInterface getServiceInterface(String kind) {
 		return serviceFactory.getMLServiceInterface(kind);

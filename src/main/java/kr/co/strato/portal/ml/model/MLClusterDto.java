@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.model;
+package kr.co.strato.portal.ml.model;
 
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import lombok.Getter;

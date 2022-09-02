@@ -12,7 +12,7 @@ import kr.co.strato.adapter.k8s.common.service.CommonAdapterService;
 import kr.co.strato.portal.config.service.ConfigMapService;
 import kr.co.strato.portal.config.service.PersistentVolumeClaimService;
 import kr.co.strato.portal.config.service.SecretService;
-import kr.co.strato.portal.machineLearning.service.MLServiceInterface;
+import kr.co.strato.portal.ml.service.MLServiceInterface;
 import kr.co.strato.portal.networking.service.IngressService;
 import kr.co.strato.portal.networking.service.K8sServiceService;
 import kr.co.strato.portal.workload.service.CronJobService;

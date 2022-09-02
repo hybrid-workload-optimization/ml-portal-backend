@@ -32,6 +32,7 @@ public class MLEntity {
 	private String mlStepCode;
 	private String yaml;
 	private String status;
+	private Long mlClusterIdx;
 	private Long clusterIdx;
 	private String createdAt;	
 	private String updatedAt;

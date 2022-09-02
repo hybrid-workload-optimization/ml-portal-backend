@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.model;
+package kr.co.strato.portal.ml.model;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

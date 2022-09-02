@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.controller;
+package kr.co.strato.portal.ml.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.machineLearning.model.MLDto;
-import kr.co.strato.portal.machineLearning.model.MLDto.ListArg;
-import kr.co.strato.portal.machineLearning.service.MLInterfaceAPIService;
+import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.service.MLInterfaceAPIService;
 
 @RequestMapping("/api/v1/ml")
 @RestController

@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.service;
+package kr.co.strato.portal.ml.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import kr.co.strato.domain.machineLearning.model.MLResourceEntity;
 import kr.co.strato.domain.machineLearning.service.MLDomainService;
 import kr.co.strato.domain.machineLearning.service.MLProjectDomainService;
 import kr.co.strato.domain.machineLearning.service.MLResourceDomainService;
-import kr.co.strato.portal.machineLearning.model.MLDto;
-import kr.co.strato.portal.machineLearning.model.MLDtoMapper;
-import kr.co.strato.portal.machineLearning.model.MLProjectDto;
-import kr.co.strato.portal.machineLearning.model.MLResourceDto;
+import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLDtoMapper;
+import kr.co.strato.portal.ml.model.MLProjectDto;
+import kr.co.strato.portal.ml.model.MLResourceDto;
 import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.setting.model.UserDto;
 

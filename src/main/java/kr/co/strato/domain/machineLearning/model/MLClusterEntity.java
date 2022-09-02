@@ -10,7 +10,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -20,7 +23,23 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MLClusterEntity {
+	
+	public static enum ClusterStatus {
+		PENDING,
+		PROVISIONING,
+		PROVISIONING_FINISHED,
+		STARTED,
+		FINISHED,
+		DELETING,
+		DELETED,
+		FAILED,
+		SCALE_IN,
+		SCALE_OUT
+	}
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

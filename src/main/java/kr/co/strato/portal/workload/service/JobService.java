@@ -40,7 +40,7 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
-import kr.co.strato.portal.machineLearning.service.MLServiceInterface;
+import kr.co.strato.portal.ml.service.MLServiceInterface;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.workload.model.JobArgDto;
 import kr.co.strato.portal.workload.model.JobDto;

@@ -1,4 +1,4 @@
-package kr.co.strato.portal.machineLearning.service;
+package kr.co.strato.portal.ml.service;
 
 public interface MLServiceInterface {
 	
