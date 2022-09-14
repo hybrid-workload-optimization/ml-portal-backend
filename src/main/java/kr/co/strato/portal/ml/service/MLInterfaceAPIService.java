@@ -215,6 +215,8 @@ public class MLInterfaceAPIService {
 	 */
 	@Transactional
 	public boolean delete(String mlId) {
+		log.info("ML delete start.");
+		log.info("ML ID: {}.", mlId);
 		MLDto.Detail mlDetail = getMl(mlId);
 		if(mlDetail != null) {
 			
@@ -229,32 +231,40 @@ public class MLInterfaceAPIService {
 				MLServiceInterface serviceInterface = getServiceInterface(kind);
 				if(serviceInterface != null) {
 					//실제 리소스 삭제.
+					log.info("ML K8S 리소스 삭제. resId: {}", resId);
 					boolean isDelete = serviceInterface.delete(resId, yaml);
 				}
 			}
 			
-			//클러스터 맵핑 삭제
+			log.info("ML Cluster Mapping 삭제.");
 			
+			//클러스터 맵핑 삭제
+			List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlIdx);
 			mlClusterMappingDomainService.deleteByMlIdx(mlIdx);
 			
 			//클러스터 삭제
-			if(!stepCode.equals(MLStepCode.SERVICE.getCode())) {
-				List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlIdx);
+			if(!stepCode.equals(MLStepCode.SERVICE.getCode())) {				
 				if(list != null) {
 					for(MLClusterMappingEntity mappingEntity : list) {
-						mlClusterDomainService.deleteByMlClusterIdx(mappingEntity.getMlCluster().getId());
+						Long clusterIdx = mappingEntity.getMlCluster().getId();
+						log.info("Cluster 삭제. clusterIdx: {}", clusterIdx);
+						mlClusterDomainService.deleteByMlClusterIdx(clusterIdx);
 					}
 				}
 			}
 			
 			//리소스 삭제
+			log.info("ML 리소스 삭제. ML ID: {}", mlIdx);
 			mlResourceDomainService.deleteByMlIdx(mlIdx);
 			
 			//ml 삭제
+			log.info("ML 삭제. ML ID: {}", mlIdx);
 			mlDomainService.delete(mlIdx);
 			
 			return true;
 		}
+		log.error("ML is null");
+		log.error("ML ID: {}", mlId);
 		return false;
 	}
 	
