@@ -234,13 +234,16 @@ public class MLInterfaceAPIService {
 			}
 			
 			//클러스터 맵핑 삭제
-			List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlIdx);
+			
 			mlClusterMappingDomainService.deleteByMlIdx(mlIdx);
 			
 			//클러스터 삭제
 			if(!stepCode.equals(MLStepCode.SERVICE.getCode())) {
-				for(MLClusterMappingEntity mappingEntity : list) {
-					mlClusterDomainService.deleteByMlClusterIdx(mappingEntity.getMlCluster().getId());
+				List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlIdx);
+				if(list != null) {
+					for(MLClusterMappingEntity mappingEntity : list) {
+						mlClusterDomainService.deleteByMlClusterIdx(mappingEntity.getMlCluster().getId());
+					}
 				}
 			}
 			

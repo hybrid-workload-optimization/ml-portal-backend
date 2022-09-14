@@ -318,7 +318,12 @@ public class JobService extends InNamespaceService implements MLServiceInterface
 		JobArgDto jobArgDto = new JobArgDto();
 		jobArgDto.setJobIdx(resourceId);
 		
-		delete(jobArgDto);
+		try {
+			delete(jobArgDto);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 		return true;
 	}
 }
