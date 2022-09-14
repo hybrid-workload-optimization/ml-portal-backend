@@ -138,7 +138,7 @@ public class MLClusterAPIService {
 				.category("gpu")
 				.podSpec(podSpecs)
 				.build();
-		
+		/*
 		ForecastDto.ResForecastDto recommandResult = mlAdapterService.forecast(param);
 		
 		//추천 노드
@@ -157,7 +157,7 @@ public class MLClusterAPIService {
 		
 		log.info("[추천된 노드 상품]");
 		log.info(gson.toJson(paasNodeSpec));
-		
+		*/
 		
 		//상품명
 		//String instance = paasNodeSpec.getInstance();

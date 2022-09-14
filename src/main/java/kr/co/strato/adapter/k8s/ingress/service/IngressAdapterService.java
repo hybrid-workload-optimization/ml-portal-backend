@@ -52,6 +52,7 @@ public class IngressAdapterService {
 		try {
 			// json -> fabric8 k8s 오브젝트 파싱
 			ObjectMapper mapper = new ObjectMapper();
+			
 
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			List<Ingress> ingress = gson.fromJson(results, new TypeToken<List<Ingress>>() {}.getType());
