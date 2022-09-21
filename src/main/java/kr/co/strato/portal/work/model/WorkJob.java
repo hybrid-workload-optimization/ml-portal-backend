@@ -9,7 +9,10 @@ public class WorkJob {
 		// Cluster 삭제
 		CLUSTER_DELETE,
 		// Cluster 스케일
-		CLUSTER_SCALE;
+		CLUSTER_SCALE,
+		// Cluster 변경.
+		CLUSTER_MODIFY;
+		
 		
 	}
 	

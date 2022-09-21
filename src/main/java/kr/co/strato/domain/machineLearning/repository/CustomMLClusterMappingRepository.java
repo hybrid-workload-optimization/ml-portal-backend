@@ -9,7 +9,7 @@ public interface CustomMLClusterMappingRepository {
 	public List<MLClusterMappingEntity> findByMlClusterIdx(Long mlClusterIdx);
 	public List<MLClusterMappingEntity> findByMlIdx(Long mlIdx);
 	
-	public void deleteByMlClusterIdx(Long mlClusterIdx);	
+	
 	public void deleteByMlIdx(Long mlIdx);
 
 }

@@ -52,7 +52,7 @@ public class CustomMLClusterMappingRepositoryImpl implements CustomMLClusterMapp
         List<MLClusterMappingEntity> content = results.getResults();
 		return content;
 	}
-
+/*
 	@Override
 	public void deleteByMlClusterIdx(Long mlClusterIdx) {
 		QMLClusterMappingEntity qEntity = QMLClusterMappingEntity.mLClusterMappingEntity;
@@ -60,8 +60,8 @@ public class CustomMLClusterMappingRepositoryImpl implements CustomMLClusterMapp
 		BooleanBuilder builder = new BooleanBuilder();
 		builder.and(qEntity.mlCluster.id.eq(mlClusterIdx));
 		
-		jpaQueryFactory.delete(qEntity).where(builder);
-	}
+		jpaQueryFactory.delete(qEntity).where(builder).execute();
+	}*/
 
 	@Override
 	public void deleteByMlIdx(Long mlIdx) {

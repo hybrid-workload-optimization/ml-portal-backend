@@ -120,6 +120,7 @@ public class AccessFilter implements Filter{
     			"api-docs", 
     			"/ws", 
     			"/api/v1/work-job/callback", 
+    			"/api/v1/clusterJob/callback", 
     			"favicon.ico",
     			"/users/reset/password",
     			"/icons",

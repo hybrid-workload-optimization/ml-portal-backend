@@ -19,6 +19,9 @@ import lombok.ToString;
 @ToString
 public class MLEntity {
 	
+	public static String STATUS_PENDING = "Pending";
+	public static String STATUS_STARTED = "Started";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ml_idx")

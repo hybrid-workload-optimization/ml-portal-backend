@@ -40,13 +40,16 @@ public class ClusterEntity {
 	}
 	
 	public static enum ProvisioningStatus {
+		PENDING,
 		READY,
 		STARTED,
 		FINISHED,
 		DELETING,
 		FAILED,
+		SCALE,
 		SCALE_IN,
-		SCALE_OUT
+		SCALE_OUT,
+		MODIFY
 	}
 	
 	@Id 

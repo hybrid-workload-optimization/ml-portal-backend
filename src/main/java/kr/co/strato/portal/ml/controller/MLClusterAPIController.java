@@ -12,17 +12,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import kr.co.strato.adapter.ml.model.CloudParamDto.ModifyArg;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.model.MLClusterDto;
+import kr.co.strato.portal.ml.model.ModifyArgDto;
 import kr.co.strato.portal.ml.model.ScaleArgDto;
-import kr.co.strato.portal.ml.service.MLClusterAPIService;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 
 @RequestMapping("/api/v1/ml/cluster")
 @RestController
 public class MLClusterAPIController {
 	
 	@Autowired
-	private MLClusterAPIService mlClusterService;
+	private MLClusterAPIAsyncService mlClusterService;
 	
 	/**
 	 * Prometheus url 반환.
@@ -43,7 +45,18 @@ public class MLClusterAPIController {
 	@Operation(summary = "Scale 조정", description = "Cluster Scale 조정(Scale-In, Scale-Out)")
 	@PostMapping("/scale")
 	public ResponseWrapper<String> scale(@RequestBody ScaleArgDto scaleDto) {
-		return null;
+		mlClusterService.scaleJobCluster(scaleDto);
+		return new ResponseWrapper<>();
+	}
+	
+	/**
+	 * 클러스터 Scale 조정
+	 */
+	@Operation(summary = "클러스터 노드풀 변경", description = "클러스터 노드풀 변경")
+	@PostMapping("/modify")
+	public ResponseWrapper<String> modify(@RequestBody ModifyArgDto modifyDto) {
+		mlClusterService.modifyJobCluster(modifyDto);
+		return new ResponseWrapper<>();
 	}
 	
 	

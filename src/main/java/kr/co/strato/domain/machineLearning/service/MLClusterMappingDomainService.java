@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
 import kr.co.strato.domain.machineLearning.model.MLClusterMappingEntity;
 import kr.co.strato.domain.machineLearning.repository.MLClusterMappingRepository;
 
@@ -30,7 +31,8 @@ public class MLClusterMappingDomainService {
 	}
 	
 	public void deleteByMlClusterIdx(Long mlClusterIdx) {
-		mlClusterMappingRepository.deleteByMlClusterIdx(mlClusterIdx);
+		MLClusterEntity entity = MLClusterEntity.builder().id(mlClusterIdx).build();
+		mlClusterMappingRepository.deleteByMlCluster(entity);
 	}
 	
 	public void deleteByMlIdx(Long mlIdx) {

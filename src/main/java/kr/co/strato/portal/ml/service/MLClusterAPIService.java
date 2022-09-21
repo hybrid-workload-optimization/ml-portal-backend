@@ -29,7 +29,6 @@ import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.ml.model.CreateArg;
 import kr.co.strato.adapter.ml.model.ForecastDto;
-import kr.co.strato.adapter.ml.model.NodeSpecDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.adapter.ml.service.AIAdapterService;
 import kr.co.strato.adapter.ml.service.CloudAdapterService;
