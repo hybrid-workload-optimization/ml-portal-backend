@@ -15,15 +15,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "machine_learning_project")
+@Table(name = "machine_learning_project_mapping")
 @Getter
 @Setter
 @ToString
-public class MLProjectEntity {
+public class MLProjectMappingEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ml_project_idx")
+	@Column(name = "ml_project_mapping_idx")
 	private Long id;
 	
 	@OneToOne

@@ -1,6 +1,7 @@
 package kr.co.strato.domain.machineLearning.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
@@ -8,10 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.domain.machineLearning.model.MLEntity;
-import kr.co.strato.domain.machineLearning.model.MLProjectEntity;
+import kr.co.strato.domain.machineLearning.model.MLProjectMappingEntity;
 import kr.co.strato.domain.machineLearning.repository.MLProjectRepository;
 import kr.co.strato.portal.ml.model.MLProjectDto;
-import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
@@ -20,7 +20,7 @@ public class MLProjectDomainService {
 	@Autowired
 	private MLProjectRepository mlProjectRepository;
 	
-	public Long save(MLProjectEntity mlProjectEntity) {
+	public Long save(MLProjectMappingEntity mlProjectEntity) {
 		mlProjectRepository.save(mlProjectEntity);
 		return mlProjectEntity.getId();
 	}
@@ -39,8 +39,8 @@ public class MLProjectDomainService {
 	 * @return
 	 * @throws Exception
 	 */
-	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception {
-    	return mlProjectRepository.getProjectList(loginUser, pageable, param);
+	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, String projectName) throws Exception {
+    	return mlProjectRepository.getProjectList(loginUser, pageable, projectName);
     }
 	
 	/**

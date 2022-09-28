@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.ml.model.MLClusterDto;
 import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLProjectDto;
 import kr.co.strato.portal.ml.service.MLProjectService;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
-import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -42,9 +42,9 @@ public class MLProjectController extends CommonController {
 	 */
 	@GetMapping("/projects")
     @ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Page<MLProjectDto>> getList(Pageable pageable, ProjectDto param) throws Exception {
+	public ResponseWrapper<Page<MLProjectDto>> getList(Pageable pageable, String projectName) throws Exception {
 		UserDto loginUser = getLoginUser();
-		Page<MLProjectDto> list = mlProjectService.getList(loginUser, pageable, param);
+		Page<MLProjectDto> list = mlProjectService.getList(loginUser, pageable, projectName);
 		return new ResponseWrapper<>(list);
 	}
 	
@@ -93,9 +93,9 @@ public class MLProjectController extends CommonController {
      */
     @GetMapping("/cluster/{projectIdx}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ProjectClusterDto>> getProjectClusterList(@PathVariable("projectIdx") Long projectIdx) {
-    	List<ProjectClusterDto> response = portalProjectService.getProjectClusterList(projectIdx);        
-        return new ResponseWrapper<List<ProjectClusterDto>> (response);
+    public ResponseWrapper<List<MLClusterDto.List>> getProjectClusterList(@PathVariable("projectIdx") Long projectIdx) {
+    	List<MLClusterDto.List> response = mlProjectService.getProjectMlClusterList(projectIdx);      
+        return new ResponseWrapper<List<MLClusterDto.List>> (response);
     }
     
     /**

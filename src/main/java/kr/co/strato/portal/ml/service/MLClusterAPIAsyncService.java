@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -95,11 +95,9 @@ public class MLClusterAPIAsyncService {
 	@Autowired
 	private MLClusterMappingDomainService mlClusterMappingDomainService;
 	
-	@Value("${portal.backend.service.url}")
-	private String backendUrl;
 	
-	@Value("${plugin.kafka.topic.azure.request}")
-	private String azureRequestTopic;
+	@Autowired
+	private Environment env;
 	
 	
 
@@ -158,7 +156,7 @@ public class MLClusterAPIAsyncService {
 		log.info("Pod Spec:");
 		log.info( gson.toJson(podSpecs));
 		
-		String cloudVender = mlSettingService.getCloudVender();
+		String cloudVender = mlSettingService.getCloudProvider();
 		
 		//노드 구성 추천
 		ForecastDto.ReqForecastDto param = ForecastDto.ReqForecastDto.builder()
@@ -270,7 +268,6 @@ public class MLClusterAPIAsyncService {
 		//kafka에 넣기 위한 데이터.
 		MessageData messageData = MessageData.builder()
 				.workJobIdx(workJobIdx)
-				.callbackUrl(getCallbackUrl())
 				.jobType(MessageData.JOB_TYPE_PROVISIONING)
 				.param(createParam)
 				.build();
@@ -280,14 +277,14 @@ public class MLClusterAPIAsyncService {
 		log.info(messageDataJson);
 		
 		//kafka 전송
-		kafkaProducerService.sendMessage(azureRequestTopic, messageDataJson);
+		kafkaProducerService.sendMessage(getCloudRequestTopic(), messageDataJson);
 		
 		return mlClusterEntity;
 	}
 	
 	public boolean finishJobCluster(MLClusterEntity mlClusterEntity, String kubeConfig) {
 		ClusterEntity clusterEntity = mlClusterEntity.getCluster();
-		String cloudVender = mlSettingService.getCloudVender();
+		String cloudVender = mlSettingService.getCloudProvider();
 		
 		try {
 			ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
@@ -507,7 +504,6 @@ public class MLClusterAPIAsyncService {
 			//kafka에 넣기 위한 데이터.
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
-					.callbackUrl(getCallbackUrl())
 					.jobType(MessageData.JOB_TYPE_DELETE)
 					.param(clusterName)
 					.build();
@@ -517,17 +513,9 @@ public class MLClusterAPIAsyncService {
 			log.info(messageDataJson);
 			
 			//kafka 전송
-			kafkaProducerService.sendMessage(azureRequestTopic, messageDataJson);
+			kafkaProducerService.sendMessage(getCloudRequestTopic(), messageDataJson);
 		}
 		
-	}
-	
-	/**
-	 * Cluster 작업 결과를 받을 url
-	 * @return
-	 */
-	private String getCallbackUrl() {
-		return String.format("%s/api/v1/clusterJob/callback", backendUrl);
 	}
 	
 	private KubernetesClient getKubeClient() {
@@ -573,7 +561,6 @@ public class MLClusterAPIAsyncService {
 			//kafka에 넣기 위한 데이터.
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
-					.callbackUrl(getCallbackUrl())
 					.jobType(MessageData.JOB_TYPE_SCALE)
 					.param(arg)
 					.build();
@@ -584,7 +571,7 @@ public class MLClusterAPIAsyncService {
 			log.info(messageDataJson);
 			
 			//kafka 전송
-			kafkaProducerService.sendMessage(azureRequestTopic, messageDataJson);
+			kafkaProducerService.sendMessage(getCloudRequestTopic(), messageDataJson);
 			
 		} else {
 			log.error("[Scale Cluster] 작업 실패!");
@@ -631,7 +618,6 @@ public class MLClusterAPIAsyncService {
 			//kafka에 넣기 위한 데이터.
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
-					.callbackUrl(getCallbackUrl())
 					.jobType(MessageData.JOB_TYPE_MODIFY)
 					.param(arg)
 					.build();
@@ -642,7 +628,7 @@ public class MLClusterAPIAsyncService {
 			log.info(messageDataJson);
 			
 			//kafka 전송
-			kafkaProducerService.sendMessage(azureRequestTopic, messageDataJson);
+			kafkaProducerService.sendMessage(getCloudRequestTopic(), messageDataJson);
 			
 		} else {
 			log.error("[Modify Cluster] 작업 실패!");
@@ -693,7 +679,7 @@ public class MLClusterAPIAsyncService {
 		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		MLClusterEntity mlClusterEntity = mlClusterDomainService.get(clusterEntity);
-		String cloudVender = mlSettingService.getCloudVender();
+		String cloudVender = mlSettingService.getCloudProvider();
 		if(clusterEntity != null) {
 			
 			if(isSuccess && data != null && data instanceof String) {
@@ -846,5 +832,15 @@ public class MLClusterAPIAsyncService {
 		clusterDomainService.update(clusterEntity);
 		mlClusterDomainService.save(mlClusterEntity);
 		
+	}
+	
+	/**
+	 * 클라우드 인터페이스와 메시지 교류를 위한 리퀘스트 토픽 이름을 불러온다.
+	 * @return
+	 */
+	public String getCloudRequestTopic() {
+		String cloudVender = mlSettingService.getCloudProvider().toLowerCase();
+		String topicKey = String.format("plugin.kafka.topic.%s.request", cloudVender);
+		return env.getProperty(topicKey);
 	}
 }

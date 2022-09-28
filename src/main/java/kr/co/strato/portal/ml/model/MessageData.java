@@ -19,13 +19,12 @@ public class MessageData {
 	
 	
 	private Long workJobIdx;
-	private String callbackUrl;
 	private String jobType;
 	private Object param;
 
 	@Override
 	public String toString() {
-		return "MessageData [workJobIdx=" + workJobIdx + ", callbackUrl=" + callbackUrl + ", jobType=" + jobType
+		return "MessageData [workJobIdx=" + workJobIdx + ", jobType=" + jobType
 				+ ", param=" + param + "]";
 	}	
 	

@@ -18,17 +18,22 @@ import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
 import kr.co.strato.domain.machineLearning.model.MLClusterMappingEntity;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
+import kr.co.strato.domain.machineLearning.model.MLProjectMappingEntity;
 import kr.co.strato.domain.machineLearning.model.MLResourceEntity;
 import kr.co.strato.domain.machineLearning.service.MLClusterDomainService;
 import kr.co.strato.domain.machineLearning.service.MLClusterMappingDomainService;
 import kr.co.strato.domain.machineLearning.service.MLDomainService;
+import kr.co.strato.domain.machineLearning.service.MLProjectDomainService;
 import kr.co.strato.domain.machineLearning.service.MLResourceDomainService;
+import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
+import kr.co.strato.portal.project.model.ProjectRequestDto;
+import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.ml.model.MLDtoMapper;
 import kr.co.strato.portal.ml.model.MLResourceDto;
 import kr.co.strato.portal.ml.model.MLStepCode;
@@ -62,6 +67,12 @@ public class MLInterfaceAPIAsyncService {
 	@Autowired
 	private MLClusterAPIAsyncService mlClusterAPIService;
 	
+	@Autowired
+	MLProjectDomainService mlProjectDoaminService;
+	
+	@Autowired
+	private MLProjectService mlProjectService;
+	
 	
 	public String apply(MLDto.ApplyArg applyDto) {
 		log.info("ML apply start.");
@@ -78,6 +89,7 @@ public class MLInterfaceAPIAsyncService {
 			mlClusterIdx = entity.getMlClusterIdx();
 		}
 		
+		String userId = applyDto.getUserId();
 		String mlName = applyDto.getName();
 		String mlId = applyDto.getMlId();
 		String yamStr = Base64Util.decode(applyDto.getYaml());
@@ -137,8 +149,23 @@ public class MLInterfaceAPIAsyncService {
 				log.info("ML apply 종료");
 					
 			} else if(provisioningStatus.equals(ClusterEntity.ProvisioningStatus.FINISHED.name())) {				
-				applyResource(entity, isNew);			
+				applyResource(entity, isNew);
 			}
+			
+			//Project 생성
+			ProjectRequestDto param = new ProjectRequestDto();
+			//ML 생성자를 프로젝트 이름으로 (생각해 봐야 함..)
+			param.setProjectName(userId);
+			ProjectUserDto manager = ProjectUserDto.builder().userId("ml@strato.co.kr").build();
+			param.setProjectManager(manager);
+			
+			ProjectEntity projectEntity = mlProjectService.createProject(param);
+			
+			//ML - Project Mapping
+			MLProjectMappingEntity projectMappingEntity = new MLProjectMappingEntity();
+			projectMappingEntity.setMl(entity);
+			projectMappingEntity.setProject(projectEntity);
+			mlProjectDoaminService.save(projectMappingEntity);
 			
 			return mlId;
 		}

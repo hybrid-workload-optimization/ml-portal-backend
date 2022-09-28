@@ -129,7 +129,7 @@ public class MLClusterAPIService {
 		log.info("Pod Spec:");
 		log.info( gson.toJson(podSpecs));
 		
-		String cloudVender = mlSettingService.getCloudVender();
+		String cloudVender = mlSettingService.getCloudProvider();
 		
 		//노드 구성 추천
 		ForecastDto.ReqForecastDto param = ForecastDto.ReqForecastDto.builder()

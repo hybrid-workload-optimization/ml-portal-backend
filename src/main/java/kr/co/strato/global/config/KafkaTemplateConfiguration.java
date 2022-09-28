@@ -30,7 +30,7 @@ public class KafkaTemplateConfiguration {
 	@Value("${plugin.kafka.url}")
 	private String BOOTSTRAP_SERVERS;
 	
-	@Value("${plugin.kafka.topic.azure.group}")
+	@Value("${plugin.kafka.paas-portal.consumer.group}")
 	private String GROUP_ID;
 
 	// consumer config

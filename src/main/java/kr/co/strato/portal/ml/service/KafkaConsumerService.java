@@ -36,9 +36,42 @@ public class KafkaConsumerService {
 	
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.azure.response}", 
-			groupId = "${plugin.kafka.topic.azure.group}", 
+			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
 			containerFactory = "kafkaListenerContainerFactory")
-    public void azureConsumerMessage(String message) throws IOException {
+    public void azureConsumer(String message) throws IOException {
+		messageJob(message);
+	}
+	
+	@KafkaListener(
+			topics = "${plugin.kafka.topic.gcp.response}", 
+			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
+			containerFactory = "kafkaListenerContainerFactory")
+    public void gcpConsumer(String message) throws IOException {
+		messageJob(message);
+	}
+	
+	@KafkaListener(
+			topics = "${plugin.kafka.topic.aws.response}", 
+			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
+			containerFactory = "kafkaListenerContainerFactory")
+    public void awsConsumer(String message) throws IOException {
+		messageJob(message);
+	}
+	
+	@KafkaListener(
+			topics = "${plugin.kafka.topic.naver.response}", 
+			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
+			containerFactory = "kafkaListenerContainerFactory")
+    public void naverConsumer(String message) throws IOException {
+		messageJob(message);
+	}
+	
+	
+	/**
+	 * Kafka로 부터 전송되는 메시지 처리.
+	 * @param message
+	 */
+	public void messageJob(String message) {
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		
 		CallbackData data = gson.fromJson(message, CallbackData.class);
@@ -52,13 +85,19 @@ public class KafkaConsumerService {
 		
 		boolean isSuccess = code == CallbackData.CODE_SUCCESS;
 		
-		log.info("Azure Response Message >>>>>>>>>>>>>>>>");
+		log.info("Message queue response >>>>>>>>>>>>>>>>");
 		log.info("workJobIdx: {}", workJobIdx);
 		log.info("code: {}", code);
 		log.info("status: {}", status);
 		
 		
 		WorkJobEntity workJobEntity = workJobService.getWorkJob(Long.valueOf(workJobIdx));
+		if(workJobEntity == null) {
+			log.error("Message queue response error");
+			log.error("WorkJobEntity가 존재하지 않습니다. workJobIdx: {}", workJobIdx);
+			return;
+		}
+		
 		WorkJobType workJobType = WorkJobType.valueOf(workJobEntity.getWorkJobType());
 		
 		//작업하는 clusterIdx를 저장

@@ -24,12 +24,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.domain.machineLearning.model.QMLEntity;
-import kr.co.strato.domain.machineLearning.model.QMLProjectEntity;
+import kr.co.strato.domain.machineLearning.model.QMLProjectMappingEntity;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.ml.model.MLProjectDto;
-import kr.co.strato.portal.project.model.ProjectDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +41,10 @@ public class CustomMLProjectRepositoryImpl implements CustomMLProjectRepository 
 	private final JPAQueryFactory queryFactory;
 	
 	@Override
-	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception {
+	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, String projectName) throws Exception {
 		BooleanBuilder builder = new BooleanBuilder();
-	    if(param.getProjectName() != null && !"".equals(param.getProjectName())) {
-	    	builder.and(projectEntity.projectName.contains(param.getProjectName()));
+	    if(projectName != null && !"".equals(projectName)) {
+	    	builder.and(projectEntity.projectName.contains(projectName));
 	    }
 	    
 	    JPAQuery<MLProjectDto> query = queryFactory
@@ -55,9 +54,9 @@ public class CustomMLProjectRepositoryImpl implements CustomMLProjectRepository 
 						  projectEntity.projectName,
 						  projectEntity.description, 
 						  ExpressionUtils.as(
-								  JPAExpressions.select(QMLProjectEntity.mLProjectEntity.id.count())
-	                                            .from(QMLProjectEntity.mLProjectEntity)
-	                                            .where(QMLProjectEntity.mLProjectEntity.project.id.eq(projectEntity.id)),
+								  JPAExpressions.select(QMLProjectMappingEntity.mLProjectMappingEntity.id.count())
+	                                            .from(QMLProjectMappingEntity.mLProjectMappingEntity)
+	                                            .where(QMLProjectMappingEntity.mLProjectMappingEntity.project.id.eq(projectEntity.id)),
 	                              "mlCount"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectClusterEntity.clusterIdx.count())
@@ -111,7 +110,7 @@ public class CustomMLProjectRepositoryImpl implements CustomMLProjectRepository 
 		List<MLProjectDto> resultList = result.getResults();
 		if(resultList != null && resultList.size() > 0) {
 			for(MLProjectDto dto : resultList) {
-				if(param.getUserId().equals(dto.getProjectPmId())) {
+				if(loginUser.getUserId().equals(dto.getProjectPmId())) {
 					dto.setOwner(dto.getProjectPmId());
 				}
 				
@@ -145,9 +144,9 @@ public class CustomMLProjectRepositoryImpl implements CustomMLProjectRepository 
 						  projectEntity.projectName,
 						  projectEntity.description, 
 						  ExpressionUtils.as(
-								  JPAExpressions.select(QMLProjectEntity.mLProjectEntity.id.count())
-	                                            .from(QMLProjectEntity.mLProjectEntity)
-	                                            .where(QMLProjectEntity.mLProjectEntity.project.id.eq(projectEntity.id)),
+								  JPAExpressions.select(QMLProjectMappingEntity.mLProjectMappingEntity.id.count())
+	                                            .from(QMLProjectMappingEntity.mLProjectMappingEntity)
+	                                            .where(QMLProjectMappingEntity.mLProjectMappingEntity.project.id.eq(projectEntity.id)),
 	                              "mlCount"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(projectClusterEntity.clusterIdx.count())
@@ -194,7 +193,7 @@ public class CustomMLProjectRepositoryImpl implements CustomMLProjectRepository 
 	
 	@Override
 	public List<MLEntity> getProjectMlList(Long projectIdx) {
-		QMLProjectEntity qProjectEntity = QMLProjectEntity.mLProjectEntity;
+		QMLProjectMappingEntity qProjectEntity = QMLProjectMappingEntity.mLProjectMappingEntity;
 		
 		QMLEntity qEntity = QMLEntity.mLEntity;
 		

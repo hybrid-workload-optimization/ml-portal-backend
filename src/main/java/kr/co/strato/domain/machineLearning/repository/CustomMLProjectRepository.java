@@ -12,7 +12,7 @@ import kr.co.strato.portal.setting.model.UserDto;
 
 public interface CustomMLProjectRepository {
 
-	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, ProjectDto param) throws Exception;
+	public PageImpl<MLProjectDto> getProjectList(UserDto loginUser, Pageable pageable, String projectName) throws Exception;
 	public MLProjectDto getProjectDetail(Long projectIdx);
 	public List<MLEntity> getProjectMlList(Long projectIdx);
 }
