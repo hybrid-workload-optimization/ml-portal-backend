@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.adapter.ml.model.CloudParamDto.ModifyArg;
 import kr.co.strato.global.model.ResponseWrapper;
@@ -20,6 +21,7 @@ import kr.co.strato.portal.ml.model.ScaleArgDto;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 
 @RequestMapping("/api/v1/ml/cluster")
+@Api(tags = {"ML Cluster 관련 API(생성/Scale 조정/삭제/상세 정보)"})
 @RestController
 public class MLClusterAPIController {
 	

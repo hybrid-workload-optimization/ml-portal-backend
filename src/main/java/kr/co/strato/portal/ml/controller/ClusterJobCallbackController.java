@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.model.CallbackData;
 import kr.co.strato.portal.ml.service.ClusterJobCallbackService;
 
 @RestController
+@Api(tags = {"Cluster Job Callback API(Async 응답 전용)"})
 public class ClusterJobCallbackController {
 	
 	@Autowired

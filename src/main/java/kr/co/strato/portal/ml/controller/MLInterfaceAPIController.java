@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.model.MLDto;
@@ -17,6 +18,7 @@ import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
 
 @RequestMapping("/api/v1/ml")
+@Api(tags = {"ML 시작/종료/삭제 등. KETI에서 호출하는 API"})
 @RestController
 public class MLInterfaceAPIController {
 	

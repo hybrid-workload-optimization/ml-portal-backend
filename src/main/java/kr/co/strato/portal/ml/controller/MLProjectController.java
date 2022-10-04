@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.ml.model.MLClusterDto;
@@ -24,6 +25,7 @@ import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @RequestMapping("/api/v1/ml/project")
+@Api(tags = {"ML Project 관련 API(리스트/상세 등.)"})
 @RestController
 public class MLProjectController extends CommonController {
 	

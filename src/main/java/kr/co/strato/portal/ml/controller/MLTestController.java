@@ -8,7 +8,7 @@ import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.SimulationDto;
 import kr.co.strato.portal.ml.service.MLTestService;
 
-@RestController
+//@RestController
 public class MLTestController {
 	
 	@Autowired
