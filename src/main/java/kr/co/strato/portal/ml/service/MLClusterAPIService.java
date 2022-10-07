@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,32 +25,25 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import kr.co.strato.adapter.cloud.aks.model.CreateArg;
+import kr.co.strato.adapter.cloud.aks.model.CreateArg.NodePool;
+import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
-import kr.co.strato.adapter.ml.model.CreateArg;
 import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.adapter.ml.service.AIAdapterService;
-import kr.co.strato.adapter.ml.service.CloudAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
-import kr.co.strato.domain.machineLearning.service.MLClusterDomainService;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterSyncService;
-import kr.co.strato.portal.ml.model.MLClusterDto;
-import kr.co.strato.portal.ml.model.MLClusterDtoMapper;
-import kr.co.strato.portal.ml.model.MLClusterType;
 import kr.co.strato.portal.setting.service.MLSettingService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class MLClusterAPIService {
-	
-	@Autowired
-	private MLClusterDomainService mlClusterDomainService;
 	
 	@Autowired
 	private NodeAdapterService nodeAdapterService;
@@ -74,30 +68,7 @@ public class MLClusterAPIService {
 	
 	private KubernetesClient client;
 
-	/**
-	 * Service Cluster 리스트 반환.
-	 * @param pageRequest
-	 * @return
-	 */
-	public List<MLClusterDto.List> getServiceClusterList() {
-		List<MLClusterEntity> list = mlClusterDomainService.getList(MLClusterType.SERVICE_CLUSTER.getType());
-		
-		List<MLClusterDto.List> result = new ArrayList<>(); 
-		for(MLClusterEntity entity : list) {
-			MLClusterDto.List l = MLClusterDtoMapper.INSTANCE.toListDto(entity);
-			result.add(l);
-		}
-		return result;
-	}
 	
-	public MLClusterDto.Detail getServiceClusterDetail(Long clusterId) {
-		MLClusterEntity entity = mlClusterDomainService.get(clusterId);
-		if(entity != null) {
-			MLClusterDto.Detail d = MLClusterDtoMapper.INSTANCE.toDetailDto(entity);
-			return d;
-		}
-		return null;
-	}
 	
 	public String getPrometheusUrl(Long clusterId) {
 		/*
@@ -120,7 +91,7 @@ public class MLClusterAPIService {
 	 * @param yaml
 	 * @return
 	 */
-	public MLClusterEntity provisioningJobCluster(String mlName, String yaml) {
+	public ClusterEntity provisioningJobCluster(String mlName, String yaml) {
 		log.info("Job cluster provisioning start");
 		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -186,34 +157,20 @@ public class MLClusterAPIService {
 				.build();		
 		clusterDomainService.register(clusterEntity);
 		
-			
-		
-		MLClusterEntity mlClusterEntity = MLClusterEntity.builder()
-				.cluster(clusterEntity)
-				.clusterType(MLClusterType.JOB_CLUSTER.getType())
-				.createdAt(now)
-				.updatedAt(now)
-				.status(MLClusterEntity.ClusterStatus.PROVISIONING.name())
-				.build();		
-		mlClusterDomainService.save(mlClusterEntity);
 		
 		
-		/*
 		NodePool nodepool = NodePool.builder()
 				.vmType(instance)
 				.nodeCount(nodeCount)
 				.build();
 		List<NodePool> nodepools = new ArrayList<>();
 		nodepools.add(nodepool);
-		*/
+		
 		
 		CreateArg createParam = CreateArg.builder()
 				.clusterName(clusterName)
-				.vmType(instance)
 				.kubernetesVersion(kubeletVersion)
 				.region(region)
-				.vmType(instance)
-				.nodeCount(nodeCount)
 //				.nodePools(nodepools)
 				.build();
 		
@@ -222,7 +179,9 @@ public class MLClusterAPIService {
 		log.info(createParamJson);
 				
 		//Cluster provisioning		
-		String kubeConfig = cloudAdapterService.provisioning(cloudVender, createParam);
+		String jsonStr = gson.toJson(createParam);
+		Map<String, Object> map = gson.fromJson(jsonStr, Map.class);
+		String kubeConfig = cloudAdapterService.provisioning(cloudVender, map);
 		
 		if(kubeConfig != null && kubeConfig.length() > 0) {			
 			try {
@@ -235,12 +194,10 @@ public class MLClusterAPIService {
 				
 				if (StringUtils.isEmpty(strClusterId)) {
 					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
-					mlClusterEntity.setStatus(MLClusterEntity.ClusterStatus.FAILED.name());
 				} else {
 					Long kubeConfigId = Long.valueOf(strClusterId);
 					clusterEntity.setClusterId(kubeConfigId);
 					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
-					mlClusterEntity.setStatus(MLClusterEntity.ClusterStatus.PROVISIONING_FINISHED.name());
 					
 					
 					log.info("Cluster Synchronization started.");
@@ -249,7 +206,6 @@ public class MLClusterAPIService {
 				}
 				
 				clusterDomainService.update(clusterEntity);
-				mlClusterDomainService.save(mlClusterEntity);
 				log.info("Job cluster provisioning success.");
 				
 			} catch (Exception e) {
@@ -261,7 +217,7 @@ public class MLClusterAPIService {
 			log.error("kubeConfig is null.");
 		}
 		
-		return mlClusterEntity;
+		return clusterEntity;
 	}
 	
 	private String genClusterName(String mlName) {
@@ -410,28 +366,26 @@ public class MLClusterAPIService {
 		return i;
 	}
 	
-	public void deleteMlCluster(Long mlClusterIdx) {
-		MLClusterEntity entity = mlClusterDomainService.get(mlClusterIdx);
-		if(entity != null) {
-			ClusterEntity clusterEntity = entity.getCluster();
+	public void deleteMlCluster(Long clusterIdx) {
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		if(clusterEntity != null) {
 			
 			String now = DateUtil.currentDateTime();
-			entity.setStatus(MLClusterEntity.ClusterStatus.DELETING.name());
-			entity.setUpdatedAt(now);
 			clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.DELETING.name());
 			clusterEntity.setUpdatedAt(now);
 			
 			clusterDomainService.update(clusterEntity);
-			mlClusterDomainService.save(entity);
 			
-			String clusterName = entity.getCluster().getClusterName();
+			String clusterName = clusterEntity.getClusterName();
 			
 			
 			log.info("Delete cluster: {}, Provider: {}", clusterName, clusterEntity.getProvider());
 			boolean isDelete = false;
 			try {
 				//클러스터 삭제
-				isDelete = cloudAdapterService.delete(clusterEntity.getProvider(), clusterName);
+				Map<String, Object> map = new HashMap<>();
+				map.put("clusterName", clusterName);
+				isDelete = cloudAdapterService.delete(clusterEntity.getProvider(), map);
 			} catch (Exception e) {
 				log.error("", e);
 			}
@@ -443,11 +397,6 @@ public class MLClusterAPIService {
 			
 			//실제 클러스터 삭제.
 			//clusterDomainService.delete(clusterEntity);
-			
-			entity.setStatus(MLClusterEntity.ClusterStatus.DELETED.name());
-			
-			//삭제 완료로 DB 업데이트
-			mlClusterDomainService.deleteByMlClusterIdx(mlClusterIdx);
 		}
 		
 	}

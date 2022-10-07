@@ -9,7 +9,7 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
@@ -19,27 +19,27 @@ public interface MLClusterDtoMapper {
 
 	MLClusterDtoMapper INSTANCE = Mappers.getMapper(MLClusterDtoMapper.class);
 	
-	@Mapping(target = "clusterId", 		source = "entity.id")
-	@Mapping(target = "clusterName", 	source = "entity.cluster.clusterName")
-	@Mapping(target = "description", 	source = "entity.cluster.description")
+	@Mapping(target = "clusterId", 		source = "entity.clusterIdx")
+	@Mapping(target = "clusterName", 	source = "entity.clusterName")
+	@Mapping(target = "description", 	source = "entity.description")
 	@Mapping(target = "status", 	source = "entity.status")
-	@Mapping(target = "nodeCount", 	source = "entity.cluster.nodes",	qualifiedByName = "nodeCount")
-	@Mapping(target = "provider", 	source = "entity.cluster.provider")
-	@Mapping(target = "kubeVersion", 	source = "entity.cluster.providerVersion")
+	@Mapping(target = "nodeCount", 	source = "entity.nodes",	qualifiedByName = "nodeCount")
+	@Mapping(target = "provider", 	source = "entity.provider")
+	@Mapping(target = "kubeVersion", 	source = "entity.providerVersion")
 	@Mapping(target = "createdAt", 	source = "entity.createdAt")
-	public MLClusterDto.List toListDto(MLClusterEntity entity);
+	public MLClusterDto.List toListDto(ClusterEntity entity);
 	
 	
-	@Mapping(target = "clusterId", 		source = "entity.id")
-	@Mapping(target = "clusterName", 	source = "entity.cluster.clusterName")
-	@Mapping(target = "description", 	source = "entity.cluster.description")
+	@Mapping(target = "clusterId", 		source = "entity.clusterIdx")
+	@Mapping(target = "clusterName", 	source = "entity.clusterName")
+	@Mapping(target = "description", 	source = "entity.description")
 	@Mapping(target = "status", 	source = "entity.status")
-	@Mapping(target = "nodeCount", 	source = "entity.cluster.nodes",	qualifiedByName = "nodeCount")
-	@Mapping(target = "provider", 	source = "entity.cluster.provider")
-	@Mapping(target = "kubeVersion", 	source = "entity.cluster.providerVersion")
+	@Mapping(target = "nodeCount", 	source = "entity.nodes",	qualifiedByName = "nodeCount")
+	@Mapping(target = "provider", 	source = "entity.provider")
+	@Mapping(target = "kubeVersion", 	source = "entity.providerVersion")
 	@Mapping(target = "createdAt", 	source = "entity.createdAt")
-	@Mapping(target = "nodes", 	source = "entity.cluster.nodes", qualifiedByName = "toNodeDtos")
-	public MLClusterDto.Detail toDetailDto(MLClusterEntity entity);
+	@Mapping(target = "nodes", 	source = "entity.nodes", qualifiedByName = "toNodeDtos")
+	public MLClusterDto.Detail toDetailDto(ClusterEntity entity);
 	
 	
 	@Named("nodeCount")

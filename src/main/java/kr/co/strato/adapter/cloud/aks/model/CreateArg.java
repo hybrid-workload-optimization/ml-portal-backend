@@ -1,4 +1,4 @@
-package kr.co.strato.adapter.ml.model;
+package kr.co.strato.adapter.cloud.aks.model;
 
 import java.util.List;
 import java.util.Map;
@@ -30,15 +30,15 @@ public class CreateArg {
 	private String region;
 	
 	//vm 상품 타입
-	@NotEmpty(message = "VM 상품유형은 null 또는 공백을 허용하지 않습니다.")
-	private String vmType;
+	//@NotEmpty(message = "VM 상품유형은 null 또는 공백을 허용하지 않습니다.")
+	//private String vmType;
 	
 	//NodePool Size
-	@Positive(message = "노드 수는 null 또는 0을 허용하지 않으며, 양수만 허용합니다.")
-	private Integer nodeCount;
+	//@Positive(message = "노드 수는 null 또는 0을 허용하지 않으며, 양수만 허용합니다.")
+	//private Integer nodeCount;
 	
 	//Node pool 이름(Optinal)
-	private String nodePoolName;
+	//private String nodePoolName;
 	
 	//기타 클라우드 별 필요 파라메타 정의
 	private String apiServerAvailability;

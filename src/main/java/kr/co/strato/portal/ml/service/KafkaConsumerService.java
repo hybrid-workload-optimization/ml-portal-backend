@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.ml.model.CallbackData;
@@ -38,18 +38,31 @@ public class KafkaConsumerService {
 			topics = "${plugin.kafka.topic.azure.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
 			containerFactory = "kafkaListenerContainerFactory")
-    public void azureConsumer(String message) throws IOException {
-		messageJob(message);
+    public void azureConsumer(String message) {
+		log.info(message);
+		try {
+			messageJob(message);
+		} catch (Exception e) {
+			log.error("", e);
+		}
 	}
+	
 	
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.gcp.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
 			containerFactory = "kafkaListenerContainerFactory")
-    public void gcpConsumer(String message) throws IOException {
-		messageJob(message);
+    public void gcpConsumer(String message) {
+		log.info(message);
+		try {
+			messageJob(message);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 	}
 	
+	/*
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.aws.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
@@ -65,7 +78,7 @@ public class KafkaConsumerService {
     public void naverConsumer(String message) throws IOException {
 		messageJob(message);
 	}
-	
+	*/
 	
 	/**
 	 * Kafka로 부터 전송되는 메시지 처리.
@@ -107,9 +120,9 @@ public class KafkaConsumerService {
 			if(status.equals(CallbackData.STATUS_START)) {
 				mlClusterApiService.provisioningStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				MLClusterEntity mlClusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
-				if(mlClusterEntity != null) {
-					mlInterfaceApiService.applyContinue(mlClusterEntity);
+				ClusterEntity clusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
+				if(clusterEntity != null) {
+					mlInterfaceApiService.applyContinue(clusterEntity);
 				} 
 			}
 		} else if(workJobType == WorkJobType.CLUSTER_DELETE) {

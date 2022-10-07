@@ -1,4 +1,4 @@
-package kr.co.strato.adapter.ml.model;
+package kr.co.strato.adapter.cloud.aks.model;
 
 
 import lombok.Getter;

@@ -18,11 +18,11 @@ public class CustomMLClusterMappingRepositoryImpl implements CustomMLClusterMapp
     }
 
 	@Override
-	public List<MLClusterMappingEntity> findByMlClusterIdx(Long mlClusterIdx) {
+	public List<MLClusterMappingEntity> findByClusterIdx(Long clusterIdx) {
 		QMLClusterMappingEntity qEntity = QMLClusterMappingEntity.mLClusterMappingEntity;
 		
 		BooleanBuilder builder = new BooleanBuilder();
-		builder.and(qEntity.mlCluster.id.eq(mlClusterIdx));
+		builder.and(qEntity.cluster.clusterIdx.eq(clusterIdx));
 
         QueryResults<MLClusterMappingEntity> results = jpaQueryFactory
         		.select(qEntity)

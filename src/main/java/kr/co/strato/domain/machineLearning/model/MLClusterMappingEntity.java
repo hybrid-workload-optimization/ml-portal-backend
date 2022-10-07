@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,8 +32,8 @@ public class MLClusterMappingEntity {
 	
 	@OneToOne
 	@NotFound(action=NotFoundAction.IGNORE)
-    @JoinColumn(name = "ml_cluster_idx")
-	private MLClusterEntity mlCluster;
+    @JoinColumn(name = "cluster_idx")
+	private ClusterEntity cluster;
 	
 	@OneToOne
     @JoinColumn(name = "ml_idx")

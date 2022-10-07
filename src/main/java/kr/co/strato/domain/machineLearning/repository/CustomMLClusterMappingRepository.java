@@ -6,7 +6,7 @@ import kr.co.strato.domain.machineLearning.model.MLClusterMappingEntity;
 
 public interface CustomMLClusterMappingRepository {
 	
-	public List<MLClusterMappingEntity> findByMlClusterIdx(Long mlClusterIdx);
+	public List<MLClusterMappingEntity> findByClusterIdx(Long mlClusterIdx);
 	public List<MLClusterMappingEntity> findByMlIdx(Long mlIdx);
 	
 	

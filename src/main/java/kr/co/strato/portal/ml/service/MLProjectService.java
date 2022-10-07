@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.machineLearning.model.MLClusterMappingEntity;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.domain.machineLearning.model.MLResourceEntity;
@@ -104,8 +104,8 @@ public class MLProjectService {
     		Long mlIdx = e.getId();
     		List<MLClusterMappingEntity> clusterMappings = mlClusterMappingDomainService.getByMlIdx(mlIdx);
     		for(MLClusterMappingEntity mapping : clusterMappings) {
-    			MLClusterEntity mlClusterEntity = mapping.getMlCluster();
-    			MLClusterDto.List l = MLClusterDtoMapper.INSTANCE.toListDto(mlClusterEntity);
+    			ClusterEntity clusterEntity = mapping.getCluster();
+    			MLClusterDto.List l = MLClusterDtoMapper.INSTANCE.toListDto(clusterEntity);
     			clusters.add(l);
     		}
     	}

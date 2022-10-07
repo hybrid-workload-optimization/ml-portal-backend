@@ -1,7 +1,5 @@
 package kr.co.strato.portal.ml.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
-import kr.co.strato.adapter.ml.model.CloudParamDto.ModifyArg;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.ml.model.MLClusterDto;
 import kr.co.strato.portal.ml.model.ModifyArgDto;
 import kr.co.strato.portal.ml.model.ScaleArgDto;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
@@ -61,30 +57,11 @@ public class MLClusterAPIController {
 		return new ResponseWrapper<>();
 	}
 	
-	
-	/**
-	 * 지속형 클러스터 리스트 요청
-	 */
-	@Operation(summary = "Cluster 리스트", description = "지속형 클러스터(ML 서비스를 위한) 리스트 요청")
-	@GetMapping("/list")
-	public ResponseWrapper<List<MLClusterDto.List>> clusterList() {
-		return new ResponseWrapper<>(mlClusterService.getServiceClusterList());
-	}
-	
-	/**
-	 * 지속형 클러스터 상세 정보 요청
-	 */
-	@Operation(summary = "Cluster 상세", description = "지속형 클러스터(ML 서비스를 위한) 상세 정보 요청")
-	@GetMapping("/{clusterId}")
-	public ResponseWrapper<MLClusterDto.Detail> clusterDetail(@PathVariable("clusterId") Long clusterId) {
-		return new ResponseWrapper<>(mlClusterService.getServiceClusterDetail(clusterId));
-	}
-	
 	/**
 	 * ML Step 중지 및 삭제
 	 */
 	@Operation(summary = "ML Cluster 삭제", description = "Machine learning 클러스터 삭제")
-	@DeleteMapping("/delete/{mlClusterIdx}")
+	@DeleteMapping("/delete/{clusterIdx}")
 	public ResponseWrapper<String> delete(@PathVariable("mlClusterIdx") Long mlClusterIdx) {
 		mlClusterService.deleteMlCluster(mlClusterIdx);
 		return new ResponseWrapper<>();

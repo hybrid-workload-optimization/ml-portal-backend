@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import kr.co.strato.adapter.cloud.aks.proxy.AKSInterfaceProxy;
 import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.NodeSpecDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.adapter.ml.model.SimulationDto;
-import kr.co.strato.adapter.ml.proxy.AzureInterfaceProxy;
 import kr.co.strato.adapter.ml.service.AIAdapterService;
 
 @Service

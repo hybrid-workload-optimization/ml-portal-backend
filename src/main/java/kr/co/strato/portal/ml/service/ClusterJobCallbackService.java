@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.co.strato.domain.machineLearning.model.MLClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.ml.model.CallbackData;
@@ -58,7 +58,7 @@ public class ClusterJobCallbackService {
 			if(status.equals(CallbackData.STATUS_START)) {
 				mlClusterApiService.provisioningStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				MLClusterEntity mlClusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
+				ClusterEntity mlClusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
 				if(mlClusterEntity != null) {
 					mlInterfaceApiService.applyContinue(mlClusterEntity);
 				} 
