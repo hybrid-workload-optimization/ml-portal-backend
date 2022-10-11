@@ -42,6 +42,14 @@ public class MLDomainService {
 		}
 	}
 	
+	public MLEntity getByClusterIdx(Long clusterIdx) {
+		Optional<MLEntity> ml = mlRepository.findByClusterIdx(clusterIdx);
+		if (ml.isPresent()) {
+			return ml.get();
+		}
+		return null;
+	}
+	
 	public MLEntity get(String mlId) {
 		Optional<MLEntity> ml = mlRepository.findByMlId(mlId);
 		if (ml.isPresent()) {

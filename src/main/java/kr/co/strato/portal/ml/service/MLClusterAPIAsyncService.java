@@ -36,7 +36,6 @@ import kr.co.strato.adapter.ml.service.AIAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.machineLearning.service.MLClusterMappingDomainService;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterSyncService;
 import kr.co.strato.portal.ml.model.MessageData;
@@ -81,9 +80,6 @@ public class MLClusterAPIAsyncService {
 	private KafkaProducerService kafkaProducerService;
 	
 	private KubernetesClient client;
-	
-	@Autowired
-	private MLClusterMappingDomainService mlClusterMappingDomainService;
 	
 	
 	@Autowired
@@ -184,7 +180,7 @@ public class MLClusterAPIAsyncService {
 		Map<String, Object> provisioningParam = 
 				paramProvider.genProvisioningParam(clusterName, kubeletVersion, region, instance, nodeCount);
 		
-		provisioningParam.put("nodePools", null);
+		//provisioningParam.put("nodePools", null);
 		
 		String createParamJson = gson.toJson(provisioningParam);
 		log.info("Request Param - Provisioning cluster");

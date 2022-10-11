@@ -1,0 +1,48 @@
+package kr.co.strato.portal.ml.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
+import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.service.MLPortalService;
+
+@RequestMapping("/api/v1/ml/portal")
+@Api(tags = {"ML Portal UI API(리스트/상세 등.)"})
+@RestController
+public class MLPortalController extends CommonController {
+	
+	@Autowired
+	private MLPortalService apiService;
+	
+	/**
+	 * ML 리스트
+	 * @param pageRequest
+	 */
+	@Operation(summary = "ML 리스트", description = "ML 리스트 요청")
+	@PostMapping("/ml/list")
+	public ResponseWrapper<Object> mlList(@RequestBody ListArg param) {
+		return new ResponseWrapper<>(apiService.getMlList(param));
+	}
+	
+	/**
+	 * ML 상세 정보
+	 * @param mlId
+	 */
+	@Operation(summary = "ML 상세", description = "ML 상세 정보")
+	@GetMapping("/{mlId}")
+	public ResponseWrapper<MLDto.DetailForPortal> mlDetail(@PathVariable("mlId") String mlId) {
+		MLDto.DetailForPortal detail = apiService.getMl(mlId);
+		return new ResponseWrapper<>(detail);
+	}
+	
+}

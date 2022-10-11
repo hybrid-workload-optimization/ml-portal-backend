@@ -20,6 +20,10 @@ public interface MLDtoMapper {
 	
 	public MLDto.ListDto toListDto(MLEntity entity);
 	
+	public MLDto.ListDtoForPortal toListDtoForPortal(MLEntity entity);
+	
+	public MLDto.DetailForPortal toDetailDtoForPortal(MLEntity entity);
+	
 	
 	@Mapping(target = "name", source = "mlResName")
 	public MLResourceDto toResDto(MLResourceEntity entity);

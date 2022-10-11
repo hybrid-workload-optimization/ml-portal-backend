@@ -15,15 +15,10 @@ import org.yaml.snakeyaml.Yaml;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.domain.machineLearning.model.MLClusterMappingEntity;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
-import kr.co.strato.domain.machineLearning.model.MLProjectMappingEntity;
 import kr.co.strato.domain.machineLearning.model.MLResourceEntity;
-import kr.co.strato.domain.machineLearning.service.MLClusterMappingDomainService;
 import kr.co.strato.domain.machineLearning.service.MLDomainService;
-import kr.co.strato.domain.machineLearning.service.MLProjectDomainService;
 import kr.co.strato.domain.machineLearning.service.MLResourceDomainService;
-import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
@@ -32,9 +27,6 @@ import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.model.MLDtoMapper;
 import kr.co.strato.portal.ml.model.MLResourceDto;
-import kr.co.strato.portal.ml.model.MLStepCode;
-import kr.co.strato.portal.project.model.ProjectRequestDto;
-import kr.co.strato.portal.project.model.ProjectUserDto;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -54,19 +46,10 @@ public class MLInterfaceAPIAsyncService {
 	private ClusterDomainService clusterDomainService;
 	
 	@Autowired
-	private MLClusterMappingDomainService mlClusterMappingDomainService;
-	
-	@Autowired
 	private CallbackService callbackService;
 	
 	@Autowired
 	private MLClusterAPIAsyncService mlClusterAPIService;
-	
-	@Autowired
-	MLProjectDomainService mlProjectDoaminService;
-	
-	@Autowired
-	private MLProjectService mlProjectService;
 	
 	
 	public String apply(MLDto.ApplyArg applyDto) {
@@ -124,15 +107,6 @@ public class MLInterfaceAPIAsyncService {
 			Long mlIdx = mlDomainService.save(entity);
 			
 			
-			//MLCluster, ML mapping 정보 저장
-			now = DateUtil.currentDateTime();
-			MLClusterMappingEntity mappingEntity = new MLClusterMappingEntity();
-			mappingEntity.setCluster(clusterEntity);
-			mappingEntity.setMl(entity);
-			mappingEntity.setCreatedAt(now);
-			mappingEntity.setUpdatedAt(now);
-			mlClusterMappingDomainService.save(mappingEntity);
-			
 			
 			if(provisioningStatus.equals(ClusterEntity.ProvisioningStatus.STARTED.name())) {
 				//Async 동작 - Kafka로 메세지 푸시
@@ -171,9 +145,8 @@ public class MLInterfaceAPIAsyncService {
 	 * @param mlClusterEntity
 	 */
 	public void applyContinue(ClusterEntity clusterEntity) {
-		List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByClusterIdx(clusterEntity.getClusterIdx());
-		for(MLClusterMappingEntity mappingEntity : list) {
-			MLEntity mlEntity = mappingEntity.getMl();
+		MLEntity mlEntity = mlDomainService.getByClusterIdx(clusterEntity.getClusterIdx());
+		if(mlEntity != null) {
 			applyResource(mlEntity);
 		}
 	}
@@ -275,13 +248,11 @@ public class MLInterfaceAPIAsyncService {
 	public void deleteAsync(String mlId) {
 		log.info("ML delete start.");
 		log.info("ML ID: {}.", mlId);
-		MLDto.Detail mlDetail = getMl(mlId);
-		if(mlDetail != null) {
-			List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlDetail.getId());
-			for(MLClusterMappingEntity entity : list) {
-				Long clusterIdx = entity.getCluster().getClusterIdx();
-				mlClusterAPIService.deleteMlCluster(clusterIdx);
-			}
+		
+		MLEntity entity = mlDomainService.get(mlId);
+		if(entity != null) {
+			Long clusterIdx = entity.getClusterIdx();
+			mlClusterAPIService.deleteMlCluster(clusterIdx);
 		}
 	}
 	
@@ -289,12 +260,12 @@ public class MLInterfaceAPIAsyncService {
 	public boolean delete(String mlId) {
 		log.info("ML delete start.");
 		log.info("ML ID: {}.", mlId);
-		MLDto.Detail mlDetail = getMl(mlId);
+		MLEntity entity = mlDomainService.get(mlId);
+		MLDto.Detail mlDetail = getMl(entity);
 		if(mlDetail != null) {
 			
 			Long mlIdx = mlDetail.getId();
 			List<MLResourceDto> resources = mlDetail.getResources();
-			String stepCode = mlDetail.getMlStepCode();
 			for(MLResourceDto resDto : resources) {
 				String kind = resDto.getKind();
 				Long resId = resDto.getResourceId();
@@ -308,28 +279,11 @@ public class MLInterfaceAPIAsyncService {
 				}
 			}
 			
-			log.info("ML Cluster Mapping 삭제.");
-			
-			//클러스터 맵핑 삭제
-			List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByMlIdx(mlIdx);
-			mlClusterMappingDomainService.deleteByMlIdx(mlIdx);
-			
 			//클러스터 삭제
-			if(!stepCode.equals(MLStepCode.SERVICE.getCode())) {				
-				if(list != null) {
-					for(MLClusterMappingEntity mappingEntity : list) {
-						
-						ClusterEntity cluster = mappingEntity.getCluster();
-						if(cluster != null) {
-							Long clusterIdx = mappingEntity.getCluster().getClusterIdx();
-							
-							log.info("Cluster 삭제. clusterIdx: {}", clusterIdx);
-							mlClusterAPIService.deleteMlCluster(clusterIdx);
-						}
-						
-					}
-				}
-			}
+			Long clusterIdx = entity.getClusterIdx();
+			
+			log.info("Cluster 삭제. clusterIdx: {}", clusterIdx);
+			mlClusterAPIService.deleteMlCluster(clusterIdx);
 			
 			//리소스 삭제
 			log.info("ML 리소스 삭제. ML ID: {}", mlIdx);
@@ -347,20 +301,15 @@ public class MLInterfaceAPIAsyncService {
 	}
 	
 	@Transactional
-	public boolean deletePre(Long clusterIdx) {		
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-		
-		List<MLClusterMappingEntity> list = mlClusterMappingDomainService.getByClusterIdx(clusterEntity.getClusterIdx());
-		for(MLClusterMappingEntity mappingEntity : list) {
-			MLEntity mlEntity = mappingEntity.getMl();
+	public boolean deletePre(Long clusterIdx) {
+		MLEntity mlEntity = mlDomainService.getByClusterIdx(clusterIdx);
+		if(mlEntity != null) {
+			
 			Long mlIdx = mlEntity.getId();
 			
 			//리소스 삭제
 			log.info("ML 리소스 삭제. ML ID: {}", mlIdx);
 			mlResourceDomainService.deleteByMlIdx(mlIdx);
-			
-			//클러스터 맵핑 정보 삭제.
-			mlClusterMappingDomainService.deleteByCluster(clusterEntity);
 			
 			//ml 삭제
 			log.info("ML 삭제. ML ID: {}", mlIdx);
@@ -376,7 +325,10 @@ public class MLInterfaceAPIAsyncService {
 	 */
 	public MLDto.Detail getMl(String mlId) {
 		MLEntity entity = mlDomainService.get(mlId);
-		
+		return getMl(entity);
+	}
+	
+	public MLDto.Detail getMl(MLEntity entity) {		
 		List<MLResourceEntity> resEntitys = mlResourceDomainService.getList(entity.getId());		
 		List<MLResourceDto> resources = new ArrayList<>();
 		for(MLResourceEntity resEntity : resEntitys) {			
@@ -417,7 +369,7 @@ public class MLInterfaceAPIAsyncService {
 		List<MLDto.ListDto> mlList = list.stream().map(c -> {
 			return MLDtoMapper.INSTANCE.toListDto(c);
 		}).collect(Collectors.toList());
-		
+				
 		PageRequest pageRequest = param.getPageRequest();
 		if(pageRequest != null) {
 			Page<MLDto.ListDto> pages = new PageImpl<>(mlList, pageRequest.of(), mlList.size());

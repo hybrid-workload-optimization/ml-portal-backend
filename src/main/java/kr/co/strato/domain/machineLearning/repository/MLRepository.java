@@ -11,6 +11,8 @@ public interface MLRepository extends JpaRepository<MLEntity, Long>, CustomMLRep
 
 	public Optional<MLEntity> findByMlId(String mlId);
 	
+	public Optional<MLEntity> findByClusterIdx(Long clusterIdx);
+	
 	@Transactional
 	public void deleteByMlId(String mlId);
 }

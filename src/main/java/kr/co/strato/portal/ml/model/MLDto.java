@@ -3,6 +3,7 @@ package kr.co.strato.portal.ml.model;
 import java.time.LocalDateTime;
 
 import kr.co.strato.global.model.PageRequest;
+import kr.co.strato.portal.cluster.model.ClusterDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -56,6 +57,7 @@ public class MLDto {
 	@Getter
 	@Setter
 	public static class ListDto {
+		private Long id;
 		private String mlId;
 		private String name;
 		private String description;
@@ -63,6 +65,39 @@ public class MLDto {
 		private String status;
 		private String createdAt;
 		private String updatedAt;
+		private String userId;
+	}
+	
+	@Getter
+	@Setter
+	public static class ListDtoForPortal {
+		private Long id;
+		private String mlId;
+		private String name;
+		private String description;
+		private String mlStepCode;
+		private String status;
+		private String createdAt;
+		private String updatedAt;
+		private String userId;
+		private Integer resourceCount;
+	}
+	
+	@Getter
+	@Setter
+	public static class DetailForPortal {
+		private Long id;
+		private String mlId;
+		private String userId;
+		private String name;
+		private String description;
+		private String mlStepCode;
+		private String status;
+		private String createdAt;
+		private String updatedAt;
+		private String callbackUrl;
+		private java.util.List<MLResourceDto> resources;
+		private ClusterDto.Detail cluster;
 	}
 	
 	@Getter

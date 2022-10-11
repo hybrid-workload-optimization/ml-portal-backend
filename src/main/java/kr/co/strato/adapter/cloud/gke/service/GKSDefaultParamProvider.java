@@ -15,7 +15,7 @@ public class GKSDefaultParamProvider extends AbstractDefaultParamProvider {
 	
 	public static final String DEFAULT_CLUSTER_NAME= "cluster01";
 	public static final String DEFAULT_KUBELET_VERSION= "1.22.12-gke.300";
-	public static final String DEFAULT_REGION= "asia-northeast3";
+	public static final String DEFAULT_REGION= "asia-northeast3-a";
 	public static final String DEFAULT_VM_TYPE= "e2-medium";
 	public static final String DEFAULT_NETWORK= "strato-vpc-1";
 	public static final String DEFAULT_SUBNETWORK= "strato-ne3-subnet-2";
