@@ -40,7 +40,7 @@ public class SwaggerConfiguration {
 				.securityContexts(Arrays.asList(securityContext()))
 				.securitySchemes(Arrays.asList(apiKey()))
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal.ml"))
+				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal"))
 				.paths(PathSelectors.any())
 				.build();
 	}
