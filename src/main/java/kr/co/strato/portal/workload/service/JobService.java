@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -325,5 +326,27 @@ public class JobService extends InNamespaceService implements MLServiceInterface
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public Object getEntity(Long resourceId) {
+		JobEntity entitiy = jobDomainService.getById(resourceId);
+		return entitiy;
+	}
+	
+	@Override
+	public String getResourceUid(Long resourceId) {
+		JobEntity entitiy = jobDomainService.getById(resourceId);
+		return entitiy.getJobUid();
+	}
+	
+	@Override
+	public HasMetadata getResource(Long resourceId) {
+		JobEntity entitiy = jobDomainService.getById(resourceId);
+		Long kubeConfigId = entitiy.getNamespaceEntity().getCluster().getClusterId();
+		String namespace = entitiy.getNamespaceEntity().getName();
+		String name = entitiy.getJobName();
+		
+		return jobAdapterService.retrieve(kubeConfigId, namespace, name);
 	}
 }
