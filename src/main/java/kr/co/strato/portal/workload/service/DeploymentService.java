@@ -27,6 +27,7 @@ import kr.co.strato.domain.common.service.InNamespaceDomainService;
 import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.repository.DeploymentRepository;
 import kr.co.strato.domain.deployment.service.DeploymentDomainService;
+import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.pod.repository.PodRepository;
@@ -431,5 +432,23 @@ public class DeploymentService extends InNamespaceService {
 		
 		delete(deploymentArgDto);
 		return true;
+	}
+	
+	@Override
+	public Object getEntity(Long resourceId) {
+		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(resourceId);
+		return entitiy;
+	}
+	
+	@Override
+	public String getResourceUid(Long resourceId) {
+		DeploymentEntity entitiy = deploymentDomainService.getDeploymentEntitiy(resourceId);
+		
+		String uid = null;
+		List<ReplicaSetEntity> replicaSetEntities = replicaSetDomainService.getByDeplymentIdx(entitiy.getDeploymentIdx());
+		if(replicaSetEntities != null && replicaSetEntities.size() > 0){
+			uid = replicaSetEntities.get(0).getReplicaSetUid();
+		}
+		return uid;
 	}
 }

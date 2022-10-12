@@ -257,9 +257,15 @@ public class MLInterfaceAPIAsyncService {
 	}
 	
 	@Transactional
-	public boolean delete(String mlId) {
+	public boolean delete(MLDto.DeleteArg deleteArg) {
+		String mlId = deleteArg.getMlId();
+		boolean isDeleteCluster = deleteArg.isDeleteCluster();
+		
 		log.info("ML delete start.");
 		log.info("ML ID: {}.", mlId);
+		log.info("클러스터 삭제: {}", isDeleteCluster);
+		
+		
 		MLEntity entity = mlDomainService.get(mlId);
 		MLDto.Detail mlDetail = getMl(entity);
 		if(mlDetail != null) {
@@ -279,11 +285,13 @@ public class MLInterfaceAPIAsyncService {
 				}
 			}
 			
-			//클러스터 삭제
-			Long clusterIdx = entity.getClusterIdx();
-			
-			log.info("Cluster 삭제. clusterIdx: {}", clusterIdx);
-			mlClusterAPIService.deleteMlCluster(clusterIdx);
+			if(isDeleteCluster) {
+				//클러스터 삭제
+				Long clusterIdx = entity.getClusterIdx();
+				
+				log.info("Cluster 삭제. clusterIdx: {}", clusterIdx);
+				mlClusterAPIService.deleteMlCluster(clusterIdx);
+			}
 			
 			//리소스 삭제
 			log.info("ML 리소스 삭제. ML ID: {}", mlIdx);

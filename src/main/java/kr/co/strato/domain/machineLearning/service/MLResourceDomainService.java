@@ -28,12 +28,25 @@ public class MLResourceDomainService {
 		return null;
 	}
 	
+	public MLResourceEntity get(Long resId) {
+		Optional<MLResourceEntity> mlRes = mlResourceRepository.findById(resId);
+		if (mlRes.isPresent()) {
+			return mlRes.get();
+		}
+		return null;
+	}
+	
 	public List<MLResourceEntity> getList(Long mlIdx) {
 		return mlResourceRepository.findByMlIdx(mlIdx);
 	}
 	
 	public void deleteByMlIdx(Long mlIdx) {
 		mlResourceRepository.deleteByMlIdx(mlIdx);
+	}
+	
+	
+	public void deleteById(Long resId) {
+		mlResourceRepository.deleteById(resId);
 	}
 	
 }

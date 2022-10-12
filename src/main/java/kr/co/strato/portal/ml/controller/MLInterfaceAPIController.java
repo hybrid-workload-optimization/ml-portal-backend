@@ -14,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.model.MLDto.DeleteArg;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
 
@@ -51,9 +52,9 @@ public class MLInterfaceAPIController {
 	 * ML Step 중지 및 삭제
 	 */
 	@Operation(summary = "ML Step 삭제", description = "Machine learning 중지 및 삭제")
-	@DeleteMapping("/delete/{mlId}")
-	public ResponseWrapper<String> delete(@PathVariable("mlId") String mlId) {
-		apiService.delete(mlId);
+	@DeleteMapping("/delete")
+	public ResponseWrapper<String> delete(@RequestBody MLDto.DeleteArg deleteArg) {
+		apiService.delete(deleteArg);
 		return new ResponseWrapper<>();
 	}
 	

@@ -597,26 +597,30 @@ public class ClusterService {
 		// 1. add info by provisioning type
 		Long workJobIdx = null;
 		
-		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
-		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			try {
+		String provisionType = clusterEntity.getProvisioningType();
+		if(provisionType != null) {
+			ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(provisionType);
+			if (provisioningType == ProvisioningType.KUBECONFIG) {
+				try {
+					addKubesprayClusterInfo(clusterEntity, detail);
+					addK8sClusterInfo(clusterEntity, detail);
+				} catch (Exception e) {
+					log.error("", e);
+				}
+				
+			} else if (provisioningType == ProvisioningType.KUBESPRAY) {
 				addKubesprayClusterInfo(clusterEntity, detail);
-				addK8sClusterInfo(clusterEntity, detail);
-			} catch (Exception e) {
-				log.error("", e);
-			}
-			
-		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			addKubesprayClusterInfo(clusterEntity, detail);
-			
-			// get workJobIdx
-			WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
-			log.debug("[getCluster] workJobEntity = {}", workJobEntity);
-			
-			if (workJobEntity != null) {
-				workJobIdx = workJobEntity.getWorkJobIdx();
+				
+				// get workJobIdx
+				WorkJobEntity workJobEntity = workJobDomainService.getWorkJobByWorkJobTypeAndReferenceIdx(WorkJobType.CLUSTER_CREATE.name(), clusterIdx);
+				log.debug("[getCluster] workJobEntity = {}", workJobEntity);
+				
+				if (workJobEntity != null) {
+					workJobIdx = workJobEntity.getWorkJobIdx();
+				}
 			}
 		}
+		
 		
 		// 2. add info by workJobIdx
 		detail.setWorkJobIdx(workJobIdx);

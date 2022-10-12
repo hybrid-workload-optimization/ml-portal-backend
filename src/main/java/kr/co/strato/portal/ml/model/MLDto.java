@@ -75,6 +75,7 @@ public class MLDto {
 		private String mlId;
 		private String name;
 		private String description;
+		private String mlStep;
 		private String mlStepCode;
 		private String status;
 		private String createdAt;
@@ -91,6 +92,7 @@ public class MLDto {
 		private String userId;
 		private String name;
 		private String description;
+		private String mlStep;
 		private String mlStepCode;
 		private String status;
 		private String createdAt;
@@ -98,6 +100,15 @@ public class MLDto {
 		private String callbackUrl;
 		private java.util.List<MLResourceDto> resources;
 		private ClusterDto.Detail cluster;
+		private int jobCount;
+		private int cronJobCount;
+		private int deploymentCount;
+		private int daemonSetCount;
+		private int replicaSetCount;
+		
+		private int activeCount;
+		private int succeededCount;			
+		private int failedCount;
 	}
 	
 	@Getter
@@ -122,6 +133,13 @@ public class MLDto {
 		private String updatedAt;
 		private String callbackUrl;
 		private java.util.List<MLResourceDto> resources;
+	}
+	
+	@Getter
+	@Setter
+	public static class DeleteArg {
+		private String mlId;
+		private boolean isDeleteCluster;
 	}
 	
 }

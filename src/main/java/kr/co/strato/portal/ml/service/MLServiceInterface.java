@@ -1,5 +1,7 @@
 package kr.co.strato.portal.ml.service;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+
 public interface MLServiceInterface {
 	
 	/**
@@ -17,4 +19,28 @@ public interface MLServiceInterface {
 	 * @return
 	 */
 	public boolean delete(Long resourceId, String yaml);
+	
+	/**
+	 * 실제 리소스를 구해 리턴함.
+	 * @param resourceId
+	 * @return
+	 */
+	public Object getEntity(Long resourceId);
+	
+	
+	/**
+	 * 리소스 UID 리턴.
+	 * @param resourceId
+	 * @return
+	 */
+	public String getResourceUid(Long resourceId);
+	
+	
+	/**
+	 * 실제 리소스를 구해 리턴함.
+	 * @param resourceId
+	 * @return
+	 */
+	public HasMetadata getResource(Long resourceId);
+	
 }

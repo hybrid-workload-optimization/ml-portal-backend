@@ -6,6 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MLResourceDto {
+	//ID
+	private Long id;
+	
 	//리소스 이름
 	private String name;
 	
@@ -29,4 +32,11 @@ public class MLResourceDto {
 	
 	//yaml
 	private String yaml;
+	
+	//파드 구동 상태
+	private String pod;
+	
+	private int totalPodCount;
+	
+	private int runningPodCount;
 }

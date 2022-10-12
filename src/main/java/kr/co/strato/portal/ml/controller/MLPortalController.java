@@ -1,6 +1,7 @@
 package kr.co.strato.portal.ml.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,18 @@ public class MLPortalController extends CommonController {
 	public ResponseWrapper<MLDto.DetailForPortal> mlDetail(@PathVariable("mlId") String mlId) {
 		MLDto.DetailForPortal detail = apiService.getMl(mlId);
 		return new ResponseWrapper<>(detail);
+	}
+	
+	
+	/**
+	 * ML 리소스 삭제
+	 * @param mlId
+	 */
+	@Operation(summary = "ML 리소스 삭제", description = "ML 개별 리소스 삭제")
+	@DeleteMapping("resource/{id}")
+	public ResponseWrapper<Boolean> deleteResource(@PathVariable("id") Long resId) {
+		boolean isDelete = apiService.deleteResource(resId);
+		return new ResponseWrapper<>(isDelete);
 	}
 	
 }

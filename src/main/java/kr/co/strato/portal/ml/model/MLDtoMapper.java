@@ -2,6 +2,7 @@ package kr.co.strato.portal.ml.model;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -20,8 +21,10 @@ public interface MLDtoMapper {
 	
 	public MLDto.ListDto toListDto(MLEntity entity);
 	
+	@Mapping(target = "mlStep",				source = "entity.mlStepCode",			qualifiedByName = "getMlStep")
 	public MLDto.ListDtoForPortal toListDtoForPortal(MLEntity entity);
 	
+	@Mapping(target = "mlStep",				source = "entity.mlStepCode",			qualifiedByName = "getMlStep")
 	public MLDto.DetailForPortal toDetailDtoForPortal(MLEntity entity);
 	
 	
@@ -29,4 +32,13 @@ public interface MLDtoMapper {
 	public MLResourceDto toResDto(MLResourceEntity entity);
 	
 	
+	@Named("getMlStep")
+    default String getMlStep(String code) {
+		String mlStep = null;
+		if(code != null) {
+			MLStepCode stepCode = MLStepCode.valueOf(code);
+			mlStep = stepCode.name().toLowerCase();
+		}
+		return mlStep;
+    }
 }

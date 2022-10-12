@@ -6,6 +6,7 @@ import java.util.Base64.Decoder;
 
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kr.co.strato.adapter.k8s.common.service.CommonAdapterService;
@@ -111,6 +112,24 @@ public class CommonService implements MLServiceInterface {
 	@Override
 	public boolean delete(Long resourceId, String yaml) {		
 		return commonAdapterService.delete(resourceId, yaml);
+	}
+
+	@Override
+	public Object getEntity(Long resourceId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getResourceUid(Long resourceId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HasMetadata getResource(Long resourceId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
