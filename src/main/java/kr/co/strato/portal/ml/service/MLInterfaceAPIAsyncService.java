@@ -23,6 +23,7 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.common.service.CallbackService;
 import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.model.MLDtoMapper;
@@ -52,7 +53,7 @@ public class MLInterfaceAPIAsyncService {
 	private MLClusterAPIAsyncService mlClusterAPIService;
 	
 	
-	public String apply(MLDto.ApplyArg applyDto) {
+	public MLEntity apply(MLDto.ApplyArg applyDto) {
 		log.info("ML apply start.");
 		boolean isNew = false;
 		Long clusterIdx = null;
@@ -88,6 +89,7 @@ public class MLInterfaceAPIAsyncService {
 		}
 		
 		
+		MLEntity entity = null;
 		if(clusterEntity != null) {		
 			String provisioningStatus = clusterEntity.getProvisioningStatus();
 			
@@ -95,7 +97,7 @@ public class MLInterfaceAPIAsyncService {
 			String now = DateUtil.currentDateTime();
 			
 			//ML 저장
-			MLEntity entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
+			entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
 			entity.setClusterIdx(clusterIdx);
 			entity.setUpdatedAt(now);
 			if(isNew) {
@@ -135,7 +137,7 @@ public class MLInterfaceAPIAsyncService {
 			mlProjectDoaminService.save(projectMappingEntity);
 			*/
 			
-			return mlId;
+			return entity;
 		}
 		return null;
 	}

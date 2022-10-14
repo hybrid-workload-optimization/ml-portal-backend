@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
+import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.model.MLDto;
-import kr.co.strato.portal.ml.model.MLDto.DeleteArg;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
 
@@ -32,8 +32,12 @@ public class MLInterfaceAPIController {
 	 */
 	@Operation(summary = "ML Step 시작", description = "Machine learning 시작 API")
 	@PostMapping("/apply")
-	public ResponseWrapper<String> apply(@RequestBody MLDto.ApplyArg applyDto) {
-		String mlId = apiService.apply(applyDto);
+	public ResponseWrapper<String> apply(@RequestBody MLDto.ApplyArg applyDto) {		
+		String mlId = null;
+		MLEntity entity = apiService.apply(applyDto);
+		if(entity != null) {
+			mlId = entity.getMlId();
+		}
 		return new ResponseWrapper<>(mlId);
 	}
 	

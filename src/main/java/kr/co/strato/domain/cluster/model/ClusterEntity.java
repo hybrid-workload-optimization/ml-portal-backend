@@ -36,7 +36,11 @@ public class ClusterEntity {
 	
 	public static enum ProvisioningType {
 		KUBECONFIG,
-		KUBESPRAY
+		KUBESPRAY,
+		AKS,
+		GKE,
+		EKS,
+		NAVER
 	}
 	
 	public static enum ProvisioningStatus {
@@ -112,5 +116,20 @@ public class ClusterEntity {
 	
 	@Column(name = "provisioning_user")
 	private String provisioningUser;
+	
+	@Column(name = "vm_type")
+	private String vmType;
+	
+	@Column(name = "node_count")
+	private Integer nodeCount;
+	
+	@Column(name = "use_type")
+	private String useType;
+	
+	@Column(name = "region")
+	private String region;
+	
+	@Column(name = "network_location")
+	private String networkLocation;
 	
 }

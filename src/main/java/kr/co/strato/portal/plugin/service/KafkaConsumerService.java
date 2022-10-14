@@ -1,6 +1,4 @@
-package kr.co.strato.portal.ml.service;
-
-import java.io.IOException;
+package kr.co.strato.portal.plugin.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,7 +12,11 @@ import com.google.gson.GsonBuilder;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.service.PublicClusterService;
+import kr.co.strato.portal.common.service.CallbackService;
 import kr.co.strato.portal.ml.model.CallbackData;
+import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
+import kr.co.strato.portal.plugin.model.ClusterJobCallbackData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
 import kr.co.strato.portal.work.service.WorkJobService;
@@ -28,10 +30,13 @@ public class KafkaConsumerService {
 	WorkJobService workJobService;
 	
 	@Autowired
-	MLClusterAPIAsyncService mlClusterApiService;
+	PublicClusterService publicClusterService;
 	
 	@Autowired
 	MLInterfaceAPIAsyncService mlInterfaceApiService;
+	
+	@Autowired
+	CallbackService callbackService;
 	
 	
 	@KafkaListener(
@@ -111,40 +116,50 @@ public class KafkaConsumerService {
 			return;
 		}
 		
-		WorkJobType workJobType = WorkJobType.valueOf(workJobEntity.getWorkJobType());
 		
-		//작업하는 clusterIdx를 저장
+		WorkJobType workJobType = WorkJobType.valueOf(workJobEntity.getWorkJobType());
+		String callbackUrl = workJobEntity.getCallbackUrl();
+		
+		
 		Long clusterIdx = workJobEntity.getWorkJobReferenceIdx();
 		
-		if(workJobType == WorkJobType.CLUSTER_CREATE) {
-			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.provisioningStart(clusterIdx, isSuccess, result);
-			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				ClusterEntity clusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
-				if(clusterEntity != null) {
-					mlInterfaceApiService.applyContinue(clusterEntity);
-				} 
-			}
-		} else if(workJobType == WorkJobType.CLUSTER_DELETE) {
-			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.deleteStart(clusterIdx, isSuccess, result);
-			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				mlInterfaceApiService.deletePre(clusterIdx);
-				mlClusterApiService.deleteFinish(clusterIdx, isSuccess, result);
-			}
-		} else if(workJobType == WorkJobType.CLUSTER_SCALE) {
-			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.scaleStart(clusterIdx, isSuccess, result);
-			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				mlClusterApiService.scaleFinish(clusterIdx, isSuccess, result);
-			}
-		} else if(workJobType == WorkJobType.CLUSTER_MODIFY) {
-			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.modifyStart(clusterIdx, isSuccess, result);
-			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				mlClusterApiService.modifyFinish(clusterIdx, isSuccess, result);
-			}
-		}		
+		//PaaS 비지니스 로직 수
+		try {
+			//작업하는 clusterIdx를 저장
+			
+			
+			if(workJobType == WorkJobType.CLUSTER_CREATE) {
+				if(status.equals(CallbackData.STATUS_START)) {
+					publicClusterService.provisioningStart(clusterIdx, isSuccess, result);
+				} else if(status.equals(CallbackData.STATUS_FINISH)) {
+					ClusterEntity clusterEntity = publicClusterService.provisioningFinish(clusterIdx, isSuccess, result);
+					if(clusterEntity != null) {
+						mlInterfaceApiService.applyContinue(clusterEntity);
+					} 
+				}
+			} else if(workJobType == WorkJobType.CLUSTER_DELETE) {
+				if(status.equals(CallbackData.STATUS_START)) {
+					publicClusterService.deleteStart(clusterIdx, isSuccess, result);
+				} else if(status.equals(CallbackData.STATUS_FINISH)) {
+					mlInterfaceApiService.deletePre(clusterIdx);
+					publicClusterService.deleteFinish(clusterIdx, isSuccess, result);
+				}
+			} else if(workJobType == WorkJobType.CLUSTER_SCALE) {
+				if(status.equals(CallbackData.STATUS_START)) {
+					publicClusterService.scaleStart(clusterIdx, isSuccess, result);
+				} else if(status.equals(CallbackData.STATUS_FINISH)) {
+					publicClusterService.scaleFinish(clusterIdx, isSuccess, result);
+				}
+			} else if(workJobType == WorkJobType.CLUSTER_MODIFY) {
+				if(status.equals(CallbackData.STATUS_START)) {
+					publicClusterService.modifyStart(clusterIdx, isSuccess, result);
+				} else if(status.equals(CallbackData.STATUS_FINISH)) {
+					publicClusterService.modifyFinish(clusterIdx, isSuccess, result);
+				}
+			}	
+		} catch (Exception e) {
+			log.error("", e);
+		}
 		
 		//workJob 업데이트
 		String response = null;
@@ -162,5 +177,43 @@ public class KafkaConsumerService {
 		workJobEntity.setWorkJobEndAt(DateUtil.currentDateTime());
 		
 		workJobService.updateWorkJob(workJobEntity);
+		
+		String clusterJobType = workJobEntity.getWorkJobType();
+		String resultStr = getResultStr(code);
+		
+		ClusterJobCallbackData callbackData = ClusterJobCallbackData.builder()
+				.clusterIdx(clusterIdx)
+				.clusterJobType(clusterJobType)
+				.status(status)
+				.message(msg)
+				.result(resultStr)
+				.build();
+		
+		String json = gson.toJson(callbackData);
+		System.out.println(json);
+		
+		//콜백이 존재하는 경우 콜백 수행
+		if(callbackUrl != null) {
+			
+			callbackService.sendCallback(callbackUrl, callbackData);
+		}
+	}
+	
+	/**
+	 * Code에 따른 String 값 리턴.
+	 * @param code
+	 * @return
+	 */
+	public String getResultStr(int code) {		
+		String result = null;
+		switch (code) {
+		case CallbackData.CODE_SUCCESS:
+			result = "success";
+			break;
+		case CallbackData.CODE_FAIL:
+			result = "fail";
+			break;
+		}
+		return result;
 	}
 }

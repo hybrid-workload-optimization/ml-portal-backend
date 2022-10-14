@@ -8,6 +8,7 @@ import java.util.Map;
 
 public abstract class AbstractDefaultParamProvider {
 	public static final String KEY_CLUSTER_NAME = "clusterName";
+	public static final String KEY_CLUSTER_DESC = "clusterDesc";
 	public static final String KEY_KUBERNETES_VERSION = "kubernetesVersion";
 	public static final String KEY_REGION = "region";
 	public static final String KEY_NODE_POOLS = "nodePools";

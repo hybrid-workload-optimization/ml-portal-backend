@@ -1049,6 +1049,7 @@ public class KeyCloakApiUtil {
 //			return restTemplate.exchange(uri, httpMethod, requestEntity, JsonNode.class);
 
 		}catch (HttpClientErrorException e) {
+			e.printStackTrace();
 //			return new ResponseEntity<>(null, e.getStatusCode());
 			throw new HttpClientErrorException(e.getStatusCode());
 		}catch (HttpStatusCodeException reste) {

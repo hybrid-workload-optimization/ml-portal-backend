@@ -1,11 +1,11 @@
 package kr.co.strato.portal.ml.model;
 
-public enum MLStepCode {
-	PRETREATMENT("ml-step-100"),
-	VERIFICATION("ml-step-200"),
-	LEARNING("ml-step-300"),
-	INFERENCE("ml-step-400"),
-	SERVICE("ml-step-900"),;
+public enum MLStepCode {	
+	Pretreatment("ml-step-100"),
+	Verification("ml-step-200"),
+	Learning("ml-step-300"),
+	Inference("ml-step-400"),
+	Service("ml-step-900"),;
 	
 	private String code;
 	
@@ -15,5 +15,20 @@ public enum MLStepCode {
 	
 	public String getCode() {
 		return this.code;
+	}
+	
+	public static MLStepCode getByCode(String code) {
+		if(code.equals(Pretreatment.getCode())) {
+			return Pretreatment;
+		} else if(code.equals(Verification.getCode())) {
+			return Verification;
+		} else if(code.equals(Learning.getCode())) {
+			return Learning;
+		} else if(code.equals(Inference.getCode())) {
+			return Inference;
+		} else if(code.equals(Service.getCode())) {
+			return Service;
+		}
+		return null;
 	}
 }

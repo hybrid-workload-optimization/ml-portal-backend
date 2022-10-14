@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.service.PublicClusterService;
 import kr.co.strato.portal.ml.model.CallbackData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
@@ -23,7 +24,7 @@ public class ClusterJobCallbackService {
 	WorkJobService workJobService;
 	
 	@Autowired
-	MLClusterAPIAsyncService mlClusterApiService;
+	PublicClusterService publicClusterService;
 	
 	@Autowired
 	MLInterfaceAPIAsyncService mlInterfaceApiService;
@@ -56,31 +57,31 @@ public class ClusterJobCallbackService {
 		
 		if(workJobType == WorkJobType.CLUSTER_CREATE) {
 			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.provisioningStart(clusterIdx, isSuccess, result);
+				publicClusterService.provisioningStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				ClusterEntity mlClusterEntity = mlClusterApiService.provisioningFinish(clusterIdx, isSuccess, result);
+				ClusterEntity mlClusterEntity = publicClusterService.provisioningFinish(clusterIdx, isSuccess, result);
 				if(mlClusterEntity != null) {
 					mlInterfaceApiService.applyContinue(mlClusterEntity);
 				} 
 			}
 		} else if(workJobType == WorkJobType.CLUSTER_DELETE) {
 			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.deleteStart(clusterIdx, isSuccess, result);
+				publicClusterService.deleteStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
 				mlInterfaceApiService.deletePre(clusterIdx);
-				mlClusterApiService.deleteFinish(clusterIdx, isSuccess, result);
+				publicClusterService.deleteFinish(clusterIdx, isSuccess, result);
 			}
 		} else if(workJobType == WorkJobType.CLUSTER_SCALE) {
 			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.scaleStart(clusterIdx, isSuccess, result);
+				publicClusterService.scaleStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				mlClusterApiService.scaleFinish(clusterIdx, isSuccess, result);
+				publicClusterService.scaleFinish(clusterIdx, isSuccess, result);
 			}
 		} else if(workJobType == WorkJobType.CLUSTER_MODIFY) {
 			if(status.equals(CallbackData.STATUS_START)) {
-				mlClusterApiService.modifyStart(clusterIdx, isSuccess, result);
+				publicClusterService.modifyStart(clusterIdx, isSuccess, result);
 			} else if(status.equals(CallbackData.STATUS_FINISH)) {
-				mlClusterApiService.modifyFinish(clusterIdx, isSuccess, result);
+				publicClusterService.modifyFinish(clusterIdx, isSuccess, result);
 			}
 		}		
 		

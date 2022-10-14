@@ -34,6 +34,13 @@ public class ClusterDto {
 		private ArrayList<Node> nodes;
 		private ArrayList<Node> originalNodes;
 		private ArrayList<String> removeNodes;
+		
+		//PROD, STAGE, DEV
+		private String useType;
+		//클러스터 설치 구역
+		private String region;
+		//네트워크 구분.
+		private String networkLocation;
 	}
 
 	@Getter
@@ -62,6 +69,13 @@ public class ClusterDto {
 		private ArrayList<String> problem;
 		private String provisioningType;
 		private String provisioningStatus;
+		
+		//PROD, STAGE, DEV
+		private String useType;
+		//클러스터 설치 구역
+		private String region;
+		//네트워크 구분.
+		private String networkLocation;
 	}
 	
 	@Getter
@@ -97,6 +111,16 @@ public class ClusterDto {
 		// work job
 		private Long workJobIdx;
 		private Long projectIdx;
+		
+		private String vmType;
+		private Integer nodeCount;
+		
+		//PROD, STAGE, DEV
+		private String useType;
+		//클러스터 설치 구역
+		private String region;
+		//네트워크 구분.
+		private String networkLocation;
 	}
 	
 	@Getter

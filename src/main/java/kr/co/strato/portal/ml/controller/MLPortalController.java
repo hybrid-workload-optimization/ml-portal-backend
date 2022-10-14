@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
+import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
 import kr.co.strato.portal.ml.service.MLPortalService;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @RequestMapping("/api/v1/ml/portal")
 @Api(tags = {"ML Portal UI API(리스트/상세 등.)"})
@@ -24,6 +27,9 @@ public class MLPortalController extends CommonController {
 	
 	@Autowired
 	private MLPortalService apiService;
+	
+	@Autowired
+	private MLInterfaceAPIAsyncService intefaceApiService;
 	
 	/**
 	 * ML 리스트
@@ -44,8 +50,7 @@ public class MLPortalController extends CommonController {
 	public ResponseWrapper<MLDto.DetailForPortal> mlDetail(@PathVariable("mlId") String mlId) {
 		MLDto.DetailForPortal detail = apiService.getMl(mlId);
 		return new ResponseWrapper<>(detail);
-	}
-	
+	}	
 	
 	/**
 	 * ML 리소스 삭제
@@ -56,6 +61,25 @@ public class MLPortalController extends CommonController {
 	public ResponseWrapper<Boolean> deleteResource(@PathVariable("id") Long resId) {
 		boolean isDelete = apiService.deleteResource(resId);
 		return new ResponseWrapper<>(isDelete);
+	}
+	
+	@Operation(summary = "ML 생성", description = "Machine learning 시작 API") 
+	@PostMapping("/registry")
+	public ResponseWrapper<MLEntity> create(@RequestBody MLDto.ApplyArg applyDto) {
+		UserDto user = getLoginUser();
+		applyDto.setUserId(user.getUserId());
+		MLEntity entity = intefaceApiService.apply(applyDto);
+		return new ResponseWrapper<>(entity);
+	}
+	
+	/**
+	 * ML Step 중지 및 삭제
+	 */
+	@Operation(summary = "ML 삭제", description = "Machine learning 중지 및 삭제")
+	@DeleteMapping("/delete")
+	public ResponseWrapper<String> delete(@RequestBody MLDto.DeleteArg deleteArg) {
+		intefaceApiService.delete(deleteArg);
+		return new ResponseWrapper<>();
 	}
 	
 }

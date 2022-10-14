@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.ml.model.ModifyArgDto;
-import kr.co.strato.portal.ml.model.ScaleArgDto;
+import kr.co.strato.portal.cluster.model.ModifyArgDto;
+import kr.co.strato.portal.cluster.model.ScaleArgDto;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 
 @RequestMapping("/api/v1/ml/cluster")
@@ -62,8 +62,8 @@ public class MLClusterAPIController {
 	 */
 	@Operation(summary = "ML Cluster 삭제", description = "Machine learning 클러스터 삭제")
 	@DeleteMapping("/delete/{clusterIdx}")
-	public ResponseWrapper<String> delete(@PathVariable("mlClusterIdx") Long mlClusterIdx) {
-		mlClusterService.deleteMlCluster(mlClusterIdx);
+	public ResponseWrapper<String> delete(@PathVariable("clusterIdx") Long clusterIdx) {
+		mlClusterService.deleteMlCluster(clusterIdx);
 		return new ResponseWrapper<>();
 	}
 }

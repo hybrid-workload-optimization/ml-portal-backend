@@ -245,35 +245,47 @@ public class ClusterService {
 				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
 				.build();
 		
-		String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
-		if (StringUtils.isEmpty(strClusterId)) {
-			throw new PortalException("Cluster registration failed");
+		Long clusterId = -1L;
+		String clusterHealth = null;
+		String kubeleteVersion = null;
+		String clusterProblemString = null;
+		
+		try {
+			String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
+			if (StringUtils.isEmpty(strClusterId)) {
+				throw new PortalException("Cluster registration failed");
+			}
+			
+			// kubeCofingId = clusterId
+			clusterId = Long.valueOf(strClusterId);
+			
+			// TODO : 이건 목록/상세 정보 조회 시 실시간으로 가져와야 할 듯함.. 
+			// k8s - get cluster's information(health + version)
+			ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
+			clusterHealth = clusterInfo.getClusterHealth().getHealth();
+			List<String> clusterProblem	= clusterInfo.getClusterHealth().getProblem();
+			// for test
+			//List<String> clusterProblem	= Arrays.asList("problem1", "problem12", "problem3");
+			
+			ObjectMapper mapper = new ObjectMapper();
+			clusterProblemString = mapper.writeValueAsString(clusterProblem);
+			kubeleteVersion = clusterInfo.getKubeletVersion();
+		} catch (Exception e) {
+			log.error("", e);
 		}
 		
-		// kubeCofingId = clusterId
-		Long clusterId = Long.valueOf(strClusterId);
-		
-		// TODO : 이건 목록/상세 정보 조회 시 실시간으로 가져와야 할 듯함.. 
-		// k8s - get cluster's information(health + version)
-		ClusterInfoAdapterDto clusterInfo = clusterAdapterService.getClusterInfo(clusterId);
-		String clusterHealth		= clusterInfo.getClusterHealth().getHealth();
-		List<String> clusterProblem	= clusterInfo.getClusterHealth().getProblem();
-		// for test
-		//List<String> clusterProblem	= Arrays.asList("problem1", "problem12", "problem3");
-		
-		ObjectMapper mapper = new ObjectMapper();
-		String clusterProblemString = mapper.writeValueAsString(clusterProblem);
 		
 		// db - insert cluster
 		ClusterEntity clusterEntity = ClusterDtoMapper.INSTANCE.toEntity(clusterDto);
 		clusterEntity.setClusterId(clusterId);
 		clusterEntity.setStatus(clusterHealth);
 		clusterEntity.setProblem(clusterProblemString);
-		clusterEntity.setProviderVersion(clusterInfo.getKubeletVersion());
+		clusterEntity.setProviderVersion(kubeleteVersion);
 		clusterEntity.setCreatedAt(DateUtil.currentDateTime());
 		clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
 		clusterEntity.setCreateUserId(loginUser.getUserId());
 		clusterEntity.setCreateUserName(loginUser.getUserName());
+
 		
 		clusterDomainService.register(clusterEntity);
 		
@@ -760,6 +772,7 @@ public class ClusterService {
 	 */
 	public Long deleteCluster(Long clusterIdx, UserDto loginUser) throws Exception {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBECONFIG) {

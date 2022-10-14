@@ -40,7 +40,9 @@ public class WorkJobDto {
 
 	private Long workJobReferenceIdx;
 	
+	private String callbackUrl;
 	
+
 	public Long getWorkJobIdx() {
 		return workJobIdx;
 	}
@@ -148,6 +150,14 @@ public class WorkJobDto {
 	public void setWorkJobReferenceIdx(Long workJobReferenceIdx) {
 		this.workJobReferenceIdx = workJobReferenceIdx;
 	}
+	
+	public String getCallbackUrl() {
+		return callbackUrl;
+	}
+
+	public void setCallbackUrl(String callbackUrl) {
+		this.callbackUrl = callbackUrl;
+	}
 
 	@Override
 	public String toString() {
@@ -177,6 +187,12 @@ public class WorkJobDto {
 		private String createUserId;
 		private String createUserName;
 		private Long workJobReferenceIdx;
+		private String callbackUrl;
+		
+		public Builder callbackUrl(String callbackUrl) {
+			this.callbackUrl = callbackUrl;
+			return this;
+		}
 		
 		public Builder workJobIdx(Long workJobIdx) {
 			this.workJobIdx = workJobIdx;
@@ -292,7 +308,7 @@ public class WorkJobDto {
 			dto.setCreateUserId(createUserId);
 			dto.setCreateUserName(createUserName);
 			dto.setWorkJobReferenceIdx(workJobReferenceIdx);
-			
+			dto.setCallbackUrl(callbackUrl);
 			return dto;
 		}
 		

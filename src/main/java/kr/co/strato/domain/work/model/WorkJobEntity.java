@@ -70,4 +70,7 @@ public class WorkJobEntity {
 	@Column(name = "work_job_reference_idx")
 	private Long workJobReferenceIdx;
 	
+	@Column(name = "callback_url")
+	private String callbackUrl;
+	
 }

@@ -36,8 +36,8 @@ public interface MLDtoMapper {
     default String getMlStep(String code) {
 		String mlStep = null;
 		if(code != null) {
-			MLStepCode stepCode = MLStepCode.valueOf(code);
-			mlStep = stepCode.name().toLowerCase();
+			MLStepCode stepCode = MLStepCode.getByCode(code);			
+			mlStep = stepCode.name();
 		}
 		return mlStep;
     }
