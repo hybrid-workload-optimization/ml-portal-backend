@@ -10,7 +10,7 @@ import lombok.Setter;
 public class ScaleArgDto {
 	
 	//스케일 조정하려는 클러스터 ID
-	private Long clusterId;
+	private Long clusterIdx;
 	
 	//gpu, normal(default)
 	private String nodeType;

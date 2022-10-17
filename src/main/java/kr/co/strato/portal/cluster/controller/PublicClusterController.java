@@ -1,15 +1,17 @@
 package kr.co.strato.portal.cluster.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ModifyArgDto;
@@ -26,8 +28,7 @@ public class PublicClusterController extends CommonController {
 	@Autowired
 	private PublicClusterService publicClusterService;
 	
-	@Operation(summary = "클러스터 생성", description = "Public cluster(AKS, GKE, EKS, Naver) 생성")
-	@ApiOperation(value="리스트 요청.",
+	@ApiOperation(value="클러스터 생성.",
 	notes=""
 			+"***cloudProvider 유효값***\n"
 			+"```\n"
@@ -36,37 +37,84 @@ public class PublicClusterController extends CommonController {
 			+"GCP\r\n"
 			+"Naver\r\n"
 			+"```\n"
+			+"***Response callback***\n"
+			+"```\n"
+			+"@Post/RequestBody\n"
+			+ "{\n"
+			+ "  \"clusterIdx\": 185,\n"
+			+ "  \"clusterJobType\": \"CLUSTER_CREATE\",\n"
+			+ "  \"status\": \"start/finish\",\n"
+			+ "  \"result\": \"success/fail”,\n"
+			+ "  \"message\": \"result가 fail일때 실패 이유\n"
+			+ "}"
 	)
 	@PostMapping("/provisioning")
-    public ResponseWrapper<ClusterEntity> provisioningCluster(@RequestBody PublicClusterDto.Povisioning param) {
-		ClusterEntity entity = publicClusterService.provisioningCluster(param, getLoginUser());
+    public ResponseWrapper<ClusterEntity> provisioningCluster(@RequestHeader Map<String, Object> header, @RequestBody PublicClusterDto.Povisioning param) {
+		ClusterEntity entity = publicClusterService.provisioningCluster(param, getLoginUser(), header);
 		return new ResponseWrapper<>(entity);
 	}
 	
-	@Operation(summary = "클러스터 삭제", description = "Public cluster 삭제")
+	@ApiOperation(value="클러스터 삭제.",
+		notes=""
+				+"***Response callback***\n"
+				+"```\n"
+				+"@Post/RequestBody\n"
+				+ "{\n"
+				+ "  \"clusterIdx\": 185,\n"
+				+ "  \"clusterJobType\": \"CLUSTER_DELETE\",\n"
+				+ "  \"status\": \"start/finish\",\n"
+				+ "  \"result\": \"success/fail”,\n"
+				+ "  \"message\": \"result가 fail일때 실패 이유\n"
+				+ "}"
+	)
 	@DeleteMapping("/delete")
-    public ResponseWrapper<Boolean> deleteCluster(@RequestBody PublicClusterDto.Delete param) {
-		boolean success = publicClusterService.deleteCluster(param, getLoginUser());
+    public ResponseWrapper<Boolean> deleteCluster(@RequestHeader Map<String, Object> header, @RequestBody PublicClusterDto.Delete param) {
+		boolean success = publicClusterService.deleteCluster(param, getLoginUser(), header);
 		return new ResponseWrapper<>(success);
 	}
 	
 	/**
 	 * 클러스터 Scale 조정
 	 */
-	@Operation(summary = "Scale 조정", description = "Cluster Scale 조정(Scale-In, Scale-Out)")
+	
+	@ApiOperation(value="Scale 조정",
+		notes=""
+				+"***Response callback***\n"
+				+"```\n"
+				+"@Post/RequestBody\n"
+				+ "{\n"
+				+ "  \"clusterIdx\": 185,\n"
+				+ "  \"clusterJobType\": \"CLUSTER_SCALE\",\n"
+				+ "  \"status\": \"start/finish\",\n"
+				+ "  \"result\": \"success/fail”,\n"
+				+ "  \"message\": \"result가 fail일때 실패 이유\n"
+				+ "}"
+	)
 	@PostMapping("/scale")
-	public ResponseWrapper<String> scale(@RequestBody ScaleArgDto scaleDto) {
-		publicClusterService.scaleJobCluster(scaleDto, getLoginUser());
+	public ResponseWrapper<String> scale(@RequestHeader Map<String, Object> header, @RequestBody ScaleArgDto scaleDto) {
+		publicClusterService.scaleJobCluster(scaleDto, getLoginUser(), header);
 		return new ResponseWrapper<>();
 	}
 	
 	/**
 	 * 클러스터 Scale 조정
 	 */
-	@Operation(summary = "클러스터 노드풀 변경", description = "클러스터 노드풀 변경")
+	@ApiOperation(value="클러스터 노드풀 변경",
+		notes=""
+				+"***Response callback***\n"
+				+"```\n"
+				+"@Post/RequestBody\n"
+				+ "{\n"
+				+ "  \"clusterIdx\": 185,\n"
+				+ "  \"clusterJobType\": \"CLUSTER_MODIFY\",\n"
+				+ "  \"status\": \"start/finish\",\n"
+				+ "  \"result\": \"success/fail”,\n"
+				+ "  \"message\": \"result가 fail일때 실패 이유\n"
+				+ "}"
+	)
 	@PostMapping("/modify")
-	public ResponseWrapper<String> modify(@RequestBody ModifyArgDto modifyDto) {
-		publicClusterService.modifyJobCluster(modifyDto, getLoginUser());
+	public ResponseWrapper<String> modify(@RequestHeader Map<String, Object> header, @RequestBody ModifyArgDto modifyDto) {
+		publicClusterService.modifyJobCluster(modifyDto, getLoginUser(), header);
 		return new ResponseWrapper<>();
 	}
 

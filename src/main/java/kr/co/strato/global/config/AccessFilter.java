@@ -37,6 +37,9 @@ public class AccessFilter implements Filter{
 	@Value("${ml.api.token}")
 	String ML_API_TOKEN;
 	
+	@Value("${cmp.api.token}")
+	String CMP_API_TOKEN;
+	
     @Override
     public void init(FilterConfig fc) throws ServletException {
     }
@@ -66,6 +69,17 @@ public class AccessFilter implements Filter{
 				
 				//41번 과제 API 인증 토큰
 				if(acToken.equals(ML_API_TOKEN)) {
+					chain.doFilter(request, response);
+					return;
+				}
+				
+				//128번 과제 API 인증 토큰
+				if(acToken.equals(CMP_API_TOKEN)) {
+					//128번 과제 사용자 인증
+					//임시 토큰을 발급하여 cmp@strato.co.kr 사용자로 임시 사용
+					UserDto loginUser = new UserDto();
+					loginUser.setUserId("cmp@strato.co.kr");
+					request.setAttribute("loginUser", loginUser);
 					chain.doFilter(request, response);
 					return;
 				}

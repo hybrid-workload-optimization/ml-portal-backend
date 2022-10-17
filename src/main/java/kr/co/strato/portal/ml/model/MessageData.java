@@ -1,5 +1,7 @@
 package kr.co.strato.portal.ml.model;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +22,7 @@ public class MessageData {
 	
 	private Long workJobIdx;
 	private String jobType;
+	private Map<String, Object> header;
 	private Object param;
 
 	@Override

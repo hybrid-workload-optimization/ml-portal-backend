@@ -63,13 +63,17 @@ public class PublicClusterService {
 	@Autowired
 	private Environment env;
 	
+	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
+		return provisioningCluster(param, user, null);
+	}
+	
 
 	/**
 	 * Public 클러스터 생성.
 	 * @param param
 	 * @return
 	 */
-    public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
+    public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user, Map<String, Object> header) {
     	log.info("[ProvisioningCluster] - start");
     	String callbackUrl = param.getCallbackUrl();
 		String cloudProvider = param.getCloudProvider().toLowerCase();
@@ -105,7 +109,7 @@ public class PublicClusterService {
 				.provisioningType(getProvisiongType(cloudProvider))
 				.nodeCount(nodeCount)
 				.vmType(vmType)
-				
+				.region(region)
 				.build();		
 		clusterDomainService.register(clusterEntity);
 		
@@ -136,6 +140,7 @@ public class PublicClusterService {
 		MessageData messageData = MessageData.builder()
 				.workJobIdx(workJobIdx)
 				.jobType(MessageData.JOB_TYPE_PROVISIONING)
+				.header(header)
 				.param(provisioningParam)
 				.build();
 		
@@ -147,6 +152,10 @@ public class PublicClusterService {
 		kafkaProducerService.sendMessage(getCloudRequestTopic(cloudProvider), messageDataJson);
 		return clusterEntity;
 	}
+    
+    public boolean deleteCluster(PublicClusterDto.Delete deleteParam, UserDto user) {
+    	return deleteCluster(deleteParam, user, null);
+    }
 	
 
     /**
@@ -154,7 +163,7 @@ public class PublicClusterService {
      * @param param
      * @return
      */
-    public boolean deleteCluster(PublicClusterDto.Delete deleteParam, UserDto user) {
+    public boolean deleteCluster(PublicClusterDto.Delete deleteParam, UserDto user, Map<String, Object> header) {
     	String callbackUrl = deleteParam.getCallbackUrl();
 		Long clusterIdx = deleteParam.getClusterIdx();
 		
@@ -198,6 +207,7 @@ public class PublicClusterService {
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
 					.jobType(MessageData.JOB_TYPE_DELETE)
+					.header(header)
 					.param(param)
 					.build();
 			
@@ -215,14 +225,19 @@ public class PublicClusterService {
 		return false;
 	}
     
+    public void scaleJobCluster(ScaleArgDto scaleDto, UserDto user) {
+    	scaleJobCluster(scaleDto, user, null);
+    }
+    
+    
     /**
 	 * Job 클러스터 프로비저닝
 	 * @param yaml
 	 * @return
 	 */
-	public void scaleJobCluster(ScaleArgDto scaleDto, UserDto user) {
+	public void scaleJobCluster(ScaleArgDto scaleDto, UserDto user, Map<String, Object> header) {
 		log.info("[Scale Cluster]  작업 시작");
-		Long clusterIdx = scaleDto.getClusterId();
+		Long clusterIdx = scaleDto.getClusterIdx();
 		String callbackUrl = scaleDto.getCallbackUrl();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		
@@ -256,6 +271,7 @@ public class PublicClusterService {
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
 					.jobType(MessageData.JOB_TYPE_SCALE)
+					.header(header)
 					.param(param)
 					.build();
 			
@@ -274,13 +290,18 @@ public class PublicClusterService {
 		
 	}
 	
+	public void modifyJobCluster(ModifyArgDto modifyDto, UserDto user) {
+		modifyJobCluster(modifyDto, user, null);
+	}
+	
+	
 	/**
 	 * 노드풀 변경 작업.
 	 * @param modifyDto
 	 */
-	public void modifyJobCluster(ModifyArgDto modifyDto, UserDto user) {
+	public void modifyJobCluster(ModifyArgDto modifyDto, UserDto user, Map<String, Object> header) {
 		log.info("[Modify Cluster]  작업 시작");
-		Long clusterIdx = modifyDto.getClusterId();
+		Long clusterIdx = modifyDto.getClusterIdx();
 		String callbackUrl = modifyDto.getCallbackUrl();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		
@@ -317,6 +338,7 @@ public class PublicClusterService {
 			MessageData messageData = MessageData.builder()
 					.workJobIdx(workJobIdx)
 					.jobType(MessageData.JOB_TYPE_MODIFY)
+					.header(header)
 					.param(param)
 					.build();
 			
