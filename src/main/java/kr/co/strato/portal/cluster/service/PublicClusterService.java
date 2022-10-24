@@ -440,7 +440,14 @@ public class PublicClusterService {
 							.configContents(Base64.getEncoder().encodeToString(kubeConfig.getBytes()))
 							.build();
 					
-					String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
+					String strClusterId = null;
+					
+					try {
+						strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
+					} catch (Exception e) {
+						log.error("", e);
+					}
+					
 					
 					if (StringUtils.isEmpty(strClusterId)) {
 						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
