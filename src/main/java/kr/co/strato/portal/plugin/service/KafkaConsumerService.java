@@ -176,24 +176,28 @@ public class KafkaConsumerService {
 		workJobEntity.setWorkJobDataResponse(response);
 		workJobEntity.setWorkJobEndAt(DateUtil.currentDateTime());
 		
-		workJobService.updateWorkJob(workJobEntity);
-		
-		String clusterJobType = workJobEntity.getWorkJobType();
-		String resultStr = getResultStr(code);
-		
-		ClusterJobCallbackData callbackData = ClusterJobCallbackData.builder()
-				.clusterIdx(clusterIdx)
-				.clusterJobType(clusterJobType)
-				.status(status)
-				.message(msg)
-				.result(resultStr)
-				.build();
-		
-		String json = gson.toJson(callbackData);
-		System.out.println(json);
+		workJobService.updateWorkJob(workJobEntity);		
 		
 		//콜백이 존재하는 경우 콜백 수행
 		if(callbackUrl != null) {
+			
+			log.info("Send Callback. url: {}", callbackUrl);
+			
+			String clusterJobType = workJobEntity.getWorkJobType();
+			String resultStr = getResultStr(code);
+			
+			ClusterJobCallbackData callbackData = ClusterJobCallbackData.builder()
+					.clusterIdx(clusterIdx)
+					.clusterJobType(clusterJobType)
+					.status(status)
+					.message(msg)
+					.result(resultStr)
+					.build();
+			
+			String json = gson.toJson(callbackData);
+			
+			log.info("Send Callback. Data:");
+			log.info(json);
 			
 			callbackService.sendCallback(callbackUrl, callbackData);
 		}
