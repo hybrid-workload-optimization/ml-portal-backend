@@ -26,7 +26,9 @@ spec:
           - key: dashboards.yml
             path: provisioning/dashboards/dashboards.yml
           - key: dashboard.json
-            path: dashboard.json
+            path: dashboard/dashboard.json
+          - key: gpu-dashboard.json
+            path: dashboard/gpu-dashboard.json
       containers:
       - name: grafana
         image: grafana/grafana:8.4.3
@@ -45,8 +47,6 @@ spec:
           value: "true"
         - name: GF_AUTH_ANONYMOUS_ORG_ROLE
           value: Admin
-        - name: GF_SERVER_ROOT_URL
-          value: /
         - name: GF_SECURITY_ADMIN_USER
           valueFrom:
             secretKeyRef:
@@ -57,6 +57,8 @@ spec:
             secretKeyRef:
               name: grafana-account
               key: admin-password
+        - name: GF_SERVER_ROOT_URL
+          value: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
 
 ---
 apiVersion: v1
@@ -70,8 +72,6 @@ metadata:
 spec:
   selector:
     app: grafana
-  type: NodePort
   ports:
     - port: 3000
       targetPort: 3000
-      nodePort: 30004

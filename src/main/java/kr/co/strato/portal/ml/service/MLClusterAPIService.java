@@ -34,10 +34,12 @@ import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.adapter.ml.service.AIAdapterService;
+import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterSyncService;
+import kr.co.strato.portal.networking.service.IngressControllerService;
 import kr.co.strato.portal.setting.service.MLSettingService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,23 +68,33 @@ public class MLClusterAPIService {
 	@Autowired
 	private ClusterSyncService clusterSyncService;
 	
+	@Autowired
+	private IngressControllerService ingressControllerService;
+	
 	private KubernetesClient client;
 
 	
 	
-	public String getPrometheusUrl(Long clusterId) {
-		/*
-		MLClusterEntity entity = mlClusterDomainService.get(clusterId);
+	public String getPrometheusUrl2(Long clusterIdx) {		
+		String url = null;
 		
-		String host = "external-ip";
-		List<String> nodeIps = nodeAdapterService.getWorkerNodeIps(entity.getCluster().getClusterId());
-		if(nodeIps != null && nodeIps.size() > 0) {
-			host = nodeIps.get(0);
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String cloudProvider = cluster.getProvider().toLowerCase();
+
+		if(cloudProvider.equals("azure")) {
+			String externalIp = "";
+			IngressControllerEntity ingressController = ingressControllerService.getIngressController(cluster, "nginx");
+			if(ingressController != null) {
+				externalIp = ingressController.getExternalIp();
+			}
+			url = String.format("http://%s/monitoring/prometheus", externalIp);
 		}
 		
-		String url = String.format("http://%s:30005", host);
-		*/
-		String url = "http://210.217.178.114:30015/";
+		if(url == null) {
+			log.error("Get Prometheus url fail.");
+			log.error("Unknown cloud provider: {}", cloudProvider);
+		}
+		
 		return url;
 	}	
 	

@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
@@ -24,9 +25,11 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
+import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.portal.cluster.model.ModifyArgDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
 import kr.co.strato.portal.cluster.model.ScaleArgDto;
@@ -48,24 +51,65 @@ public class MLClusterAPIAsyncService {
 	@Autowired
 	private PublicClusterService publicClusterService;
 	
+	@Autowired
+	private ClusterDomainService clusterDomainService;
+	
+	@Autowired
+	private ServiceAdapterService serviceAdapterService;
+	
 	private KubernetesClient client;
 	
 	
-	public String getPrometheusUrl(Long clusterId) {
-		/*
-		MLClusterEntity entity = mlClusterDomainService.get(clusterId);
+	public String getPrometheusUrl(Long clusterIdx) {		
+		String url = null;
 		
-		String host = "external-ip";
-		List<String> nodeIps = nodeAdapterService.getWorkerNodeIps(entity.getCluster().getClusterId());
-		if(nodeIps != null && nodeIps.size() > 0) {
-			host = nodeIps.get(0);
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String cloudProvider = cluster.getProvider().toLowerCase();
+
+		if(cloudProvider.equals("azure")) {
+			String externalIp = getAzureIngressExternalIp(cluster.getClusterId());			
+			url = String.format("http://%s/prometheus/graph", externalIp);
 		}
 		
-		String url = String.format("http://%s:30005", host);
-		*/
-		String url = "http://210.217.178.114:30015/";
+		if(url == null) {
+			log.error("Get Prometheus url fail.");
+			log.error("Unknown cloud provider: {}", cloudProvider);
+		}
+		
 		return url;
-	}	
+	}
+	
+	public String getGrafanaUrl(Long clusterIdx) {		
+		String url = null;
+		
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String cloudProvider = cluster.getProvider().toLowerCase();
+
+		if(cloudProvider.equals("azure")) {
+			String externalIp = getAzureIngressExternalIp(cluster.getClusterId());
+			url = String.format("http://%s/grafana", externalIp);
+		}
+		
+		if(url == null) {
+			log.error("Get Prometheus url fail.");
+			log.error("Unknown cloud provider: {}", cloudProvider);
+		}
+		
+		return url;
+	}
+	
+	private String getAzureIngressExternalIp(Long kubeConfigId) {
+		String externalIp = "";
+		io.fabric8.kubernetes.api.model.Service s 
+			= serviceAdapterService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+
+		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
+		if(list != null && list.size() > 0) {
+			LoadBalancerIngress loadBalancerIngres = list.get(0);
+			externalIp = loadBalancerIngres.getIp();
+		}
+		return externalIp;
+	}
 	
 	/**
 	 * Job 클러스터 프로비저닝

@@ -118,51 +118,56 @@ public class MLPortalService {
 			int totalPodCount = 0;
 			int runningPodCount = 0;
 			
-			if(kind.equals("job")) {
-				jobCount++;
-				
-				HasMetadata data = mlServiceInterface.getResource(resId);
-				if(data != null) {
-					Job job = (Job) data;
-					JobStatus status = job.getStatus();
+			try {
+				if(kind.equals("job")) {
+					jobCount++;
 					
-					int a = status.getActive() == null ? 0: status.getActive();
-					int s = status.getSucceeded() == null ? 0: status.getSucceeded();
-					int f = status.getFailed()== null ? 0: status.getFailed();
+					HasMetadata data = mlServiceInterface.getResource(resId);
+					if(data != null) {
+						Job job = (Job) data;
+						JobStatus status = job.getStatus();
+						
+						int a = status.getActive() == null ? 0: status.getActive();
+						int s = status.getSucceeded() == null ? 0: status.getSucceeded();
+						int f = status.getFailed()== null ? 0: status.getFailed();
+						
+						active += a;
+						succeeded += s;
+						failed += f;
+						
+						totalPodCount += a + s + f;
+						runningPodCount += a;
+					}
 					
-					active += a;
-					succeeded += s;
-					failed += f;
+				} else { 
+					if(kind.equals("cronjob")) {
+						cronJobCount++;
+					} else if(kind.equals("deployment")) {
+						deploymentCount++;
+					} else if(kind.equals("daemonset")) {
+						daemonSetCount++;
+					} else if(kind.equals("replicaset")) {
+						replicaSetCount++;
+					}
 					
-					totalPodCount += a + s + f;
-					runningPodCount += a;
-				}
-				
-			} else { 
-				if(kind.equals("cronjob")) {
-					cronJobCount++;
-				} else if(kind.equals("deployment")) {
-					deploymentCount++;
-				} else if(kind.equals("daemonset")) {
-					daemonSetCount++;
-				} else if(kind.equals("replicaset")) {
-					replicaSetCount++;
-				}
-				
-				if(cluster != null && mlServiceInterface != null) {
-					String uid = mlServiceInterface.getResourceUid(resId);
-					
-					List<Pod> pods = podAdapterService.getList(cluster.getClusterId(), null, uid, null, null);
-					totalPodCount = pods.size();
-					
-					for(Pod p : pods) {
-						String podStatus = p.getStatus().getPhase();
-						if(podStatus.equals("Running")) {
-							runningPodCount++;
+					if(cluster != null && mlServiceInterface != null) {
+						String uid = mlServiceInterface.getResourceUid(resId);
+						
+						List<Pod> pods = podAdapterService.getList(cluster.getClusterId(), null, uid, null, null);
+						totalPodCount = pods.size();
+						
+						for(Pod p : pods) {
+							String podStatus = p.getStatus().getPhase();
+							if(podStatus.equals("Running")) {
+								runningPodCount++;
+							}
 						}
 					}
 				}
+			} catch (Exception e) {
+				log.error("", e);
 			}
+			
 			resDto.setTotalPodCount(totalPodCount);
 			resDto.setRunningPodCount(runningPodCount);
 			

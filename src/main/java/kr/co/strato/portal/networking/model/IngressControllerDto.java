@@ -1,8 +1,12 @@
 package kr.co.strato.portal.networking.model;
 
 import java.util.List;
+import java.util.Map;
 
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
+import kr.co.strato.portal.ml.model.MessageData;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +19,9 @@ public class IngressControllerDto {
 
 	@Getter
 	@Setter
+	@Builder
 	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class ReqCreateDto {
 		private Long id;
 		private Long clusterIdx;

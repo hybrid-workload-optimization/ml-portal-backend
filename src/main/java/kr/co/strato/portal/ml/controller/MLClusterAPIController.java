@@ -36,6 +36,18 @@ public class MLClusterAPIController {
 		return new ResponseWrapper<>(url);
 	}
 	
+	/**
+	 * Prometheus url 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	@Operation(summary = "Grafana URL", description = "클러스터 별 Grafana URL 요청")
+	@GetMapping("/api/v1/ml/cluster/{clusterId}/grafana")
+	public ResponseWrapper<String> getGrafanaUrl(@PathVariable("clusterId") Long clusterId) {
+		String url = mlClusterService.getGrafanaUrl(clusterId);
+		return new ResponseWrapper<>(url);
+	}
+	
 	
 	/**
 	 * 클러스터 Scale 조정

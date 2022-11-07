@@ -144,7 +144,7 @@ public class AddonService {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean installAddon(Long clusterIdx, String addonId, Map<String, Object> parameters, String userName)
+	public boolean installAddon(Long clusterIdx, String addonId, Map<String, Object> parameters, String userId)
 			throws IOException {
 
 		Addon addon = getAddon(clusterIdx, addonId);
@@ -176,29 +176,42 @@ public class AddonService {
 				adapter.setParameter(resoures, parameters);
 			}
 
+			String yamlString = null;
 			for (HasMetadata data : resoures) {
-				String yamlString = Serialization.asYaml(data);
+				yamlString = Serialization.asYaml(data);
 
 				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlString).build();
-
-				String str = commonProxy.apply(param);
-				if (str != null && str.length() > 0) {
-					List<HasMetadata> apply = new ObjectMapper().readValue(str, new TypeReference<List<HasMetadata>>() {
-					});
-					applyList.addAll(apply);
-
-					if (apply != null) {
-						String kind = data.getKind();
-						String name = data.getMetadata().getName();
-						log.info("Addon install success. - kind: {}, name: {}", kind, name);
+				
+				try {
+					String str = commonProxy.apply(param);					
+					if (str != null && str.length() > 0) {
+						List<HasMetadata> apply = new ObjectMapper().readValue(str, new TypeReference<List<HasMetadata>>() {
+						});
+						
+						if(apply != null) {
+							applyList.addAll(apply);
+							
+							String kind = data.getKind();
+							String name = data.getMetadata().getName();
+							log.info("Addon install success. - kind: {}, name: {}", kind, name);
+						} else {
+							log.info("Addon install fail.");
+						}
 					}
+					result.add(str);
+				} catch (Exception e) {
+					log.error("Addon install fail.");
+					log.error(yamlString);
+					log.error("", e);
 				}
-				result.add(str);
+				
 			}
+			/*
 			if (resoures.size() != applyList.size()) {
 				isOk = false;
 				break;
 			}
+			*/
 		}
 
 		if (!isOk) {
@@ -219,7 +232,7 @@ public class AddonService {
 			entity.setClusterIdx(clusterIdx);
 			entity.setAddonId(addon.getAddonId());
 			entity.setAddonType(addon.getAddonType());
-			entity.setInstallUserId(addonId);
+			entity.setInstallUserId(userId);
 			addonDomainService.register(entity);
 		}
 		client.close();

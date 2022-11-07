@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -60,11 +61,14 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 		if(d != null) {
 			svc = (Service) d;
 			
-			ServicePort servicePort = svc.getSpec().getPorts().stream()
-					.filter(p -> p.getNodePort() != null)
-					.findFirst()
-					.get();
+			ServicePort servicePort = null;
 			
+			Optional<ServicePort> op = svc.getSpec().getPorts().stream()
+					.filter(p -> p.getNodePort() != null)
+					.findFirst();
+			if(op.isPresent()) {
+				servicePort = op.get();
+			}
 			
 			if(servicePort != null) {
 				List<String> endpoints = new ArrayList<>();
@@ -113,6 +117,8 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 			.findFirst()
 			.get()
 			.setNodePort(nodePort);
+		
+		service.getSpec().setType("NodePort");
 	}
 	
 	/**

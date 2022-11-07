@@ -10,9 +10,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import kr.co.strato.adapter.k8s.ingressController.model.CreateIngressControllerParam;
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
 import kr.co.strato.adapter.k8s.ingressController.service.IngressControllerAdapterService;
+import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.service.IngressControllerDomainService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
@@ -38,6 +43,9 @@ public class IngressControllerService {
 	
 	@Autowired
 	private ClusterDomainService clusterDomainService;
+	
+	@Autowired
+	private ServiceAdapterService serviceAdapterService;
 
 	/**
 	 * IngressController 타입 리턴.
@@ -80,6 +88,7 @@ public class IngressControllerService {
 		//k8s 리소스 생성.
 		CreateIngressControllerParam createParam = IngressControllerDtoMapper.INSTANCE.toCreateParam(param, kubeConfigIdx);
 		String str = ingressControllerAdapterService.create(createParam);
+		
 		
 		if(str != null && str.length() > 0) {
 			//DB저장
@@ -228,6 +237,11 @@ public class IngressControllerService {
 		return page;
 	}
 	
+	public IngressControllerEntity getIngressController(ClusterEntity cluster, String name) {	
+		IngressControllerEntity ingressController = ingressControllerDomainService.getIngressController(cluster, name);
+		return ingressController;
+	}
+	
 	/**
 	 * ingressController와 연결된 Ingress 리스트 반환.
 	 * @param ingressController
@@ -237,4 +251,79 @@ public class IngressControllerService {
 		ingressService.updateIngressRule(ingressController);
 	}
 	
+	/**
+	 * Cloud Provider 별 기 IngressController 설치
+	 * @param clusterEntity
+	 * @return
+	 * @throws IOException
+	 */
+	public Long create(ClusterEntity clusterEntity) throws IOException {
+		Long id = null;
+		IngressControllerDto.ReqCreateDto param = null;
+		String cloudProvider = clusterEntity.getProvider().toLowerCase();
+		
+		if(cloudProvider.equals("azure")) {			
+			log.info("Azure IngressController Create.");
+			param = IngressControllerDto.ReqCreateDto.builder()
+					.clusterIdx(clusterEntity.getClusterIdx())
+					.name("nginx")
+					.replicas(2)
+					.isDefault(true)
+					.serviceType("LoadBalancer")
+					.build();
+			
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			String json = gson.toJson(param);
+			
+			log.info("IngressController Create Param:");
+			log.info(json);
+			
+			
+			Long clusterIdx = clusterEntity.getClusterIdx();
+			Long kubeConfigIdx = clusterEntity.getClusterId();
+			
+			//k8s 리소스 생성.
+			CreateIngressControllerParam createParam = IngressControllerDtoMapper.INSTANCE.toCreateParam(param, kubeConfigIdx);
+			String str = ingressControllerAdapterService.create(createParam);
+			
+			
+			if(str != null && str.length() > 0) {
+				
+				String externalIp = null;
+				
+				try {					
+					io.fabric8.kubernetes.api.model.Service s 
+							= serviceAdapterService.get(kubeConfigIdx, "ingress-nginx", "ingress-nginx-controller");
+			
+					List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
+					if(list != null && list.size() > 0) {
+						LoadBalancerIngress loadBalancerIngres = list.get(0);
+						externalIp = loadBalancerIngres.getIp();
+					}
+					
+				} catch (Exception e) {
+					log.error("Ingress Controller 접속 주소 가져오기 실패!");
+					log.error("", e);
+				}
+				
+				
+				//DB저장
+				IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
+				entity.setCreatedAt(DateUtil.currentDateTime());
+				entity.setExternalIp(externalIp);
+				
+				id = ingressControllerDomainService.registry(entity);
+				
+				//IngressRule 업데이트
+				updateIngressRule(entity);
+			}
+			return id;
+		}
+		
+		log.error("IngressController Create Fail.");
+		log.error("Unknown cloudProvider: {}", cloudProvider);
+		
+		return null;
+		
+	}
 }

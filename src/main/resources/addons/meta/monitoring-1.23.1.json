@@ -12,6 +12,7 @@
     "hwSpec": "4Core 8GB 50GB 2Node"
   },
   "yamls": [
+	"addons/monitoring-1.23.1/dcgm-exporter.yaml",
     "addons/monitoring-1.23.1/metrics-server.yaml",
     "addons/monitoring-1.23.1/monitoring-namespace.yaml",
     "addons/monitoring-1.23.1/prometheus-cluster-role.yaml",
@@ -19,6 +20,7 @@
     "addons/monitoring-1.23.1/prometheus-deployment.yaml",
     "addons/monitoring-1.23.1/prometheus-node-exporter.yaml",
     "addons/monitoring-1.23.1/prometheus-svc.yaml",    
+    "addons/monitoring-1.23.1/prometheus-ingress.yaml",    
     "addons/monitoring-1.23.1/kube-state-metrics-cluster-role.yaml",
     "addons/monitoring-1.23.1/kube-state-metrics-cluster-role-binding.yaml",
     "addons/monitoring-1.23.1/kube-state-metrics-deployment.yaml",
@@ -26,7 +28,8 @@
     "addons/monitoring-1.23.1/kube-state-metrics-service-account.yaml",   
     "addons/monitoring-1.23.1/grafana-config-map.yaml",
     "addons/monitoring-1.23.1/grafana-account-secret.yaml",
-    "addons/monitoring-1.23.1/grafana-deployment.yaml"
+    "addons/monitoring-1.23.1/grafana-deployment.yaml",
+    "addons/monitoring-1.23.1/grafana-ingress.yaml"
   ],
   "packages": [
     {

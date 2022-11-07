@@ -37,7 +37,7 @@ public class MLPortalController extends CommonController {
 	 */
 	@Operation(summary = "ML 리스트", description = "ML 리스트 요청")
 	@PostMapping("/ml/list")
-	public ResponseWrapper<Object> mlList(@RequestBody ListArg param) {
+	public ResponseWrapper<Object> getMlList(@RequestBody ListArg param) {
 		return new ResponseWrapper<>(apiService.getMlList(param));
 	}
 	
@@ -47,7 +47,7 @@ public class MLPortalController extends CommonController {
 	 */
 	@Operation(summary = "ML 상세", description = "ML 상세 정보")
 	@GetMapping("/{mlId}")
-	public ResponseWrapper<MLDto.DetailForPortal> mlDetail(@PathVariable("mlId") String mlId) {
+	public ResponseWrapper<MLDto.DetailForPortal> getMlDetail(@PathVariable("mlId") String mlId) {
 		MLDto.DetailForPortal detail = apiService.getMl(mlId);
 		return new ResponseWrapper<>(detail);
 	}	

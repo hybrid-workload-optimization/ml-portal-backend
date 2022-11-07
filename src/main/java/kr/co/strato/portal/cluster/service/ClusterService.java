@@ -775,13 +775,13 @@ public class ClusterService {
 		
 		
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
-		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			return deleteK8sCluster(clusterEntity);
-		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
+		if (provisioningType == ProvisioningType.KUBESPRAY) {
 			return deleteKubesprayCluster(clusterEntity, loginUser);
+		} else {
+			return deleteK8sCluster(clusterEntity);
 		}
 		
-		return null;
+		//return null;
 	}
 	
 	/**

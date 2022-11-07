@@ -86,8 +86,11 @@ public class CustomIngressRepositoryImpl implements CustomIngressRepository{
         builder.and(qIngressEntity.cluster.clusterIdx.eq(ingressController.getCluster().getClusterIdx()));
         builder.and(builderIngressClass);
         
+        String ingressClass = ingressController.getIngressClass();
+        if(ingressClass != null) {
+        	builderIngressClass.and(qIngressEntity.ingressClass.eq(ingressClass));
+        }
         
-        builderIngressClass.and(qIngressEntity.ingressClass.eq(ingressController.getIngressClass()));
         if(ingressController.getDefaultYn().equals("Y")) {
         	builderIngressClass.or(qIngressEntity.ingressClass.eq("default"));
         }
