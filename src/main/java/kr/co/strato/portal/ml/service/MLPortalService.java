@@ -189,7 +189,7 @@ public class MLPortalService {
 			e.printStackTrace();
 		}
 		
-		detail.setCluster(clusterDetail);
+		detail.setClusters(new ClusterDto.Detail[] {clusterDetail});
 		detail.setResources(resources);
 		return detail;
 	}

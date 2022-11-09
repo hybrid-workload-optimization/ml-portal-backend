@@ -99,7 +99,7 @@ public class MLDto {
 		private String updatedAt;
 		private String callbackUrl;
 		private java.util.List<MLResourceDto> resources;
-		private ClusterDto.Detail cluster;
+		private ClusterDto.Detail[] clusters;
 		private int jobCount;
 		private int cronJobCount;
 		private int deploymentCount;
