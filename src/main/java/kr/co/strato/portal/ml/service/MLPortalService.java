@@ -45,7 +45,10 @@ public class MLPortalService {
 	private ServiceFactory serviceFactory;
 	
 	@Autowired
-	PodAdapterService podAdapterService;
+	private PodAdapterService podAdapterService;
+	
+	@Autowired
+	private MLClusterAPIAsyncService mlClusterService;
 	
 	/**
 	 * ML 리스트 반환.
@@ -182,9 +185,17 @@ public class MLPortalService {
 		detail.setSucceededCount(succeeded);
 		detail.setFailedCount(failed);
 		
+		Long clusterIdx = entity.getClusterIdx();
+		
+		String prometheusUrl = mlClusterService.getPrometheusUrl(clusterIdx);
+		String grafanaUrl = mlClusterService.getGrafanaUrl(clusterIdx);
+		
+		detail.setPromethusUrl(prometheusUrl);
+		detail.setGrafanaUrl(grafanaUrl);
+		
 		ClusterDto.Detail clusterDetail = null;
 		try {
-			clusterDetail = clusterService.getCluster(entity.getClusterIdx());
+			clusterDetail = clusterService.getCluster(clusterIdx);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

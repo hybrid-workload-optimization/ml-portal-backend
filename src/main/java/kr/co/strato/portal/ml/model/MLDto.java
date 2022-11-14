@@ -109,6 +109,9 @@ public class MLDto {
 		private int activeCount;
 		private int succeededCount;			
 		private int failedCount;
+		
+		private String promethusUrl;
+		private String grafanaUrl;
 	}
 	
 	@Getter
