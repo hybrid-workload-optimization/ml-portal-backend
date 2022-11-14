@@ -536,15 +536,21 @@ public class PublicClusterService {
 		}		
 		setClusterStatus(clusterIdx, clusterStatus);
 		
-		List<Node> list = nodeAdapterService.getNodeList(clusterIdx);
+		int nodeCount = 0;
 		
+		try {
+			List<Node> list = nodeAdapterService.getNodeList(clusterIdx);
+			nodeCount = list.size();
+		} catch (Exception e) {
+			log.error("", e);
+		}
 		
 		//클러스터 카운트 업데이트
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 
 		String now = DateUtil.currentDateTime();		
 		clusterEntity.setProvisioningStatus(clusterStatus.name());
-		clusterEntity.setNodeCount(list.size());
+		clusterEntity.setNodeCount(nodeCount);
 		clusterEntity.setUpdatedAt(now);
 		
 		clusterDomainService.update(clusterEntity);
