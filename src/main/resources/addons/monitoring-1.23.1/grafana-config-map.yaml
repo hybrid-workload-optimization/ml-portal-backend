@@ -77,14 +77,14 @@ data:
           editable: true
           options:
             path: /etc/grafana/dashboard/dashboard.json
-        - name: default
+        - name: default-gpu
           orgId: 1
           folder: ''
           type: file
           disableDeletion: true
           editable: true
           options:
-            path: /etc/grafana/dashboard/dashboard.json
+            path: /etc/grafana/dashboard/gpu-dashboard.json
             
             
   dashboard.json: |+
