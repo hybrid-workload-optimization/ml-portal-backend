@@ -16,6 +16,7 @@ import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
@@ -33,6 +34,8 @@ import kr.co.strato.portal.work.model.WorkJobDto;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
 import kr.co.strato.portal.work.service.WorkJobService;
+
+import io.fabric8.kubernetes.api.model.Node;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -59,6 +62,9 @@ public class PublicClusterService {
 	
 	@Autowired
 	private ClusterAdapterService clusterAdapterService;
+	
+	@Autowired
+	private NodeAdapterService nodeAdapterService;
 	
 	@Autowired
 	private Environment env;
@@ -529,6 +535,19 @@ public class PublicClusterService {
 			clusterStatus = ClusterEntity.ProvisioningStatus.FAILED;
 		}		
 		setClusterStatus(clusterIdx, clusterStatus);
+		
+		List<Node> list = nodeAdapterService.getNodeList(clusterIdx);
+		
+		
+		//클러스터 카운트 업데이트
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+
+		String now = DateUtil.currentDateTime();		
+		clusterEntity.setProvisioningStatus(clusterStatus.name());
+		clusterEntity.setNodeCount(list.size());
+		clusterEntity.setUpdatedAt(now);
+		
+		clusterDomainService.update(clusterEntity);
 	}
 	
 	public void modifyStart(Long clusterIdx, boolean isSuccess, Object data) {
