@@ -158,7 +158,8 @@ public class MLClusterAPIAsyncService {
 		//String instance = paasNodeSpec.getInstance();
 		//int nodeCount = paasNodeSpec.getCount();
 		
-		String clusterName = genClusterName(mlName);		
+		String clusterName = genClusterName(mlName);
+		String clusterDesc = mlName + "를 수행하기 위한 클러스터.";
 		String region = null;
 		String kubeletVersion = null;
 		
@@ -171,7 +172,7 @@ public class MLClusterAPIAsyncService {
 		//Provisioning Param 생성.
 		AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(provider);
 		Map<String, Object> provisioningParam = 
-						paramProvider.genProvisioningParam(clusterName, kubeletVersion, region, instance, nodeCount);
+						paramProvider.genProvisioningParam(clusterName, clusterDesc, kubeletVersion, region, instance, nodeCount);
 		
 		PublicClusterDto.Povisioning pParam = PublicClusterDto.Povisioning.builder()
 				.cloudProvider(provider)

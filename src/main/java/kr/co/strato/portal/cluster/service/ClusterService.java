@@ -137,6 +137,7 @@ public class ClusterService {
 			Long kubeConfigId = item.getClusterId();
 			String pStatus = item.getProvisioningStatus();
 			
+			log.info("Get cluster Health. clusterIdx: {}", item.getClusterIdx());
 			ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
 			
 			item.setStatus(health.getHealth());

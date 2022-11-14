@@ -21,7 +21,7 @@ public abstract class AbstractDefaultParamProvider {
 	protected abstract Map<String, Object> getDefaultModify();
 	
 	
-	public Map<String, Object> genProvisioningParam(String clusterName, String kubeletVersion, String region, String vmType, Integer nodeCount) {
+	public Map<String, Object> genProvisioningParam(String clusterName, String clusterDesc, String kubeletVersion, String region, String vmType, Integer nodeCount) {
 		Map<String, Object> param = new HashMap<>();
 		param.putAll(getDefaultProvisioningParam());
 		
@@ -31,11 +31,15 @@ public abstract class AbstractDefaultParamProvider {
 		
 		
 		nodePools.add(nodePool);
-		param.put(KEY_NODE_POOLS, nodePools);
+		param.put(KEY_NODE_POOLS, nodePools);	
 		
 		
 		if(clusterName != null) {
 			param.put(KEY_CLUSTER_NAME, clusterName);
+		}
+		
+		if(clusterDesc != null) {
+			param.put(KEY_CLUSTER_DESC, clusterDesc);
 		}
 		
 		if(kubeletVersion != null) {
