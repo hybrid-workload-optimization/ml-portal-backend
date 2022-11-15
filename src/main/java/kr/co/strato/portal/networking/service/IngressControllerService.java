@@ -251,6 +251,19 @@ public class IngressControllerService {
 		ingressService.updateIngressRule(ingressController);
 	}
 	
+	public Long create(Long clusterIdx) throws IOException {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		Long id = create(cluster);
+		
+		//생성 대기.
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		return id;
+	}
+	
 	/**
 	 * Cloud Provider 별 기 IngressController 설치
 	 * @param clusterEntity

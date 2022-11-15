@@ -30,7 +30,7 @@ public class MLClusterAPIController {
 	 * @return
 	 */
 	@Operation(summary = "Prometheus URL", description = "클러스터 별 Prometheus URL 요청")
-	@GetMapping("/api/v1/ml/cluster/{clusterId}/prometheusUrl")
+	@GetMapping("/{clusterId}/prometheusUrl")
 	public ResponseWrapper<String> getPrometheusUrl(@PathVariable("clusterId") Long clusterId) {
 		String url = mlClusterService.getPrometheusUrl(clusterId);
 		return new ResponseWrapper<>(url);
@@ -42,7 +42,7 @@ public class MLClusterAPIController {
 	 * @return
 	 */
 	@Operation(summary = "Grafana URL", description = "클러스터 별 Grafana URL 요청")
-	@GetMapping("/api/v1/ml/cluster/{clusterId}/grafana")
+	@GetMapping("/{clusterId}/grafana")
 	public ResponseWrapper<String> getGrafanaUrl(@PathVariable("clusterId") Long clusterId) {
 		String url = mlClusterService.getGrafanaUrl(clusterId);
 		return new ResponseWrapper<>(url);

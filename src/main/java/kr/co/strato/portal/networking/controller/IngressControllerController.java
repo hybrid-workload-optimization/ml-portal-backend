@@ -141,4 +141,12 @@ public class IngressControllerController {
 		return new ResponseWrapper<>(isOk);
 	}
 	
+	
+	@ApiOperation(value="Public Cloud - Ingress Controller 생성(현재 Azure만 지원함.)")
+	@PostMapping("/ingressController/{clusterIdx}/create")
+	public ResponseWrapper<Long> createIngressController(@PathVariable Long clusterIdx) throws IOException {
+		Long id = ingressControllerService.create(clusterIdx);
+		return new ResponseWrapper<>(id);
+	}
+	
 }

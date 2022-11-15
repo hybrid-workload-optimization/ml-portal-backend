@@ -201,8 +201,6 @@ public class MLInterfaceAPIAsyncService {
 						log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
 						log.error("", e);
 					}
-					
-					
 				}
 			});
 		}

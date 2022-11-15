@@ -3,6 +3,7 @@ package kr.co.strato.portal.addon.adapter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,12 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 			e.printStackTrace();
 		}
 		return encodedString; 
+	}
+	
+	public static void main(String[] args) {
+		Decoder decoder = Base64.getDecoder();
+		byte[] bb = decoder.decode("Z3JhZmFuYUluaXRpYWxQYXNzd29yZA==");
+		System.out.println(new String(bb));
 	}
 	
 }

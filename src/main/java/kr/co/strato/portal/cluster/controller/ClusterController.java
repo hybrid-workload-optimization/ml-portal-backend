@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
@@ -25,6 +26,7 @@ import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
 import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;
@@ -46,6 +48,9 @@ public class ClusterController extends CommonController {
 	
 	@Autowired
 	private AddonService addonService;
+	
+	@Autowired
+	private MLClusterAPIAsyncService mlClusterService;
 	
 	@GetMapping("/api/v1/clusters")
     public ResponseWrapper<Page<ClusterDto.List>> getCluterList(PageRequest pageRequest){
@@ -455,5 +460,29 @@ public class ClusterController extends CommonController {
 	@GetMapping("/api/v1/test/delete")
 	public void delete(@RequestParam Long clusterIdx) {
 		clusterService.deleteClusterDB(clusterIdx);
+	}
+	
+	/**
+	 * Prometheus url 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	@Operation(summary = "Prometheus URL", description = "클러스터 별 Prometheus URL 요청")
+	@GetMapping("/api/v1/clusters/{clusterId}/prometheusUrl")
+	public ResponseWrapper<String> getPrometheusUrl(@PathVariable("clusterId") Long clusterId) {
+		String url = mlClusterService.getPrometheusUrl(clusterId);
+		return new ResponseWrapper<>(url);
+	}
+	
+	/**
+	 * Prometheus url 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	@Operation(summary = "Grafana URL", description = "클러스터 별 Grafana URL 요청")
+	@GetMapping("/api/v1/clusters/{clusterId}/grafana")
+	public ResponseWrapper<String> getGrafanaUrl(@PathVariable("clusterId") Long clusterId) {
+		String url = mlClusterService.getGrafanaUrl(clusterId);
+		return new ResponseWrapper<>(url);
 	}
 }
