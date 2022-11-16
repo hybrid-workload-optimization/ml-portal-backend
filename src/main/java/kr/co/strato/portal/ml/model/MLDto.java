@@ -112,6 +112,7 @@ public class MLDto {
 		
 		private String promethusUrl;
 		private String grafanaUrl;
+		private String monitoringUrl;
 	}
 	
 	@Getter

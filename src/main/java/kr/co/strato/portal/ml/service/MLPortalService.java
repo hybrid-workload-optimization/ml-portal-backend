@@ -189,13 +189,15 @@ public class MLPortalService {
 		
 		String prometheusUrl = mlClusterService.getPrometheusUrl(clusterIdx);
 		String grafanaUrl = mlClusterService.getGrafanaUrl(clusterIdx);
+		String clusterMonitoringUrl = String.format("%s/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tv", grafanaUrl);
+		String gpuMonitoringUrl = String.format("%s/d/syl6zhqkz/gpu-nodes?orgId=1&refresh=30s&theme=light&kiosk=tv", grafanaUrl);
 		
 		detail.setPromethusUrl(prometheusUrl);
 		detail.setGrafanaUrl(grafanaUrl);
+		detail.setMonitoringUrl(clusterMonitoringUrl);
 		
 		ClusterDto.Detail clusterDetail = null;
 		try {
-			clusterDetail = clusterService.getCluster(clusterIdx);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
