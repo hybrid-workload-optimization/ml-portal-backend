@@ -143,6 +143,10 @@ public class ClusterNodeService {
 	
 
 	public List<Long> synClusterNodeSave(List<Node> clusterNodes, Long clusterId) {
+		//기존 노드 삭제
+		nodeDomainService.deleteByClusterIdx(clusterId);
+		
+		
 		List<Long> ids = new ArrayList<>();
 		for (Node n : clusterNodes) {
 			try {

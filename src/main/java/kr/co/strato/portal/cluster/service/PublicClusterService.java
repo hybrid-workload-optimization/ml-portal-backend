@@ -67,6 +67,9 @@ public class PublicClusterService {
 	private NodeAdapterService nodeAdapterService;
 	
 	@Autowired
+	private ClusterNodeService clusterNodeService;
+	
+	@Autowired
 	private Environment env;
 	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
@@ -549,6 +552,9 @@ public class PublicClusterService {
 		try {
 			List<Node> list = nodeAdapterService.getNodeList(clusterEntity.getClusterId());
 			nodeCount = list.size();
+			
+			//노드 테이블 동기화.
+			clusterNodeService.synClusterNodeSave(list, clusterIdx);
 		} catch (Exception e) {
 			log.error("", e);
 		}
@@ -559,6 +565,8 @@ public class PublicClusterService {
 		clusterEntity.setUpdatedAt(now);
 		
 		clusterDomainService.update(clusterEntity);
+		
+		
 	}
 	
 	public void modifyStart(Long clusterIdx, boolean isSuccess, Object data) {

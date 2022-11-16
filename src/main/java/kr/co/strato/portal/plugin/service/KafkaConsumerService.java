@@ -67,23 +67,31 @@ public class KafkaConsumerService {
 		
 	}
 	
-	/*
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.aws.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
 			containerFactory = "kafkaListenerContainerFactory")
-    public void awsConsumer(String message) throws IOException {
-		messageJob(message);
+    public void awsConsumer(String message) {
+		log.info(message);
+		try {
+			messageJob(message);
+		} catch (Exception e) {
+			log.error("", e);
+		}
 	}
 	
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.naver.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
 			containerFactory = "kafkaListenerContainerFactory")
-    public void naverConsumer(String message) throws IOException {
-		messageJob(message);
+    public void naverConsumer(String message) {
+		log.info(message);
+		try {
+			messageJob(message);
+		} catch (Exception e) {
+			log.error("", e);
+		}
 	}
-	*/
 	
 	/**
 	 * Kafka로 부터 전송되는 메시지 처리.
