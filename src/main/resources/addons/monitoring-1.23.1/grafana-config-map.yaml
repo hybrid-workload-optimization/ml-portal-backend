@@ -13,6 +13,7 @@ data:
     [auth.anonymous]
     enabled = true
     org_role = Editor
+    allow_embedding = true
   datasource.yml: |+
     # config file version
     apiVersion: 1
