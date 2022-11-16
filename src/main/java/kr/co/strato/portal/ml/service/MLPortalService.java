@@ -198,6 +198,7 @@ public class MLPortalService {
 		
 		ClusterDto.Detail clusterDetail = null;
 		try {
+			clusterDetail = clusterService.getCluster(clusterIdx);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
