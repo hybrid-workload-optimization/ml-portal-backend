@@ -1,6 +1,7 @@
 package kr.co.strato.portal.setting.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
+import kr.co.strato.portal.setting.model.AuthorityViewDto.Menu;
 import kr.co.strato.portal.setting.model.AuthorityViewDtoMapper;
 import kr.co.strato.portal.setting.model.UserAuthorityDto;
 import lombok.extern.slf4j.Slf4j;
@@ -357,7 +359,22 @@ public class AuthorityService {
 				}
 			}
 		}
+		
+		parentList.sort(new Comparator<AuthorityViewDto.Menu>() {
 
+			@Override
+			public int compare(Menu o1, Menu o2) {
+				int menuOrder1 = o1.getMenuOrder();
+				int menuOrder2 = o2.getMenuOrder();
+				
+				if (menuOrder1 < menuOrder2) {
+		            return -1;
+		        } else if (menuOrder2 > menuOrder1) {
+		            return 1;
+		        }
+		        return 0;
+			}
+		});
 		return parentList;
 	}
 	
