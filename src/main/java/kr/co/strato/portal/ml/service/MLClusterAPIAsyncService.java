@@ -232,18 +232,6 @@ public class MLClusterAPIAsyncService {
 			List<Container> containers =  podSpec.getContainers();
 			for(Container c : containers) {
 				String containerName = c.getName();
-				ResourceRequirements resReq = c.getResources();
-				
-				Map<String, Quantity> request = resReq.getRequests();
-				Map<String, Quantity> limits = resReq.getLimits();
-				
-				Quantity rCpu = request.get("cpu");
-				Quantity rMemory = request.get("memory");
-				Quantity rStorage = request.get("ephemeral-storage");
-				
-				Quantity lCpu = limits.get("cpu");
-				Quantity lMemory = limits.get("memory");
-				Quantity lStorage = limits.get("ephemeral-storage");
 				
 				//Default값 설정(0.5Core, 1GB, 10GB)
 				//1Core
@@ -253,10 +241,30 @@ public class MLClusterAPIAsyncService {
 				Float defaultGpu = 1f;
 				Float defaultGpuMemory = 1f;
 				
-				float cpu = getCpuLimits(rCpu, lCpu, defaultCpu);
-				float memory = getMemStorageLimits(rMemory, lMemory, defaultMemory);
-				float storage = getMemStorageLimits(rStorage, lStorage, defaultStorage);				
+				float cpu = defaultCpu;
+				float memory = defaultMemory;
+				float storage = defaultStorage;
 				
+				
+				ResourceRequirements resReq = c.getResources();
+				if(resReq != null) {
+					Map<String, Quantity> request = resReq.getRequests();
+					Map<String, Quantity> limits = resReq.getLimits();
+					
+					Quantity rCpu = request.get("cpu");
+					Quantity rMemory = request.get("memory");
+					Quantity rStorage = request.get("ephemeral-storage");
+					
+					Quantity lCpu = limits.get("cpu");
+					Quantity lMemory = limits.get("memory");
+					Quantity lStorage = limits.get("ephemeral-storage");
+					
+					
+					
+					cpu = getCpuLimits(rCpu, lCpu, defaultCpu);
+					memory = getMemStorageLimits(rMemory, lMemory, defaultMemory);
+					storage = getMemStorageLimits(rStorage, lStorage, defaultStorage);
+				}
 				PodSpecDto podSpecDto = PodSpecDto.builder()
 						.name(containerName)
 						.cpu(cpu)
