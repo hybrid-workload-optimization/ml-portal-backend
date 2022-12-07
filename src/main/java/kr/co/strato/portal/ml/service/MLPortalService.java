@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobStatus;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.domain.machineLearning.model.MLResourceEntity;
 import kr.co.strato.domain.machineLearning.service.MLDomainService;
@@ -187,14 +188,6 @@ public class MLPortalService {
 		
 		Long clusterIdx = entity.getClusterIdx();
 		
-		String prometheusUrl = mlClusterService.getPrometheusUrl(clusterIdx);
-		String grafanaUrl = mlClusterService.getGrafanaUrl(clusterIdx);
-		String clusterMonitoringUrl = String.format("%s/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", grafanaUrl);
-		String gpuMonitoringUrl = String.format("%s/d/syl6zhqkz/gpu-nodes?orgId=1&refresh=30s&theme=light&kiosk=tvm", grafanaUrl);
-		
-		detail.setPromethusUrl(prometheusUrl);
-		detail.setGrafanaUrl(grafanaUrl);
-		detail.setMonitoringUrl(clusterMonitoringUrl);
 		
 		ClusterDto.Detail clusterDetail = null;
 		try {
@@ -202,6 +195,20 @@ public class MLPortalService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		String provisionStatus = clusterDetail.getProvisioningStatus();
+		if(provisionStatus.equals(ClusterEntity.ProvisioningStatus.FINISHED.name())) {
+			String prometheusUrl = mlClusterService.getPrometheusUrl(clusterIdx);
+			String grafanaUrl = mlClusterService.getGrafanaUrl(clusterIdx);
+			String clusterMonitoringUrl = String.format("%s/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", grafanaUrl);
+			String gpuMonitoringUrl = String.format("%s/d/syl6zhqkz/gpu-nodes?orgId=1&refresh=30s&theme=light&kiosk=tvm", grafanaUrl);
+			
+			detail.setPromethusUrl(prometheusUrl);
+			detail.setGrafanaUrl(grafanaUrl);
+			detail.setMonitoringUrl(clusterMonitoringUrl);
+			
+		}
+
 		
 		detail.setClusters(new ClusterDto.Detail[] {clusterDetail});
 		detail.setResources(resources);
