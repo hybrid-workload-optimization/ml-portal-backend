@@ -138,7 +138,8 @@ public class AccessFilter implements Filter{
     			"favicon.ico",
     			"/users/reset/password",
     			"/icons",
-    			"/sse"};
+    			"/sse",
+    			"prometheusUrl"};
     	
     	if("POST".equals(method) && path.contains("users")) {
     		// 회원가입 액션
