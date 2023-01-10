@@ -202,7 +202,11 @@ public class ClusterStorageClassService extends NonNamespaceService {
 			String uid = sc.getMetadata().getUid();
 			String createdAt = sc.getMetadata().getCreationTimestamp();
 			String provider = sc.getProvisioner();
-			String type = sc.getParameters().get("type");
+			String type = null;
+			if(sc.getParameters() != null) {
+				type = sc.getParameters().get("type");
+			}
+			
 			
 			String annotations = mapper.writeValueAsString(sc.getMetadata().getAnnotations());
 			String label = mapper.writeValueAsString(sc.getMetadata().getLabels());
