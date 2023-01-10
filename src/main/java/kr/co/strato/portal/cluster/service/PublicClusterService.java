@@ -414,7 +414,7 @@ public class PublicClusterService {
 	 * @param clusterIdx
 	 * @param isSuccess
 	 */
-	public void provisioningStart(Long clusterIdx, boolean isSuccess, Object data) {
+	public ClusterEntity provisioningStart(Long clusterIdx, boolean isSuccess, Object data) {
 		log.info("Callback process - provisioning start");
 		
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
@@ -428,6 +428,7 @@ public class PublicClusterService {
 			cluster.setUpdatedAt(now);
 			clusterDomainService.update(cluster);
 		}
+		return cluster;
 	}
 	
 	/**
@@ -459,6 +460,9 @@ public class PublicClusterService {
 						log.error("", e);
 					}
 					
+					log.info("-----------------------------------------------");
+					log.info("등록된 kubeConfigId: {}", strClusterId);
+					log.info("-----------------------------------------------");
 					
 					if (StringUtils.isEmpty(strClusterId)) {
 						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
@@ -540,10 +544,6 @@ public class PublicClusterService {
 			clusterStatus = ClusterEntity.ProvisioningStatus.FAILED;
 		}		
 		setClusterStatus(clusterIdx, clusterStatus);
-		
-		
-		
-		
 		
 		//클러스터 카운트 업데이트
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
