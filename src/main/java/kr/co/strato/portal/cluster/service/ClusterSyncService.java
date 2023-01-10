@@ -71,28 +71,64 @@ public class ClusterSyncService {
 	@Transactional(rollbackFor = Exception.class)
 	public void syncCluster(Long clusterId, Long clusterIdx) throws Exception {
 		// k8s - get namespace
-		List<Namespace> namespaces = namespaceAdapterService.getNamespaceList(clusterId);
+		List<Namespace> namespaces = null;
+		try {
+			namespaces = namespaceAdapterService.getNamespaceList(clusterId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 		
 		// k8s - get node
-		List<Node> nodes = nodeAdapterService.getNodeList(clusterId);
+		List<Node> nodes = null;
+		try {
+			nodes = nodeAdapterService.getNodeList(clusterId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 		
 		// k8s - get pv
-		List<PersistentVolume> persistentVolumes = persistentVolumeAdapterService.getPersistentVolumeList(clusterId);
+		List<PersistentVolume> persistentVolumes = null;
+		try {
+			persistentVolumes = persistentVolumeAdapterService.getPersistentVolumeList(clusterId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 		
 		// k8s - get storage class
-		List<StorageClass> storageClasses = storageClassAdapterService.getStorageClassList(clusterId);
+		List<StorageClass> storageClasses = null;
+		try {
+			storageClasses = storageClassAdapterService.getStorageClassList(clusterId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
 		
 		// db - insert namespace
-		clusterNamespaceService.synClusterNamespaceSave(namespaces, clusterIdx);
+		if(namespaces != null) {
+			clusterNamespaceService.synClusterNamespaceSave(namespaces, clusterIdx);
+		}
+		
 				
 		// db - insert node
-		clusterNodeService.synClusterNodeSave(nodes, clusterIdx);
+		if(nodes != null) {
+			clusterNodeService.synClusterNodeSave(nodes, clusterIdx);
+		}
+		
 		
 		// db - insert pv
-		clusterPersistentVolumeService.synClusterPersistentVolumeSave(persistentVolumes, clusterIdx);
+		if(persistentVolumes != null) {
+			clusterPersistentVolumeService.synClusterPersistentVolumeSave(persistentVolumes, clusterIdx);
+		}
+		
 		
 		// db - insert storage class
-		clusterStorageClassService.synClusterStorageClassSave(storageClasses, clusterIdx);
+		if(storageClasses != null) {
+			clusterStorageClassService.synClusterStorageClassSave(storageClasses, clusterIdx);
+		}
+		
 	}
 	
 	/**
