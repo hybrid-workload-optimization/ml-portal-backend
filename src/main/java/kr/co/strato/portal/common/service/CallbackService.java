@@ -1,6 +1,7 @@
 package kr.co.strato.portal.common.service;
 
 import java.net.URI;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,22 +67,32 @@ public class CallbackService {
 	}
 	
 	public void sendCallback(String callBackUrl, Object data) {
-		try {			
-			for(int cnt = 0; cnt < RETRY_COUNT; cnt++) {	
-				try {
-					logger.info("[Send Callback] >>> ResultBody: "+ new Gson().toJson(data).toString());
-					
-					URI url = new URI(callBackUrl);
-					ResponseEntity<String> resp = sendCallbackPost(url.toString(), data);
-					String status 	= resp.getStatusCode().toString(); 
-		
-					logger.info("[Send Callback MLId Result:] >>> Resp status: " + status );		
-					break;
-				} catch(Exception e){
-					logger.info("[retry -sleep({}msec) Send Callback url : {}", RETRY_SLEEP_MILLIS, callBackUrl);
-					Thread.sleep(RETRY_SLEEP_MILLIS);	
+		try {
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					for(int cnt = 0; cnt < RETRY_COUNT; cnt++) {	
+						try {
+							logger.info("[Send Callback] >>> ResultBody: "+ new Gson().toJson(data).toString());
+							
+							URI url = new URI(callBackUrl);
+							ResponseEntity<String> resp = sendCallbackPost(url.toString(), data);
+							String status 	= resp.getStatusCode().toString(); 
+				
+							logger.info("[Send Callback MLId Result:] >>> Resp status: " + status );		
+							break;
+						} catch(Exception e){
+							logger.info("[retry -sleep({}msec) Send Callback url : {}", RETRY_SLEEP_MILLIS, callBackUrl);
+							try {
+								Thread.sleep(RETRY_SLEEP_MILLIS);
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							}	
+						}
+					}
 				}
-			}
+			};			
+			Executors.newSingleThreadExecutor().execute(runnable);
 		} catch(Exception ex) {
 			logger.error("retry all fail.. callback:{}", callBackUrl);
 			logger.error(ex.getMessage(), ex.fillInStackTrace());
