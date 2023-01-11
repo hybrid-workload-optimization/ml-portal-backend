@@ -8,7 +8,7 @@
   "adapter": "kr.co.strato.portal.addon.adapter.ClusterMonitoringAdapter",
   "requiredSpec": {
   	"minKubeletVersion": "1.23.1",
-    "maxKubeletVersion": "1.23.1",
+    "maxKubeletVersion": "1.30.0",
     "hwSpec": "4Core 8GB 50GB 2Node"
   },
   "yamls": [

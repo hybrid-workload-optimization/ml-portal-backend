@@ -73,6 +73,10 @@ public class AddonService {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 
 		String v = clusterEntity.getProviderVersion();
+		if(v.contains("-")) {
+			v = v.substring(0, v.indexOf("-"));
+		}
+		
 		Version kubeletVersion = new Version(v);
 
 		List<Addon> list = new ArrayList<>();
