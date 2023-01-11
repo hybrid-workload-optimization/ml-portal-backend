@@ -691,8 +691,7 @@ public class ClusterService {
 		// db - get cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 				
-		// k8s - get node
-		List<io.fabric8.kubernetes.api.model.Node> k8sNodes = nodeAdapterService.getNodeList(clusterEntity.getClusterId());
+		
 		
 		PageRequest pageRequest = new PageRequest();
 		pageRequest.setSize(Integer.MAX_VALUE);
@@ -711,33 +710,54 @@ public class ClusterService {
 		
 		log.debug("[Cluster Summary] nodes/namespaces/pods size = {}/{}/{}", nodes.size(), namespaces.size(), pods.size());
 		
-		List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
-		List<NodeEntity> workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker") || "[]".equals(n.getRole())).collect(Collectors.toList());
+		List<NodeEntity> masterNodes = null;
+		List<NodeEntity> workerNodes = null;
 		
 		int availableMasterCount = 0;
-		for (NodeEntity n : masterNodes) {
-			for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
-				String uid = k8sNode.getMetadata().getUid();
-				List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
-				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
-						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
-				
-				if (n.getUid().equals(uid) && status) {
-					availableMasterCount++;
-				}
-			}
+		int availableWorkerCount = 0;
+		
+		String provider = clusterEntity.getProvider();
+		if(provider.equals("Kubernetes")) {
+			masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
+			workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker") || "[]".equals(n.getRole())).collect(Collectors.toList());
+		} else {
+			masterNodes = new ArrayList<>();
+			workerNodes = nodes;		
 		}
 		
-		int availableWorkerCount = 0;
-		for (NodeEntity n : workerNodes) {
-			for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
-				String uid = k8sNode.getMetadata().getUid();
-				List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
-				boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
-						.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
-				
-				if (n.getUid().equals(uid) && status) {
-					availableWorkerCount++;
+		
+		// k8s - get node
+		List<io.fabric8.kubernetes.api.model.Node> k8sNodes = null;
+		try {
+			k8sNodes = nodeAdapterService.getNodeList(clusterEntity.getClusterId());
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		
+		if(k8sNodes != null && k8sNodes.size() > 0) {
+			for (NodeEntity n : masterNodes) {
+				for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
+					String uid = k8sNode.getMetadata().getUid();
+					List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
+					boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+							.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+					
+					if (n.getUid().equals(uid) && status) {
+						availableMasterCount++;
+					}
+				}
+			}
+			
+			for (NodeEntity n : workerNodes) {
+				for (io.fabric8.kubernetes.api.model.Node k8sNode : k8sNodes) {
+					String uid = k8sNode.getMetadata().getUid();
+					List<NodeCondition> conditions = k8sNode.getStatus().getConditions();
+					boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
+							.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
+					
+					if (n.getUid().equals(uid) && status) {
+						availableWorkerCount++;
+					}
 				}
 			}
 		}
@@ -745,13 +765,14 @@ public class ClusterService {
 		log.debug("[Cluster Summary] masterNodes/workerNodes size = {}/{}", masterNodes.size(), workerNodes.size());
 		log.debug("[Cluster Summary] availableMasterCount/availableWorkerCount = {}/{}", availableMasterCount, availableWorkerCount);
 		
-		// Master/Worker 수량
 		int masterCount = masterNodes.size();
 		int workerCount = workerNodes.size();
 		
 		// Master/Worker 가동률
 		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 0;
 		float availableWorkerPercent = workerCount > 0 ? (availableWorkerCount * 100 / workerCount) : 0;
+		
+		
 		
 		Summary summary = new ClusterDto.Summary();
 		summary.setMasterCount(masterCount);
