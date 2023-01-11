@@ -769,7 +769,7 @@ public class ClusterService {
 		int workerCount = workerNodes.size();
 		
 		// Master/Worker 가동률
-		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 0;
+		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 100;		
 		float availableWorkerPercent = workerCount > 0 ? (availableWorkerCount * 100 / workerCount) : 0;
 		
 		
