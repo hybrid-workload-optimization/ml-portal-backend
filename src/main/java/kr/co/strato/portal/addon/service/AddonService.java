@@ -92,7 +92,7 @@ public class AddonService {
 			}
 
 			if (maxVersion != null) {
-				isSupported = kubeletVersion.compareTo(new Version(minVersion)) != 1;
+				isSupported = kubeletVersion.compareTo(new Version(maxVersion)) != 1;
 			}
 
 			if (isSupported) {
