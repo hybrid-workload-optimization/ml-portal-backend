@@ -80,9 +80,6 @@ public class PublicClusterService {
 	private AddonService addonService;
 	
 	@Autowired
-	private PublicClusterService publicClusterService;
-	
-	@Autowired
 	private Environment env;
 	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
@@ -493,26 +490,33 @@ public class PublicClusterService {
 							log.error("", e);
 							
 						}
-						log.info("Cluster Synchronization finished.");
-						
-						//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
-						Executors.newSingleThreadExecutor().execute(new Runnable() {
-							
-							@Override
-							public void run() {
-								log.info("Install Monitoring Package started.");
-								try {
-									publicClusterService.installMonitoringPackage(clusterIdx);
-								} catch (Exception e) {
-									log.error("", e);
-								}						
-								log.info("Install Monitoring Package Finished.");
-							}
-						});						
+						log.info("Cluster Synchronization finished.");										
 					}					
 				} catch (Exception e) {
 					log.error("", e);
 				}
+				
+				String now = DateUtil.currentDateTime();
+				clusterEntity.setUpdatedAt(now);
+				
+				clusterDomainService.update(clusterEntity);
+				log.info("Job cluster provisioning success.");
+				
+				//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
+				Executors.newSingleThreadExecutor().execute(new Runnable() {
+					
+					@Override
+					public void run() {
+						log.info("Install Monitoring Package started.");
+						try {
+							installMonitoringPackage(clusterEntity);
+						} catch (Exception e) {
+							log.error("", e);
+						}						
+						log.info("Install Monitoring Package Finished.");
+					}
+				});
+				
 			} else {
 				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
 				log.error("Cluster 생성 실패 했거나 KubeConfig 데이터가 잘못 되었습니다.");
@@ -521,13 +525,7 @@ public class PublicClusterService {
 		} else {			
 			log.error("Cluster가 존재하지 않습니다.");
 			log.error("clusterIdx: {}", clusterIdx);
-		}
-		
-		String now = DateUtil.currentDateTime();
-		clusterEntity.setUpdatedAt(now);
-		
-		clusterDomainService.update(clusterEntity);
-		log.info("Job cluster provisioning success.");
+		}	
 		return clusterEntity;
 	}
 	
@@ -668,14 +666,22 @@ public class PublicClusterService {
 		return env.getProperty(topicKey);
 	}
 	
+	
+	
 	/**
 	 * 클러스터 생성 완료 후 ML
 	 * @param mlClusterEntity
 	 */
 	public boolean installMonitoringPackage(Long clusterIdx) {
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);		
+		return installMonitoringPackage(clusterEntity);
+	}
+	
+	public boolean installMonitoringPackage(ClusterEntity clusterEntity) {
 		boolean isOk = true;
-		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
+		Long clusterIdx = clusterEntity.getClusterIdx();
+				
 		//IngressController 생성.
 		try {
 			log.info("Ingress Controller 설치 시작. clusterIdx: {}", clusterIdx);

@@ -85,41 +85,21 @@ public class MLClusterAPIAsyncService {
 	public String getExternalUrl(Long clusterIdx) {
 		String externalUrl = null;
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
-		String cloudProvider = cluster.getProvider().toLowerCase();
-
-		if(cloudProvider.equals("azure")) {
-			externalUrl = getAzureIngressExternalIp(cluster.getClusterId());
-		}
+		Long kubeConfigId = cluster.getClusterId();
 		
-		if(cloudProvider.equals("aws") || cloudProvider.equals("naver") || cloudProvider.equals("gcp")) {
-			externalUrl = getIngressHostName(cluster.getClusterId());	
+		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
+
+		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
+		if(list != null && list.size() > 0) {
+			LoadBalancerIngress loadBalancerIngres = list.get(0);
+			externalUrl = loadBalancerIngres.getIp();
+			if(externalUrl == null || externalUrl.isEmpty()) {
+				externalUrl = loadBalancerIngres.getHostname();
+			}
 		}
 		return externalUrl;
 	}
 	
-	private String getAzureIngressExternalIp(Long kubeConfigId) {
-		String externalIp = "";
-		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
-
-		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
-		if(list != null && list.size() > 0) {
-			LoadBalancerIngress loadBalancerIngres = list.get(0);
-			externalIp = loadBalancerIngres.getIp();
-		}
-		return externalIp;
-	}
-	
-	private String getIngressHostName(Long kubeConfigId) {
-		String hostName = "";
-		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
-
-		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
-		if(list != null && list.size() > 0) {
-			LoadBalancerIngress loadBalancerIngres = list.get(0);
-			hostName = loadBalancerIngres.getHostname();
-		}
-		return hostName;
-	}
 	
 	public io.fabric8.kubernetes.api.model.Service getIngressService(Long kubeConfigId) {
 		io.fabric8.kubernetes.api.model.Service s 
