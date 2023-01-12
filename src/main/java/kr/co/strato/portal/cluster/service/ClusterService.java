@@ -768,8 +768,22 @@ public class ClusterService {
 		int masterCount = masterNodes.size();
 		int workerCount = workerNodes.size();
 		
+		
+		Long kubeConfigId = clusterEntity.getClusterId();
+		String pStatus = clusterEntity.getProvisioningStatus();
+		
+		log.info("Get cluster Health. clusterIdx: {}", clusterEntity.getClusterIdx());
+		ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
+		
+		
 		// Master/Worker 가동률
-		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 100;		
+		float availableMasterPercent = masterCount > 0 ? (availableMasterCount * 100 / masterCount) : 0;
+		
+		//Public 클라우드의 쿠버네티스는 마스터 노드가 조회되지 않음
+		//정상 가동중이라면 마스터 가동률 100프로로 설정
+		if(!clusterEntity.getProvider().equals("Kubernetes") && health.getHealth().equals("Healthy")) {
+			availableMasterPercent = 100;
+		}		
 		float availableWorkerPercent = workerCount > 0 ? (availableWorkerCount * 100 / workerCount) : 0;
 		
 		
@@ -782,6 +796,7 @@ public class ClusterService {
 		summary.setNamespaceCount(namespaces.size());
 		summary.setPodCount(pods.size());
 		summary.setPvcCount(0); // TODO : pvc count
+		summary.setHealthInfo(health);
 		
 		return summary;
 	}

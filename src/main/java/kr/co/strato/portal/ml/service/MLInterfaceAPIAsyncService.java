@@ -1,12 +1,9 @@
 package kr.co.strato.portal.ml.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +23,11 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.addon.service.AddonService;
 import kr.co.strato.portal.common.service.CallbackService;
 import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.model.MLDtoMapper;
 import kr.co.strato.portal.ml.model.MLResourceDto;
-import kr.co.strato.portal.networking.service.IngressControllerService;
-import kr.co.strato.portal.networking.service.IngressService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -57,15 +51,6 @@ public class MLInterfaceAPIAsyncService {
 	
 	@Autowired
 	private MLClusterAPIAsyncService mlClusterAPIService;
-	
-	@Autowired
-	private IngressControllerService ingressControllerService;
-	
-	@Autowired
-	private AddonService addonService;
-	
-	@Autowired
-	private IngressService ingressService;
 	
 	
 	public MLEntity apply(MLDto.ApplyArg applyDto) {
@@ -161,48 +146,11 @@ public class MLInterfaceAPIAsyncService {
 	 * 클러스터 생성 완료 후 ML
 	 * @param mlClusterEntity
 	 */
-	public void applyContinue(ClusterEntity clusterEntity) {		
+	public void applyContinue(ClusterEntity clusterEntity) {	
 		MLEntity mlEntity = mlDomainService.getByClusterIdx(clusterEntity.getClusterIdx());
 		if(mlEntity != null) {		
-			Executors.newSingleThreadExecutor().execute(new Runnable() {
-				
-				@Override
-				public void run() {
-					
-					//ML 워크로드 배포.
-					applyMLWorkload(mlEntity);
-					
-					
-					Long clusterIdx = clusterEntity.getClusterIdx();					
-					//IngressController 생성.
-					try {
-						log.info("Ingress Controller 설치 시작. clusterIdx: {}", clusterIdx);
-						ingressControllerService.create(clusterEntity);
-						log.info("Ingress Controller 설치 종료. clusterIdx: {}", clusterIdx);
-					} catch (IOException e) {
-						log.info("Ingress Controller 설치 실패. clusterIdx: {}", clusterIdx);
-						log.error("", e);
-					}
-					
-					//IngressController 생성 완료까지 대기
-					try {
-						Thread.sleep(100000);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					
-					//Monitoring Addon 설치
-					Map<String, Object> parameters = new HashMap<>();	
-					try {
-						log.info("Monitoring addon 설치 시작. clusterIdx: {}", clusterIdx);
-						addonService.installAddon(clusterIdx, "1", parameters, null);
-						log.info("Monitoring addon 설치 종료. clusterIdx: {}", clusterIdx);
-					} catch (IOException e) {
-						log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
-						log.error("", e);
-					}
-				}
-			});
+			//ML 워크로드 배포.
+			applyMLWorkload(mlEntity);
 		}
 	}
 	

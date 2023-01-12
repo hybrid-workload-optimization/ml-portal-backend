@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.validation.constraints.NotEmpty;
 
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -138,5 +139,6 @@ public class ClusterDto {
 		private int pvcCount;
 		
 		private String monitoringServiceUrl;
+		private ClusterHealthAdapterDto healthInfo;
 	}
 }

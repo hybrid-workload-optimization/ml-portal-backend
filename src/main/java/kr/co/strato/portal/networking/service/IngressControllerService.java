@@ -275,8 +275,8 @@ public class IngressControllerService {
 		IngressControllerDto.ReqCreateDto param = null;
 		String cloudProvider = clusterEntity.getProvider().toLowerCase();
 		
-		if(cloudProvider.equals("azure")) {			
-			log.info("Azure IngressController Create.");
+		//if(cloudProvider.equals("azure") || cloudProvider.equals("aws") || cloudProvider.equals("naver")) {			
+			log.info("IngressController Create.");
 			param = IngressControllerDto.ReqCreateDto.builder()
 					.clusterIdx(clusterEntity.getClusterIdx())
 					.name("nginx")
@@ -302,7 +302,7 @@ public class IngressControllerService {
 			
 			if(str != null && str.length() > 0) {
 				
-				String externalIp = null;
+				String externalURL = null;
 				
 				try {					
 					io.fabric8.kubernetes.api.model.Service s 
@@ -311,7 +311,15 @@ public class IngressControllerService {
 					List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
 					if(list != null && list.size() > 0) {
 						LoadBalancerIngress loadBalancerIngres = list.get(0);
-						externalIp = loadBalancerIngres.getIp();
+						
+						if(cloudProvider.equals("azure")) {
+							externalURL = loadBalancerIngres.getIp();
+						} else if(cloudProvider.equals("aws")) {
+							externalURL = loadBalancerIngres.getHostname();
+						} else if(cloudProvider.equals("naver")) {
+							externalURL = loadBalancerIngres.getHostname();
+						}
+						
 					}
 					
 				} catch (Exception e) {
@@ -323,7 +331,7 @@ public class IngressControllerService {
 				//DB저장
 				IngressControllerEntity entity = IngressControllerDtoMapper.INSTANCE.toEntity(param, clusterIdx);
 				entity.setCreatedAt(DateUtil.currentDateTime());
-				entity.setExternalIp(externalIp);
+				entity.setExternalIp(externalURL);
 				
 				id = ingressControllerDomainService.registry(entity);
 				
@@ -331,12 +339,12 @@ public class IngressControllerService {
 				updateIngressRule(entity);
 			}
 			return id;
-		}
+		//}
 		
-		log.error("IngressController Create Fail.");
-		log.error("Unknown cloudProvider: {}", cloudProvider);
+		//log.error("IngressController Create Fail.");
+		//log.error("Unknown cloudProvider: {}", cloudProvider);
 		
-		return null;
+		//return null;
 		
 	}
 }

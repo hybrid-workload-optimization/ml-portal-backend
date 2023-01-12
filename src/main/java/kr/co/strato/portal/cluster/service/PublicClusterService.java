@@ -1,8 +1,11 @@
 package kr.co.strato.portal.cluster.service;
 
+import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import io.fabric8.kubernetes.api.model.Node;
 import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
@@ -23,19 +27,19 @@ import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.addon.service.AddonService;
 import kr.co.strato.portal.cluster.model.ModifyArgDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
 import kr.co.strato.portal.cluster.model.ScaleArgDto;
 import kr.co.strato.portal.ml.model.MessageData;
+import kr.co.strato.portal.networking.service.IngressControllerService;
 import kr.co.strato.portal.plugin.service.KafkaProducerService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.MLSettingService;
-import kr.co.strato.portal.work.model.WorkJobDto;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
+import kr.co.strato.portal.work.model.WorkJobDto;
 import kr.co.strato.portal.work.service.WorkJobService;
-
-import io.fabric8.kubernetes.api.model.Node;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -68,6 +72,15 @@ public class PublicClusterService {
 	
 	@Autowired
 	private ClusterNodeService clusterNodeService;
+	
+	@Autowired
+	private IngressControllerService ingressControllerService;
+	
+	@Autowired
+	private AddonService addonService;
+	
+	@Autowired
+	private PublicClusterService publicClusterService;
 	
 	@Autowired
 	private Environment env;
@@ -443,7 +456,6 @@ public class PublicClusterService {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		String cloudVender = mlSettingService.getCloudProvider();
 		if(clusterEntity != null) {
-			
 			if(isSuccess && data != null && data instanceof String) {
 				String kubeConfig = (String) data;
 				try {
@@ -475,15 +487,34 @@ public class PublicClusterService {
 						
 						log.info("KubeConfig 등록 완료");
 						log.info("Cluster Synchronization started.");
-						clusterSyncService.syncCluster(kubeConfigId, clusterEntity.getClusterIdx());
+						try {
+							clusterSyncService.syncCluster(kubeConfigId, clusterEntity.getClusterIdx());
+						} catch (Exception e) {
+							log.error("", e);
+							
+						}
 						log.info("Cluster Synchronization finished.");
-					}
+						
+						//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
+						Executors.newSingleThreadExecutor().execute(new Runnable() {
+							
+							@Override
+							public void run() {
+								log.info("Install Monitoring Package started.");
+								try {
+									publicClusterService.installMonitoringPackage(clusterIdx);
+								} catch (Exception e) {
+									log.error("", e);
+								}						
+								log.info("Install Monitoring Package Finished.");
+							}
+						});						
+					}					
 				} catch (Exception e) {
 					log.error("", e);
 				}
 			} else {
 				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
-				
 				log.error("Cluster 생성 실패 했거나 KubeConfig 데이터가 잘못 되었습니다.");
 				log.error("data: {}", data);
 			}
@@ -635,6 +666,47 @@ public class PublicClusterService {
 	public String getCloudRequestTopic(String provider) {
 		String topicKey = String.format("plugin.kafka.topic.%s.request", provider.toLowerCase());
 		return env.getProperty(topicKey);
+	}
+	
+	/**
+	 * 클러스터 생성 완료 후 ML
+	 * @param mlClusterEntity
+	 */
+	public boolean installMonitoringPackage(Long clusterIdx) {
+		boolean isOk = true;
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		//IngressController 생성.
+		try {
+			log.info("Ingress Controller 설치 시작. clusterIdx: {}", clusterIdx);
+			ingressControllerService.create(clusterEntity);
+			log.info("Ingress Controller 설치 종료. clusterIdx: {}", clusterIdx);
+		} catch (IOException e) {
+			log.info("Ingress Controller 설치 실패. clusterIdx: {}", clusterIdx);
+			log.error("", e);
+			
+			isOk = false;
+		}
+		
+		//IngressController 생성 완료까지 대기
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		
+		//Monitoring Addon 설치
+		Map<String, Object> parameters = new HashMap<>();	
+		try {
+			log.info("Monitoring addon 설치 시작. clusterIdx: {}", clusterIdx);
+			addonService.installAddon(clusterIdx, "1", parameters, null);
+			log.info("Monitoring addon 설치 종료. clusterIdx: {}", clusterIdx);
+		} catch (IOException e) {
+			log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
+			log.error("", e);
+			isOk = false;
+		}
+		return isOk;
 	}
 	
 }

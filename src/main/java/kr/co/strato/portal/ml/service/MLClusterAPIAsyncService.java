@@ -61,47 +61,45 @@ public class MLClusterAPIAsyncService {
 	
 	
 	public String getPrometheusUrl(Long clusterIdx) {		
-		String url = null;
-		
-		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
-		String cloudProvider = cluster.getProvider().toLowerCase();
-
-		if(cloudProvider.equals("azure")) {
-			String externalIp = getAzureIngressExternalIp(cluster.getClusterId());			
-			url = String.format("http://%s/prometheus/graph", externalIp);
+		String externalUrl = getExternalUrl(clusterIdx);		
+		if(externalUrl == null) {
+			log.error("Get Prometheus url fail. clusterIdx: {}", clusterIdx);
+			log.error("External url is null.");
 		}
 		
-		if(url == null) {
-			log.error("Get Prometheus url fail.");
-			log.error("Unknown cloud provider: {}", cloudProvider);
-		}
-		
+		String url = String.format("http://%s/prometheus/graph", externalUrl);
 		return url;
 	}
 	
 	public String getGrafanaUrl(Long clusterIdx) {		
-		String url = null;
+		String externalUrl = getExternalUrl(clusterIdx);
+		if(externalUrl == null) {
+			log.error("Get Grafana url fail. clusterIdx: {}", clusterIdx);
+			log.error("External url is null.");
+		}
 		
+		String url = String.format("http://%s/grafana", externalUrl);
+		return url;
+	}
+	
+	public String getExternalUrl(Long clusterIdx) {
+		String externalUrl = null;
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 		String cloudProvider = cluster.getProvider().toLowerCase();
 
 		if(cloudProvider.equals("azure")) {
-			String externalIp = getAzureIngressExternalIp(cluster.getClusterId());
-			url = String.format("http://%s/grafana", externalIp);
+			externalUrl = getAzureIngressExternalIp(cluster.getClusterId());
 		}
 		
-		if(url == null) {
-			log.error("Get Prometheus url fail.");
-			log.error("Unknown cloud provider: {}", cloudProvider);
+		if(cloudProvider.equals("aws") || cloudProvider.equals("naver") || cloudProvider.equals("gcp")) {
+			externalUrl = getIngressHostName(cluster.getClusterId());	
 		}
-		
-		return url;
+		return externalUrl;
 	}
 	
 	private String getAzureIngressExternalIp(Long kubeConfigId) {
 		String externalIp = "";
-		io.fabric8.kubernetes.api.model.Service s 
-			= serviceAdapterService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
 
 		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
 		if(list != null && list.size() > 0) {
@@ -109,6 +107,24 @@ public class MLClusterAPIAsyncService {
 			externalIp = loadBalancerIngres.getIp();
 		}
 		return externalIp;
+	}
+	
+	private String getIngressHostName(Long kubeConfigId) {
+		String hostName = "";
+		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
+
+		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
+		if(list != null && list.size() > 0) {
+			LoadBalancerIngress loadBalancerIngres = list.get(0);
+			hostName = loadBalancerIngres.getHostname();
+		}
+		return hostName;
+	}
+	
+	public io.fabric8.kubernetes.api.model.Service getIngressService(Long kubeConfigId) {
+		io.fabric8.kubernetes.api.model.Service s 
+				= serviceAdapterService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+		return s;
 	}
 	
 	/**

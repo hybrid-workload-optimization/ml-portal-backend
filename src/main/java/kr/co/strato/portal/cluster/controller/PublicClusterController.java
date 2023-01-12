@@ -3,11 +3,14 @@ package kr.co.strato.portal.cluster.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -116,6 +119,13 @@ public class PublicClusterController extends CommonController {
 	public ResponseWrapper<String> modify(@RequestHeader Map<String, Object> header, @RequestBody ModifyArgDto modifyDto) {
 		publicClusterService.modifyJobCluster(modifyDto, getLoginUser(), header);
 		return new ResponseWrapper<>();
+	}
+	
+	@PostMapping("/install-monitoring/{clusterIdx}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<Boolean> installMonitoringPackage(@PathVariable Long clusterIdx) {
+		boolean isOk = publicClusterService.installMonitoringPackage(clusterIdx);
+		return new ResponseWrapper<>(isOk);
 	}
 
 }
