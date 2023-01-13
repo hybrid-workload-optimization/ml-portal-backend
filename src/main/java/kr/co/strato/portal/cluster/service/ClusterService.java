@@ -53,6 +53,7 @@ import kr.co.strato.portal.cluster.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
+import kr.co.strato.portal.cluster.model.PublicClusterDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
@@ -103,6 +104,8 @@ public class ClusterService {
 	
 	@Autowired
 	NodeAdapterService nodeAdapterService;
+	
+	PublicClusterService publicClusterService;
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
@@ -814,11 +817,17 @@ public class ClusterService {
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterEntity.getProvisioningType());
 		if (provisioningType == ProvisioningType.KUBESPRAY) {
 			return deleteKubesprayCluster(clusterEntity, loginUser);
-		} else {
+		} else if (provisioningType == ProvisioningType.KUBECONFIG) {
 			return deleteK8sCluster(clusterEntity);
+		} else {
+			//public Cloud에 있는 cluster 삭제			
+			PublicClusterDto.Delete deleteParam = PublicClusterDto.Delete.builder()
+					.clusterIdx(clusterIdx)
+					.build();
+			publicClusterService.deleteCluster(deleteParam, loginUser);
+			
 		}
-		
-		//return null;
+		return null;
 	}
 	
 	/**
