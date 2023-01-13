@@ -199,6 +199,7 @@ public class PublicClusterService {
 			clusterDomainService.update(clusterEntity);
 			
 			String clusterName = clusterEntity.getClusterName();
+			String regin = clusterEntity.getRegion();
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			
@@ -210,8 +211,8 @@ public class PublicClusterService {
 					.workJobStartAt(DateUtil.currentDateTime())
 					.workSyncYn("N")
 					.workJobReferenceIdx(clusterEntity.getClusterIdx())
-					.createUserId(user.getUserId())
-					.createUserName(user.getUserName())
+					//.createUserId(user.getUserId())
+					//.createUserName(user.getUserName())
 					.callbackUrl(callbackUrl)
 					.build();
 			
@@ -220,8 +221,7 @@ public class PublicClusterService {
 			
 			String cloudProvider = clusterEntity.getProvider();
 			AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(cloudProvider);
-			
-			Map<String, Object> param = paramProvider.genDeleteParam(clusterName, null);
+			Map<String, Object> param = paramProvider.genDeleteParam(clusterName, regin);
 			
 			
 			//kafka에 넣기 위한 데이터.

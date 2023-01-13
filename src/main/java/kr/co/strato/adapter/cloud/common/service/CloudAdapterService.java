@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.adapter.cloud.aks.proxy.AKSInterfaceProxy;
 import kr.co.strato.adapter.cloud.aks.service.AKSDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.proxy.InterfaceProxy;
+import kr.co.strato.adapter.cloud.eks.service.EKSDefaultParamProvider;
 import kr.co.strato.adapter.cloud.gke.service.GKSDefaultParamProvider;
+import kr.co.strato.adapter.cloud.naver.service.NaverDefaultParamProvider;
 import kr.co.strato.global.error.exception.BadRequestException;
 
 @Service
@@ -17,6 +19,7 @@ public class CloudAdapterService {
 	public static final String PROVIDER_AZURE = "Azure";
 	public static final String PROVIDER_GCP = "GCP";
 	public static final String PROVIDER_AWS = "AWS";
+	public static final String PROVIDER_NAVER = "NAVER";
 	
 	@Autowired
 	private AKSInterfaceProxy azureInterfaceProxy;
@@ -90,7 +93,9 @@ public class CloudAdapterService {
 		} else if(provider.toLowerCase().equals(PROVIDER_GCP.toLowerCase())) {
 			paramService = new GKSDefaultParamProvider();
 		} else if(provider.toLowerCase().equals(PROVIDER_AWS.toLowerCase())) {
-			
+			paramService = new EKSDefaultParamProvider();
+		} else if(provider.toLowerCase().equals(PROVIDER_NAVER.toLowerCase())) {
+			paramService = new NaverDefaultParamProvider();
 		}
 		return paramService;
 	}
