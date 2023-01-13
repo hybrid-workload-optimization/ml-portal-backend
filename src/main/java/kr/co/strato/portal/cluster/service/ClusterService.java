@@ -105,6 +105,7 @@ public class ClusterService {
 	@Autowired
 	NodeAdapterService nodeAdapterService;
 	
+	@Autowired
 	PublicClusterService publicClusterService;
 	
 	@Autowired
