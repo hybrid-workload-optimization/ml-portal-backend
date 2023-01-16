@@ -102,7 +102,7 @@ public class PublicClusterService {
 		boolean isVaild = true;
 		AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(cloudProvider);
 		if(paramProvider != null) {
-			isVaild = paramProvider.isVaildProvisioningParam(provisioningParam);
+			//isVaild = paramProvider.isVaildProvisioningParam(provisioningParam);
 		} 
 		if(!isVaild) {
 			log.error("[ProvisioningCluster] - 클러스터 생성 실패!");
