@@ -92,7 +92,7 @@ public class ClusterController extends CommonController {
     }
 	
 	@GetMapping("/api/v1/cluster/list")
-    public ResponseWrapper<List<ClusterDto.List>> getCluterList(@RequestParam(required = true) String userId){
+    public ResponseWrapper<List<ClusterDto.List>> getCluterListForDevops(@RequestParam(required = true) String userId){
 		List<ClusterDto.List> results = null;
 		try {
 			results = clusterService.getClusterListForDevops(userId);
