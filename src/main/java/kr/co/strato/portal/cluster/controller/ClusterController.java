@@ -485,4 +485,16 @@ public class ClusterController extends CommonController {
 		String url = mlClusterService.getGrafanaUrl(clusterId);
 		return new ResponseWrapper<>(url);
 	}
+	
+	/**
+	 * Prometheus url 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	@Operation(summary = "Grafana iframe URL", description = "클러스터 아이프래임 Grafana URL 요청")
+	@GetMapping("/api/v1/clusters/{clusterId}/grafana")
+	public ResponseWrapper<String> getGrafanIframeUrl(@PathVariable("clusterIdx") Long clusterIdx) {
+		String url = mlClusterService.getGrafanaIframeUrl(clusterIdx);
+		return new ResponseWrapper<>(url);
+	}
 }
