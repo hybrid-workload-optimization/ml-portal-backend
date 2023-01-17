@@ -504,7 +504,7 @@ public class ClusterController extends CommonController {
 	 * @return
 	 */
 	@Operation(summary = "Grafana iframe URL", description = "클러스터 아이프래임 Grafana URL 요청")
-	@GetMapping("/api/v1/clusters/{clusterId}/grafana-iframe")
+	@GetMapping("/api/v1/clusters/{clusterIdx}/grafana-iframe")
 	public ResponseWrapper<String> getGrafanIframeUrl(@PathVariable("clusterIdx") Long clusterIdx) {
 		String url = mlClusterService.getGrafanaIframeUrl(clusterIdx);
 		return new ResponseWrapper<>(url);
