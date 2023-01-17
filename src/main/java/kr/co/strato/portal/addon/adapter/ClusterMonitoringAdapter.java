@@ -51,21 +51,20 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 	
 	@Override
 	public void setDetails(AddonService service, ClusterEntity cluster, Addon addon) {
+		Long kubeConfigId = cluster.getClusterId();
 		kr.co.strato.portal.addon.model.Package pkg = addon.getPackages().stream().filter(p -> p.getName().equals("grafana")).findFirst().get();
 		EndPoint endpoint = pkg.getEndpoints().stream().filter(e -> e.getName().equals("grafana-dashboard")).findFirst().get();
 		
-		String namespace = endpoint.getNamespace();
-		String serviceName = endpoint.getServiceName();
-		
-		ServiceAdapterService sService = service.getServiceAdapterService();
-		
-		Service svc = null;
-		Long KubeConfigId = cluster.getClusterId();
-		HasMetadata d = sService.get(KubeConfigId, namespace, serviceName);
-		if(d != null) {
-			svc = (Service) d;
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {			
+			String namespace = endpoint.getNamespace();
+			String serviceName = endpoint.getServiceName();
 			
-			if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			ServiceAdapterService sService = service.getServiceAdapterService();
+			
+			Service svc = null;
+			HasMetadata d = sService.get(kubeConfigId, namespace, serviceName);
+			if(d != null) {
+				svc = (Service) d;
 				ServicePort servicePort = null;
 				
 				Optional<ServicePort> op = svc.getSpec().getPorts().stream()
@@ -84,14 +83,20 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 					
 					
 					NodeAdapterService nodeService = service.getNodeAdapterService();
-					List<String> workerIps = nodeService.getWorkerNodeIps(KubeConfigId);
+					List<String> workerIps = nodeService.getWorkerNodeIps(kubeConfigId);
 					for(String ip : workerIps) {
 						String end = String.format("http://%s:%d%s", ip, nodePort, uri);
 						endpoints.add(end);
 					}
 					endpoint.setEndpoints(endpoints);
 				}
-			} else {
+				
+			}
+		} else {
+			ServiceAdapterService sService = service.getServiceAdapterService();
+			HasMetadata d = sService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+			if(d != null) {
+				Service svc = (Service) d;
 				String externalUrl = null;
 				List<LoadBalancerIngress> list = svc.getStatus().getLoadBalancer().getIngress();
 				if(list != null && list.size() > 0) {
@@ -107,7 +112,10 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 				endpoints.add(url);
 				endpoint.setEndpoints(endpoints);
 			}
+			
+			
 		}
+		
 	}
 	
 	/**
