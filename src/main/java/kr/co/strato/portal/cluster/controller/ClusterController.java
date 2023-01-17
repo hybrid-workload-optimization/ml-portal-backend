@@ -1,6 +1,7 @@
 package kr.co.strato.portal.cluster.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -87,6 +88,17 @@ public class ClusterController extends CommonController {
 			}
 		}
         
+        return new ResponseWrapper<>(results);
+    }
+	
+	@GetMapping("/api/v1/cluster/list")
+    public ResponseWrapper<List<ClusterDto.List>> getCluterList(@RequestParam(required = true) String userId){
+		List<ClusterDto.List> results = null;
+		try {
+			results = clusterService.getClusterListForDevops(userId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
         return new ResponseWrapper<>(results);
     }
 	

@@ -55,6 +55,7 @@ import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
 import kr.co.strato.portal.setting.model.UserDto;
+import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
@@ -111,6 +112,10 @@ public class ClusterService {
 	@Autowired
 	ProjectDomainService projectDomainService;
 	
+	@Autowired
+	UserService userService;
+	
+	
 	@Value("${portal.backend.service.url}")
 	String portalBackendServiceUrl;
 	
@@ -149,6 +154,18 @@ public class ClusterService {
 		}
 		return new PageImpl<>(clusterList, pageable, clusterPage.getTotalElements());
 	}
+	
+	
+	public List<ClusterDto.List> getClusterListForDevops(String userId) throws Exception {
+		UserDto userDto = userService.getUserInfo(userId);		
+		List<ClusterEntity> clusterList = clusterDomainService.getListByLoginUser(userDto);
+		
+		List<ClusterDto.List> list = clusterList.stream()
+				.map(c -> ClusterDtoMapper.INSTANCE.toList(c))
+				.collect(Collectors.toList());
+		return list;
+	}
+	
 	
 	public ClusterDto.Status getClusterStatus(Long clusterIdx) {
 		ClusterDto.Status status = new ClusterDto.Status();
