@@ -1,0 +1,36 @@
+{
+  "addonId": "2",
+  "addonType": "argocd",
+  "name": "ArgoCD",
+  "version": "v2.5.4",
+  "desc": "Provides cluster, node, and pod monitoring function using Grafana.",
+  "iconPath": "/icons/argo-icon-color.png",
+  "adapter": "kr.co.strato.portal.addon.adapter.ClusterMonitoringAdapter",
+  "requiredSpec": {
+  	"minKubeletVersion": "1.23.1",
+    "maxKubeletVersion": "1.30.0",
+    "hwSpec": "4Core 8GB 50GB 2Node"
+  },
+  "yamls": [
+	"addons/argocd-2.5.4/argocd-namespace.yaml",
+	"addons/argocd-2.5.4/argocd.yaml",
+    "addons/argocd-2.5.4/argocd-ingress.yaml"
+  ],
+  "packages": [
+    {
+      "name": "ArgoCD",
+      "desc": "ArgoCD 서비스 서비스 제공.",
+      "version": "v2.5.4",
+      "image": "quay.io/argoproj/argocd:v2.5.4",
+      "endpoints": [
+        {
+          "name": "grafana-dashboard",
+          "uri": "/argocd",
+          "type": "ingress",
+          "namespace": "argocd",
+          "serviceName": "argocd-server"
+        }
+      ]      
+    }
+  ]
+}
