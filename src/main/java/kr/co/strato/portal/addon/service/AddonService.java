@@ -17,8 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -172,8 +170,6 @@ public class AddonService {
 			ClassPathResource resource = new ClassPathResource(yamlPath);
 			InputStream is = resource.getInputStream();
 
-			List<HasMetadata> applyList = new ArrayList<>();
-
 			List<HasMetadata> resoures = client.load(is).get();
 			if (adapter != null && parameters != null) {
 				// 파라메타 반영.
@@ -189,18 +185,10 @@ public class AddonService {
 				try {
 					String str = commonProxy.apply(param);					
 					if (str != null && str.length() > 0) {
-						List<HasMetadata> apply = new ObjectMapper().readValue(str, new TypeReference<List<HasMetadata>>() {
-						});
 						
-						if(apply != null) {
-							applyList.addAll(apply);
-							
-							String kind = data.getKind();
-							String name = data.getMetadata().getName();
-							log.info("Addon install success. - kind: {}, name: {}", kind, name);
-						} else {
-							log.info("Addon install fail.");
-						}
+						String kind = data.getKind();
+						String name = data.getMetadata().getName();
+						log.info("Addon install success. - kind: {}, name: {}", kind, name);
 					}
 					result.add(str);
 				} catch (Exception e) {
@@ -269,7 +257,9 @@ public class AddonService {
 		List<String> yamls = addon.getYamls();
 
 		boolean result = true;
-		for (String yamlPath : yamls) {
+		for(int i=yamls.size() -1; i>=0; i--) {
+			String yamlPath = yamls.get(i);
+			
 			ClassPathResource resource = new ClassPathResource(yamlPath);
 			InputStream is = resource.getInputStream();
 
@@ -279,25 +269,23 @@ public class AddonService {
 
 				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlString).build();
 
-				boolean isDelete = commonProxy.delete(param);
-
 				String kind = data.getKind();
 				String name = data.getMetadata().getName();
-
-				if (isDelete) {
+				
+				boolean isDelete = false;
+				try {
+					isDelete = commonProxy.delete(param);
 					log.info("Addon uninstall - Success kind: {}, name: {}", kind, name);
-				} else {
+				} catch (Exception e) {
 					log.info("Addon uninstall - Fail kind: {}, name: {}", kind, name);
 					result = false;
 				}
 			}
 		}
 		client.close();
-
-		if (result) {
-			// DB 정보 삭제.
-			addonDomainService.delete(clusterIdx, addonId);
-		}
+		
+		// DB 정보 삭제.
+		addonDomainService.delete(clusterIdx, addonId);
 
 		log.info("Addon uninstall. clusterIdx: {}, addonId: {}", clusterIdx, addonId);
 		log.info("Addon uninstall result: {}", result);
