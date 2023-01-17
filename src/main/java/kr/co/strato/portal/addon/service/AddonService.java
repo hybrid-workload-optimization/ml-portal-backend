@@ -205,7 +205,12 @@ public class AddonService {
 					result.add(str);
 				} catch (Exception e) {
 					log.error("Addon install fail.");
-					log.error(yamlString);
+					String printYaml = yamlString;
+					if(printYaml.length() > 2000) {
+						printYaml = printYaml.substring(0, 2000);
+						printYaml += ".....";
+					}
+					log.error(printYaml);
 					log.error("", e);
 				}
 				
