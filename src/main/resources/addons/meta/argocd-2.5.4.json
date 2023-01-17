@@ -3,9 +3,9 @@
   "addonType": "argocd",
   "name": "ArgoCD",
   "version": "v2.5.4",
-  "desc": "Provides cluster, node, and pod monitoring function using Grafana.",
+  "desc": "Provides ArgoCD Package.",
   "iconPath": "/icons/argo-icon-color.png",
-  "adapter": "kr.co.strato.portal.addon.adapter.ClusterMonitoringAdapter",
+  "adapter": "kr.co.strato.portal.addon.adapter.ArgoCDAdapter",
   "requiredSpec": {
   	"minKubeletVersion": "1.23.1",
     "maxKubeletVersion": "1.30.0",
