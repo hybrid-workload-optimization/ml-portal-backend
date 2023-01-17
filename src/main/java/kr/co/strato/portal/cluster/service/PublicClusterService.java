@@ -95,7 +95,7 @@ public class PublicClusterService {
     public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user, Map<String, Object> header) {
     	log.info("[ProvisioningCluster] - start");
     	String callbackUrl = param.getCallbackUrl();
-		String cloudProvider = param.getCloudProvider().toLowerCase();
+		String cloudProvider = getCloudProviderLabel(param.getCloudProvider());
 		
 		Map<String, Object> provisioningParam = param.getPovisioningParam();		
 		
@@ -173,6 +173,24 @@ public class PublicClusterService {
 		kafkaProducerService.sendMessage(getCloudRequestTopic(cloudProvider), messageDataJson);
 		return clusterEntity;
 	}
+    
+    
+    public String getCloudProviderLabel(String provider) {
+    	String type = null;
+    	String lowerProvider = provider.toLowerCase();
+    	if(lowerProvider.equals("kubernetes")) {
+			type = "Kubernetes";
+		} else if(lowerProvider.equals("azure")) {
+			type = "Azure";
+		} else if(lowerProvider.equals("gcp")) {
+			type = "GCP";
+		} else if(lowerProvider.equals("aws")) {
+			type = "AWS";
+		} else if(lowerProvider.equals("naver")) {
+			type = "Naver";
+		}
+    	return type;
+    }
     
     public boolean deleteCluster(PublicClusterDto.Delete deleteParam, UserDto user) {
     	return deleteCluster(deleteParam, user, null);
