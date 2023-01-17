@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.portal.addon.model.Addon;
 import kr.co.strato.portal.addon.model.EndPoint;
 import kr.co.strato.portal.addon.service.AddonService;
@@ -48,7 +50,7 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 	}
 	
 	@Override
-	public void setDetails(AddonService service, Long KubeConfigId, Addon addon) {
+	public void setDetails(AddonService service, ClusterEntity cluster, Addon addon) {
 		kr.co.strato.portal.addon.model.Package pkg = addon.getPackages().stream().filter(p -> p.getName().equals("grafana")).findFirst().get();
 		EndPoint endpoint = pkg.getEndpoints().stream().filter(e -> e.getName().equals("grafana-dashboard")).findFirst().get();
 		
@@ -58,35 +60,52 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 		ServiceAdapterService sService = service.getServiceAdapterService();
 		
 		Service svc = null;
+		Long KubeConfigId = cluster.getClusterId();
 		HasMetadata d = sService.get(KubeConfigId, namespace, serviceName);
 		if(d != null) {
 			svc = (Service) d;
 			
-			ServicePort servicePort = null;
-			
-			Optional<ServicePort> op = svc.getSpec().getPorts().stream()
-					.filter(p -> p.getNodePort() != null)
-					.findFirst();
-			if(op.isPresent()) {
-				servicePort = op.get();
-			}
-			
-			if(servicePort != null) {
-				List<String> endpoints = new ArrayList<>();
+			if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+				ServicePort servicePort = null;
 				
-				String protocol = servicePort.getProtocol();
-				Integer nodePort = servicePort.getNodePort();
-				String uri = endpoint.getUri();
-				
-				
-				NodeAdapterService nodeService = service.getNodeAdapterService();
-				List<String> workerIps = nodeService.getWorkerNodeIps(KubeConfigId);
-				for(String ip : workerIps) {
-					String end = String.format("http://%s:%d%s", ip, nodePort, uri);
-					endpoints.add(end);
+				Optional<ServicePort> op = svc.getSpec().getPorts().stream()
+						.filter(p -> p.getNodePort() != null)
+						.findFirst();
+				if(op.isPresent()) {
+					servicePort = op.get();
 				}
-				endpoint.setEndpoints(endpoints);
 				
+				if(servicePort != null) {
+					List<String> endpoints = new ArrayList<>();
+					
+					String protocol = servicePort.getProtocol();
+					Integer nodePort = servicePort.getNodePort();
+					String uri = endpoint.getUri();
+					
+					
+					NodeAdapterService nodeService = service.getNodeAdapterService();
+					List<String> workerIps = nodeService.getWorkerNodeIps(KubeConfigId);
+					for(String ip : workerIps) {
+						String end = String.format("http://%s:%d%s", ip, nodePort, uri);
+						endpoints.add(end);
+					}
+					endpoint.setEndpoints(endpoints);
+				}
+			} else {
+				String externalUrl = null;
+				List<LoadBalancerIngress> list = svc.getStatus().getLoadBalancer().getIngress();
+				if(list != null && list.size() > 0) {
+					LoadBalancerIngress loadBalancerIngres = list.get(0);
+					externalUrl = loadBalancerIngres.getIp();
+					if(externalUrl == null || externalUrl.isEmpty()) {
+						externalUrl = loadBalancerIngres.getHostname();
+					}
+				}
+				String url = String.format("http://%s/grafana", externalUrl);
+				
+				List<String> endpoints = new ArrayList<>();
+				endpoints.add(url);
+				endpoint.setEndpoints(endpoints);
 			}
 		}
 	}

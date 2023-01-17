@@ -120,7 +120,6 @@ public class AddonService {
 	 * @throws IOException
 	 */
 	public Addon getAddon(Long clusterIdx, String addonId) throws IOException {
-		Long kubeConfigId = getKubeConfigId(clusterIdx);
 		Addon addon = getAddons().get(addonId);
 		if (addon == null) {
 			log.error("Addon not found. - addonId: {}", addonId);
@@ -130,7 +129,8 @@ public class AddonService {
 		AddonAdapter adapter = getAdapter(addon);
 		if (adapter != null) {
 			// 상세 정보 셋
-			adapter.setDetails(this, kubeConfigId, addon);
+			ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+			adapter.setDetails(this, clusterEntity, addon);
 		}
 
 		AddonEntity entity = addonDomainService.getEntity(clusterIdx, addonId);
