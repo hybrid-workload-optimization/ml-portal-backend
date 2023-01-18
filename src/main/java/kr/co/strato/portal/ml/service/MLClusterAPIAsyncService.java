@@ -110,7 +110,7 @@ public class MLClusterAPIAsyncService {
 			log.error("Get ArgoCD url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
 		}
-		String url = String.format("http://%s/argocd", externalUrl);
+		String url = String.format("https://%s/argocd", externalUrl);
 		
 		String password = null;
 		try {
