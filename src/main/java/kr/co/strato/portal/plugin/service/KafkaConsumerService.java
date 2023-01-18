@@ -187,7 +187,7 @@ public class KafkaConsumerService {
 		workJobService.updateWorkJob(workJobEntity);		
 		
 		//콜백이 존재하는 경우 콜백 수행
-		if(callbackUrl != null) {
+		if(callbackUrl != null && callbackUrl.length() > 0) {
 			
 			log.info("Send Callback. url: {}", callbackUrl);
 			

@@ -88,6 +88,9 @@ public class AlertService {
 		}
 		
 		for(String userId : userIds) {
+			if(userId == null) {
+				continue;
+			}
 			try {
 				AlertEntity entity = AlertEntity.builder()
 						.clusterIdx(clusterIdx)
