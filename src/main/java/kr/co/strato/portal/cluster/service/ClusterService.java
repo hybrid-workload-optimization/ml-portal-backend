@@ -176,6 +176,7 @@ public class ClusterService {
 			
 			ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
 			
+			status.setNodeCount(clusterEntity.getNodeCount());
 			status.setClusterIdx(clusterIdx);
 			status.setStatus(health.getHealth());
 			status.setProblem(status.getProblem());
