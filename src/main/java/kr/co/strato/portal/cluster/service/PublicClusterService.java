@@ -532,11 +532,21 @@ public class PublicClusterService {
 							log.error("", e);
 						}						
 						log.info("Install Monitoring Package Finished.");
+						
+						
+						log.info("Install ArgoCD Package started.");
+						try {
+							installArgoCDPackage(clusterEntity);
+						} catch (Exception e) {
+							log.error("", e);
+						}						
+						log.info("Install ArgoCD Package Finished.");
 					}
 				});
 				
 			} else {
 				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
+				clusterDomainService.update(clusterEntity);
 				log.error("Cluster 생성 실패 했거나 KubeConfig 데이터가 잘못 되었습니다.");
 				log.error("data: {}", data);
 			}
@@ -724,6 +734,25 @@ public class PublicClusterService {
 		try {
 			log.info("Monitoring addon 설치 시작. clusterIdx: {}", clusterIdx);
 			addonService.installAddon(clusterIdx, "1", parameters, null);
+			log.info("Monitoring addon 설치 종료. clusterIdx: {}", clusterIdx);
+		} catch (IOException e) {
+			log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
+			log.error("", e);
+			isOk = false;
+		}
+		return isOk;
+	}
+	
+	public boolean installArgoCDPackage(ClusterEntity clusterEntity) {
+		boolean isOk = true;
+		
+		Long clusterIdx = clusterEntity.getClusterIdx();				
+				
+		//Monitoring Addon 설치
+		Map<String, Object> parameters = new HashMap<>();	
+		try {
+			log.info("Monitoring addon 설치 시작. clusterIdx: {}", clusterIdx);
+			addonService.installAddon(clusterIdx, "2", parameters, null);
 			log.info("Monitoring addon 설치 종료. clusterIdx: {}", clusterIdx);
 		} catch (IOException e) {
 			log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
