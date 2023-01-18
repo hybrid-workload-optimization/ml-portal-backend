@@ -2,10 +2,13 @@ package kr.co.strato.portal.ml.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Base64.Decoder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,17 +22,20 @@ import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
+import kr.co.strato.adapter.k8s.secret.service.SecretAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.adapter.ml.model.ForecastDto;
 import kr.co.strato.adapter.ml.model.PodSpecDto;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.portal.cluster.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.model.ModifyArgDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
 import kr.co.strato.portal.cluster.model.ScaleArgDto;
@@ -56,6 +62,9 @@ public class MLClusterAPIAsyncService {
 	
 	@Autowired
 	private ServiceAdapterService serviceAdapterService;
+	
+	@Autowired
+	private SecretAdapterService secretAdapterService;
 	
 	private KubernetesClient client;
 	
@@ -92,9 +101,39 @@ public class MLClusterAPIAsyncService {
 		return clusterMonitoringUrl;
 	}
 	
-	public String getExternalUrl(Long clusterIdx) {
-		String externalUrl = null;
+	public ArgoCDInfo getArgoCDInfo(Long clusterIdx) {	
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = cluster.getClusterId();
+		
+		String externalUrl = getExternalUrl(cluster);
+		if(externalUrl == null) {
+			log.error("Get ArgoCD url fail. clusterIdx: {}", clusterIdx);
+			log.error("External url is null.");
+		}
+		String url = String.format("http://%s/argocd", externalUrl);
+		
+		String password = null;
+		try {
+			Secret secret = secretAdapterService.get(kubeConfigId, "argocd", "argocd-initial-admin-secret");
+			if(secret != null && secret.getData() != null && secret.getData().containsKey("password")) {
+				String encodedPassword = secret.getData().get("password");
+				password = base64Decoding(encodedPassword);
+			} else {
+				log.error("Argocd 패스워드가 존재하지 않습니다. clusterIdx: {}", clusterIdx);
+			}
+		} catch (Exception e) {
+			log.error("Argocd 패스워드 가져오기 실패.", e);
+		}		
+		return ArgoCDInfo.builder().url(url).password(password).build();
+	}
+	
+	public String getExternalUrl(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		return getExternalUrl(cluster);
+	}
+	
+	public String getExternalUrl(ClusterEntity cluster) {
+		String externalUrl = null;
 		Long kubeConfigId = cluster.getClusterId();
 		
 		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
@@ -374,6 +413,22 @@ public class MLClusterAPIAsyncService {
 				.userName("ML관리자")
 				.build();		
 		publicClusterService.modifyJobCluster(modifyDto, user);
+	}
+	
+	public String base64Decoding(String encodedString) {
+		return base64Decoding(encodedString, "UTF-8");
+	}
+	
+	public String base64Decoding(String encodedString, String charset) {
+		Decoder decoder = Base64.getDecoder();
+		byte[] decodedBytes1 = decoder.decode(encodedString.getBytes());
+		String decodedString = null;
+		try {
+			decodedString = new String(decodedBytes1, charset);
+		} catch (UnsupportedEncodingException e) {
+			log.error("", e);
+		}
+		return decodedString;
 	}
 	
 	

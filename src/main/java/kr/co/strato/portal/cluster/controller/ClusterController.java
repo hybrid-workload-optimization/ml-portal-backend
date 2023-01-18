@@ -23,6 +23,7 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.addon.model.Addon;
 import kr.co.strato.portal.addon.service.AddonService;
+import kr.co.strato.portal.cluster.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
@@ -509,4 +510,17 @@ public class ClusterController extends CommonController {
 		String url = mlClusterService.getGrafanaIframeUrl(clusterIdx);
 		return new ResponseWrapper<>(url);
 	}
+
+	/**
+	 * ArgoCD 접속정보 반환.
+	 * @param clusterId
+	 * @return
+	 */
+	@Operation(summary = "ArgoCD 접속 정보", description = "ArgoCD URL, Password")
+	@GetMapping("/api/v1/clusters/{clusterIdx}/argocd")
+	public ResponseWrapper<ArgoCDInfo> getArgoCDInfo(@PathVariable("clusterIdx") Long clusterIdx) {
+		ArgoCDInfo info = mlClusterService.getArgoCDInfo(clusterIdx);
+		return new ResponseWrapper<>(info);
+	}
+	
 }
