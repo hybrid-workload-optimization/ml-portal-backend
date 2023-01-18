@@ -16,5 +16,6 @@ import lombok.ToString;
 public class YamlApplyParam {
     private Long kubeConfigId;
     private String yaml;
+    private String namespace;
 
 }

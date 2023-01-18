@@ -180,7 +180,11 @@ public class AddonService {
 			for (HasMetadata data : resoures) {
 				yamlString = Serialization.asYaml(data);
 
-				YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlString).build();
+				YamlApplyParam param = YamlApplyParam.builder()
+						.kubeConfigId(kubeConfigId)
+						.yaml(yamlString)
+						.namespace("argocd")
+						.build();
 				
 				try {
 					String str = commonProxy.apply(param);					
