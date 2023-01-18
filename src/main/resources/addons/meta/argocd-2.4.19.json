@@ -2,19 +2,19 @@
   "addonId": "2",
   "addonType": "argocd",
   "name": "ArgoCD",
-  "version": "v2.5.4",
+  "version": "v2.4.19",
   "desc": "Provides ArgoCD Package.",
   "iconPath": "/icons/argo-icon-color.png",
   "adapter": "kr.co.strato.portal.addon.adapter.ArgoCDAdapter",
   "requiredSpec": {
-  	"minKubeletVersion": "1.23.1",
-    "maxKubeletVersion": "1.30.0",
+  	"minKubeletVersion": "1.22.0",
+    "maxKubeletVersion": "1.24.0",
     "hwSpec": "4Core 8GB 50GB 2Node"
   },
   "yamls": [
-	"addons/argocd-2.5.4/argocd-namespace.yaml",
-	"addons/argocd-2.5.4/argocd.yaml",
-    "addons/argocd-2.5.4/argocd-ingress.yaml"
+	"addons/argocd-2.4.19/argocd-namespace.yaml",
+	"addons/argocd-2.4.19/argocd.yaml",
+    "addons/argocd-2.4.19/argocd-ingress.yaml"
   ],
   "packages": [
     {
