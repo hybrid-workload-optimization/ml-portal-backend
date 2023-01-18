@@ -20,11 +20,11 @@
     {
       "name": "ArgoCD",
       "desc": "ArgoCD 서비스 서비스 제공.",
-      "version": "v2.5.4",
+      "version": "v2.4.19",
       "image": "quay.io/argoproj/argocd:v2.5.4",
       "endpoints": [
         {
-          "name": "grafana-dashboard",
+          "name": "argocd",
           "uri": "/argocd",
           "type": "ingress",
           "namespace": "argocd",
