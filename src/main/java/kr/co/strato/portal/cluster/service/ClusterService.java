@@ -227,7 +227,7 @@ public class ClusterService {
 		}
 		
 		
-		if(health == null) {
+		if(health.getHealth() == null) {
 			health.setHealth("Error");
 			health.addProbleam("Unknown Error.");
 		}
