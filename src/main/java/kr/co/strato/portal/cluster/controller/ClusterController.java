@@ -90,18 +90,7 @@ public class ClusterController extends CommonController {
 		}
         
         return new ResponseWrapper<>(results);
-    }
-	
-	@GetMapping("/api/v1/cluster/list")
-    public ResponseWrapper<List<ClusterDto.List>> getCluterListForDevops(@RequestParam(required = true) String userId){
-		List<ClusterDto.List> results = null;
-		try {
-			results = clusterService.getClusterListForDevops(userId);
-		} catch (Exception e) {
-			log.error("", e);
-		}
-        return new ResponseWrapper<>(results);
-    }
+    }	
 	
 	@GetMapping("/api/v1/clusters/{clusterIdx}/status")
     public ResponseWrapper<ClusterDto.Status> getClusterStatus(@PathVariable(required = true) Long clusterIdx){
@@ -522,5 +511,16 @@ public class ClusterController extends CommonController {
 		ArgoCDInfo info = mlClusterService.getArgoCDInfo(clusterIdx);
 		return new ResponseWrapper<>(info);
 	}
+	
+	@GetMapping("/api/v1/cluster/list")
+    public ResponseWrapper<List<ClusterDto.ListForDevops>> getCluterListForDevops(@RequestParam(required = true) String userId){
+		List<ClusterDto.ListForDevops> results = null;
+		try {
+			results = clusterService.getClusterListForDevops(userId);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+        return new ResponseWrapper<>(results);
+    }
 	
 }

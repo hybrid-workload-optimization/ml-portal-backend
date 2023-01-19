@@ -101,6 +101,10 @@ public class ClusterDomainService {
 		return clusterRepository.getUserClusterList(loginUser);
 	}
 	
+	public List<ClusterEntity> getListByLoginUserForDevops(UserDto loginUser){
+		return clusterRepository.getUserClusterListForDevops(loginUser);
+	}
+	
 
 	public void delete(ClusterEntity clusterEntity) {
 		clusterMapper.deleteClusterAll(clusterEntity.getClusterIdx());

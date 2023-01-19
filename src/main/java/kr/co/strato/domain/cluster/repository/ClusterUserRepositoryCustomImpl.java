@@ -51,6 +51,29 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 		List<ClusterEntity> result = query.fetch();		
 		return result;
 	}
+	
+	
+	@Override
+	public List<ClusterEntity> getUserClusterListForDevops(UserDto loginUser) {
+		JPAQuery<ClusterEntity> query =  queryFactory
+				.select(clusterEntity)
+				  .from(clusterEntity);
+		
+		if(loginUser != null 
+				&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN)
+				&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+			query = query.where(clusterEntity.clusterIdx.in(
+					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
+							JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))
+					))
+					
+			  ).or(clusterEntity.createUserId.eq(loginUser.getUserId())));
+	    }
+		query.orderBy(clusterEntity.createdAt.desc());
+		
+		List<ClusterEntity> result = query.fetch();
+		return result;
+	}
 
 
 	@Override

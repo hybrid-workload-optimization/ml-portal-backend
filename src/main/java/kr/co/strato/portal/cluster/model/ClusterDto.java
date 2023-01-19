@@ -82,6 +82,13 @@ public class ClusterDto {
 	@Getter
 	@Setter
 	@NoArgsConstructor
+	public static class ListForDevops extends List {
+		private ArgoCDInfo argocd;
+	}
+	
+	@Getter
+	@Setter
+	@NoArgsConstructor
 	public static class Status {
 		private Long clusterIdx;
 		private String status;

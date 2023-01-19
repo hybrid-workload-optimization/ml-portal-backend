@@ -48,9 +48,11 @@ import kr.co.strato.global.error.exception.DuplicateResourceNameException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
@@ -115,6 +117,9 @@ public class ClusterService {
 	@Autowired
 	UserService userService;
 	
+	@Autowired
+	MLClusterAPIAsyncService mlClusterService;
+	
 	
 	@Value("${portal.backend.service.url}")
 	String portalBackendServiceUrl;
@@ -156,13 +161,19 @@ public class ClusterService {
 	}
 	
 	
-	public List<ClusterDto.List> getClusterListForDevops(String userId) throws Exception {
+	public List<ClusterDto.ListForDevops> getClusterListForDevops(String userId) throws Exception {
 		UserDto userDto = userService.getUserInfo(userId);		
-		List<ClusterEntity> clusterList = clusterDomainService.getListByLoginUser(userDto);
+		List<ClusterEntity> clusterList = clusterDomainService.getListByLoginUserForDevops(userDto);
 		
-		List<ClusterDto.List> list = clusterList.stream()
-				.map(c -> ClusterDtoMapper.INSTANCE.toList(c))
+		List<ClusterDto.ListForDevops> list = clusterList.stream()
+				.map(c -> ClusterDtoMapper.INSTANCE.toListForDevops(c))
 				.collect(Collectors.toList());
+		
+		for(ClusterDto.ListForDevops c : list) {
+			Long clusterIdx = c.getClusterIdx();
+			ArgoCDInfo info = mlClusterService.getArgoCDInfo(clusterIdx);
+			c.setArgocd(info);	
+		}
 		return list;
 	}
 	

@@ -18,6 +18,14 @@ public interface ClusterUserRepositoryCustom {
 	 */
 	public List<ClusterEntity> getUserClusterList(UserDto loginUser);
 	
+	/**
+	 * 데브옵스 연동을 위한 클러스터 리스트 반환.
+	 * 기존 리스트 + 로그인 사용자가 생성한 클러스터 추가. 
+	 * @param loginUser
+	 * @return
+	 */
+	public List<ClusterEntity> getUserClusterListForDevops(UserDto loginUser);
+	
 	
 	public Page<ClusterEntity> getUserClusterList(Pageable pageable, UserDto loginUser);
 	

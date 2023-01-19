@@ -33,6 +33,11 @@ public interface ClusterDtoMapper {
 	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
 	public ClusterDto.List toList(ClusterEntity c);
 	
+	@Mapping(target = "nodeCount", 		source = "c.nodes",		qualifiedByName = "nodeCount")
+    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
+	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
+	public ClusterDto.ListForDevops toListForDevops(ClusterEntity c);
+	
 	@Mapping(target = "description",	source = "c.description")
     @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
 	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")

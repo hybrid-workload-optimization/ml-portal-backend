@@ -514,12 +514,44 @@ public class PublicClusterService {
 					log.error("", e);
 				}
 				
+				
+				
+				//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
+				log.info("Install Monitoring Package started.");
+				try {
+					installMonitoringPackage(clusterEntity);
+				} catch (Exception e) {
+					log.error("", e);
+				}						
+				log.info("Install Monitoring Package Finished.");
+				
+				
+				log.info("Install ArgoCD Package started.");
+				try {
+					installArgoCDPackage(clusterEntity);
+				} catch (Exception e) {
+					log.error("", e);
+				}						
+				log.info("Install ArgoCD Package Finished.");
+				
+				//패키지 로딩까지 30초 대기
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				
+				
 				String now = DateUtil.currentDateTime();
 				clusterEntity.setUpdatedAt(now);
 				
 				clusterDomainService.update(clusterEntity);
 				log.info("Job cluster provisioning success.");
 				
+				
+				
+				/*
+				//싱가폴 시연을 위해 주석처리.
 				//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
 				Executors.newSingleThreadExecutor().execute(new Runnable() {
 					
@@ -543,6 +575,7 @@ public class PublicClusterService {
 						log.info("Install ArgoCD Package Finished.");
 					}
 				});
+				*/
 				
 			} else {
 				clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
