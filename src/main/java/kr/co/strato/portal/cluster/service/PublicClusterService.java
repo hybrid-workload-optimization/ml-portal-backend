@@ -488,17 +488,18 @@ public class PublicClusterService {
 					}
 					
 					log.info("-----------------------------------------------");
-					log.info("등록된 kubeConfigId: {}", strClusterId);
+					log.info("등록된 clusterIdx: {}, kubeConfigId: {}", clusterEntity.getClusterIdx(), strClusterId);
 					log.info("-----------------------------------------------");
 					
 					if (StringUtils.isEmpty(strClusterId)) {
 						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
-						
+						clusterDomainService.update(clusterEntity);
 						log.error("KubeConfig 등록 실패");
 					} else {
 						Long kubeConfigId = Long.valueOf(strClusterId);
 						clusterEntity.setClusterId(kubeConfigId);
-						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+						clusterDomainService.update(clusterEntity);
+						
 						
 						log.info("KubeConfig 등록 완료");
 						log.info("Cluster Synchronization started.");
@@ -507,48 +508,48 @@ public class PublicClusterService {
 						} catch (Exception e) {
 							log.error("", e);
 							
+						}						
+						
+						//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
+						log.info("Install Monitoring Package started.");
+						try {
+							installMonitoringPackage(clusterEntity);
+						} catch (Exception e) {
+							log.error("", e);
+						}						
+						log.info("Install Monitoring Package Finished.");
+						
+						
+						log.info("Install ArgoCD Package started.");
+						try {
+							installArgoCDPackage(clusterEntity);
+						} catch (Exception e) {
+							log.error("", e);
+						}						
+						log.info("Install ArgoCD Package Finished.");
+						
+						//패키지 로딩까지 30초 대기
+						try {
+							Thread.sleep(30000);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
 						}
-						log.info("Cluster Synchronization finished.");										
+						
+						
+						String now = DateUtil.currentDateTime();
+						clusterEntity.setUpdatedAt(now);
+						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+						clusterDomainService.update(clusterEntity);
+						log.info("Job cluster provisioning success.");
+						
+						
+						log.info("Cluster Synchronization finished.");
 					}					
 				} catch (Exception e) {
+					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
+					clusterDomainService.update(clusterEntity);
 					log.error("", e);
 				}
-				
-				
-				
-				//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
-				log.info("Install Monitoring Package started.");
-				try {
-					installMonitoringPackage(clusterEntity);
-				} catch (Exception e) {
-					log.error("", e);
-				}						
-				log.info("Install Monitoring Package Finished.");
-				
-				
-				log.info("Install ArgoCD Package started.");
-				try {
-					installArgoCDPackage(clusterEntity);
-				} catch (Exception e) {
-					log.error("", e);
-				}						
-				log.info("Install ArgoCD Package Finished.");
-				
-				//패키지 로딩까지 30초 대기
-				try {
-					Thread.sleep(30000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				
-				
-				String now = DateUtil.currentDateTime();
-				clusterEntity.setUpdatedAt(now);
-				
-				clusterDomainService.update(clusterEntity);
-				log.info("Job cluster provisioning success.");
-				
-				
 				
 				/*
 				//싱가폴 시연을 위해 주석처리.
