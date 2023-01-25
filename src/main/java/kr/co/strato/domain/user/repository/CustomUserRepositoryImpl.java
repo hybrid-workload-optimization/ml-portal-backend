@@ -30,6 +30,7 @@ import kr.co.strato.domain.project.model.QProjectUserEntity;
 import kr.co.strato.domain.user.model.QUserEntity;
 import kr.co.strato.domain.user.model.QUserRoleEntity;
 import kr.co.strato.domain.user.model.UserEntity;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.SearchParam;
@@ -47,7 +48,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 	}
 	
 	@Override
-	public Page<UserEntity> getListUserWithParam(Pageable pageable, SearchParam param) {
+	public Page<UserEntity> getListUserWithParam(Pageable pageable, SearchParam param, UserDto loginUser) {
 		
 		QUserEntity	qUserEntity = QUserEntity.userEntity;
 		QProjectUserEntity qProjectUserEntity = QProjectUserEntity.projectUserEntity;
@@ -72,6 +73,13 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 		if(param.getNotAuthorityId()!= null && !"".equals(param.getNotAuthorityId())) {
 			//해당 권한이 아닌 사용자만 리턴.
 			builder.and(qUserRoleEntity.userRoleCode.ne(param.getNotAuthorityId()));
+		}
+		
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN) 
+		    		&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+			//시스템 어드민 , 포탈 어드민이 아닌 일반 사용자인 경우
+			//본인이 생성한 유저만 리스트에 보이도록 수정.
+			builder.and(qUserEntity.createUserId.eq(loginUser.getUserId()));
 		}
 		
 		QueryResults<UserEntity> results = null;

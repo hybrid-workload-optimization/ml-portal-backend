@@ -6,9 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Base64.Decoder;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,14 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
+import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.secret.service.SecretAdapterService;
 import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.adapter.ml.model.ForecastDto;
@@ -66,39 +69,68 @@ public class MLClusterAPIAsyncService {
 	@Autowired
 	private SecretAdapterService secretAdapterService;
 	
+	@Autowired
+	private NodeAdapterService nodeAdapterService;
+	
 	private KubernetesClient client;
 	
 	
-	public String getPrometheusUrl(Long clusterIdx) {		
-		String externalUrl = getExternalUrl(clusterIdx);		
+	public String getPrometheusUrl(Long clusterIdx) {	
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String externalUrl = getExternalUrl(cluster);		
 		if(externalUrl == null) {
 			log.error("Get Prometheus url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
 		}
 		
-		String url = String.format("http://%s/prometheus/graph", externalUrl);
+		String url = null;
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			url = String.format("http://%s", externalUrl);
+		} else {
+			//Public Cloud
+			url = String.format("http://%s/prometheus/graph", externalUrl);
+		}
 		return url;
 	}
 	
-	public String getGrafanaUrl(Long clusterIdx) {		
-		String externalUrl = getExternalUrl(clusterIdx);
+	public String getGrafanaUrl(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String externalUrl = getExternalUrl(cluster);
 		if(externalUrl == null) {
 			log.error("Get Grafana url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
 		}
 		
-		String url = String.format("http://%s/grafana", externalUrl);
+		String url = null;
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			url = String.format("http://%s", externalUrl);
+		} else {
+			//Public Cloud
+			url = String.format("http://%s/grafana", externalUrl);
+		}
 		return url;
 	}
 	
-	public String getGrafanaIframeUrl(Long clusterIdx) {		
-		String externalUrl = getExternalUrl(clusterIdx);
+	public String getGrafanaIframeUrl(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String externalUrl = getExternalUrl(cluster);
 		if(externalUrl == null) {
 			log.error("Get Grafana url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
 			return null;
 		}
 		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
+		
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			clusterMonitoringUrl = String.format("http://%s/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
+		} else {
+			//Public Cloud
+			clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
+		}
+		
 		return clusterMonitoringUrl;
 	}
 	
@@ -111,7 +143,15 @@ public class MLClusterAPIAsyncService {
 			log.error("Get ArgoCD url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
 		}
-		String url = String.format("https://%s/argocd", externalUrl);
+		
+		String url = null;
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			url = String.format("https://%s", externalUrl);
+		} else {
+			//Public Cloud
+			url = String.format("https://%s/argocd", externalUrl);
+		}
 		
 		String password = null;
 		try {
@@ -128,12 +168,47 @@ public class MLClusterAPIAsyncService {
 		return ArgoCDInfo.builder().url(url).password(password).build();
 	}
 	
-	public String getExternalUrl(Long clusterIdx) {
-		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
-		return getExternalUrl(cluster);
+	public String getExternalUrl(ClusterEntity cluster) {		
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			return getPrivateExternalUrl(cluster);
+			
+		} else {
+			//Public Cloud
+			return getPublicExternalUrl(cluster);
+		}
 	}
 	
-	public String getExternalUrl(ClusterEntity cluster) {
+	public String getPrivateExternalUrl(ClusterEntity cluster) {
+		String externalUrl = null;
+		Long kubeConfigId = cluster.getClusterId();
+		
+		io.fabric8.kubernetes.api.model.Service svc = serviceAdapterService.get(kubeConfigId, "monitoring", "grafana");
+		if(svc != null) {
+			ServicePort servicePort = null;
+			
+			Optional<ServicePort> op = svc.getSpec().getPorts().stream()
+					.filter(p -> p.getNodePort() != null)
+					.findFirst();
+			if(op.isPresent()) {
+				servicePort = op.get();
+			}
+			
+			if(servicePort != null) {				
+				String protocol = servicePort.getProtocol();
+				Integer nodePort = servicePort.getNodePort();				
+				List<String> workerIps = nodeAdapterService.getWorkerNodeIps(kubeConfigId);
+				for(String ip : workerIps) {
+					String end = String.format("%s:%d", ip, nodePort);
+					externalUrl = end;
+					break;
+				}
+			}
+		}
+		return externalUrl;
+	}
+	
+	public String getPublicExternalUrl(ClusterEntity cluster) {
 		String externalUrl = null;
 		Long kubeConfigId = cluster.getClusterId();
 		

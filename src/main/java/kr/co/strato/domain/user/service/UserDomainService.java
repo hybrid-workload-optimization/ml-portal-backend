@@ -50,15 +50,17 @@ public class UserDomainService {
 		// 등록
 		if("post".equals(mode)) {
 			//DB 저장
-			//PROJECT MEMBER의 RoleCode 가져오기
-			String roleCode = "PROJECT_MEMBER";
-			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
 			
-			//권한 매핑 
-			entity.getUserRole().setId(role.getId());
-			
+			if(entity.getUserRole() == null) {
+				//PROJECT MEMBER의 RoleCode 가져오기
+				String roleCode = "PROJECT_MEMBER";
+				UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+				
+				//권한 매핑 
+				entity.getUserRole().setId(role.getId());
+			}
 			userRepository.save(entity);	
-		}else {
+		} else {
 			
 			// 수정할 유저의 roleCode > 변경했다면 코드값이 있고, 없다면 값이 없음
 			String roleCode = entity.getUserRole().getUserRoleCode();
@@ -129,8 +131,8 @@ public class UserDomainService {
 		return list;
 	}
 	
-	public Page<UserEntity> getAllUserList(Pageable pageable, SearchParam param) {
-		Page<UserEntity> list =  userRepository.getListUserWithParam(pageable, param);
+	public Page<UserEntity> getAllUserList(Pageable pageable, SearchParam param, UserDto loginUser) {
+		Page<UserEntity> list =  userRepository.getListUserWithParam(pageable, param, loginUser);
 		return list;
 	}
 

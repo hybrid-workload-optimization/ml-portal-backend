@@ -64,60 +64,61 @@ public class AccessFilter implements Filter{
         
 		String acToken = request.getHeader("access-token");
 		
-		if(!checkPath(path, method)) {
-			if(acToken != null) {
-				
-				//41번 과제 API 인증 토큰
-				if(acToken.equals(ML_API_TOKEN)) {
-					chain.doFilter(request, response);
-					return;
-				}
-				
-				//128번 과제 API 인증 토큰
-				if(acToken.equals(CMP_API_TOKEN)) {
-					//128번 과제 사용자 인증
-					//임시 토큰을 발급하여 cmp@strato.co.kr 사용자로 임시 사용
-					UserDto loginUser = new UserDto();
-					loginUser.setUserId("cmp@strato.co.kr");
-					request.setAttribute("loginUser", loginUser);
-					chain.doFilter(request, response);
-					return;
-				}
-				
-				
-				String token = null;
-				try {
-					token = tokenValidator.decrypt(acToken, timestamp, path, method);
-				} catch (Exception e) {
-					e.printStackTrace();
-					request.getSession(false);
-					response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
-				}
-				if(token == null) {
-					log.info("Token is null");
+		if(acToken != null) {
+			
+			//41번 과제 API 인증 토큰
+			if(acToken.equals(ML_API_TOKEN)) {
+				chain.doFilter(request, response);
+				return;
+			}
+			
+			//128번 과제 API 인증 토큰
+			if(acToken.equals(CMP_API_TOKEN)) {
+				//128번 과제 사용자 인증
+				//임시 토큰을 발급하여 cmp@strato.co.kr 사용자로 임시 사용
+				UserDto loginUser = new UserDto();
+				loginUser.setUserId("cmp@strato.co.kr");
+				request.setAttribute("loginUser", loginUser);
+				chain.doFilter(request, response);
+				return;
+			}
+			
+			
+			String token = null;
+			try {
+				token = tokenValidator.decrypt(acToken, timestamp, path, method);
+			} catch (Exception e) {
+				e.printStackTrace();
+				request.getSession(false);
+				response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			}
+			if(token == null) {
+				log.info("Token is null");
+				request.getSession(false);
+				response.sendError(HttpStatus.UNAUTHORIZED.value());
+			} else {
+				if(!tokenValidator.validateToken(token)) {
+					log.info("Token is not validate. Token: {}", token);
+					
+					//토큰 기간 만료
 					request.getSession(false);
 					response.sendError(HttpStatus.UNAUTHORIZED.value());
 				} else {
-					if(!tokenValidator.validateToken(token)) {
-						log.info("Token is not validate. Token: {}", token);
-						
-						//토큰 기간 만료
-						request.getSession(false);
-						response.sendError(HttpStatus.UNAUTHORIZED.value());
-					} else {
-						UserDto loginUser = tokenValidator.extractUserInfo(token);
-						request.setAttribute("loginUser", loginUser);
-						chain.doFilter(request, response);
-					}
-				}	
+					UserDto loginUser = tokenValidator.extractUserInfo(token);
+					request.setAttribute("loginUser", loginUser);
+					chain.doFilter(request, response);
+				}
+			}	
+		} else {
+			if(checkPath(path, method)) {
+				chain.doFilter(request, response);
 			} else {
 				log.error("Token is null");
 				request.getSession(false);
 				response.sendError(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else {		
-			chain.doFilter(request, response);
 		}
+		
     }
 	
     @Override

@@ -10,7 +10,7 @@ import kr.co.strato.portal.setting.model.UserDto;
 
 public interface CustomUserRepository {
 	
-	Page<UserEntity> getListUserWithParam(Pageable pageable, UserDto.SearchParam param);
+	Page<UserEntity> getListUserWithParam(Pageable pageable, UserDto.SearchParam param, UserDto loginUser);
 	
 	List<UserDto.UserMenuDto> getUserMenu(String userId);
 }

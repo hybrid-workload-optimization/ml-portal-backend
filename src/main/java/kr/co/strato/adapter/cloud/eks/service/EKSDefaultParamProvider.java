@@ -11,7 +11,10 @@ import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 public class EKSDefaultParamProvider extends AbstractDefaultParamProvider {
 
 	public static final String KEY_NETWORK = "network";
-	public static final String KEY_SUBNETWORK = "subnetwork";
+	public static final String KEY_SUBNETWORKS = "subnetworks";
+	public static final String KEY_ROLE_ARN = "roleArn";
+	public static final String KEY_NODE_ROLE= "nodeRole";
+	
 	
 	public static final String DEFAULT_CLUSTER_NAME= "cluster01";
 	public static final String DEFAULT_KUBELET_VERSION= "1.22.12-gke.300";
@@ -32,9 +35,12 @@ public class EKSDefaultParamProvider extends AbstractDefaultParamProvider {
 		put(KEY_CLUSTER_NAME, 			DEFAULT_CLUSTER_NAME);
 		put(KEY_KUBERNETES_VERSION, 	DEFAULT_KUBELET_VERSION);
 		put(KEY_REGION, 				DEFAULT_REGION);
-		put(KEY_NODE_POOLS, 			DEFAULT_NODE_POOLS);
-		put(KEY_NETWORK, 				DEFAULT_NETWORK);
-		put(KEY_SUBNETWORK, 			DEFAULT_SUBNETWORK);
+		put(KEY_ROLE_ARN, 				"");
+		put(KEY_SUBNETWORKS, 			"");
+		put(KEY_NODE_COUNT, 			1);
+		put(KEY_NODE_ROLE, 				"");
+		put(KEY_VM_TYPE, 				"");
+		
 	}};
 	
 	

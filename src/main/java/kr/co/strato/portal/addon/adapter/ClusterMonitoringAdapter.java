@@ -8,6 +8,7 @@ import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
@@ -90,7 +91,6 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 					}
 					endpoint.setEndpoints(endpoints);
 				}
-				
 			}
 		} else {
 			ServiceAdapterService sService = service.getServiceAdapterService();
@@ -140,13 +140,15 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 	 * @param nodePort
 	 */
 	private void setGrafanaNodePort(Service service, Integer nodePort) {
-		service.getSpec().getPorts().stream()
-			.filter(p -> p.getNodePort() != null)
-			.findFirst()
+		Stream<ServicePort> stream = service.getSpec().getPorts().stream()
+			.filter(p -> p.getNodePort() != null);
+		
+		if(stream.findFirst().isPresent()) {
+			stream.findFirst()
 			.get()
 			.setNodePort(nodePort);
-		
-		service.getSpec().setType("NodePort");
+			service.getSpec().setType("NodePort");
+		}
 	}
 	
 	/**

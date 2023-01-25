@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserResetPasswordEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
+import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.SsoConnectionException;
@@ -63,6 +64,9 @@ public class UserService {
 	@Autowired
 	AccessService accessService;
 	
+	@Autowired
+	UserRoleRepository userRoleRepository;
+	
 	@Value("${portal.front.service.url}")
 	String frontUrl;
 	
@@ -85,7 +89,7 @@ public class UserService {
 	}
 	
 	//등록
-	public String postUser(UserDto param) {
+	public String postUser(UserDto param, UserDto loginUser) {
 		
 		//keycloak 연동
 		try {
@@ -97,6 +101,21 @@ public class UserService {
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		//최초 가입 유저는 미사용 처리.
 		entity.setUseYn("N");
+		
+		//유저 생성자 설정.
+		if(loginUser != null) {
+			entity.setCreateUserId(loginUser.getUserId());
+			entity.setCreateUserName(loginUser.getUserName());
+		} else {
+			entity.setCreateUserId(entity.getUserId());
+			entity.setCreateUserName(entity.getUserName());
+			
+			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
+			String roleCode = "PROJECT_MANAGER";
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+			entity.getUserRole().setId(role.getId());
+		}
+		
 		userDomainService.saveUser(entity, "post");
 		
 		//패스워드 초기화 이메일 전송
@@ -245,8 +264,8 @@ public class UserService {
 	*/
 	
 	// 목록 > param(projectId, authorityId)
-	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param) throws Exception{
-		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable, param);
+	public Page<UserDto> getAllUserList(Pageable pageable, UserDto.SearchParam param, UserDto loginUser) throws Exception{
+		Page<UserEntity> userEntityList = userDomainService.getAllUserList(pageable, param, loginUser);
 		List<UserDto> userDtoList = userEntityList
 										.getContent()
 										.stream()

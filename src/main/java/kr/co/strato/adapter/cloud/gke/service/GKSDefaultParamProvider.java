@@ -32,9 +32,11 @@ public class GKSDefaultParamProvider extends AbstractDefaultParamProvider {
 		put(KEY_CLUSTER_NAME, 			DEFAULT_CLUSTER_NAME);
 		put(KEY_KUBERNETES_VERSION, 	DEFAULT_KUBELET_VERSION);
 		put(KEY_REGION, 				DEFAULT_REGION);
-		put(KEY_NODE_POOLS, 			DEFAULT_NODE_POOLS);
 		put(KEY_NETWORK, 				DEFAULT_NETWORK);
 		put(KEY_SUBNETWORK, 			DEFAULT_SUBNETWORK);
+		put(KEY_NODE_COUNT, 			DEFAULT_SUBNETWORK);
+		put(KEY_VM_TYPE, 				"");
+		
 	}};
 	
 	

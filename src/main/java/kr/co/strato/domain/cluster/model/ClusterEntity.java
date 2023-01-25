@@ -40,7 +40,7 @@ public class ClusterEntity {
 		AKS,
 		GKE,
 		EKS,
-		NAVER
+		NKS
 	}
 	
 	public static enum ProvisioningStatus {

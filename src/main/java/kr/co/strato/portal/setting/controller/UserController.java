@@ -73,11 +73,14 @@ public class UserController extends CommonController {
         Map<String, Object> workMetadata	= meta;
         WorkResult workResult				= WorkResult.SUCCESS;
         String workMessage					= "";
+        
+        
+        UserDto loginUser = getLoginUser();
 		
         
 		param.setUseYn("Y");
 		try {
-			userService.postUser(param);
+			userService.postUser(param, loginUser);
 			result = param.getUserId();
 		}catch (Exception e) {
 			workResult		= WorkResult.FAIL;
@@ -253,7 +256,7 @@ public class UserController extends CommonController {
         String workMessage					= "";
 
 		try {
-			list = userService.getAllUserList(pageRequest.of(), searchParam);
+			list = userService.getAllUserList(pageRequest.of(), searchParam, getLoginUser());
 			
 		}catch (Exception e) {
 			workResult		= WorkResult.FAIL;
