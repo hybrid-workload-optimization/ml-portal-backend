@@ -96,6 +96,7 @@ public class MLClusterAPIAsyncService {
 		if(externalUrl == null) {
 			log.error("Get Grafana url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
+			return null;
 		}
 		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
 		return clusterMonitoringUrl;
