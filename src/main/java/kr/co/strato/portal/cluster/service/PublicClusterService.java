@@ -5,7 +5,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -709,7 +708,7 @@ public class PublicClusterService {
 		} else if(provider.equals("aws")) {
 			type = ProvisioningType.EKS.name();
 		} else if(provider.equals("naver")) {
-			type = ProvisioningType.NAVER.name();
+			type = ProvisioningType.NKS.name();
 		}
 		return type;
 	}
