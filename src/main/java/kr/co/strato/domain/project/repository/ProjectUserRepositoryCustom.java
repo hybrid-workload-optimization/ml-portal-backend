@@ -6,6 +6,7 @@ import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.setting.model.UserDto;
 
 public interface ProjectUserRepositoryCustom {
 
@@ -14,6 +15,8 @@ public interface ProjectUserRepositoryCustom {
 	public List<ProjectUserDto> getProjectUserListExceptManager(Long projectIdx);
 	
 	public List<UserEntity> getProjectUserListExceptUse(Long projectId);
+	
+	public List<UserEntity> getAvailableProjectUserList(UserDto loginUser);
 	
 	public List<UserEntity> getAvailableProjectUserList();
 	

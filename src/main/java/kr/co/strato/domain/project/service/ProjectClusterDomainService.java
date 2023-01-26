@@ -11,6 +11,7 @@ import kr.co.strato.domain.cluster.repository.ClusterRepository;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.repository.ProjectClusterRepository;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -37,9 +38,9 @@ public class ProjectClusterDomainService {
      * @param loginId
      * @return
      */
-	public List<ClusterEntity> getProjecClusterListByNotUsedClusters() {
+	public List<ClusterEntity> getProjecClusterListByNotUsedClusters(UserDto loginUser) {
 		
-		return projectClusterRepository.getProjecClusterListByNotUsedClusters();
+		return projectClusterRepository.getProjecClusterListByNotUsedClusters(loginUser);
 	}
 	
 	/**

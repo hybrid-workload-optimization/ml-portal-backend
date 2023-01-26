@@ -11,6 +11,7 @@ import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.setting.model.UserDto;
 
 @Service
 @Transactional//(rollbackFor = Exception.class)
@@ -43,8 +44,8 @@ public class ProjectUserDomainService {
 	 * 프로젝트에 추가 할 수 있는 사용자 리스트 반환.
 	 * @return
 	 */
-	public List<UserEntity> getAvailableProjectUserList() {
-		return projectUserRepository.getAvailableProjectUserList();
+	public List<UserEntity> getAvailableProjectUserList(UserDto loginUser) {
+		return projectUserRepository.getAvailableProjectUserList(loginUser);
 	}
 	
 	/**

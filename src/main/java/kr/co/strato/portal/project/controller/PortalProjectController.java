@@ -300,7 +300,7 @@ public class PortalProjectController extends CommonController {
     		projectIdx = null;
     	}
     	
-    	List<UserDto> response = portalProjectService.getUserWithManagerList(projectIdx);
+    	List<UserDto> response = portalProjectService.getUserWithManagerList(getLoginUser(), projectIdx);
         return new ResponseWrapper<List<UserDto>>(response);
     }
     

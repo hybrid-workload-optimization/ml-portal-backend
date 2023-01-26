@@ -1,5 +1,7 @@
 package kr.co.strato.portal.project.service;
 
+import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,8 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.service.ClusterService;
+import kr.co.strato.portal.common.controller.CommonController;
+import kr.co.strato.portal.common.service.CommonService;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
@@ -51,7 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class PortalProjectService {
+public class PortalProjectService extends CommonController {
 
 	@Autowired
 	ProjectDomainService projectDomainService;
@@ -120,7 +124,7 @@ public class PortalProjectService {
      */
     public List<ClusterDto.List> getProjecClusterListByNotUsedClusters() {
     	
-    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByNotUsedClusters();
+    	List<ClusterEntity> clusterList = projectClusterDomainService.getProjecClusterListByNotUsedClusters(getLoginUser());
     	
     	//Entity -> DTO 변환
     	return clusterList.stream().map(m -> ClusterDtoMapper.INSTANCE.toList(m)).collect(Collectors.toList());
@@ -131,7 +135,7 @@ public class PortalProjectService {
      * @return
      */
     public List<UserDto> getAvailableProjectUserList() {
-    	List<UserEntity> userList = projectUserDomainService.getAvailableProjectUserList();
+    	List<UserEntity> userList = projectUserDomainService.getAvailableProjectUserList(getLoginUser());
     	
     	//Entity -> DTO 변환
     	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
@@ -708,11 +712,29 @@ public class PortalProjectService {
      * 사용자 권한이 Project Manager 인 사용자 조회
      * @return
      */
-    public List<UserDto> getUserWithManagerList(Long projectIdx) {
-    	List<UserEntity> userList = projectUserDomainService.getUserWithManagerList(projectIdx);
-    	
-    	//Entity -> DTO 변환
-    	return userList.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    public List<UserDto> getUserWithManagerList(UserDto loginUser, Long projectIdx) {
+    	List<UserDto> userList = null;
+    	if(loginUser != null) {
+    		String roleCode = loginUser.getUserRole().getUserRoleCode();
+    		
+    		if(roleCode.equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN)
+    				|| roleCode.equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+    			
+    			//Admin 권한인 경우 프로젝트메니저 권한을 가진 모든 사용자 반환.
+    			List<UserEntity> list = projectUserDomainService.getUserWithManagerList(projectIdx);
+    			
+    			//Entity -> DTO 변환
+    			userList = list.stream().map(m -> UserDtoMapper.INSTANCE.toDto(m)).collect(Collectors.toList());
+    		} else if(roleCode.equals(UserRoleEntity.ROLE_CODE_PROJECT_MANAGER)) {
+    			//프로젝트 메니저 권한을 가진 사용자인 경우 본인을 반환.
+    			userList = new ArrayList<>();
+    			userList.add(loginUser);
+    		} else {
+    			userList = new ArrayList<>();
+    		}
+    		
+    	}
+    	return userList;
     }
     
     /**

@@ -1,7 +1,5 @@
 package kr.co.strato.domain.project.repository;
 
-import static kr.co.strato.domain.cluster.model.QClusterEntity.clusterEntity;
-import static kr.co.strato.domain.project.model.QProjectClusterEntity.projectClusterEntity;
 import static kr.co.strato.domain.project.model.QProjectUserEntity.projectUserEntity;
 import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
 import static kr.co.strato.domain.user.model.QUserRoleEntity.userRoleEntity;
@@ -10,6 +8,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -20,6 +19,7 @@ import kr.co.strato.domain.project.model.ProjectUserEntity;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.setting.model.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,6 +78,32 @@ public class ProjectUserRepositoryCustomImpl implements ProjectUserRepositoryCus
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
 						.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN))
 				)
+				.orderBy(userEntity.userRole.parentUserRoleIdx.asc(), userEntity.userName.asc())
+				.fetch();
+		
+		return result;
+	}
+	
+	@Override
+	public List<UserEntity> getAvailableProjectUserList(UserDto loginUser) {
+		
+		BooleanBuilder builder = new BooleanBuilder();
+		
+		builder
+			.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN))
+			.and(userEntity.userRole.userRoleCode.ne(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN));
+		
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN) 
+	    		&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+			//시스템 어드민 , 포탈 어드민이 아닌 일반 사용자인 경우
+			//본인이 생성한 사용자만 보이도록 수정.
+			builder.and(userEntity.createUserId.eq(loginUser.getUserId()));
+		}
+		
+		
+		
+		List<UserEntity> result = queryFactory.select(userEntity).from(userEntity)
+				.where(builder)
 				.orderBy(userEntity.userRole.parentUserRoleIdx.asc(), userEntity.userName.asc())
 				.fetch();
 		
