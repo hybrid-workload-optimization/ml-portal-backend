@@ -580,7 +580,6 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgb(255, 255, 255)",
                     "value": null
                   },
                   {
@@ -658,7 +657,6 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgb(255, 255, 255)",
                     "value": null
                   },
                   {
@@ -736,7 +734,6 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgb(255, 255, 255)",
                     "value": null
                   },
                   {
