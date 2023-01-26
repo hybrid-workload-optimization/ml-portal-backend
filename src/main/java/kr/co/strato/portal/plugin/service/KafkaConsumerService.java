@@ -38,7 +38,7 @@ public class KafkaConsumerService {
 	@Autowired
 	CallbackService callbackService;
 	
-	/*
+	
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.azure.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
@@ -92,7 +92,7 @@ public class KafkaConsumerService {
 			log.error("", e);
 		}
 	}
-	*/
+	
 	
 	/**
 	 * Kafka로 부터 전송되는 메시지 처리.
