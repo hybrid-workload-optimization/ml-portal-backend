@@ -2,14 +2,12 @@ package kr.co.strato.portal.workload.model;
 
 import java.time.LocalDateTime;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
-public class DeploymentDto {
+public class DeploymentOnlyApiDto {
 	private Long idx;
 	private String name;
 	private String uid;

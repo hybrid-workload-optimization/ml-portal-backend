@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.fabric8.kubernetes.api.model.Namespace;
+import kr.co.strato.adapter.k8s.namespace.service.NamespaceAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
@@ -18,7 +20,9 @@ import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.portal.common.model.SelectDto;
 import kr.co.strato.portal.common.model.SelectDtoMapper;
 import kr.co.strato.portal.setting.model.UserDto;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class SelectService {
     @Autowired
@@ -29,6 +33,9 @@ public class SelectService {
 
     @Autowired
     private NamespaceDomainService namespaceDomainService;
+    
+    @Autowired
+    private NamespaceAdapterService namespaceAdapterService;
     
     @Autowired
     private UserRoleDomainService userRoleDomainService;
@@ -56,6 +63,23 @@ public class SelectService {
         List<SelectDto> selectNamespaces = namespaces.stream().map(e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
         return selectNamespaces;
     }
+    
+    
+    public List<SelectDto> getSelectNamespacesAPIOnly(Long clusterIdx) {
+    	ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+    	Long kubeConfigId = cluster.getClusterId();
+    	List<Namespace> list = namespaceAdapterService.getNamespaceList(kubeConfigId);
+    	
+    	log.info("Select namespace: clusterIdx, {}, kubeConfigId: {}", clusterIdx, kubeConfigId);
+    	
+        List<SelectDto> selectNamespaces = list.stream().map(e -> SelectDtoMapper.INSTANCE.toDto(e)).collect(Collectors.toList());
+        
+        for(SelectDto select : selectNamespaces) {
+        	log.info(select.getText());
+        }
+        return selectNamespaces;
+    }
+    
 
 	public List<SelectDto> getUserRoles() {
 		List<UserRoleEntity> roles = userRoleDomainService.getUseUserRole();

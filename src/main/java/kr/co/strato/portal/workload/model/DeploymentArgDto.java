@@ -1,6 +1,7 @@
 package kr.co.strato.portal.workload.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -13,4 +14,21 @@ public class DeploymentArgDto {
 	private Long clusterId;
 	private String yaml;
 	private Long clusterIdx;
+	
+	@Getter
+    @Setter
+    @NoArgsConstructor
+    public static class ListParam{
+		private Long clusterIdx;
+		private String namespace;
+    }
+	
+	@Getter
+    @Setter
+    @NoArgsConstructor
+    public static class DeleteParam{
+		private Long clusterIdx;
+		private String namespace;
+		private String name;
+    }
 }

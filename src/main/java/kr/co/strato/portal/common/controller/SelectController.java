@@ -33,6 +33,13 @@ public class SelectController extends CommonController {
 
         return new ResponseWrapper<>(results);
     }
+    
+    @GetMapping("api/v1/select/namespaces-apionly")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<SelectDto>> getNamespacesAPIOnly(@RequestParam Long clusterIdx){
+        List<SelectDto> results = selectService.getSelectNamespacesAPIOnly(clusterIdx);
+        return new ResponseWrapper<>(results);
+    }
 
     @GetMapping("api/v1/select/clusters")
     @ResponseStatus(HttpStatus.OK)

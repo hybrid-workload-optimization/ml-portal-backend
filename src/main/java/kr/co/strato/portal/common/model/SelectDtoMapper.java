@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
+import io.fabric8.kubernetes.api.model.Namespace;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -33,5 +34,10 @@ public interface SelectDtoMapper {
     @Mapping(target = "text", source = "userRoleName")
     @Mapping(target = "value", source = "userRoleCode")
     public SelectDto toDto(UserRoleEntity entity);
+    
+    
+    @Mapping(target = "text", source = "n.metadata.name")
+    @Mapping(target = "value", source = "n.metadata.name")
+    public SelectDto toDto(Namespace n);
 
 }

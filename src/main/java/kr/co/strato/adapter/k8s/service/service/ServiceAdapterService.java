@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import feign.FeignException;
+import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
@@ -53,6 +54,24 @@ public class ServiceAdapterService {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - service 생성 에러");
+        }
+    }
+    
+    public List<Service> getList(Long clusterId, String namespaceName) {
+    	ResourceListSearchInfo listSearchInfo = ResourceListSearchInfo.builder().kubeConfigId(clusterId).namespace(namespaceName).build();
+        try{
+            String result = inNamespaceProxy.getResourceList(ResourceType.service.get(), listSearchInfo);
+
+            ObjectMapper mapper = new ObjectMapper();
+            List<Service> service = mapper.readValue(result, new TypeReference<List<Service>>() {});
+
+            return service;
+        }catch (JsonProcessingException e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("json 파싱 에러");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - service 조회 에러");
         }
     }
 
