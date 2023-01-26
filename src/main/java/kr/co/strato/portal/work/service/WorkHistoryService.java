@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkHistoryService {
 
 	@Autowired
-	WorkHistoryDomainService workHistoryDomainService;
+	WorkHistoryDomainService workHistoryDomainService; 
 	
 	/**
 	 * 작업 이력 등록
