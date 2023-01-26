@@ -34,6 +34,8 @@ import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
+import kr.co.strato.domain.persistentVolume.model.PersistentVolumeEntity;
+import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainService;
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
@@ -41,6 +43,8 @@ import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
+import kr.co.strato.domain.storageClass.model.StorageClassEntity;
+import kr.co.strato.domain.storageClass.service.StorageClassDomainService;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.domain.work.service.WorkJobDomainService;
 import kr.co.strato.global.error.exception.BadRequestException;
@@ -113,6 +117,12 @@ public class ClusterService {
 	
 	@Autowired
 	ProjectDomainService projectDomainService;
+	
+	@Autowired
+	PersistentVolumeDomainService pvDomainService;
+	
+	@Autowired
+	StorageClassDomainService storageClassDomainService;
 	
 	@Autowired
 	UserService userService;
@@ -738,6 +748,12 @@ public class ClusterService {
 		// pod
 		List<PodEntity> pods = podDomainService.getPods(pageRequest.of(), null, clusterIdx, null, null).getContent();
 		
+		//pv
+		List<PersistentVolumeEntity> pvs = pvDomainService.getPersistentVolumeList(pageRequest.of(), clusterIdx, null).getContent();
+		
+		List<StorageClassEntity> storageClasses = storageClassDomainService.getStorageClassList(pageRequest.of(), clusterIdx, null).getContent();
+		
+		
 		// TODO : pvc list
 		// not implemented
 		
@@ -830,6 +846,8 @@ public class ClusterService {
 		summary.setPodCount(pods.size());
 		summary.setPvcCount(0); // TODO : pvc count
 		summary.setHealthInfo(health);
+		summary.setPvCount(pvs.size());
+		summary.setStorageClassCount(storageClasses.size());
 		
 		return summary;
 	}

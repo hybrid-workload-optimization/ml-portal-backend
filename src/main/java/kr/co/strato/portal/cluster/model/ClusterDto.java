@@ -145,6 +145,8 @@ public class ClusterDto {
 		private int namespaceCount;
 		private int podCount;
 		private int pvcCount;
+		private int pvCount;
+		private int storageClassCount;
 		
 		private String monitoringServiceUrl;
 		private ClusterHealthAdapterDto healthInfo;

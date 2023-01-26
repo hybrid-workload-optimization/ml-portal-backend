@@ -12,7 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import kr.co.strato.adapter.k8s.deployment.service.DeploymentAdapterService;
+import kr.co.strato.adapter.k8s.replicaset.service.ReplicaSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.model.PageRequest;
@@ -32,6 +34,9 @@ public class DeploymentOnlyApiService {
 	@Autowired
 	ClusterDomainService clusterDomainService;
 	
+	@Autowired
+	ReplicaSetAdapterService replicaSetAdapterService;
+	
 	
 	//목록
 	public Page<DeploymentDto> getList(PageRequest pageRequest, DeploymentArgDto.ListParam args) {
@@ -49,6 +54,8 @@ public class DeploymentOnlyApiService {
 			try {
 				dto = toDto(d);
 				dto.setClusterName(clusterName);
+				dto.setClusterIdx(clusterIdx);
+				dto.setClusterId(Long.toString(kubeConfigId));
 				list.add(dto);
 			} catch (JsonProcessingException e) {
 				log.error("", e);
@@ -70,6 +77,21 @@ public class DeploymentOnlyApiService {
 			dto = toDto(deployment);
 			dto.setClusterName(clusterEntity.getClusterName());	
 			dto.setClusterIdx(clusterIdx);
+			dto.setClusterId(Long.toString(kubeConfigId));
+			
+			try {
+			
+				List<ReplicaSet> replicaSets = replicaSetAdapterService.getListFromOwnerUid(clusterEntity.getClusterId(), dto.getUid());
+				if(replicaSets != null && replicaSets.size() > 0) {
+					ReplicaSet replicaSet = replicaSets.get(0);
+					String uid = replicaSet.getMetadata().getUid();
+					dto.setReplicaSetUid(uid);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
 		} catch (JsonProcessingException e) {
 			log.error("", e);
 		}
@@ -177,6 +199,8 @@ public class DeploymentOnlyApiService {
         float fMaxUnavailable = 0f;
         if(maxUnavailable != null && !maxUnavailable.isEmpty())
         	fMaxUnavailable = Float.parseFloat(maxUnavailable);
+        
+       
         
         DeploymentDto deploymentDto = DeploymentDto.builder()
         		.name(name)
