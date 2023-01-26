@@ -893,8 +893,8 @@ public class ClusterService {
 				.workJobType(WorkJobType.CLUSTER_DELETE)
 				.workJobStatus(WorkJobStatus.WAITING)
 				.workJobStartAt(DateUtil.currentDateTime())
-				.createUserId(loginUser.getUserId())
-				.createUserName(loginUser.getUserName())
+				.createUserId("hclee@strato.co.kr")
+				.createUserName("hclee")
 				.workSyncYn("N")
 				.build();
 		
@@ -927,6 +927,7 @@ public class ClusterService {
 		
 		try {
 			boolean isDeleted = clusterCloudService.removeCluster(clusterCloudDto);
+			System.out.println(isDeleted);
 			/*
 			if (!isDeleted) {
 				throw new PortalException("Cluster deletion failed");

@@ -277,13 +277,25 @@ public class IngressControllerService {
 		
 		//if(cloudProvider.equals("azure") || cloudProvider.equals("aws") || cloudProvider.equals("naver")) {			
 			log.info("IngressController Create.");
+		if(clusterEntity.getProvider().toLowerCase().equals("kubernetes")) {
 			param = IngressControllerDto.ReqCreateDto.builder()
 					.clusterIdx(clusterEntity.getClusterIdx())
 					.name("nginx")
-					.replicas(2)
+					.replicas(1)
+					.isDefault(true)
+					.serviceType("NodePort")
+					.httpPort(30007)
+					.build();
+		} else {
+			param = IngressControllerDto.ReqCreateDto.builder()
+					.clusterIdx(clusterEntity.getClusterIdx())
+					.name("nginx")
+					.replicas(1)
 					.isDefault(true)
 					.serviceType("LoadBalancer")
 					.build();
+		}
+			
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String json = gson.toJson(param);

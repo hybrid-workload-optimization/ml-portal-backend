@@ -121,11 +121,10 @@ public class PublicClusterController extends CommonController {
 		return new ResponseWrapper<>();
 	}
 	
-	@PostMapping("/install-monitoring/{clusterIdx}")
+	@PostMapping("/install-addon/{clusterIdx}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> installMonitoringPackage(@PathVariable Long clusterIdx) {
-		boolean isOk = publicClusterService.installMonitoringPackage(clusterIdx);
+	public ResponseWrapper<Boolean> installAddonPackage(@PathVariable Long clusterIdx) {
+		boolean isOk = publicClusterService.instalAddonPackage(clusterIdx);
 		return new ResponseWrapper<>(isOk);
 	}
-
 }

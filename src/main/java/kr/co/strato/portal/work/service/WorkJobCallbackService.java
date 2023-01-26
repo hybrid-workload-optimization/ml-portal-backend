@@ -21,6 +21,7 @@ import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterSyncService;
+import kr.co.strato.portal.cluster.service.PublicClusterService;
 import kr.co.strato.portal.work.model.WorkJob;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobState;
@@ -47,6 +48,9 @@ public class WorkJobCallbackService {
 	
 	@Autowired
 	NodeDomainService nodeDomainService;
+	
+	@Autowired
+	PublicClusterService publicClusterService;
 	
 	
 	public void callbackWorkJob(WorkJobCallback<Map<String, Object>> workJobCallback) {
@@ -150,6 +154,9 @@ public class WorkJobCallbackService {
 						*/
 						// db - sync(insert) cluster - node/namespace/pv/storageClass
 						clusterSyncService.syncCluster(clusterId, workJobEntity.getWorkJobReferenceIdx());
+						
+						
+						
 					}
 					
 					// db - update cluster
@@ -164,6 +171,10 @@ public class WorkJobCallbackService {
 					}
 					
 					clusterDomainService.update(clusterEntity);
+					
+					if (workJobStatus == WorkJobStatus.SUCCESS && workJobState == WorkJobState.FINISHED) {
+						publicClusterService.instalAddonPackage(clusterEntity);
+					}
 				}
 			} catch (Exception e) {
 				log.error("[callbackWorkJob] Cluster creation failed");

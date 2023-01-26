@@ -512,20 +512,11 @@ public class PublicClusterService {
 						//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
 						log.info("Install Monitoring Package started.");
 						try {
-							installMonitoringPackage(clusterEntity);
+							instalAddonPackage(clusterEntity);
 						} catch (Exception e) {
 							log.error("", e);
 						}						
 						log.info("Install Monitoring Package Finished.");
-						
-						
-						log.info("Install ArgoCD Package started.");
-						try {
-							installArgoCDPackage(clusterEntity);
-						} catch (Exception e) {
-							log.error("", e);
-						}						
-						log.info("Install ArgoCD Package Finished.");
 						
 						//패키지 로딩까지 30초 대기
 						try {
@@ -733,12 +724,12 @@ public class PublicClusterService {
 	 * 클러스터 생성 완료 후 ML
 	 * @param mlClusterEntity
 	 */
-	public boolean installMonitoringPackage(Long clusterIdx) {
+	public boolean instalAddonPackage(Long clusterIdx) {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);		
-		return installMonitoringPackage(clusterEntity);
+		return instalAddonPackage(clusterEntity);
 	}
 	
-	public boolean installMonitoringPackage(ClusterEntity clusterEntity) {
+	public boolean instalAddonPackage(ClusterEntity clusterEntity) {
 		boolean isOk = true;
 		
 		Long clusterIdx = clusterEntity.getClusterIdx();
@@ -773,26 +764,18 @@ public class PublicClusterService {
 			log.error("", e);
 			isOk = false;
 		}
-		return isOk;
-	}
-	
-	public boolean installArgoCDPackage(ClusterEntity clusterEntity) {
-		boolean isOk = true;
 		
-		Long clusterIdx = clusterEntity.getClusterIdx();				
-				
-		//Monitoring Addon 설치
-		Map<String, Object> parameters = new HashMap<>();	
+		
+		//ArgoCD Addon 설치
 		try {
-			log.info("Monitoring addon 설치 시작. clusterIdx: {}", clusterIdx);
+			log.info("ArgoCD addon 설치 시작. clusterIdx: {}", clusterIdx);
 			addonService.installAddon(clusterIdx, "2", parameters, null);
-			log.info("Monitoring addon 설치 종료. clusterIdx: {}", clusterIdx);
+			log.info("ArgoCD addon 설치 종료. clusterIdx: {}", clusterIdx);
 		} catch (IOException e) {
-			log.info("Monitoring addon 설치 실패. clusterIdx: {}", clusterIdx);
+			log.info("ArgoCD addon 설치 실패. clusterIdx: {}", clusterIdx);
 			log.error("", e);
 			isOk = false;
-		}
+		}		
 		return isOk;
-	}
-	
+	}	
 }

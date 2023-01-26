@@ -44,7 +44,7 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
 							JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))
 					))
-			  ));
+			  ).or(clusterEntity.createUserId.eq(loginUser.getUserId())));
 	    }
 		query.orderBy(clusterEntity.createdAt.desc());
 		

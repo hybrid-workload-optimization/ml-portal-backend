@@ -20,11 +20,14 @@ import com.google.gson.GsonBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServiceSpec;
+import io.fabric8.kubernetes.api.model.ServiceStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -83,14 +86,7 @@ public class MLClusterAPIAsyncService {
 			log.error("External url is null.");
 		}
 		
-		String url = null;
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
-			//Private Cloud			
-			url = String.format("http://%s", externalUrl);
-		} else {
-			//Public Cloud
-			url = String.format("http://%s/prometheus/graph", externalUrl);
-		}
+		String url = String.format("http://%s/prometheus/graph", externalUrl);
 		return url;
 	}
 	
@@ -102,14 +98,7 @@ public class MLClusterAPIAsyncService {
 			log.error("External url is null.");
 		}
 		
-		String url = null;
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
-			//Private Cloud			
-			url = String.format("http://%s", externalUrl);
-		} else {
-			//Public Cloud
-			url = String.format("http://%s/grafana", externalUrl);
-		}
+		String url = String.format("http://%s/grafana", externalUrl);
 		return url;
 	}
 	
@@ -121,16 +110,7 @@ public class MLClusterAPIAsyncService {
 			log.error("External url is null.");
 			return null;
 		}
-		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
-		
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
-			//Private Cloud			
-			clusterMonitoringUrl = String.format("http://%s/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
-		} else {
-			//Public Cloud
-			clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
-		}
-		
+		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
 		return clusterMonitoringUrl;
 	}
 	
@@ -144,15 +124,7 @@ public class MLClusterAPIAsyncService {
 			log.error("External url is null.");
 		}
 		
-		String url = null;
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
-			//Private Cloud			
-			url = String.format("https://%s", externalUrl);
-		} else {
-			//Public Cloud
-			url = String.format("https://%s/argocd", externalUrl);
-		}
-		
+		String url = String.format("https://%s/argocd", externalUrl);		
 		String password = null;
 		try {
 			Secret secret = secretAdapterService.get(kubeConfigId, "argocd", "argocd-initial-admin-secret");
@@ -183,7 +155,7 @@ public class MLClusterAPIAsyncService {
 		String externalUrl = null;
 		Long kubeConfigId = cluster.getClusterId();
 		
-		io.fabric8.kubernetes.api.model.Service svc = serviceAdapterService.get(kubeConfigId, "monitoring", "grafana");
+		io.fabric8.kubernetes.api.model.Service svc = getIngressService(kubeConfigId);
 		if(svc != null) {
 			ServicePort servicePort = null;
 			
