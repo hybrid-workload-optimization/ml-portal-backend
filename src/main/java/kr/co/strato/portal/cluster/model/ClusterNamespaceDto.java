@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import kr.co.strato.global.validation.annotation.K8sKind;
 import kr.co.strato.global.validation.model.K8sKindType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +30,9 @@ public class ClusterNamespaceDto {
 
 	@Getter
 	@Setter
+	@Builder
 	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class ResListDto{
 		private Long id;
     	private String name;
@@ -44,7 +48,9 @@ public class ClusterNamespaceDto {
 	
     @Getter
     @Setter
+    @Builder
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class ResDetailDto{
     	private Long id;
     	private String name;
@@ -67,6 +73,12 @@ public class ClusterNamespaceDto {
 	    private String name;
 	}
 	
-	
-
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	@ToString
+	public static class DeleteParam{
+	    private Long clusterIdx;
+	    private String name;
+	}
 }

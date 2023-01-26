@@ -87,6 +87,18 @@ public class NamespaceAdapterService {
         return nonNamespaceProxy.deleteResource(ResourceType.namespace.get(), param);
     }
     
-    
+    public Namespace getNamespace(Long kubeConfigId, String name) {
+    	String results = nonNamespaceProxy.getResource(ResourceType.namespace.get(), kubeConfigId, name);
+    	ObjectMapper mapper = new ObjectMapper();
+		try {
+			Namespace namespace = mapper.readValue(results, new TypeReference<Namespace>() {});
+			return namespace;
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("json 파싱 에러");
+		} catch (Exception e){
+            throw new InternalServerException("k8s 통신 에러");
+        }
+    }
     
 }
