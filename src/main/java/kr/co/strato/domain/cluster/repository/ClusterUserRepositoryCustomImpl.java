@@ -62,12 +62,13 @@ public class ClusterUserRepositoryCustomImpl implements ClusterUserRepositoryCus
 		if(loginUser != null 
 				&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN)
 				&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
-			query = query.where(clusterEntity.clusterIdx.in(
+			query = query.where((clusterEntity.clusterIdx.in(
 					JPAExpressions.select(projectClusterEntity.clusterIdx).from(projectClusterEntity).where(projectClusterEntity.projectIdx.in(
 							JPAExpressions.select(projectUserEntity.projectIdx).from(projectUserEntity).where(projectUserEntity.userId.eq(loginUser.getUserId()))
 					))
 					
-			  ).or(clusterEntity.createUserId.eq(loginUser.getUserId())));
+			  ).or(clusterEntity.createUserId.eq(loginUser.getUserId())))
+					.and(clusterEntity.provisioningStatus.eq(ClusterEntity.ProvisioningStatus.FINISHED.name())));
 	    }
 		query.orderBy(clusterEntity.createdAt.desc());
 		

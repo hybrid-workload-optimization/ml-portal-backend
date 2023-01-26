@@ -106,6 +106,12 @@ public class UserService {
 		if(loginUser != null) {
 			entity.setCreateUserId(loginUser.getUserId());
 			entity.setCreateUserName(loginUser.getUserName());
+			
+			
+			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
+			String roleCode = "PROJECT_MEMBER";
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+			entity.getUserRole().setId(role.getId());
 		} else {
 			entity.setCreateUserId(entity.getUserId());
 			entity.setCreateUserName(entity.getUserName());
