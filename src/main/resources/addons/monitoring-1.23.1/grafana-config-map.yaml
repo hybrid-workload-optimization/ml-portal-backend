@@ -133,7 +133,7 @@ data:
           },
           "id": 156,
           "panels": [],
-          "title": "클러스터 요약",
+          "title": "Cluster Summary",
           "type": "row"
         },
         {
@@ -194,7 +194,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "마스터 정상 가동률",
+          "title": "Master Normal Operation Rate",
           "type": "stat"
         },
         {
@@ -495,7 +495,7 @@ data:
               "refId": "H"
             }
           ],
-          "title": "노드 현황",
+          "title": "Node Status",
           "transformations": [
             {
               "id": "filterFieldsByName",
@@ -802,7 +802,7 @@ data:
           },
           "id": 137,
           "panels": [],
-          "title": "전체 클러스터",
+          "title": "Cluster",
           "type": "row"
         },
         {
@@ -880,7 +880,7 @@ data:
             }
           ],
           "timeRegions": [],
-          "title": "노드별 CPU 점유율",
+          "title": "CPU Usages By Node",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -972,7 +972,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "노드별 메모리 사용량",
+          "title": "Memory Usages By Node",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -1075,7 +1075,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "초당 네트워크 트래픽",
+          "title": "Network Traffic Per Second",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1090,7 +1090,7 @@ data:
           "yaxes": [
             {
               "format": "decbytes",
-              "label": "수신 | 송신",
+              "label": "Request | Response",
               "logBase": 1,
               "show": true
             },
@@ -1163,7 +1163,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "API 서버 호출",
+          "title": "API Server Call",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1205,7 +1205,7 @@ data:
           },
           "id": 139,
           "panels": [],
-          "title": "노드 $node",
+          "title": "Node $node",
           "type": "row"
         },
         {
@@ -1269,7 +1269,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "CPU 점유율",
+          "title": "CPU Usages",
           "type": "gauge"
         },
         {
@@ -1333,7 +1333,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "메모리 점유율",
+          "title": "Memory Usages",
           "type": "gauge"
         },
         {
@@ -1397,7 +1397,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "디스크 사용률(%)",
+          "title": "Disk Usages(%)",
           "type": "gauge"
         },
         {
@@ -1456,7 +1456,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "CPU 코어",
+          "title": "CPU Core",
           "type": "stat"
         },
         {
@@ -1666,7 +1666,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "Disk IOPS 완료",
+          "title": "Disk IOPS Complete",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -1749,7 +1749,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "메모리",
+          "title": "Memory",
           "type": "stat"
         },
         {
@@ -1822,7 +1822,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Pod 생성시간",
+          "title": "Pod Creation Time",
           "type": "stat"
         },
         {
@@ -1893,7 +1893,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Pod 가동 상태",
+          "title": "Pod State",
           "type": "stat"
         },
         {
@@ -1957,7 +1957,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "10분 이내 재시작",
+          "title": "Restart within 10 minutes",
           "type": "stat"
         },
         {
@@ -2075,7 +2075,7 @@ data:
               "refId": "C"
             }
           ],
-          "title": "리소스 사용량",
+          "title": "Resource Usages",
           "type": "bargauge"
         },
         {
@@ -2160,7 +2160,7 @@ data:
               "refId": "B"
             }
           ],
-          "title": "리소스 할당  제한",
+          "title": "Resource Allocation Limits",
           "type": "stat"
         },
         {
@@ -2242,7 +2242,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "초당 네트워크 트래픽",
+          "title": "Network traffic per second",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2258,7 +2258,7 @@ data:
           "yaxes": [
             {
               "format": "decbytes",
-              "label": "수신 | 송신",
+              "label": "Request | Response",
               "logBase": 1,
               "show": true
             },
@@ -2351,7 +2351,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "메모리 상태(Swap/Failure)",
+          "title": "Memory State(Swap/Failure)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2457,7 +2457,7 @@ data:
           ],
           "thresholds": [],
           "timeRegions": [],
-          "title": "스레드 개수",
+          "title": "Thread Count",
           "tooltip": {
             "shared": true,
             "sort": 0,
