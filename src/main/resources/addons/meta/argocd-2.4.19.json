@@ -19,7 +19,7 @@
   "packages": [
     {
       "name": "ArgoCD",
-      "desc": "ArgoCD 서비스 서비스 제공.",
+      "desc": "Provide ArgoCD service.",
       "version": "v2.4.19",
       "image": "quay.io/argoproj/argocd:v2.5.4",
       "endpoints": [
