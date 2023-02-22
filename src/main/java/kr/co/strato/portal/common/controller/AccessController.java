@@ -4,8 +4,6 @@ package kr.co.strato.portal.common.controller;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,29 +50,20 @@ public class AccessController extends CommonController {
 	@Autowired
 	AuthorityService authorityService;
 	
-	//token 요청(로그인)
-	@PostMapping("/login")
-	public ResponseWrapper<LoginDto> doLogin(@RequestBody UserDto dto, HttpSession session, HttpServletResponse response) throws Exception {
-		
+	//로그인된 유저 정보 반환.
+	@PostMapping("/user-info")
+	public ResponseWrapper<LoginDto> getUserInfo() throws Exception {
 		LoginDto result = new LoginDto();
 		
-		try {
-			String userId = dto.getUserId();
-			ResponseEntity<KeycloakToken> data = accessService.doLogin(dto);
-			if(data.getStatusCode() == HttpStatus.OK) {
-				KeycloakToken token = data.getBody();
-				UserDto user = userService.getUserInfo(userId);
-				result.setToken(token);
-				result.setUser(user);	
-				
-				//유저 권한 추가
-				UserAuthorityDto authority = authorityService.getUserRole(userId);
-				result.setAuthority(authority);
-				
-				return new ResponseWrapper<>(result);
-			}else {
-				return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
-			}	
+		try {			
+			UserDto user = getLoginUser();
+			result.setUser(user);
+			
+			//유저 권한 추가
+			UserAuthorityDto authority = authorityService.getUserRole(user.getUserId(), user.getUserRole().getUserRoleCode());
+			result.setAuthority(authority);
+			
+			return new ResponseWrapper<>(result);
 		}catch (HttpClientErrorException e) {
 			log.error(e.getMessage(), e);
 			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
@@ -82,7 +71,7 @@ public class AccessController extends CommonController {
 			log.error(e.getMessage(), e);
 			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
 		}
-	}	
+	}
 	
 	//token refresh 요청
 	@PostMapping("/token-refresh")

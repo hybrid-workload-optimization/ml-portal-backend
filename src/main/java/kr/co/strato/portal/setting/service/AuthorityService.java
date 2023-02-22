@@ -30,6 +30,7 @@ import kr.co.strato.domain.user.model.UserRoleMenuEntity;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
+import kr.co.strato.domain.user.service.UserRoleMenuDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
@@ -61,6 +62,9 @@ public class AuthorityService {
 	
 	@Autowired
 	KeyCloakApiUtil keyCloakApiUtil;
+	
+	@Autowired
+	private UserRoleMenuDomainService userRoleMenuDomainService;
 	
 	
 	public Page<AuthorityRequestDto> getListPagingAuthorityDto(AuthorityRequestDto.ReqViewDto param, Pageable pageable) {
@@ -475,6 +479,46 @@ public class AuthorityService {
 		}
 		
 		
+		return userAuthroityDto;
+	}
+	
+	public UserAuthorityDto getUserRole(String userId, String roleCode) {
+		UserAuthorityDto userAuthroityDto = new UserAuthorityDto();
+		if(roleCode == null) {
+			//권한 설정 되어있지 않은 경우 디폴트 권한 설정
+			roleCode = "PROJECT_MEMBER";
+		}
+		
+		List<UserRoleMenuEntity> list = userRoleMenuDomainService.getUserRoleMenuList(roleCode);
+		List<AuthorityViewDto.Menu> menuDto = list.stream()
+				.map(m -> AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDtoInnerMenu(m))
+				.collect(Collectors.toList());			
+				
+		List<AuthorityViewDto.Menu> defaultMenu = getMenuTreeList(menuDto);
+		userAuthroityDto.setDefaultUserRole(defaultMenu);
+		
+		//프로젝트 별 권한 설정
+		Map<Long, List<AuthorityViewDto.Menu>> projectUserRole = new HashMap<>();
+		userAuthroityDto.setProjectUserRole(projectUserRole);
+		
+		
+		List<ProjectUserEntity> projectUsers = projectUserDomainService.findByUserId(userId);
+		for(ProjectUserEntity pu : projectUsers) {
+			Long projectIdx = pu.getProjectIdx();
+			
+			//TODO 사용자 권한 바뀌면 설정
+			Long userRoleIdx = pu.getUserRoleIdx();
+			
+			if(userRoleIdx != null) {
+				List<UserRoleMenuEntity> plist = userRoleMenuDomainService.getUserRoleMenuList(userRoleIdx);
+				List<AuthorityViewDto.Menu> pMenuDto = plist.stream()
+						.map(m -> AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDtoInnerMenu(m))
+						.collect(Collectors.toList());			
+						
+				List<AuthorityViewDto.Menu> pDefaultMenu = getMenuTreeList(pMenuDto);
+				projectUserRole.put(projectIdx, pDefaultMenu);
+			}
+		}
 		return userAuthroityDto;
 	}
 }
