@@ -15,7 +15,7 @@ import kr.co.strato.global.model.JwtTokenModel;
 
 @Service
 public class ClientRoleAdapterService {
-	public static final String AUTHORIZATION_KEY = "access-token";
+	public static final String AUTHORIZATION_KEY = "Authorization";
 
 	@Autowired
 	private ClientRoleProxy roleProxy;
