@@ -38,21 +38,6 @@ public class KafkaConsumerService {
 	@Autowired
 	CallbackService callbackService;
 	
-	@KafkaListener(
-			topics = "${strato.portal.event}", 
-			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
-			containerFactory = "kafkaListenerContainerFactory")
-    public void azureConsumer(String message) {
-		log.info(message);
-		/*
-		try {
-			messageJob(message);
-		} catch (Exception e) {
-			log.error("", e);
-		}
-		*/
-	}
-	
 	/*
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.azure.response}", 
