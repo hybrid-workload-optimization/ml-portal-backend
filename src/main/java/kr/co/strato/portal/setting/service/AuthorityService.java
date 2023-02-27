@@ -14,12 +14,15 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import kr.co.strato.adapter.sso.model.ClientRoleDTO;
+import kr.co.strato.adapter.sso.service.ClientRoleAdapterService;
 import kr.co.strato.domain.menu.model.MenuEntity;
 import kr.co.strato.domain.menu.service.MenuDomainService;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
@@ -65,6 +68,12 @@ public class AuthorityService {
 	
 	@Autowired
 	private UserRoleMenuDomainService userRoleMenuDomainService;
+	
+	@Autowired
+	private ClientRoleAdapterService clientRoleAdapterService;
+	
+	@Value("${keycloak.resource}")
+	private String clientId;
 	
 	
 	public Page<AuthorityRequestDto> getListPagingAuthorityDto(AuthorityRequestDto.ReqViewDto param, Pageable pageable) {
@@ -520,5 +529,9 @@ public class AuthorityService {
 			}
 		}
 		return userAuthroityDto;
+	}
+	
+	public List<ClientRoleDTO> getClientRole() {
+		return clientRoleAdapterService.getClientRole(clientId);
 	}
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.strato.adapter.sso.model.ClientRoleDTO;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
@@ -86,5 +87,10 @@ public class AuthorityController extends CommonController {
 			authority = authorityService.getUserRole(userId, loginUser.getUserRole().getUserRoleCode());
 		}		
 		return new ResponseWrapper<>(authority);
+	}
+	
+	@GetMapping("/roles")
+	public List<ClientRoleDTO> getClientRole() {
+		return authorityService.getClientRole();
 	}
 }
