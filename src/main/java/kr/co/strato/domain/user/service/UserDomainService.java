@@ -77,6 +77,9 @@ public class UserDomainService {
 				if(entity.getOrganization() != null && !"".equals(entity.getOrganization())) {
 					pUser.get().setOrganization(entity.getOrganization());
 				}
+				if(entity.getEmail() != null && !"".equals(entity.getEmail())) {
+					pUser.get().setEmail(entity.getEmail());
+				}
 				if(entity.getUserRole().getUserRoleCode() != null && !"".equals(entity.getUserRole().getUserRoleCode())) {
 					UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
 //					pUser.getUserRole().setId(role.getId());

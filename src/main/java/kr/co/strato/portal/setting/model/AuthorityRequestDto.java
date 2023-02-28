@@ -37,6 +37,7 @@ public class AuthorityRequestDto {
 	@ToString
 	public static class ReqDeleteDto {
 		private Long userRoleIdx;
+		private String userRoleName;
 	}
 	
 	@Getter

@@ -160,11 +160,11 @@ public class AuthorityService {
 			}
 			
 			//Keycloak Role 생성
-			boolean isOk = keyCloakApiUtil.postRole(paramEntity);
-			if(!isOk) {
-				log.error("Keycloak Role 생성 실패!");
-				log.error("Keycloak Role 생성 실패! - Role Code: {}", paramEntity.getUserRoleCode());
-			}
+//			boolean isOk = keyCloakApiUtil.postRole(paramEntity);
+//			if(!isOk) {
+//				log.error("Keycloak Role 생성 실패!");
+//				log.error("Keycloak Role 생성 실패! - Role Code: {}", paramEntity.getUserRoleCode());
+//			}
 		}
 		paramEntity.setUserDefinedYn("Y");
 		
@@ -176,7 +176,13 @@ public class AuthorityService {
 	// 권한 삭제
 	@Transactional
 	public Long deleteUserRole(AuthorityRequestDto.ReqDeleteDto param) {
-		UserRoleEntity userRole = userRoleDomainService.getUserRoleById(param.getUserRoleIdx());
+		UserRoleEntity userRole = null;
+		if(param.getUserRoleIdx() != null && param.getUserRoleIdx() != 0) {
+			userRole = userRoleDomainService.getUserRoleById(param.getUserRoleIdx());
+		} else {
+			userRole = userRoleDomainService.getUserRoleByName(param.getUserRoleName());
+		}
+		
 		UserRoleEntity defaultUserRole = getDefaultUserRole(); // 기본권한 조회
 		if ( ObjectUtils.isEmpty(defaultUserRole) ) {
 			throw new NotFoundResourceException("user role code : PROJECT_MEMBER");
@@ -189,11 +195,12 @@ public class AuthorityService {
 		userRoleDomainService.deleteUserRole(userRole);
 		
 		//Keycloak Role 삭제
-		boolean isOk = keyCloakApiUtil.deleteRole(userRole.getUserRoleCode());
-		if(!isOk) {
-			log.error("Keycloak Role 삭제 실패!");
-			log.error("Keycloak Role 삭제 실패! - Role Code: {}", userRole.getUserRoleCode());
-		}
+//		boolean isOk = keyCloakApiUtil.deleteRole(userRole.getUserRoleCode());
+//		if(!isOk) {
+//			log.error("Keycloak Role 삭제 실패!");
+//			log.error("Keycloak Role 삭제 실패! - Role Code: {}", userRole.getUserRoleCode());
+//		}
+		
 		return userRole.getId();
 	}
 

@@ -92,28 +92,28 @@ public class UserService {
 	public String postUser(UserDto param, UserDto loginUser) {
 		
 		//keycloak 연동
-		try {
-			keyCloakApiUtil.createSsoUser(param);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw new SsoConnectionException(e.getMessage());
-		}		
+//		try {
+//			keyCloakApiUtil.createSsoUser(param);
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			throw new SsoConnectionException(e.getMessage());
+//		}		
+		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
 		//최초 가입 유저는 미사용 처리.
 		entity.setUseYn("N");
 		
 		//유저 생성자 설정.
 		if(loginUser != null) {
-			entity.setCreateUserId(loginUser.getUserId());
+//			entity.setCreateUserId(loginUser.getUserId());
 			entity.setCreateUserName(loginUser.getUserName());
-			
 			
 			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
 			String roleCode = "PROJECT_MEMBER";
 			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
 			entity.getUserRole().setId(role.getId());
 		} else {
-			entity.setCreateUserId(entity.getUserId());
+//			entity.setCreateUserId(entity.getUserId());
 			entity.setCreateUserName(entity.getUserName());
 			
 			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
@@ -125,7 +125,7 @@ public class UserService {
 		userDomainService.saveUser(entity, "post");
 		
 		//패스워드 초기화 이메일 전송
-		requestResetPassword(param.getUserId(), param.getEmail());
+//		requestResetPassword(param.getUserId(), param.getEmail());
 		return param.getUserId();
 	}
 	
@@ -176,26 +176,29 @@ public class UserService {
 			
 			
 			UserEntity old = userDomainService.getUserInfoByUserId(param.getUserId());
-			UserRoleEntity oldRole = old.getUserRole();
-			UserRole newRole = param.getUserRole();
 			
-			if(newRole == null) {
-				keycloakApiUtil.deleteAllUserRole(userId);
-				keycloakApiUtil.logoutUser(userId);
-			} else {
-				if(!oldRole.getUserRoleCode().equals(newRole.getUserRoleCode())) {
-					//권한이 변경된 경우 Keycloak에 변경사항 반영
-					keycloakApiUtil.postUserRole(userId, newRole.getUserRoleCode());
-					keycloakApiUtil.logoutUser(userId);
-				}
-			}
+//			UserRoleEntity oldRole = old.getUserRole();
+//			UserRole newRole = param.getUserRole();
+			
+//			if(newRole == null) {
+//				keycloakApiUtil.deleteAllUserRole(userId);
+//				keycloakApiUtil.logoutUser(userId);
+//			} else {
+//				if(!oldRole.getUserRoleCode().equals(newRole.getUserRoleCode())) {
+//					//권한이 변경된 경우 Keycloak에 변경사항 반영
+//					keycloakApiUtil.postUserRole(userId, newRole.getUserRoleCode());
+//					keycloakApiUtil.logoutUser(userId);
+//				}
+//			}
 			
 		}  catch (Exception e) {
 			log.error(e.getMessage());
 		}
 		
-		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);		
-		userDomainService.saveUser(entity, "patch");				
+		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);	
+		entity.setUpdateUserName(param.getUpdateUserName());
+		userDomainService.saveUser(entity, "patch");
+		
 		return param.getUserId();
 	}
 	
@@ -206,10 +209,10 @@ public class UserService {
 		
 		try {
 			//로그아웃 처리
-			accessService.doLogout(entity.getUserId());
+//			accessService.doLogout(entity.getUserId());
 			
 			//keycloak 유저 비활성화
-			keyCloakApiUtil.enableSsoUser(param.getUserId(), false);
+//			keyCloakApiUtil.enableSsoUser(param.getUserId(), false);
 			
 			//keyCloakApiUtil.deleteSsoUser(param);
 		} catch (Exception e) {
