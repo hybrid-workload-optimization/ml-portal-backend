@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.sso.model.ClientRoleDTO;
 import kr.co.strato.adapter.sso.proxy.ClientRoleProxy;
-import kr.co.strato.global.model.JwtTokenModel;
+import kr.co.strato.global.model.JwtToken;
 
 @Service
 public class ClientRoleAdapterService {
@@ -32,10 +32,10 @@ public class ClientRoleAdapterService {
 	public Map<String, Object> authorizationHeader() {
 		Map<String, Object> header = new HashMap<>();
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();		
-		if(auth.getPrincipal() instanceof JwtTokenModel.payload) {
-			JwtTokenModel.payload principal = (JwtTokenModel.payload)auth.getPrincipal();
+		if(auth.getPrincipal() instanceof JwtToken) {
+			JwtToken principal = (JwtToken)auth.getPrincipal();
 	        
-	        String accessTokenStr  = principal.getAccessToken();
+	        String accessTokenStr  = principal.getAccessTokenStr();
 	        
 	        //System.out.println(accessTokenStr);
 	        header.put("Content-Type", "application/json");

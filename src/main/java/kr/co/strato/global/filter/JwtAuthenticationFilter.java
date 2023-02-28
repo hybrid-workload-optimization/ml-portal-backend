@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import kr.co.strato.global.model.JwtTokenModel;
+import kr.co.strato.global.model.JwtToken;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -106,9 +106,8 @@ public class JwtAuthenticationFilter implements Filter {
 	 * @return
 	 */
 	public Authentication getAuthentication(String jwtToken) {		
-		JwtTokenModel.payload userDetails = tokenParser(jwtToken);
-		userDetails.setAccessToken(jwtToken);
-		return new UsernamePasswordAuthenticationToken(userDetails, null, null);
+		JwtToken token = tokenParser(jwtToken);
+		return new UsernamePasswordAuthenticationToken(token, null, null);
 	}
 	
 	public RSAPublicKey getParsePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -119,21 +118,28 @@ public class JwtAuthenticationFilter implements Filter {
         return pubKey;
 	}
 
-	public JwtTokenModel.payload tokenParser(String token) {
-		String[] chunks = token.split("\\.");
+	public JwtToken tokenParser(String tokenStr) {
+		String[] chunks = tokenStr.split("\\.");
 		Base64.Decoder decoder = Base64.getUrlDecoder();
 		String header = new String(decoder.decode(chunks[0]));
 		String payload = new String(decoder.decode(chunks[1]));
 		
 		Gson gson = new Gson();
 
-		//JwtTokenModel.header headerInfo = gson.fromJson(header, JwtTokenModel.header.class);
-		JwtTokenModel.payload payloadInfo = gson.fromJson(payload, JwtTokenModel.payload.class);
+		
+		JwtToken.Header headerInfo = gson.fromJson(header, JwtToken.Header.class);
+		JwtToken.Payload payloadInfo = gson.fromJson(payload, JwtToken.Payload.class);
+		
+		JwtToken token = JwtToken.builder()
+				.header(headerInfo)
+				.payload(payloadInfo)
+				.accessTokenStr(tokenStr)
+				.build();
 		
 		log.info("header >>> {}", header);
 		log.info("payload >>> {}", payload);
 		
-		return payloadInfo;
+		return token;
 	}
 	
 	/**

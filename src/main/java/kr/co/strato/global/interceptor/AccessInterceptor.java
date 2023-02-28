@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import kr.co.strato.global.model.JwtTokenModel;
+import kr.co.strato.global.model.JwtToken;
 
 
 public class AccessInterceptor implements HandlerInterceptor {
@@ -23,12 +23,12 @@ public class AccessInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-		if(auth.getPrincipal() instanceof JwtTokenModel.payload) {
-			JwtTokenModel.payload principal = (JwtTokenModel.payload)auth.getPrincipal();
+		if(auth.getPrincipal() instanceof JwtToken) {
+			JwtToken principal = (JwtToken)auth.getPrincipal();
 			
 			//부여된 Client Role 조회
 			List<String> roles = principal.getClientRoles(clientId);
-			if(roles != null) {				
+			if(roles != null) {
 				//TODO : roles로 상세 권한 처리
 				
 				return true;

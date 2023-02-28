@@ -5,20 +5,53 @@ import java.util.Map;
 
 import com.google.gson.annotations.SerializedName;
 
+import lombok.Builder;
 import lombok.Data;
 
+
 @Data
-public class JwtTokenModel {
+@Builder
+public class JwtToken {
+	private String accessTokenStr;
+	private Header header;
+	private Payload payload;
+	
+	/**
+	 * 클라이언트 롤 반환.
+	 * @param clientId
+	 * @return
+	 */
+	public List<String> getClientRoles(String clientId) {
+		if(payload != null) {
+			Map<String, List<String>> res = payload.getResourceAccess().get(clientId);
+			if(res != null) {
+				return res.get("roles");
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 클라이언트 Audience 검사.
+	 * @param clientId
+	 * @return
+	 */
+	public boolean hasAudience(String clientId) {
+		if(payload != null) {
+			return payload.getAud().contains(clientId);
+		}
+		return false;
+	}
 
 	@Data
-	public static class header {
+	public static class Header {
 		private String alg;
 		private String typ;
 		private String kid;
 	}
 	
 	@Data
-	public static class payload {
+	public static class Payload {
 		private String exp;
 		private String iat;
 		private String jti;
@@ -42,29 +75,5 @@ public class JwtTokenModel {
 		@SerializedName("preferred_username")
 		private String preferredUsername;
 		private String email;
-		private String accessToken;
-		
-		/**
-		 * 클라이언트 롤 반환.
-		 * @param clientId
-		 * @return
-		 */
-		public List<String> getClientRoles(String clientId) {
-			Map<String, List<String>> res = getResourceAccess().get(clientId);
-			if(res != null) {
-				return res.get("roles");
-			}
-			return null;
-		}
-		
-		/**
-		 * 클라이언트 Audience 검사.
-		 * @param clientId
-		 * @return
-		 */
-		public boolean hasAudience(String clientId) {
-			return getAud().contains(clientId);
-		}
-	}
-	
+	}	
 }

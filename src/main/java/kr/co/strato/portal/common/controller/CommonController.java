@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.strato.global.model.JwtTokenModel;
+import kr.co.strato.global.model.JwtToken;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.UserRole;
 
@@ -23,12 +23,12 @@ public class CommonController {
 	 */	
 	public UserDto getLoginUser() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();		
-		if(auth.getPrincipal() instanceof JwtTokenModel.payload) {
-			JwtTokenModel.payload principal = (JwtTokenModel.payload)auth.getPrincipal();
+		if(auth.getPrincipal() instanceof JwtToken) {
+			JwtToken principal = (JwtToken)auth.getPrincipal();
 			
 	        UserDto user = new UserDto();
-	        user.setUserId(principal.getPreferredUsername());
-	        user.setEmail(principal.getEmail());
+	        user.setUserId(principal.getPayload().getPreferredUsername());
+	        user.setEmail(principal.getPayload().getEmail());
 	        
 	        List<String> roles = principal.getClientRoles(clientId);
 	        if(roles != null && roles.size() > 0) {
