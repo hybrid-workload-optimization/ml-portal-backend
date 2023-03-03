@@ -87,6 +87,13 @@ public class PortalProjectService extends CommonController {
         return projectList;
     }
     
+    public Long getProjectIdx(String projectName) {
+    	
+    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectByProjectName(projectName, "N");
+    	
+    	return projectInfo.get().getId();
+    }
+    
     /**
      * Project 상세 조회
      * @param projectIdx
@@ -257,7 +264,14 @@ public class PortalProjectService extends CommonController {
     	
     	boolean result = false;
     	
-    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	Optional<ProjectEntity> projectInfo = null;
+    	
+    	if(param.getProjectIdx() != null) {
+    		projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	} else {
+    		projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName(), "N");
+    	}
+    	
     	if(projectInfo == null) {
     		throw new NotFoundProjectException();
     	}
@@ -267,7 +281,7 @@ public class PortalProjectService extends CommonController {
     		ProjectEntity oldEntity = projectInfo.get();
     		
         	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
-        	projectBuiler.id(param.getProjectIdx());
+        	projectBuiler.id(projectInfo.get().getId());
         	projectBuiler.projectName(param.getProjectName());
         	projectBuiler.description(param.getDescription());
         	projectBuiler.createUserId(userId);
@@ -287,14 +301,14 @@ public class PortalProjectService extends CommonController {
             // Project Manager 정보 확인 및 수정
         	ProjectUserDto managerInfo = param.getProjectManager();
         	if(managerInfo != null) {
-        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(projectInfo.get().getId());
         		ProjectUserDto pmUser = ProjectUserDtoMapper.INSTANCE.toDto(pmUserInfo);
         		if(!managerInfo.getUserId().equals(pmUser.getUserId())) {
     				
     				// 신규 Project Manager 적용
     				ProjectUserDtoBuilder newProjectManagerBuiler = ProjectUserDto.builder();
     				newProjectManagerBuiler.userId(managerInfo.getUserId());
-    				newProjectManagerBuiler.projectIdx(param.getProjectIdx());
+    				newProjectManagerBuiler.projectIdx(projectInfo.get().getId());
     				newProjectManagerBuiler.createUserId(userId);
     				newProjectManagerBuiler.createUserName(userName);
     				newProjectManagerBuiler.createdAt(now);
@@ -325,7 +339,7 @@ public class PortalProjectService extends CommonController {
         	List<ProjectClusterDto> reqClusterList = param.getClusterList();
     		if(reqClusterList != null && !reqClusterList.isEmpty()) {
     			List<Long> duplicateIdxList = new ArrayList<Long>();
-        		List<ProjectClusterDto> clusterList = projectClusterDomainService.getProjectClusterList(param.getProjectIdx());
+        		List<ProjectClusterDto> clusterList = projectClusterDomainService.getProjectClusterList(projectInfo.get().getId());
         		for(ProjectClusterDto nowCluster : clusterList) {
         			for(ProjectClusterDto reqCluster : reqClusterList) {
         				if(nowCluster.getClusterIdx().equals(reqCluster.getClusterIdx())) {
@@ -336,17 +350,17 @@ public class PortalProjectService extends CommonController {
         		}
         		
         		if(duplicateIdxList != null && duplicateIdxList.size() > 0) {
-        			projectClusterDomainService.deleteRequestProjectCluster(param.getProjectIdx(), duplicateIdxList);
+        			projectClusterDomainService.deleteRequestProjectCluster(projectInfo.get().getId(), duplicateIdxList);
         		}
                 
                 //Project Cluster 등록
         		reqClusterList = param.getClusterList();
             	for(ProjectClusterDto cluster : reqClusterList) {
             		ProjectClusterDtoBuilder projectClusterBuiler = ProjectClusterDto.builder();
-            		projectClusterBuiler.projectIdx(param.getProjectIdx());
+            		projectClusterBuiler.projectIdx(projectInfo.get().getId());
             		projectClusterBuiler.clusterIdx(cluster.getClusterIdx());
             		
-            		ProjectClusterEntity selectCluster = projectClusterDomainService.getProjectCluster(param.getProjectIdx(), cluster.getClusterIdx());
+            		ProjectClusterEntity selectCluster = projectClusterDomainService.getProjectCluster(projectInfo.get().getId(), cluster.getClusterIdx());
             		if(selectCluster != null) {
             			System.out.println("selectCluster === " + selectCluster.getClusterIdx());
             			continue;
@@ -357,7 +371,7 @@ public class PortalProjectService extends CommonController {
                     projectClusterDomainService.createProjectCluster(projectClusterEntity);
             	}
     		} else {
-    			projectClusterDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
+    			projectClusterDomainService.deleteProjectByProjectIdx(projectInfo.get().getId());
     		}
     		
     		//Project Member
@@ -370,10 +384,10 @@ public class PortalProjectService extends CommonController {
     		if(reqUserList != null && !reqUserList.isEmpty()) {
         		//List<String> duplicateIdList = new ArrayList<String>();
         		
-        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(projectInfo.get().getId());
         		duplicateIdList.add(pmUserInfo.getUserId());
         		
-        		userList = projectUserDomainService.getProjectUserListExceptManager(param.getProjectIdx());
+        		userList = projectUserDomainService.getProjectUserListExceptManager(projectInfo.get().getId());
         		for(ProjectUserDto nowUser : userList) {
         			for(ProjectUserDto reqCluster : reqUserList) {
         				if(nowUser.getUserId().equals(reqCluster.getUserId())) {
@@ -384,16 +398,16 @@ public class PortalProjectService extends CommonController {
         		}
         		
         		if(duplicateIdList != null && duplicateIdList.size() > 0) {
-        			projectUserDomainService.deleteRequestProjectUser(param.getProjectIdx(), duplicateIdList);
+        			projectUserDomainService.deleteRequestProjectUser(projectInfo.get().getId(), duplicateIdList);
         		}
                 
                 //Project User 등록
         		for(ProjectUserDto user : reqUserList) {
-            		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(param.getProjectIdx(), user.getUserId());
+             		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(projectInfo.get().getId(), user.getUserId());
             		
             		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
             		projectUserBuiler.userId(user.getUserId());
-            		projectUserBuiler.projectIdx(param.getProjectIdx());
+            		projectUserBuiler.projectIdx(projectInfo.get().getId());
             		projectUserBuiler.createUserId(userId);
             		projectUserBuiler.createUserName(userName);
             		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
@@ -409,7 +423,7 @@ public class PortalProjectService extends CommonController {
             		projectUserDomainService.createProjectUser(projectUserEntity);
             	}
     		} else {
-    			projectUserDomainService.deleteProjectUserExceptManager(param.getProjectIdx());
+    			projectUserDomainService.deleteProjectUserExceptManager(projectInfo.get().getId());
     		}
             
             result = true;
@@ -503,9 +517,12 @@ public class PortalProjectService extends CommonController {
     	
     	boolean result = false;
     	
-    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
-    	if(projectInfo == null) {
-    		throw new NotFoundProjectException();
+    	Optional<ProjectEntity> projectInfo = null;
+    	
+    	if(param.getProjectIdx() != null) {
+    		projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	} else {
+    		projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName(), "N");
     	}
     	
     	try {
@@ -515,10 +532,10 @@ public class PortalProjectService extends CommonController {
     			//projectUserDomainService.deleteProjectByProjectIdx(param.getProjectIdx());
         		List<String> duplicateIdList = new ArrayList<String>();
         		
-        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(param.getProjectIdx());
+        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(projectInfo.get().getId());
         		duplicateIdList.add(pmUserInfo.getUserId());
         		
-        		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserListExceptManager(param.getProjectIdx());
+        		List<ProjectUserDto> userList = projectUserDomainService.getProjectUserListExceptManager(projectInfo.get().getId());
         		
         		for(ProjectUserDto nowUser : userList) {
         			for(ProjectUserDto reqCluster : reqUserList) {
@@ -530,16 +547,16 @@ public class PortalProjectService extends CommonController {
         		}
         		
         		if(duplicateIdList != null && duplicateIdList.size() > 0) {
-        			projectUserDomainService.deleteRequestProjectUser(param.getProjectIdx(), duplicateIdList);
+//        			projectUserDomainService.deleteRequestProjectUser(projectInfo.get().getId(), duplicateIdList);
         		}
                 
                 //Project User 등록
         		for(ProjectUserDto user : reqUserList) {
-            		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(param.getProjectIdx(), user.getUserId());
+            		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(projectInfo.get().getId(), user.getUserId());
             		
             		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
             		projectUserBuiler.userId(user.getUserId());
-            		projectUserBuiler.projectIdx(param.getProjectIdx());
+            		projectUserBuiler.projectIdx(projectInfo.get().getId());
             		projectUserBuiler.createUserId(userId);
             		projectUserBuiler.createUserName(userName);
             		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
@@ -556,7 +573,7 @@ public class PortalProjectService extends CommonController {
             		projectUserDomainService.createProjectUser(projectUserEntity);
             	}
     		} else {
-    			projectUserDomainService.deleteProjectUserExceptManager(param.getProjectIdx());
+    			projectUserDomainService.deleteProjectUserExceptManager(projectInfo.get().getId());
     		}
         	
         	result = true;
@@ -577,7 +594,13 @@ public class PortalProjectService extends CommonController {
     	
     	boolean result = false;
     	
-    	Optional<ProjectEntity> projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	Optional<ProjectEntity> projectInfo = null;
+    	if(param.getProjectIdx() != null) {
+    		projectInfo = projectDomainService.getProjectById(param.getProjectIdx());
+    	} else {
+    		projectInfo = projectDomainService.getProjectByProjectName(param.getProjectName(), "N");
+    	}
+    	
     	if(projectInfo == null) {
     		throw new NotFoundProjectException();
     	}

@@ -9,4 +9,7 @@ public class MessageModel {
 	private String type;
 	private Object data;
 	private Object role;
+	private Object group;
+	private Object user;
+	
 }

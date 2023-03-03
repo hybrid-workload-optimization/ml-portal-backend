@@ -115,12 +115,14 @@ public class UserDomainService {
 	public String deleteUser(UserEntity user) {
 		
 		//@TODO 유저 삭제에 대한 정책 확정 필요
-		Optional<UserEntity> entity =  userRepository.findById(user.getUserId());
+//		Optional<UserEntity> entity =  userRepository.findById(user.getUserId());
+
+//		if(entity.isPresent()) {
+//			entity.get().setUseYn("N");
+//			userRepository.save(entity.get());
+//		}
 		
-		if(entity.isPresent()) {
-			entity.get().setUseYn("N");
-			userRepository.save(entity.get());
-		}
+		userRepository.deleteById(user.getUserId());
 		
 		return user.getUserId();
 	}

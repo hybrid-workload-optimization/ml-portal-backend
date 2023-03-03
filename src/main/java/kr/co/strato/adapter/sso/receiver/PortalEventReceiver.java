@@ -22,6 +22,9 @@ public class PortalEventReceiver {
     public static final String TYPE_COMPANY = "company";
     public static final String TYPE_SERVICE_GROUP = "service_group";
     
+    public static final String EVENT_JOIN_GROUP = "join_group";
+    public static final String EVENT_LEAVE_GROUP = "leave_group";
+    
 	/**
 	 * Portal에서 발생하는 Event 수신
 	 * @param message
@@ -37,20 +40,28 @@ public class PortalEventReceiver {
 		Gson gson = new Gson();
 		MessageModel messageObj = gson.fromJson(message, MessageModel.class);
 		String typeName = messageObj.getType();
+		String eventName = messageObj.getEvent();
 		
 		if(TYPE_USER.equals(typeName)) {
 			
 			eventService.userEvent(messageObj);
 		
+		} else if(TYPE_SERVICE_GROUP.equals(typeName)) {
+			
+			eventService.groupEvent(messageObj);
+			
 		} else if(TYPE_ROLE.equals(typeName)) {
 			
 			eventService.roleEvent(messageObj);
 			
+		} else if(EVENT_JOIN_GROUP.equals(eventName) || EVENT_LEAVE_GROUP.equals(eventName)) {
+			
+			eventService.groupMemberEvent(messageObj);
+		
 		} else if(TYPE_COMPANY.equals(typeName)) {
 			
-		} else if(TYPE_SERVICE_GROUP.equals(typeName)) {
-			
-		}
+		} 
+		
 		
 	}
 	

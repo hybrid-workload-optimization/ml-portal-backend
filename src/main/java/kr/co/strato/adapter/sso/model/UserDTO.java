@@ -18,7 +18,6 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private String email;
-    private String fullName;
 //    private String createAt;
     private String createdBy;
 //    private String updateAt;

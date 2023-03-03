@@ -1,13 +1,20 @@
 package kr.co.strato.adapter.sso.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
 import kr.co.strato.adapter.sso.model.ClientRoleDTO;
+import kr.co.strato.adapter.sso.model.GroupDTO;
 import kr.co.strato.adapter.sso.model.MessageModel;
 import kr.co.strato.adapter.sso.model.UserDTO;
+import kr.co.strato.portal.project.model.ProjectRequestDto;
+import kr.co.strato.portal.project.model.ProjectUserDto;
+import kr.co.strato.portal.project.service.PortalProjectService;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto.ReqDeleteDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto.ReqRegistDto;
@@ -25,6 +32,8 @@ public class PortalEventService {
 	private UserService userService;
 	@Autowired
 	private AuthorityService authorityService;
+	@Autowired
+	private PortalProjectService projectService;
 	
 	public static final String EVENT_CREATED = "created";
     public static final String EVENT_REMOVED = "removed";
@@ -35,6 +44,7 @@ public class PortalEventService {
 	
 	/**
 	 * User 이벤트 처리
+	 * created / removed / updated
 	 * @param messageObj
 	 */
 	public void userEvent(MessageModel messageObj) {
@@ -51,7 +61,6 @@ public class PortalEventService {
 		log.info(data.toString());
 		log.info(eventName);
 		
-		// 유저 생성
 		if(EVENT_CREATED.equals(eventName)) {
 			
 			UserDto loginUser = new UserDto();
@@ -60,13 +69,11 @@ public class PortalEventService {
 			String result = userService.postUser(serviceDto, loginUser);
 			log.info("created user >>>> {}", result);
 		
-		// 유저 삭제
 		} else if(EVENT_REMOVED.equals(eventName)) {
 			
 			Long result = userService.deleteUser(serviceDto);
 			log.info("deleted user >>>> {}", result);
 		
-		// 유저 수정
 		} else if(EVENT_UPDATED.equals(eventName)) {
 			
 			serviceDto.setUpdateUserName(userDTO.getUpdateBy());
@@ -77,9 +84,90 @@ public class PortalEventService {
 		}
 	}
 	
+	/**
+	 * Group 이벤트 처리
+	 * created / removed / updated
+	 * @param messageObj
+	 */
+	public void groupEvent(MessageModel messageObj) {
+		
+		Gson gson = new Gson();
+		String eventName = messageObj.getEvent();
+		Object data = messageObj.getData();
+		String dataStr = gson.toJson(data);		
+		
+		GroupDTO groupDTO = gson.fromJson(dataStr, GroupDTO.class);
+
+		ProjectRequestDto serviceDTO = groupDtoMapper(groupDTO);
+		
+		log.info(data.toString());
+		log.info(eventName);
+		
+		if(EVENT_CREATED.equals(eventName)) {
+		
+			serviceDTO.setLoginName(groupDTO.getCreatedBy());
+			
+			Long result = projectService.createProject(serviceDTO);
+			log.info("created group >>>> {}", result);
+		
+		} else if(EVENT_REMOVED.equals(eventName)) {
+			
+			serviceDTO.setLoginName(groupDTO.getCreatedBy());
+			
+			boolean result = projectService.deleteProject(serviceDTO, null);
+			log.info("deleted group >>>> {}", result);
+		
+		} else if(EVENT_UPDATED.equals(eventName)) {
+			
+			serviceDTO.setLoginName(groupDTO.getUpdatedBy());
+			
+			boolean result = projectService.updateProject(serviceDTO);
+			log.info("updated group >>>> {}", result);
+			
+		}
+		
+	}
 	
 	/**
+	 * Group 멤버 이벤트 처리
+	 * join / leave
+	 * @param messageObj
+	 */
+	public void groupMemberEvent(MessageModel messageObj) {
+		
+		Gson gson = new Gson();
+		String eventName = messageObj.getEvent();
+		Object group = messageObj.getGroup();
+		Object user = messageObj.getUser();
+		
+		String groupStr = gson.toJson(group);
+		String userStr = gson.toJson(user);
+		
+		GroupDTO groupDTO = gson.fromJson(groupStr, GroupDTO.class);
+		UserDTO userDTO = gson.fromJson(userStr, UserDTO.class);
+		
+		ProjectRequestDto serviceDTO = groupMemberDtoMapper(groupDTO, userDTO);
+		
+		if(EVENT_JOIN_GROUP.equals(eventName)) {
+			
+			boolean result = projectService.updateProjectUser(serviceDTO);
+			log.info("join group member >>>> {}", result);
+			
+		} else if(EVENT_LEAVE_GROUP.equals(eventName)) {
+			
+			String userId = serviceDTO.getUserList().get(0).getUserId();
+			Long projectIdx = projectService.getProjectIdx(serviceDTO.getProjectName());
+			boolean result = projectService.deleteProjectUser(projectIdx, userId);
+			
+			log.info("leave group member >>>> {}", result);
+			
+		}	
+	}
+	
+
+	/**
 	 * Role 이벤트 처리
+	 * created / removed
 	 * @param messageObj
 	 */
 	public void roleEvent(MessageModel messageObj) {
@@ -114,7 +202,47 @@ public class PortalEventService {
 		}
 	}
 	
+	
 	// 이벤트 DTO -> 서비스 DTO 데이터 파싱
+	public ProjectRequestDto groupMemberDtoMapper(GroupDTO groupDTO, UserDTO userDTO) {
+
+		// Project Member 추가
+		ProjectUserDto userDto = new ProjectUserDto();
+		userDto.setUserId(userDTO.getUsername());
+		userDto.setCreateUserName(userDTO.getCreatedBy());
+		userDto.setUserRoleIdx(6L);
+		userDto.setUserRoleName("PROJECT_MEMBER");
+		List<ProjectUserDto> userList = new ArrayList<>();
+		userList.add(userDto);
+
+		ProjectRequestDto serviceDTO = new ProjectRequestDto();
+		serviceDTO.setProjectName(groupDTO.getGroupName());
+		serviceDTO.setDescription(groupDTO.getDescription());
+		serviceDTO.setLoginName(groupDTO.getCreatedBy());
+		serviceDTO.setUserList(userList);
+		
+		return serviceDTO;
+	}
+	
+	public ProjectRequestDto groupDtoMapper(GroupDTO groupDTO) {
+
+		// Project Manager 추가
+		ProjectUserDto userDto = new ProjectUserDto();
+		userDto.setUserId(groupDTO.getManager());
+		userDto.setCreateUserName(groupDTO.getCreatedBy());
+		userDto.setUserRoleIdx(5L);
+		userDto.setUserRoleName("PROJECT_MANAGER");
+		List<ProjectUserDto> userList = new ArrayList<>();
+		userList.add(userDto);
+
+		ProjectRequestDto serviceDTO = new ProjectRequestDto();
+		serviceDTO.setProjectName(groupDTO.getGroupName());
+		serviceDTO.setDescription(groupDTO.getDescription());
+		serviceDTO.setUserList(userList);
+		
+		return serviceDTO;
+	}
+	
 	public UserDto userDtoMapper(UserDTO userDTO) {
 		
 		UserDto serviceDto = new UserDto(); 

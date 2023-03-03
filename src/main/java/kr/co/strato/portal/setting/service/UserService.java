@@ -175,7 +175,7 @@ public class UserService {
 			//keyCloakApiUtil.updateSsoUser(param, null);
 			
 			
-			UserEntity old = userDomainService.getUserInfoByUserId(param.getUserId());
+//			UserEntity old = userDomainService.getUserInfoByUserId(param.getUserId());
 			
 //			UserRoleEntity oldRole = old.getUserRole();
 //			UserRole newRole = param.getUserRole();

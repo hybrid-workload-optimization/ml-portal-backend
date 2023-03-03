@@ -10,7 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClientRoleDTO {
+	
 	private String uuid;
 	private String roleName;
 	private String description;
+	
+	
 }
