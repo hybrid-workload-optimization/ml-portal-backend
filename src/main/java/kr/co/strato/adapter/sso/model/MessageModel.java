@@ -11,5 +11,6 @@ public class MessageModel {
 	private Object role;
 	private Object group;
 	private Object user;
+	private String clientId;
 	
 }

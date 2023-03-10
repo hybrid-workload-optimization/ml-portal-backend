@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import kr.co.strato.adapter.sso.service.PortalAdapterService;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserResetPasswordEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
@@ -41,29 +42,29 @@ public class UserDomainService {
 	@Autowired
 	KeyCloakApiUtil	keyCloakApiUtil;
 	
+	@Autowired
+	PortalAdapterService portalAdapterService;
+	
+	
 	/**
 	 * 유저 등록/수정
 	 * @param entity
 	 */
 	public void saveUser(UserEntity entity, String mode) {
-
+		
 		// 등록
 		if("post".equals(mode)) {
 			//DB 저장
 			
-			if(entity.getUserRole() == null) {
-				//PROJECT MEMBER의 RoleCode 가져오기
-				String roleCode = "PROJECT_MEMBER";
-				UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-				
-				//권한 매핑 
-				entity.getUserRole().setId(role.getId());
-			}
-			userRepository.save(entity);	
+			userRepository.save(entity);
+			
 		} else {
 			
 			// 수정할 유저의 roleCode > 변경했다면 코드값이 있고, 없다면 값이 없음
-			String roleCode = entity.getUserRole().getUserRoleCode();
+			String roleCode = "";
+			if(entity.getUserRole() != null) {
+				roleCode = entity.getUserRole().getUserRoleCode();
+			}
 
 			// 수정
 			Optional<UserEntity> pUser = userRepository.findByUserId(entity.getUserId());
@@ -80,10 +81,11 @@ public class UserDomainService {
 				if(entity.getEmail() != null && !"".equals(entity.getEmail())) {
 					pUser.get().setEmail(entity.getEmail());
 				}
-				if(entity.getUserRole().getUserRoleCode() != null && !"".equals(entity.getUserRole().getUserRoleCode())) {
-					UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-//					pUser.getUserRole().setId(role.getId());
-					pUser.get().setUserRole(role);
+				if(entity.getUseYn() != null && !"".equals(entity.getUseYn())) {
+					pUser.get().setUseYn(entity.getUseYn());
+				}
+				if(entity.getUpdateUserName() != null && !"".equals(entity.getUpdateUserName())) {
+					pUser.get().setUpdateUserName(entity.getUpdateUserName());
 				}
 				userRepository.save(pUser.get());
 
@@ -103,6 +105,40 @@ public class UserDomainService {
 			}
 			
 		}
+	}
+	
+	/**
+	 * 유저 롤 추가/삭제
+	 * @param entity
+	 */
+	public void userRoleUpdate(UserEntity entity) {
+		
+		// 수정할 유저의 roleCode > 변경했다면 코드값이 있고, 없다면 값이 없음
+		String roleCode = "";
+		if(entity.getUserRole() != null) {
+			roleCode = entity.getUserRole().getUserRoleCode();
+		}
+
+		// 수정
+		Optional<UserEntity> pUser = userRepository.findByUserId(entity.getUserId());
+		if(pUser.isPresent()) {
+			if(entity.getUserRole() != null) {
+				UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
+				pUser.get().setUserRole(role);
+				pUser.get().setUseYn("Y");
+			} else {
+				pUser.get().setUserRole(null);
+				pUser.get().setUseYn("N");
+			}
+			if(entity.getUpdateUserName() != null && !"".equals(entity.getUpdateUserName())) {
+				pUser.get().setUpdateUserName(entity.getUpdateUserName());
+			}
+			userRepository.save(pUser.get());
+
+		}else {
+			throw new NotFoundResourceException("user : " + entity.toString());
+		}
+		
 	}
 	
 	

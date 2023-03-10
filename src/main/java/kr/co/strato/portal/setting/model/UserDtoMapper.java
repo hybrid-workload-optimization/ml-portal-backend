@@ -24,6 +24,8 @@ public interface UserDtoMapper {
 		@Mapping(source = "email",  target = "email"),
 		@Mapping(source = "contact",  target = "contact"),
 		@Mapping(source = "useYn",  target = "useYn"),
+		@Mapping(source = "createUserName",  target = "createUserName"),
+		@Mapping(source = "updateUserName",  target = "updateUserName"),
 		@Mapping(source = "userRole", target = "userRole", qualifiedByName = "toUserDtoInnerUserRole")
 	})
 	UserEntity toEntity(UserDto dto);

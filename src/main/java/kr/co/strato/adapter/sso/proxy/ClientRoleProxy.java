@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import kr.co.strato.adapter.sso.model.ClientRoleDTO;
+import kr.co.strato.adapter.sso.model.dto.ClientRoleDTO;
 
 
 @FeignClient(value="strato-portal-role", url = "${strato.portal.url}")

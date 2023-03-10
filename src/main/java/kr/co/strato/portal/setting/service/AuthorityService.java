@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import kr.co.strato.adapter.sso.model.ClientRoleDTO;
-import kr.co.strato.adapter.sso.service.ClientRoleAdapterService;
+import kr.co.strato.adapter.sso.model.dto.ClientRoleDTO;
+import kr.co.strato.adapter.sso.service.PortalAdapterService;
 import kr.co.strato.domain.menu.model.MenuEntity;
 import kr.co.strato.domain.menu.service.MenuDomainService;
 import kr.co.strato.domain.project.model.ProjectUserEntity;
@@ -70,7 +70,7 @@ public class AuthorityService {
 	private UserRoleMenuDomainService userRoleMenuDomainService;
 	
 	@Autowired
-	private ClientRoleAdapterService clientRoleAdapterService;
+	private PortalAdapterService clientRoleAdapterService;
 	
 	@Value("${keycloak.resource}")
 	private String clientId;
@@ -146,8 +146,8 @@ public class AuthorityService {
 			paramEntity.setUserRoleCode("GROUP_" + Long.toString(System.currentTimeMillis()));
 			paramEntity.setParentUserRoleIdx((long)0);
 		} else {
-			paramEntity.setUserRoleCode("ROLE_" + Long.toString(System.currentTimeMillis()));
-						
+//			paramEntity.setUserRoleCode("ROLE_" + Long.toString(System.currentTimeMillis()));
+			
 			//자식일경우 그룹에 매핑된 실제 권한이므로 메뉴생성
 			List<MenuEntity> menus = menuDomainService.getAllMenu();
 			for ( MenuEntity menu : menus ) {
@@ -159,12 +159,6 @@ public class AuthorityService {
 				paramEntity.addToUserRoleMenu(userRoleMenu);
 			}
 			
-			//Keycloak Role 생성
-//			boolean isOk = keyCloakApiUtil.postRole(paramEntity);
-//			if(!isOk) {
-//				log.error("Keycloak Role 생성 실패!");
-//				log.error("Keycloak Role 생성 실패! - Role Code: {}", paramEntity.getUserRoleCode());
-//			}
 		}
 		paramEntity.setUserDefinedYn("Y");
 		
@@ -183,23 +177,17 @@ public class AuthorityService {
 			userRole = userRoleDomainService.getUserRoleByName(param.getUserRoleName());
 		}
 		
-		UserRoleEntity defaultUserRole = getDefaultUserRole(); // 기본권한 조회
-		if ( ObjectUtils.isEmpty(defaultUserRole) ) {
-			throw new NotFoundResourceException("user role code : PROJECT_MEMBER");
-		}
+//		UserRoleEntity defaultUserRole = getDefaultUserRole(); // 기본권한 조회
+//		if ( ObjectUtils.isEmpty(defaultUserRole) ) {
+//			throw new NotFoundResourceException("user role code : PROJECT_MEMBER");
+//		}
 		
+		// 권한삭제 시 매핑 유저 권한 null 설정
 		userRole.getUsers().stream().forEach(user -> {
-			user.setUserRole(defaultUserRole);
+			user.setUserRole(null);
 		});
 		userRoleDomainService.saveUserRole(userRole);
 		userRoleDomainService.deleteUserRole(userRole);
-		
-		//Keycloak Role 삭제
-//		boolean isOk = keyCloakApiUtil.deleteRole(userRole.getUserRoleCode());
-//		if(!isOk) {
-//			log.error("Keycloak Role 삭제 실패!");
-//			log.error("Keycloak Role 삭제 실패! - Role Code: {}", userRole.getUserRoleCode());
-//		}
 		
 		return userRole.getId();
 	}

@@ -1,4 +1,4 @@
-package kr.co.strato.adapter.sso.model;
+package kr.co.strato.adapter.sso.model.dto;
 
 import java.util.List;
 
@@ -18,7 +18,8 @@ public class GroupDTO {
 	private String description;
 	private String companyName;
 	private List<String> allowClients;
-	private String manager;
+	private UserDTO manager;
+	private String managerId;
 	private String createdAt;
 	private String createdBy;
 	private String updatedAt;

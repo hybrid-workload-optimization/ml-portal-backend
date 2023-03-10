@@ -22,7 +22,6 @@ import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
-import kr.co.strato.global.error.exception.SsoConnectionException;
 import kr.co.strato.global.util.FileUtils;
 import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
@@ -31,7 +30,6 @@ import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.EnableUserDto;
 import kr.co.strato.portal.setting.model.UserDto.ResetParam;
 import kr.co.strato.portal.setting.model.UserDto.ResetRequestResult;
-import kr.co.strato.portal.setting.model.UserDto.UserRole;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
@@ -85,48 +83,80 @@ public class UserService {
 		} catch (Exception e) {
 			log.error("", e);
 		}
-		
 	}
-	
+
 	//등록
 	public String postUser(UserDto param, UserDto loginUser) {
 		
-		//keycloak 연동
-//		try {
-//			keyCloakApiUtil.createSsoUser(param);
-//		} catch (Exception e) {
-//			log.error(e.getMessage(), e);
-//			throw new SsoConnectionException(e.getMessage());
-//		}		
-		
 		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
-		//최초 가입 유저는 미사용 처리.
-		entity.setUseYn("N");
 		
-		//유저 생성자 설정.
-		if(loginUser != null) {
-//			entity.setCreateUserId(loginUser.getUserId());
-			entity.setCreateUserName(loginUser.getUserName());
+		entity.setCreateUserName(loginUser.getCreateUserName());
+		
+		if(param.getUserRole() != null) {
+			String roleName = param.getUserRole().getUserRoleName();
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleName(roleName);
 			
-			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
-			String roleCode = "PROJECT_MEMBER";
-			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
 			entity.getUserRole().setId(role.getId());
+			entity.getUserRole().setUserRoleCode(role.getUserRoleCode());
+			
+			entity.setUseYn("Y");
 		} else {
-//			entity.setCreateUserId(entity.getUserId());
-			entity.setCreateUserName(entity.getUserName());
-			
-			//싱가폴 데모를 위해 Sing up 사용자 초기 롤을 Manager로 설정
-			String roleCode = "PROJECT_MANAGER";
-			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(roleCode);
-			entity.getUserRole().setId(role.getId());
+			entity.setUseYn("N");
 		}
-		
+
 		userDomainService.saveUser(entity, "post");
 		
-		//패스워드 초기화 이메일 전송
-//		requestResetPassword(param.getUserId(), param.getEmail());
 		return param.getUserId();
+	}
+	
+	//수정
+	public String patchUser(UserDto param) {
+
+		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);	
+		entity.setUpdateUserName(param.getUpdateUserName());
+		
+		userDomainService.saveUser(entity, "patch");
+		
+		return param.getUserId();
+	}
+	
+	// 유저 롤 추가/삭제
+	public String userRoleUpdate(UserDto param) {
+
+		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);	
+		entity.setUpdateUserName(param.getUpdateUserName());
+		
+		if(param.getUserRole() != null) {
+			String roleName = param.getUserRole().getUserRoleName();
+			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleName(roleName);
+			entity.getUserRole().setId(role.getId());
+			entity.getUserRole().setUserRoleCode(role.getUserRoleCode());
+		}
+		
+		userDomainService.userRoleUpdate(entity);
+		
+		return param.getUserId();
+	}
+	
+	//삭제
+	public Long deleteUser(UserDto param) {		
+		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
+		userDomainService.deleteUser(entity);
+		
+		try {
+			//로그아웃 처리
+//			accessService.doLogout(entity.getUserId());
+			
+			//keycloak 유저 비활성화
+//			keyCloakApiUtil.enableSsoUser(param.getUserId(), false);
+			
+			//keyCloakApiUtil.deleteSsoUser(param);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		
+		
+		return 0L;
 	}
 	
 	/**
@@ -161,66 +191,6 @@ public class UserService {
 			return entity.getUserId();
 		}
 		return null;
-	}
-	
-	//수정
-	public String patchUser(UserDto param) {
-		String userId = param.getUserId();
-		
-		//keycloak 연동
-		try {			
-			//updateSsoUser에서는 UserId, Email을 변경하고 있는데 
-			//두 정보는 변경 여지가 없기 때문에 주석 처리
-			//이호철 22.04.19
-			//keyCloakApiUtil.updateSsoUser(param, null);
-			
-			
-//			UserEntity old = userDomainService.getUserInfoByUserId(param.getUserId());
-			
-//			UserRoleEntity oldRole = old.getUserRole();
-//			UserRole newRole = param.getUserRole();
-			
-//			if(newRole == null) {
-//				keycloakApiUtil.deleteAllUserRole(userId);
-//				keycloakApiUtil.logoutUser(userId);
-//			} else {
-//				if(!oldRole.getUserRoleCode().equals(newRole.getUserRoleCode())) {
-//					//권한이 변경된 경우 Keycloak에 변경사항 반영
-//					keycloakApiUtil.postUserRole(userId, newRole.getUserRoleCode());
-//					keycloakApiUtil.logoutUser(userId);
-//				}
-//			}
-			
-		}  catch (Exception e) {
-			log.error(e.getMessage());
-		}
-		
-		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);	
-		entity.setUpdateUserName(param.getUpdateUserName());
-		userDomainService.saveUser(entity, "patch");
-		
-		return param.getUserId();
-	}
-	
-	//삭제
-	public Long deleteUser(UserDto param) {		
-		UserEntity entity = UserDtoMapper.INSTANCE.toEntity(param);
-		userDomainService.deleteUser(entity);
-		
-		try {
-			//로그아웃 처리
-//			accessService.doLogout(entity.getUserId());
-			
-			//keycloak 유저 비활성화
-//			keyCloakApiUtil.enableSsoUser(param.getUserId(), false);
-			
-			//keyCloakApiUtil.deleteSsoUser(param);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
-		
-		
-		return 0L;
 	}
 	
 	/**

@@ -1,7 +1,5 @@
 package kr.co.strato.portal.project.service;
 
-import static kr.co.strato.domain.user.model.QUserEntity.userEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +21,7 @@ import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.project.service.ProjectUserDomainService;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
+import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.error.exception.AleadyUserClusterException;
@@ -35,7 +34,6 @@ import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.service.ClusterService;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.common.service.CommonService;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectClusterDto.ProjectClusterDtoBuilder;
 import kr.co.strato.portal.project.model.ProjectDto;
@@ -65,6 +63,9 @@ public class PortalProjectService extends CommonController {
 	
 	@Autowired
 	ProjectClusterDomainService projectClusterDomainService;
+	
+	@Autowired
+	UserRoleRepository userRoleRepository;
 	
 	@Autowired
 	ClusterService clusterService;
@@ -208,7 +209,10 @@ public class PortalProjectService extends CommonController {
                 		projectUserBuiler.createUserId(userId);
                 		projectUserBuiler.createUserName(userName);
                 		projectUserBuiler.createdAt(now);
-                		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
+                		
+                		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
+            			
+                		projectUserBuiler.userRoleIdx(role.getId());
                 		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
                 		
                 		//ProjectUserDTO -> ProjectUserEntity
@@ -217,6 +221,7 @@ public class PortalProjectService extends CommonController {
                 	}
         		}
             }
+            
     	} catch(Exception e) {
     		e.printStackTrace();
     		throw new CreateProjectFailException();
@@ -312,7 +317,10 @@ public class PortalProjectService extends CommonController {
     				newProjectManagerBuiler.createUserId(userId);
     				newProjectManagerBuiler.createUserName(userName);
     				newProjectManagerBuiler.createdAt(now);
-    				newProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX);
+            		UserRoleEntity newRole = userRoleRepository.findTop1BByUserRoleCode(managerInfo.getUserRoleCode());
+            		newProjectManagerBuiler.userRoleIdx(newRole.getId());
+    				    				
+//    				newProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX);
 
             		//ProjectUserDTO -> ProjectUserEntity
                     ProjectUserEntity newProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(newProjectManagerBuiler.build());
@@ -325,7 +333,10 @@ public class PortalProjectService extends CommonController {
     				oldProjectManagerBuiler.createUserId(userId);
     				oldProjectManagerBuiler.createUserName(userName);
     				oldProjectManagerBuiler.createdAt(now);
-    				oldProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MEMBER_ROLE_IDX);
+    				UserRoleEntity oldRole = userRoleRepository.findTop1BByUserRoleCode(pmUser.getUserRoleCode());
+    				oldProjectManagerBuiler.userRoleIdx(oldRole.getId());
+
+//    				oldProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MEMBER_ROLE_IDX);
     				
     				//ProjectUserDTO -> ProjectUserEntity
     				ProjectUserEntity oldProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(oldProjectManagerBuiler.build());
@@ -410,13 +421,18 @@ public class PortalProjectService extends CommonController {
             		projectUserBuiler.projectIdx(projectInfo.get().getId());
             		projectUserBuiler.createUserId(userId);
             		projectUserBuiler.createUserName(userName);
-            		projectUserBuiler.userRoleIdx(user.getUserRoleIdx());
             		if(selectUser != null) {
             			System.out.println("selectUser === " + selectUser.getUserId());
             			projectUserBuiler.createdAt(selectUser.getCreatedAt());
             		} else {
                 		projectUserBuiler.createdAt(now);
             		}
+
+            		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
+        			
+            		projectUserBuiler.userRoleIdx(role.getId());
+            		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
+            		
             		
             		//ProjectUserDTO -> ProjectUserEntity
                     ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
@@ -567,6 +583,9 @@ public class PortalProjectService extends CommonController {
             		} else {
                 		projectUserBuiler.createdAt(now);
             		}
+            		
+            		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
+        			projectUserBuiler.userRoleIdx(role.getId());
             		
             		//ProjectUserDTO -> ProjectUserEntity
                     ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
