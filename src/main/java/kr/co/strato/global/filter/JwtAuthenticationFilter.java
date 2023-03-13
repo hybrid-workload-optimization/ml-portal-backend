@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import kr.co.strato.global.model.JwtToken;
+import kr.co.strato.global.auth.JwtToken;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

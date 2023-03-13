@@ -23,7 +23,6 @@ import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.util.FileUtils;
-import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
@@ -48,16 +47,10 @@ public class UserService {
 	UserRoleDomainService userRoleDomainservice;
 	
 	@Autowired
-	KeyCloakApiUtil	keyCloakApiUtil;
-	
-	@Autowired
 	TokenValidator tokenValidator;
 	
 	@Autowired
 	EmailService emailService;
-	
-	@Autowired
-	KeyCloakApiUtil keycloakApiUtil;
 	
 	@Autowired
 	AccessService accessService;
@@ -204,23 +197,18 @@ public class UserService {
 		boolean enable = param.isEnable();
 		
 		try {			
-			//keycloak 유저 활성화			
-			boolean isOk = keyCloakApiUtil.enableSsoUser(userId, enable);
-			if(isOk) {
-				
-				String useYn = enable? "Y" : "N";
-				
-				//DB 활성화
-				UserEntity user = userDomainService.getUserInfoByUserId(userId);
-				user.setUpdateUserName(loginUser.getUserName());
-				user.setUpdateUserId(loginUser.getUserId());
-				user.setUpdatedAt(LocalDateTime.now());
-				user.setUseYn(useYn);
-				
-				userDomainService.updateUser(user);
-				UserDto userDto = UserDtoMapper.INSTANCE.toDto(user);
-				return userDto;
-			}
+			String useYn = enable? "Y" : "N";
+			
+			//DB 활성화
+			UserEntity user = userDomainService.getUserInfoByUserId(userId);
+			user.setUpdateUserName(loginUser.getUserName());
+			user.setUpdateUserId(loginUser.getUserId());
+			user.setUpdatedAt(LocalDateTime.now());
+			user.setUseYn(useYn);
+			
+			userDomainService.updateUser(user);
+			UserDto userDto = UserDtoMapper.INSTANCE.toDto(user);
+			return userDto;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -278,12 +266,14 @@ public class UserService {
 	
 	// 비밀번호 변경
 	public void patchUserPassword(String userId, String password) {
-
+		
+		/*
 		try {
 			keyCloakApiUtil.updatePasswordSsoUser(userId, password);
 		}catch (Exception e) {
 			log.error(e.getMessage());
 		}
+		*/
 		
 	}
 	
@@ -360,6 +350,7 @@ public class UserService {
 					boolean enableOk = false;
 					boolean changeOk = false;
 					try {
+						/*
 						//계정 활성화.
 						enableOk = keyCloakApiUtil.enableSsoUser(user.getUserId(), true);
 						log.info("계정 활성화 - userId: {}", id);
@@ -368,7 +359,7 @@ public class UserService {
 						changeOk = keyCloakApiUtil.updatePasswordSsoUser(id, password);
 						log.info("패스워드 변경 - userId: {}", id);
 						log.info("패스워드 변경 - result: {}", changeOk);
-						
+						*/
 					} catch (Exception e) {
 						log.error("", e);
 					}

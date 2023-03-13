@@ -1,6 +1,5 @@
 package kr.co.strato.portal.common.model;
 
-import kr.co.strato.global.model.KeycloakToken;
 import kr.co.strato.portal.setting.model.UserAuthorityDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.AllArgsConstructor;
@@ -17,14 +16,12 @@ import lombok.Setter;
 public class LoginDto {
 	
 	private UserDto user;
-	private KeycloakToken token;
 	private UserAuthorityDto authority;
 	
 	
 	@Override
 	public String toString() {
-		return "USER : " + user.toString() 
-			+ " / token : " + token.toString();
+		return "USER : " + user.toString();
 	}
 
 }

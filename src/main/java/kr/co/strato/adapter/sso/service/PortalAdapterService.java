@@ -22,7 +22,7 @@ import kr.co.strato.adapter.sso.model.req.UsersReq;
 import kr.co.strato.adapter.sso.proxy.ClientRoleProxy;
 import kr.co.strato.adapter.sso.proxy.GroupProxy;
 import kr.co.strato.adapter.sso.proxy.UserProxy;
-import kr.co.strato.global.model.JwtToken;
+import kr.co.strato.global.auth.JwtToken;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.UserDto;

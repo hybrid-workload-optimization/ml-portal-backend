@@ -1,4 +1,4 @@
-package kr.co.strato.global.model;
+package kr.co.strato.global.auth;
 
 import java.util.List;
 import java.util.Map;

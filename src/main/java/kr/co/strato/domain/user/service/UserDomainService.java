@@ -17,7 +17,6 @@ import kr.co.strato.domain.user.repository.UserRepository;
 import kr.co.strato.domain.user.repository.UserResetPasswordRepository;
 import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
-import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.SearchParam;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +37,6 @@ public class UserDomainService {
 	
 	@Autowired
 	UserResetPasswordRepository resetPasswordRepostory;
-	
-	@Autowired
-	KeyCloakApiUtil	keyCloakApiUtil;
 	
 	@Autowired
 	PortalAdapterService portalAdapterService;

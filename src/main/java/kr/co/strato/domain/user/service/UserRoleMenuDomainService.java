@@ -20,9 +20,9 @@ public class UserRoleMenuDomainService {
 	@Autowired
 	private UserRoleRepository userRoleRepository;
 	
-	public List<UserRoleMenuEntity> getUserRoleMenuList(String userRoleCode) {
+	public List<UserRoleMenuEntity> getUserRoleMenuList(String userRoleName) {
 		
-		UserRoleEntity userRole = userRoleRepository.findTop1BByUserRoleCode(userRoleCode);
+		UserRoleEntity userRole = userRoleRepository.findTop1BByUserRoleName(userRoleName);
 		if(userRole != null) {
 			return userRoleMenuRepository.findByUserRole(userRole);
 		}

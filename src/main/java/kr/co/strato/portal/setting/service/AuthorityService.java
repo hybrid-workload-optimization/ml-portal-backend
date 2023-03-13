@@ -35,7 +35,6 @@ import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.domain.user.service.UserRoleMenuDomainService;
 import kr.co.strato.global.error.exception.NotFoundResourceException;
-import kr.co.strato.global.util.KeyCloakApiUtil;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDtoMapper;
 import kr.co.strato.portal.setting.model.AuthorityViewDto;
@@ -62,9 +61,6 @@ public class AuthorityService {
 	
 	@Autowired
 	private ProjectUserDomainService projectUserDomainService;
-	
-	@Autowired
-	KeyCloakApiUtil keyCloakApiUtil;
 	
 	@Autowired
 	private UserRoleMenuDomainService userRoleMenuDomainService;
@@ -254,6 +250,7 @@ public class AuthorityService {
 						UserEntity newUserEntity =  userDomainService.getUserInfoByUserId(userParam.getUserId());
 						newUserEntity.setUserRole(userRole);
 						
+						/*
 						try {
 							keyCloakApiUtil.postUserRole(newUserEntity.getUserId(), userRole.getUserRoleCode());
 						} catch (Exception e) {
@@ -261,22 +258,27 @@ public class AuthorityService {
 							log.error("", e);
 							e.printStackTrace();
 						}
+						*/
 					} else if (  StringUtils.equals(userParam.getType(), "D")  ) {
 						// 권한별 사용자 매핑 변경
 						userRole.getUsers().stream().forEach(user -> {
 							if ( StringUtils.equals(userParam.getUserId(), user.getUserId()) ) {
 								//권한 삭제(초기화)
 								user.setUserRole(defaultUserRole);
+								
+								/*
 								try {
 									keyCloakApiUtil.postUserRole(user.getUserId(), defaultUserRole.getUserRoleCode());
 								} catch (Exception e) {
 									log.error("Keycloak Role 변경 오류 - UserId: {}", user.getUserId());
 									log.error("", e);
 								}
+								*/
 							}
 						});
 					}
 					
+					/*
 					// 권한 변경 유저 로그아웃 처리.
 					try {
 						keyCloakApiUtil.logoutUser(userParam.getUserId());
@@ -285,6 +287,7 @@ public class AuthorityService {
 					} catch (Exception e) {
 						log.error("", e);
 					}
+					*/
 				}
 			});
 		}
@@ -486,14 +489,14 @@ public class AuthorityService {
 		return userAuthroityDto;
 	}
 	
-	public UserAuthorityDto getUserRole(String userId, String roleCode) {
+	public UserAuthorityDto getUserRole(String userId, String roleName) {
 		UserAuthorityDto userAuthroityDto = new UserAuthorityDto();
-		if(roleCode == null) {
+		if(roleName == null) {
 			//권한 설정 되어있지 않은 경우 디폴트 권한 설정
-			roleCode = "PROJECT_MEMBER";
+			roleName = "Project Member";
 		}
 		
-		List<UserRoleMenuEntity> list = userRoleMenuDomainService.getUserRoleMenuList(roleCode);
+		List<UserRoleMenuEntity> list = userRoleMenuDomainService.getUserRoleMenuList(roleName);
 		List<AuthorityViewDto.Menu> menuDto = list.stream()
 				.map(m -> AuthorityViewDtoMapper.INSTANCE.toAuthorityViewDtoInnerMenu(m))
 				.collect(Collectors.toList());			
