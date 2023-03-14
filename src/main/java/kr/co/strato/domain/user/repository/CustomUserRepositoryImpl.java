@@ -75,8 +75,11 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 			builder.and(qUserRoleEntity.userRoleCode.ne(param.getNotAuthorityId()));
 		}
 		
-		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN) 
-		    		&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+//		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_PORTAL_ADMIN) 
+//		    		&& !loginUser.getUserRole().getUserRoleCode().equals(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN)) {
+		if(loginUser != null && !loginUser.getUserRole().getUserRoleCode().equals("Portal Admin") 
+	    		&& !loginUser.getUserRole().getUserRoleCode().equals("System Admin")) {
+		
 			//시스템 어드민 , 포탈 어드민이 아닌 일반 사용자인 경우
 			//본인이 생성한 유저만 리스트에 보이도록 수정.
 			builder.and(qUserEntity.createUserId.eq(loginUser.getUserId()));

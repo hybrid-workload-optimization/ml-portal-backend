@@ -149,7 +149,7 @@ public class AuthorityService {
 			for ( MenuEntity menu : menus ) {
 				UserRoleMenuEntity userRoleMenu = new UserRoleMenuEntity();
 				userRoleMenu.setMenu(menu);
-				userRoleMenu.setViewableYn("N");
+				userRoleMenu.setViewableYn("Y");
 				userRoleMenu.setWritableYn("N");
 				userRoleMenu.setCreated_at(new Date());
 				paramEntity.addToUserRoleMenu(userRoleMenu);
@@ -301,6 +301,12 @@ public class AuthorityService {
 		List<AuthorityViewDto> treeList     = new ArrayList<>();
 		List<AuthorityViewDto> childrenList = new ArrayList<>();
 
+		AuthorityViewDto groupRole = new AuthorityViewDto();
+		groupRole.setGroupYn("Y");
+		groupRole.setUserRoleIdx(0L);
+		groupRole.setUserRoleName("통합 포탈 권한");
+		roleList.add(groupRole);
+		
 		if ( roleList != null && roleList.size() > 0 ) {
 			for ( AuthorityViewDto role : roleList ) {
 				if ( StringUtils.equals("Y", role.getGroupYn()) ) {
