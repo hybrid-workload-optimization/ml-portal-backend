@@ -23,7 +23,6 @@ import kr.co.strato.domain.user.repository.UserRoleRepository;
 import kr.co.strato.domain.user.service.UserDomainService;
 import kr.co.strato.domain.user.service.UserRoleDomainService;
 import kr.co.strato.global.util.FileUtils;
-import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDto.EnableUserDto;
@@ -45,9 +44,6 @@ public class UserService {
 	
 	@Autowired
 	UserRoleDomainService userRoleDomainservice;
-	
-	@Autowired
-	TokenValidator tokenValidator;
 	
 	@Autowired
 	EmailService emailService;

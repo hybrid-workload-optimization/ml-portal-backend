@@ -47,11 +47,8 @@ public class PortalAdapterService {
 	@Autowired
 	private GroupProxy groupProxy;
 	
-	@Value("${service.keycloak.client.id}")
+	@Value("${auth.clientId}")
 	private String clientId;
-	
-	@Value("${service.keycloak.company.name}")
-	private String companyName;
 	
 	/**
 	 * 사용자 리스트 조회

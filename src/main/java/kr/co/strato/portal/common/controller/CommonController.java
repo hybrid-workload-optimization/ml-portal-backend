@@ -14,7 +14,7 @@ import kr.co.strato.portal.setting.model.UserDto.UserRole;
 @RestController
 public class CommonController {
 	
-	@Value("${keycloak.resource}")
+	@Value("${auth.clientId}")
 	private String clientId;
 	
 	/**

@@ -31,11 +31,10 @@ import kr.co.strato.global.error.exception.NotFoundResourceException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.setting.model.UserDto;
-import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserDto.EnableUserDto;
+import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
@@ -53,9 +52,6 @@ public class UserController extends CommonController {
 	
 	@Autowired
 	UserService userService;
-	
-	@Autowired
-	TokenValidator tokenValidator;
 	
 	@Autowired
 	WorkHistoryService workHistoryService;

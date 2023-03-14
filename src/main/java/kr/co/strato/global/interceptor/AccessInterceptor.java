@@ -17,7 +17,7 @@ import kr.co.strato.global.auth.JwtToken;
 
 public class AccessInterceptor implements HandlerInterceptor {
 	
-	@Value("${keycloak.resource}")
+	@Value("${auth.clientId}")
 	private String clientId;
 
 	@Override

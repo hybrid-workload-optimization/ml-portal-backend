@@ -13,7 +13,7 @@ import kr.co.strato.global.filter.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 	
-	@Value("${jwt.publicKey}")
+	@Value("${auth.publicKey}")
 	private String publicKey;
 
 	@Bean

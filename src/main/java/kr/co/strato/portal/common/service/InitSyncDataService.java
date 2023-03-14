@@ -55,7 +55,7 @@ public class InitSyncDataService {
 	@Autowired
 	ProjectClusterRepository projectClusterRepository;
 	
-	@Value("${keycloak.resource}")
+	@Value("${auth.clientId}")
 	String clientId;
 	
 	/**

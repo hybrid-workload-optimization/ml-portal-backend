@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class InitSyncDataController {
 
-	@Value("${keycloak.resource}")
+	@Value("${auth.clientId}")
 	String clientId;
 	
 	@Autowired

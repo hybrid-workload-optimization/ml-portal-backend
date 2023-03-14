@@ -1,14 +1,11 @@
 package kr.co.strato.portal.common.controller;
 
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,7 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import kr.co.strato.global.error.type.AuthErrorType;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.global.validation.TokenValidator;
 import kr.co.strato.portal.common.model.LoginDto;
 import kr.co.strato.portal.common.service.AccessService;
 import kr.co.strato.portal.setting.model.UserAuthorityDto;
@@ -37,9 +33,6 @@ public class AccessController extends CommonController {
 	
 	@Autowired
 	UserService userService;
-	
-	@Autowired
-	TokenValidator tokenValidator;
 	
 	@Autowired
 	AuthorityService authorityService;
@@ -66,13 +59,6 @@ public class AccessController extends CommonController {
 			return new ResponseWrapper<>(AuthErrorType.FAIL_AUTH);
 		}
 	}
-	
-	//token 유효성 검증
-	@PostMapping("/token-verify")
-	public void tokenVerify(@RequestBody Map<String, String> token) {
-		boolean result = accessService.tokenVerify(token.get("access_token"));
-	}
-	
 	
 	//token 삭제 요청(로그아웃)
 	@GetMapping("/logout/{userId}")

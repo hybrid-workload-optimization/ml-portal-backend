@@ -18,7 +18,7 @@ public class PortalEventReceiver {
 	@Autowired
 	private PortalEventService eventService;
 	
-	@Value("${service.keycloak.client.id}")
+	@Value("${auth.clientId}")
 	String clientId;
 	
     public static final String TYPE_USER = "user";

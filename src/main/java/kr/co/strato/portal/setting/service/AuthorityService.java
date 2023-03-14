@@ -68,7 +68,7 @@ public class AuthorityService {
 	@Autowired
 	private PortalAdapterService clientRoleAdapterService;
 	
-	@Value("${keycloak.resource}")
+	@Value("${auth.clientId}")
 	private String clientId;
 	
 	
