@@ -37,8 +37,13 @@ public class JwtToken {
 	 * @return
 	 */
 	public boolean hasAudience(String clientId) {
-		if(payload != null) {
-			return ((String) payload.getAud()).contains(clientId);
+		if(payload != null &&  payload.getAud() != null) {
+			Object aud =  payload.getAud();
+			if(aud instanceof String) {
+				return ((String)aud).equals(clientId);
+			} else if(aud instanceof List) {
+				return ((List)aud).contains(clientId);
+			} 
 		}
 		return false;
 	}
@@ -52,7 +57,7 @@ public class JwtToken {
 	
 	@Data
 	public static class Payload {
-		private String exp;
+		private String exp; 
 		private String iat;
 		private String jti;
 		private String iss;
