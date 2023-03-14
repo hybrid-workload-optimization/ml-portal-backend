@@ -39,7 +39,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
     implementation 'org.projectlombok:lombok:1.18.20'
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
-    implementation "com.querydsl:querydsl-jpa"
+    implementation "com.querydsl:querydsl-jpa" 
     implementation "com.vladmihalcea:hibernate-types-55:2.14.0"
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.5'
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
