@@ -297,25 +297,9 @@ public class AuthorityService {
 		return userRole.getId();
 	}
 	
-	private List<AuthorityViewDto> getAuthorityTreeList(List<AuthorityViewDto> roleList) {
-		
-		for(AuthorityViewDto role : roleList) {
-			List<AuthorityViewDto.Menu> treeMenuList = getMenuTreeList(role.getMenuList());
-			role.setMenuList(treeMenuList);
-		}
-		
-		return roleList;
-		
-		/*
+	private List<AuthorityViewDto> getAuthorityTreeList(List<AuthorityViewDto> roleList) {	
 		List<AuthorityViewDto> treeList     = new ArrayList<>();
 		List<AuthorityViewDto> childrenList = new ArrayList<>();
-
-			
-		AuthorityViewDto groupRole = new AuthorityViewDto();
-		groupRole.setGroupYn("Y");
-		groupRole.setUserRoleIdx(0L);
-		groupRole.setUserRoleName("통합 포탈 권한");
-		roleList.add(groupRole);
 		
 		if ( roleList != null && roleList.size() > 0 ) {
 			for ( AuthorityViewDto role : roleList ) {
@@ -326,27 +310,35 @@ public class AuthorityService {
 					childrenList.add(role);
 				}
 			}
-
-			for ( AuthorityViewDto pTree : treeList ) {
-				List<AuthorityViewDto> cTreeList = new ArrayList<>();
-				List<AuthorityViewDto.Menu> treeMenuList = new ArrayList<>(); //메뉴구조 트리화를 위함
-				for ( AuthorityViewDto cTree : childrenList ) {
-					if ( StringUtils.equals(pTree.getUserRoleIdx().toString(), cTree.getParentUserRoleIdx().toString()) ) {
-						// 서브롤이 확인됬을경우
-						treeMenuList = getMenuTreeList(cTree.getMenuList());
-						
-						// 메뉴 > 트리화
-						cTree.setMenuList(treeMenuList);
-						
-						// 트리 리스트에 세팅
-						cTreeList.add(cTree);
+			
+			if(treeList.size() > 0) {
+				for ( AuthorityViewDto pTree : treeList ) {
+					List<AuthorityViewDto> cTreeList = new ArrayList<>();
+					List<AuthorityViewDto.Menu> treeMenuList = new ArrayList<>(); //메뉴구조 트리화를 위함
+					for ( AuthorityViewDto cTree : childrenList ) {
+						if ( StringUtils.equals(pTree.getUserRoleIdx().toString(), cTree.getParentUserRoleIdx().toString()) ) {
+							// 서브롤이 확인됬을경우
+							treeMenuList = getMenuTreeList(cTree.getMenuList());
+							
+							// 메뉴 > 트리화
+							cTree.setMenuList(treeMenuList);
+							
+							// 트리 리스트에 세팅
+							cTreeList.add(cTree);
+						}
 					}
+					pTree.setSubRoleList(cTreeList);
 				}
-				pTree.setSubRoleList(cTreeList);
+				return treeList;				
+			} else {
+				for(AuthorityViewDto role : childrenList) {
+					List<AuthorityViewDto.Menu> treeMenuList = getMenuTreeList(role.getMenuList());
+					role.setMenuList(treeMenuList);
+				}
+				return childrenList;
 			}
 		}
-		*/
-		
+		return roleList;
 	}
 	
 	private List<AuthorityViewDto.Menu> getMenuTreeList(List<AuthorityViewDto.Menu> menuList) {
