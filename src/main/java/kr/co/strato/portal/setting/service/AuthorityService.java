@@ -298,9 +298,19 @@ public class AuthorityService {
 	}
 	
 	private List<AuthorityViewDto> getAuthorityTreeList(List<AuthorityViewDto> roleList) {
+		
+		for(AuthorityViewDto role : roleList) {
+			List<AuthorityViewDto.Menu> treeMenuList = getMenuTreeList(role.getMenuList());
+			role.setMenuList(treeMenuList);
+		}
+		
+		return roleList;
+		
+		/*
 		List<AuthorityViewDto> treeList     = new ArrayList<>();
 		List<AuthorityViewDto> childrenList = new ArrayList<>();
 
+			
 		AuthorityViewDto groupRole = new AuthorityViewDto();
 		groupRole.setGroupYn("Y");
 		groupRole.setUserRoleIdx(0L);
@@ -335,8 +345,8 @@ public class AuthorityService {
 				pTree.setSubRoleList(cTreeList);
 			}
 		}
-
-		return treeList;
+		*/
+		
 	}
 	
 	private List<AuthorityViewDto.Menu> getMenuTreeList(List<AuthorityViewDto.Menu> menuList) {
