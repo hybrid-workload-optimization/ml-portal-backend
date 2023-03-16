@@ -47,7 +47,7 @@ public class AccessController extends CommonController {
 			result.setUser(user);
 			
 			//유저 권한 추가
-			UserAuthorityDto authority = authorityService.getUserRole(user.getUserId(), user.getUserRole().getUserRoleName());
+			UserAuthorityDto authority = authorityService.getUserRole(user.getUserId(), user.getUserRole().getUserRoleCode());
 			result.setAuthority(authority);
 			
 			return new ResponseWrapper<>(result);
