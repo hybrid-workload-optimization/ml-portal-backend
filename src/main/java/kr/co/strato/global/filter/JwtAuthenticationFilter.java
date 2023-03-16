@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter implements Filter {
 	public static final String AUTHORIZATION_KEY = "Authorization";
 	
-	private final List<String> allowUrls = Arrays.asList("/login", "/sso/login", "/error", "/sse/v1/alert/receive", "/favicon.ico");
+	private final List<String> allowUrls = Arrays.asList("/login", "/sso/login", "/error", "/favicon.ico", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**");
 	
 	private String publicKey;
 	
@@ -61,6 +61,7 @@ public class JwtAuthenticationFilter implements Filter {
 			return;
 		}		
 		
+		log.info(requestURI);
 		
 		log.info("JwtAuthenticationFilter start. ");
 		String jwtToken = getTokenStr(httpRequest);
