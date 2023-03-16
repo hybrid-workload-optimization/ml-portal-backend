@@ -9,6 +9,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,9 +19,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
 import com.google.gson.Gson;
@@ -28,6 +29,8 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import kr.co.strato.global.auth.ClientAuthority;
+import kr.co.strato.global.auth.JwtAuthentication;
 import kr.co.strato.global.auth.JwtToken;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,9 +41,11 @@ public class JwtAuthenticationFilter implements Filter {
 	private final List<String> allowUrls = Arrays.asList("/login", "/sso/login", "/error", "/favicon.ico", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**");
 	
 	private String publicKey; 
+	private String clientId;
 	
-	public JwtAuthenticationFilter(String publicKey) {
+	public JwtAuthenticationFilter(String publicKey, String clientId) {
 		this.publicKey = publicKey;
+		this.clientId = clientId;
 	}
 	
 	@Override
@@ -55,13 +60,15 @@ public class JwtAuthenticationFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		
 		String requestURI = httpRequest.getRequestURI();
+		log.info("Request URI : " + requestURI);
 		
-		if(allowUrls.contains(requestURI)) {
-			chain.doFilter(request, response);
-			return;
-		}		
-		
-		log.info(requestURI);
+		AntPathMatcher antPathMatcher = new AntPathMatcher();
+		for(String allowUrl : allowUrls) {
+			if(antPathMatcher.match(allowUrl, requestURI)) {
+				chain.doFilter(request, response);
+				return;
+			}
+		}
 		
 		log.info("JwtAuthenticationFilter start. ");
 		String jwtToken = getTokenStr(httpRequest);
@@ -108,7 +115,15 @@ public class JwtAuthenticationFilter implements Filter {
 	 */
 	public Authentication getAuthentication(String jwtToken) {		
 		JwtToken token = tokenParser(jwtToken);
-		return new UsernamePasswordAuthenticationToken(token, null, null);
+		
+		List<String> roles = token.getClientRoles(clientId);
+		
+		List<ClientAuthority> clientAuthoritys = null;
+		if(roles != null) {
+			clientAuthoritys = roles.stream().map(s -> new ClientAuthority(s)).collect(Collectors.toList());
+		}
+		JwtAuthentication authentication = new JwtAuthentication(token, jwtToken, clientAuthoritys);
+		return authentication;
 	}
 	
 	public RSAPublicKey getParsePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {

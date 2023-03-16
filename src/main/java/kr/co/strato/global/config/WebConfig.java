@@ -24,7 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
 						"/css/**", 
 						"/*.ico", 
 						"/error",
-						"/pass");
+						"/pass",
+						"/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**");
 	}
 	
 	@Bean
