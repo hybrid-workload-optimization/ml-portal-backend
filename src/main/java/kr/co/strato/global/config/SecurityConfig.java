@@ -15,11 +15,17 @@ public class SecurityConfig {
 	
 	@Value("${auth.publicKey}")
 	private String publicKey;
+	
+	@Value("${auth.clientId}")
+	private String clientId;
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 	    	.authorizeRequests()
+	    	.antMatchers("/swagger-ui/**").permitAll()
+	    	.antMatchers("/swagger-resources/**").permitAll()
+	    	.antMatchers("/v3/api-docs/**").permitAll()
 	    	.antMatchers("/error").permitAll()
 	    	.antMatchers("/favicon.ico").permitAll()
 	    	.antMatchers("/**").authenticated()
@@ -35,7 +41,7 @@ public class SecurityConfig {
 	 * @return
 	 */
 	public JwtAuthenticationFilter getJwtAuthenticationFilter() {
-		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(publicKey);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(publicKey, clientId);
 		return jwtAuthenticationFilter;
 	}
 }
