@@ -501,7 +501,7 @@ public class AuthorityService {
 		UserAuthorityDto userAuthroityDto = new UserAuthorityDto();
 		if(roleName == null) {
 			//권한 설정 되어있지 않은 경우 디폴트 권한 설정
-			roleName = "Project Member";
+			roleName = "PROJECT_MEMBER";
 		}
 		
 		List<UserRoleMenuEntity> list = userRoleMenuDomainService.getUserRoleMenuList(roleName);
