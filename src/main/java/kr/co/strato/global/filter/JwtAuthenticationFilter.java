@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter implements Filter {
 	
 	private final List<String> allowUrls = Arrays.asList("/login", "/sso/login", "/error", "/favicon.ico", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**");
 	
-	private String publicKey;
+	private String publicKey; 
 	
 	public JwtAuthenticationFilter(String publicKey) {
 		this.publicKey = publicKey;
