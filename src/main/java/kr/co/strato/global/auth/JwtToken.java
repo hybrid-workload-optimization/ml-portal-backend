@@ -1,5 +1,6 @@
 package kr.co.strato.global.auth;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,17 @@ public class JwtToken {
 			}
 		}
 		return null;
+	}
+	
+	public void setClientRole(String clientId, List<String> roles) {
+		if(payload != null) {
+			Map<String, List<String>> res = payload.getResourceAccess().get(clientId);
+			if(res == null) {
+				res = new HashMap<>();
+				payload.getResourceAccess().put(clientId, res);
+			}
+			res.put("roles", roles);
+		}
 	}
 	
 	/**
