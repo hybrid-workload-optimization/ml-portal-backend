@@ -137,7 +137,7 @@ public class InitSyncDataService {
 			log.info("result id: {}", resultId);
 			return true;
 		} 
-		return false;
+		return false; 
 	}
 
 	/**
