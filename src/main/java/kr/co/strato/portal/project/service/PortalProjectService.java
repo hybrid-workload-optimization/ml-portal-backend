@@ -48,6 +48,7 @@ import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
+import kr.co.strato.portal.setting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -69,10 +70,10 @@ public class PortalProjectService extends CommonController {
 	
 	@Autowired
 	ClusterService clusterService;
-	
-	
+
 	@Autowired
 	private UserRoleDomainService userRoleDomainService;
+	
 	
 	/**
      * Project 리스트 조회
@@ -202,7 +203,7 @@ public class PortalProjectService extends CommonController {
             	//Project User 등록
         		if(param.getUserList() != null) {
         			List<ProjectUserDto> userList = param.getUserList();
-                	for(ProjectUserDto user : userList) {
+                	for(ProjectUserDto user : userList) {                		
                 		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
                 		projectUserBuiler.userId(user.getUserId());
                 		projectUserBuiler.projectIdx(resultIdx);
@@ -210,14 +211,19 @@ public class PortalProjectService extends CommonController {
                 		projectUserBuiler.createUserName(userName);
                 		projectUserBuiler.createdAt(now);
                 		
-                		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
-            			
-                		projectUserBuiler.userRoleIdx(role.getId());
-                		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
+                		try {
+                			UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
+                			
+                    		projectUserBuiler.userRoleIdx(role.getId());
+                    		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
+                    		
+                    		//ProjectUserDTO -> ProjectUserEntity
+                            ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
+                            projectUserDomainService.createProjectUser(projectUserEntity);
+                		} catch (Exception e) {
+							log.error("", e);
+						}
                 		
-                		//ProjectUserDTO -> ProjectUserEntity
-                        ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
-                        projectUserDomainService.createProjectUser(projectUserEntity);
                 	}
         		}
             }

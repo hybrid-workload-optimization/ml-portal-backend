@@ -54,20 +54,31 @@ public class PortalAdapterService {
 	 * 사용자 리스트 조회
 	 * @return
 	 */
-	public List<UserDto> getUsers() {
-		
-		log.info("Search user list");
-		
-		UsersReq param = new UsersReq(clientId, null, null, null, null);
-		
+	public List<UserDto> getUsers() {		
+		log.info("Search user list");		
+		UsersReq param = new UsersReq(clientId, null, null, null, null);		
 		log.info("Body: {}", param.toString());
 		
-		List<UserDTO> response = userProxy.getUsers(authorizationHeader(), param);
-		
-		List<UserDto> serviceDto = DtoMapper.userDtoMapper(response);
-		
+		List<UserDTO> response = userProxy.getUsers(authorizationHeader(), param);		
+		List<UserDto> serviceDto = DtoMapper.userDtoMapper(response);		
 		return serviceDto;
 		
+	}
+	
+	/**
+	 * 사용자 정보 조회
+	 * @param userId
+	 * @return
+	 */
+	public UserDto getUser(String userId) {		
+		log.info("Get user");
+		
+		UserDTO response = userProxy.getUser(authorizationHeader(), clientId, userId);		
+		if(response != null) {
+			return DtoMapper.userDtoMapper(response);
+		}		
+		
+		return null;
 	}
 	
 	/**

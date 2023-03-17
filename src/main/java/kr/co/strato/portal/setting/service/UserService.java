@@ -2,6 +2,7 @@ package kr.co.strato.portal.setting.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -477,5 +478,14 @@ public class UserService {
 		List<UserDto.UserMenuDto> userMenu = userDomainService.getUserMenu(userId);
 		
 		return userMenu;
+	}
+	
+	/**
+	 * 유저 존재 유무 리턴.
+	 * @param userId
+	 * @return
+	 */
+	public boolean isExistUser(String userId) {
+		return userDomainService.isExistUser(userId);
 	}
 }

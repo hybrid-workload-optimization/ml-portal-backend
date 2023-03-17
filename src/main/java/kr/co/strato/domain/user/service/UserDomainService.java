@@ -279,4 +279,14 @@ public class UserDomainService {
 	public void updateUser(UserEntity entity) {
 		userRepository.save(entity);	
 	}
+	
+	/**
+	 * 유저가 존재하는지 조회
+	 * @param userId
+	 * @return
+	 */
+	public boolean isExistUser(String userId) {
+		Optional<UserEntity> entity =  userRepository.findById(userId);
+		return entity.isPresent();
+	}
 }
