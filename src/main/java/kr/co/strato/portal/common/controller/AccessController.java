@@ -38,7 +38,7 @@ public class AccessController extends CommonController {
 	AuthorityService authorityService;
 	
 	//로그인된 유저 정보 반환.
-	@PostMapping("/user-info")
+	@GetMapping("/user-info")
 	public ResponseWrapper<LoginDto> getUserInfo() throws Exception {
 		LoginDto result = new LoginDto();
 		
