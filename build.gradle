@@ -61,6 +61,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
     
+    //Jaeger tracing
+	implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.3.1'
+	implementation 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.5.9'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 
