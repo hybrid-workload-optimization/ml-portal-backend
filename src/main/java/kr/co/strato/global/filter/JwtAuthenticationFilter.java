@@ -82,10 +82,10 @@ public class JwtAuthenticationFilter implements Filter {
 				chain.doFilter(request, response);
 				return;
 			} else {
-				log.debug("Auth fail. Token is not valid.");
+				log.error("Auth fail. Token is not valid.");
 			}
 		} else {
-			log.debug("Auth fail. Token is null.");
+			log.error("Auth fail. Token is null.");
 		}
 		httpRequest.getSession(false);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
