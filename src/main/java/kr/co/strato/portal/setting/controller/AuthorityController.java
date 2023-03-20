@@ -85,7 +85,7 @@ public class AuthorityController extends CommonController {
 		if(loginUser != null) {
 			String userId = loginUser.getUserId();
 			authority = authorityService.getUserRole(userId, loginUser.getUserRole().getUserRoleName());
-		}		
+		}
 		return new ResponseWrapper<>(authority);
 	}
 	

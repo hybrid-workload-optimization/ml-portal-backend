@@ -93,7 +93,7 @@ public class InitSyncDataService {
 			
 		} catch(Exception e) {
 			log.error("", e);
-			throw new SyncRoleFailException();
+			//throw new SyncRoleFailException();
 		}
 		
 		return true;
@@ -122,21 +122,25 @@ public class InitSyncDataService {
 			}
 		} catch(Exception e) {
 			log.error("", e);
-			throw new SyncUserFailException();
+			//throw new SyncUserFailException();
 		}
 		return true;
 	}
 	
 	public boolean syncUserData(String userId) {	
-		log.info("Sync user data start... userId: {}", userId);				
-		UserDto user = portalAdapterService.getUser(userId);
-		if(user != null) {
-			UserDto loginUser = new UserDto();
-			loginUser.setUserName(user.getCreateUserName());
-			String resultId = userService.postUser(user, loginUser);
-			log.info("result id: {}", resultId);
-			return true;
-		} 
+		log.info("Sync user data start... userId: {}", userId);	
+		try {
+			UserDto user = portalAdapterService.getUser(userId);
+			if(user != null) {
+				UserDto loginUser = new UserDto();
+				loginUser.setUserName(user.getCreateUserName());
+				String resultId = userService.postUser(user, loginUser);
+				log.info("result id: {}", resultId);
+				return true;
+			} 
+		} catch (Exception e) {
+			log.error("", e);
+		}
 		return false; 
 	}
 
@@ -172,7 +176,7 @@ public class InitSyncDataService {
 			}
 		} catch(Exception e) {
 			log.error("", e);
-			throw new SyncGroupFailException();
+			//throw new SyncGroupFailException();
 		}
 		return true;
 		

@@ -50,6 +50,9 @@ public class PortalAdapterService {
 	@Value("${auth.clientId}")
 	private String clientId;
 	
+	@Value("${auth.syncToken}")
+	private String syncToken;
+	
 	/**
 	 * 사용자 리스트 조회
 	 * @return
@@ -157,18 +160,7 @@ public class PortalAdapterService {
 	public Map<String, Object> authorizationHeader() {
 		Map<String, Object> header = new HashMap<>();
 		header.put("Content-Type", "application/json");
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();		
-		if(auth != null && auth.getPrincipal() instanceof JwtToken) {
-			JwtToken principal = (JwtToken)auth.getPrincipal();
-	        
-	        String accessTokenStr  = principal.getAccessTokenStr();
-	        
-	        //System.out.println(accessTokenStr);
-	        header.put("Content-Type", "application/json");
-	        header.put(AUTHORIZATION_KEY, accessTokenStr);
-		}
+        header.put(AUTHORIZATION_KEY, syncToken);
 		return header;
 	}
-	
-	
 }
