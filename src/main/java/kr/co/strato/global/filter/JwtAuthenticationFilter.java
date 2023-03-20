@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		
 		String requestURI = httpRequest.getRequestURI();
-		log.info("Request URI : " + requestURI);
+		log.debug("Request URI : " + requestURI);
 		
 		AntPathMatcher antPathMatcher = new AntPathMatcher();
 		for(String allowUrl : allowUrls) {
@@ -70,22 +70,22 @@ public class JwtAuthenticationFilter implements Filter {
 			}
 		}
 		
-		log.info("JwtAuthenticationFilter start. ");
+		log.debug("JwtAuthenticationFilter start. ");
 		String jwtToken = getTokenStr(httpRequest);
-		log.info("token = {}",jwtToken);
+		log.debug("token = {}",jwtToken);
 		
 		if (jwtToken != null) {
 			if(validateToken(jwtToken)) {
-				log.info("Auth success. token validate !");
+				log.debug("Auth success. token validate !");
 				Authentication auth = getAuthentication(jwtToken);
 				SecurityContextHolder.getContext().setAuthentication(auth);
 				chain.doFilter(request, response);
 				return;
 			} else {
-				log.info("Auth fail. Token is not valid.");
+				log.debug("Auth fail. Token is not valid.");
 			}
 		} else {
-			log.info("Auth fail. Token is null.");
+			log.debug("Auth fail. Token is null.");
 		}
 		httpRequest.getSession(false);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
@@ -152,8 +152,8 @@ public class JwtAuthenticationFilter implements Filter {
 				.accessTokenStr(tokenStr)
 				.build();
 		
-		log.info("header >>> {}", header);
-		log.info("payload >>> {}", payload);
+		log.debug("header >>> {}", header);
+		log.debug("payload >>> {}", payload);
 		
 		return token;
 	}
