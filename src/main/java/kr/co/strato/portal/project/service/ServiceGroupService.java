@@ -26,6 +26,9 @@ public class ServiceGroupService {
 	ProjectClusterDomainService projectClusterDomainService;
 	
 	@Autowired
+	PortalProjectService portalProjectService;
+	
+	@Autowired
 	ClusterService clusterService;
 
 	/**
@@ -36,7 +39,7 @@ public class ServiceGroupService {
 	public List<ClusterDto.Detail> getGroupClusters(String uuid) {
 		ProjectEntity entity = projectDomainService.getProjectByUuid(uuid);
 		if(entity != null) {
-			Long projectIdx = entity.getId();
+			Long projectIdx = entity.getId();		
 			
 			List<ClusterDto.Detail> result = new ArrayList<>();
 			List<ProjectClusterEntity> list = projectClusterDomainService.getProjectClusters(projectIdx);
@@ -44,6 +47,7 @@ public class ServiceGroupService {
 				Long clusterIdx = e.getClusterIdx();				
 				try {
 					ClusterDto.Detail detail = clusterService.getCluster(clusterIdx);
+					detail.setProvisioningLog(null);
 					result.add(detail);
 				} catch (Exception e1) {
 					log.error("", e);
