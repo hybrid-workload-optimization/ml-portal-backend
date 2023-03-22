@@ -649,6 +649,20 @@ public class ClusterService {
 		
 		// convert from entity to dto
 		ClusterDto.Detail detail = ClusterDtoMapper.INSTANCE.toDetail(clusterEntity);
+		return getCluster(detail, clusterEntity);
+	}
+	
+	public ClusterDto.Detail getClusterWithMonitoring(Long clusterIdx) throws Exception {
+		// cluster
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		// convert from entity to dto
+		ClusterDto.DetailWithMonitoring detail = ClusterDtoMapper.INSTANCE.toDetailWithMonitoring(clusterEntity);
+		return getCluster(detail, clusterEntity);
+	}
+	
+	public ClusterDto.Detail getCluster(ClusterDto.Detail detail, ClusterEntity clusterEntity) throws Exception {
+		Long clusterIdx = clusterEntity.getClusterIdx();
 		
 		// 1. add info by provisioning type
 		Long workJobIdx = null;

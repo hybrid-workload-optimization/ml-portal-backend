@@ -135,6 +135,14 @@ public class ClusterDto {
 	@Getter
 	@Setter
 	@NoArgsConstructor
+	public static class DetailWithMonitoring extends Detail {
+		private String prometheusUrl;
+		private String grafanaUrl;
+	}
+	
+	@Getter
+	@Setter
+	@NoArgsConstructor
 	public static class Summary {
 		// master/worker
 		private int masterCount;

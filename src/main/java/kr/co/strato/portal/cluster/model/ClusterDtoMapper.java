@@ -43,6 +43,11 @@ public interface ClusterDtoMapper {
 	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
 	public ClusterDto.Detail toDetail(ClusterEntity c);
 	
+	@Mapping(target = "description",	source = "c.description")
+    @Mapping(target = "problem",		source = "c.problem",	qualifiedByName = "jsonToList")
+	@Mapping(target = "createdAt",		source = "c.createdAt", qualifiedByName = "createdAt")
+	public ClusterDto.DetailWithMonitoring toDetailWithMonitoring(ClusterEntity c);
+	
 	@Mapping(target = "userName",		source = "dto.provisioningUser")
 	@Mapping(target = "nodes",			source = "dto.nodes",	qualifiedByName = "dtoToClusterCloudNodeList")
 	public ClusterCloudDto toClusterCloudDto(ClusterDto.Form dto);

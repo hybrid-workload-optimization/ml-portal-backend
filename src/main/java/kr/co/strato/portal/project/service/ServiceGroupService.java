@@ -13,6 +13,7 @@ import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.global.error.exception.NotFoundProjectException;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,16 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 public class ServiceGroupService {
 	
 	@Autowired
-	ProjectDomainService projectDomainService;
+	private ProjectDomainService projectDomainService;
 	
 	@Autowired
-	ProjectClusterDomainService projectClusterDomainService;
+	private ProjectClusterDomainService projectClusterDomainService;
 	
 	@Autowired
-	PortalProjectService portalProjectService;
+	private ClusterService clusterService;
 	
 	@Autowired
-	ClusterService clusterService;
+	private MLClusterAPIAsyncService mlClusterService;
 
 	/**
 	 * 서비스 그룹에 속한 클러스터 상세 정보 반환.
@@ -46,8 +47,17 @@ public class ServiceGroupService {
 			for(ProjectClusterEntity e : list) {
 				Long clusterIdx = e.getClusterIdx();				
 				try {
-					ClusterDto.Detail detail = clusterService.getCluster(clusterIdx);
+					ClusterDto.Detail detail = clusterService.getClusterWithMonitoring(clusterIdx);
 					detail.setProvisioningLog(null);
+					
+					if(detail instanceof ClusterDto.DetailWithMonitoring) {
+						String prometheusUrl = mlClusterService.getPrometheusUrl(clusterIdx);
+						String grafanaUrl = mlClusterService.getGrafanaUrl(clusterIdx);
+						
+						ClusterDto.DetailWithMonitoring m = (ClusterDto.DetailWithMonitoring)detail;
+						m.setPrometheusUrl(prometheusUrl);
+						m.setGrafanaUrl(grafanaUrl);
+					} 
 					result.add(detail);
 				} catch (Exception e1) {
 					log.error("", e);
