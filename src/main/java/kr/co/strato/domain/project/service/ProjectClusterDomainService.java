@@ -124,4 +124,8 @@ public class ProjectClusterDomainService {
 		
 		return projectClusterRepository.deleteByProjectIdxAndClusterIdxNotIn(projectIdx, clusters);
 	}
+	
+	public List<ProjectClusterEntity> getProjectClusters(Long projectIdx) {
+		return projectClusterRepository.findByProjectIdx(projectIdx);
+	}
 }

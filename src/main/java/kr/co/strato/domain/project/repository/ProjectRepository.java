@@ -12,4 +12,6 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long>, P
 	Optional<ProjectEntity>findByProjectNameAndDeletedYn(String projectName, String deletedYn);
 
 	List<ProjectEntity> findByDeletedYn(String deletedYn);
+	
+	Optional<ProjectEntity>findByUuid(String uuid);
 }

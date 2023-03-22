@@ -81,8 +81,20 @@ public class ProjectDomainService {
      * @return
      */
     public Optional<ProjectEntity> getProjectById(Long projectIdx) {
-    	
     	return projectRepository.findById(projectIdx);
+    }
+    
+    /**
+     * Project 조회
+     * @param
+     * @return
+     */
+    public ProjectEntity getProjectByUuid(String uuid) {
+    	Optional<ProjectEntity> opt = projectRepository.findByUuid(uuid);
+    	if(opt.isPresent()) {
+    		return opt.get();
+    	}
+    	return null;
     }
 	
 	/**
