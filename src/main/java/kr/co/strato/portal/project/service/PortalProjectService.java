@@ -48,7 +48,6 @@ import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.model.UserDtoMapper;
 import kr.co.strato.portal.setting.model.UserRoleDto;
 import kr.co.strato.portal.setting.model.UserRoleDtoMapper;
-import kr.co.strato.portal.setting.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -162,6 +161,7 @@ public class PortalProjectService extends CommonController {
     	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
     	
     	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
+    	projectBuiler.uuid(param.getUuid());
     	projectBuiler.projectName(param.getProjectName());
     	projectBuiler.description(param.getDescription());
     	projectBuiler.createUserId(userId);
@@ -293,6 +293,7 @@ public class PortalProjectService extends CommonController {
     		
         	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
         	projectBuiler.id(projectInfo.get().getId());
+        	projectBuiler.uuid(projectInfo.get().getUuid());
         	projectBuiler.projectName(param.getProjectName());
         	projectBuiler.description(param.getDescription());
         	projectBuiler.createUserId(userId);

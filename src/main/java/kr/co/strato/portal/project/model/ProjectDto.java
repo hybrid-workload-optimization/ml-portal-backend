@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class ProjectDto {
 
 	private Long id;
+	private String uuid;
 	private String projectName;
 	private String description;
 	private String createUserId;

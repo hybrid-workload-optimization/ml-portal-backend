@@ -136,7 +136,7 @@ public class PortalAdapterService {
 		
 		// 그룹 리스트 조회
 		GroupReq groupReq = new GroupReq(clientId, null);
-		List<GroupDTO> response = groupProxy.getGroups(authorizationHeader(), groupReq);
+		List<GroupDTO> response = groupProxy.getGroups(authorizationHeader(), groupReq);		
 		
 		// 그룹별 디테일 조회
 		for(GroupDTO groupDTO : response) {

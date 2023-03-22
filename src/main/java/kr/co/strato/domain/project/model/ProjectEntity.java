@@ -30,6 +30,9 @@ public class ProjectEntity {
 	@Column(name="project_idx")
 	private Long id;
 	
+	@Column(name="uuid")
+	private String uuid;
+	
 	@Column(name="project_name")
 	private String projectName;
 	

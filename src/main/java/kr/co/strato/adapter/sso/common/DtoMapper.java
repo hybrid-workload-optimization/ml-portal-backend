@@ -149,6 +149,7 @@ public class DtoMapper {
 		serviceDTO.setProjectName(groupDTO.getGroupName());
 		serviceDTO.setDescription(groupDTO.getDescription());
 		serviceDTO.setUserList(userList);
+		serviceDTO.setUuid(groupDTO.getUuid());
 		
 		return serviceDTO;
 	}
@@ -188,6 +189,7 @@ public class DtoMapper {
 		ProjectRequestDto serviceDTO = new ProjectRequestDto();
 		serviceDTO.setProjectName(groupDTO.getGroupName());
 		serviceDTO.setDescription(groupDTO.getDescription());
+		serviceDTO.setUuid(groupDTO.getUuid());
 		serviceDTO.setProjectManager(managerDto);
 		serviceDTO.setUserList(userList);
 		

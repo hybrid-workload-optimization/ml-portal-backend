@@ -1,6 +1,9 @@
 package kr.co.strato.adapter.sso.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -30,6 +33,9 @@ public class PortalEventService {
 	private AuthorityService authorityService;
 	@Autowired
 	private PortalProjectService projectService;
+	
+	@Value("${auth.clientId}")
+	private String clientId;
 	
 	public static final String EVENT_CREATED = "created";
     public static final String EVENT_REMOVED = "removed";
@@ -123,6 +129,12 @@ public class PortalEventService {
 		String dataStr = gson.toJson(data);		
 		
 		GroupDTO groupDTO = gson.fromJson(dataStr, GroupDTO.class);
+		List<String> allowClients = groupDTO.getAllowClients();
+		if(allowClients != null && !allowClients.contains(clientId)) {
+			//이 클라이언트에 허용되는 서비스 그룹이 아닌 경우 패스!
+			log.info("Service Group Event - 이 클라이언트에 지원되는 서비스 그룹이 아닙니다. ClientId: {}, ServiceGroupName: {}", clientId, groupDTO.getGroupName());
+			return;
+		}
 
 		ProjectRequestDto serviceDTO = DtoMapper.groupDtoMapper(groupDTO);
 		

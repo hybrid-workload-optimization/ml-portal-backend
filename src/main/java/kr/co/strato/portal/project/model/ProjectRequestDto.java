@@ -15,6 +15,7 @@ public class ProjectRequestDto {
 
 	private Long projectIdx;
 	
+	private String uuid;
 	private String loginId;
 	private String loginName;
 	
