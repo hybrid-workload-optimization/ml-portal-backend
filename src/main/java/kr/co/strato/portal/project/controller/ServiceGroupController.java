@@ -22,7 +22,7 @@ import kr.co.strato.portal.project.service.ServiceGroupService;
  *
  */
 @RequestMapping("/api/v1/service-group")
-@Api(tags = {"서비스 그룹에 CSP 계정 관리"})
+@Api(tags = {"서비스 그룹 관리"})
 @RestController
 public class ServiceGroupController {
 	
