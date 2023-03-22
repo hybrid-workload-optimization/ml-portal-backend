@@ -268,8 +268,6 @@ public class PortalProjectService extends CommonController {
      * @return
      */
     public Boolean updateProject(ProjectRequestDto param) throws NotFoundProjectException, UpdateProjectFailException {
-    	
-    	String userId = param.getLoginId();
     	String userName = param.getLoginName();
     	String now = DateUtil.currentDateTime("yyyy-MM-dd HH:mm:ss");
     	
@@ -290,68 +288,9 @@ public class PortalProjectService extends CommonController {
     	try {
     		//Project General
     		ProjectEntity oldEntity = projectInfo.get();
-    		
-        	ProjectDtoBuilder projectBuiler = ProjectDto.builder();
-        	projectBuiler.id(projectInfo.get().getId());
-        	projectBuiler.uuid(projectInfo.get().getUuid());
-        	projectBuiler.projectName(param.getProjectName());
-        	projectBuiler.description(param.getDescription());
-        	projectBuiler.createUserId(userId);
-        	projectBuiler.createUserName(userName);
-        	projectBuiler.createdAt(oldEntity.getCreatedAt());
-        	projectBuiler.updateUserId(userId);
-        	projectBuiler.updateUserName(userName);
-        	projectBuiler.updatedAt(now);
-        	projectBuiler.deletedYn(projectInfo.get().getDeletedYn());
-        	
-        	//ProjectDTO -> ProjectEntity
-            ProjectEntity projectEntity = ProjectDtoMapper.INSTANCE.toEntity(projectBuiler.build());
-            projectDomainService.updateProject(projectEntity);
-        	
-            List<String> duplicateIdList = new ArrayList<String>();
-            
-            // Project Manager 정보 확인 및 수정
-        	ProjectUserDto managerInfo = param.getProjectManager();
-        	if(managerInfo != null) {
-        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(projectInfo.get().getId());
-        		ProjectUserDto pmUser = ProjectUserDtoMapper.INSTANCE.toDto(pmUserInfo);
-        		if(!managerInfo.getUserId().equals(pmUser.getUserId())) {
-    				
-    				// 신규 Project Manager 적용
-    				ProjectUserDtoBuilder newProjectManagerBuiler = ProjectUserDto.builder();
-    				newProjectManagerBuiler.userId(managerInfo.getUserId());
-    				newProjectManagerBuiler.projectIdx(projectInfo.get().getId());
-    				newProjectManagerBuiler.createUserId(userId);
-    				newProjectManagerBuiler.createUserName(userName);
-    				newProjectManagerBuiler.createdAt(now);
-            		UserRoleEntity newRole = userRoleRepository.findTop1BByUserRoleCode(managerInfo.getUserRoleCode());
-            		newProjectManagerBuiler.userRoleIdx(newRole.getId());
-    				    				
-//    				newProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX);
-
-            		//ProjectUserDTO -> ProjectUserEntity
-                    ProjectUserEntity newProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(newProjectManagerBuiler.build());
-    				projectUserDomainService.createProjectUser(newProjectManagerEntity);
-    				
-    				// 기존 Project Manager 를 Member로 변경
-    				ProjectUserDtoBuilder oldProjectManagerBuiler = ProjectUserDto.builder();
-    				oldProjectManagerBuiler.userId(pmUser.getUserId());
-    				oldProjectManagerBuiler.projectIdx(param.getProjectIdx());
-    				oldProjectManagerBuiler.createUserId(userId);
-    				oldProjectManagerBuiler.createUserName(userName);
-    				oldProjectManagerBuiler.createdAt(now);
-    				UserRoleEntity oldRole = userRoleRepository.findTop1BByUserRoleCode(pmUser.getUserRoleCode());
-    				oldProjectManagerBuiler.userRoleIdx(oldRole.getId());
-
-//    				oldProjectManagerBuiler.userRoleIdx(ProjectUserEntity.PROJECT_MEMBER_ROLE_IDX);
-    				
-    				//ProjectUserDTO -> ProjectUserEntity
-    				ProjectUserEntity oldProjectManagerEntity = ProjectUserDtoMapper.INSTANCE.toEntity(oldProjectManagerBuiler.build());
-    				projectUserDomainService.createProjectUser(oldProjectManagerEntity);
-    				
-    				duplicateIdList.add(pmUser.getUserId()); // 기존 PM 이 삭제되지 않도록 List 에 추가 
-    			}
-        	}
+    		oldEntity.setUpdatedAt(now);
+    		oldEntity.setUpdateUserName(userName);    		
+            projectDomainService.updateProject(oldEntity);
         	
         	//Project Cluster
         	List<ProjectClusterDto> reqClusterList = param.getClusterList();
@@ -390,63 +329,6 @@ public class PortalProjectService extends CommonController {
             	}
     		} else {
     			projectClusterDomainService.deleteProjectByProjectIdx(projectInfo.get().getId());
-    		}
-    		
-    		//Project Member
-    		List<ProjectUserDto> reqUserList = param.getUserList();
-    		List<ProjectUserDto> userList = null;
-    		
-    		System.out.println("request === " + reqUserList);
-    		
-    		//Project User 삭제
-    		if(reqUserList != null && !reqUserList.isEmpty()) {
-        		//List<String> duplicateIdList = new ArrayList<String>();
-        		
-        		ProjectUserEntity pmUserInfo = projectUserDomainService.getProjectManagerInfo(projectInfo.get().getId());
-        		duplicateIdList.add(pmUserInfo.getUserId());
-        		
-        		userList = projectUserDomainService.getProjectUserListExceptManager(projectInfo.get().getId());
-        		for(ProjectUserDto nowUser : userList) {
-        			for(ProjectUserDto reqCluster : reqUserList) {
-        				if(nowUser.getUserId().equals(reqCluster.getUserId())) {
-        					duplicateIdList.add(reqCluster.getUserId());
-        					break;
-        				}
-        			}
-        		}
-        		
-        		if(duplicateIdList != null && duplicateIdList.size() > 0) {
-        			projectUserDomainService.deleteRequestProjectUser(projectInfo.get().getId(), duplicateIdList);
-        		}
-                
-                //Project User 등록
-        		for(ProjectUserDto user : reqUserList) {
-             		ProjectUserEntity selectUser = projectUserDomainService.getProjectUser(projectInfo.get().getId(), user.getUserId());
-            		
-            		ProjectUserDtoBuilder projectUserBuiler = ProjectUserDto.builder();
-            		projectUserBuiler.userId(user.getUserId());
-            		projectUserBuiler.projectIdx(projectInfo.get().getId());
-            		projectUserBuiler.createUserId(userId);
-            		projectUserBuiler.createUserName(userName);
-            		if(selectUser != null) {
-            			System.out.println("selectUser === " + selectUser.getUserId());
-            			projectUserBuiler.createdAt(selectUser.getCreatedAt());
-            		} else {
-                		projectUserBuiler.createdAt(now);
-            		}
-
-            		UserRoleEntity role = userRoleRepository.findTop1BByUserRoleCode(user.getUserRoleCode());
-        			
-            		projectUserBuiler.userRoleIdx(role.getId());
-            		//projectUserBuiler.projectUserRole(user.getProjectUserRole());
-            		
-            		
-            		//ProjectUserDTO -> ProjectUserEntity
-                    ProjectUserEntity projectUserEntity = ProjectUserDtoMapper.INSTANCE.toEntity(projectUserBuiler.build());
-            		projectUserDomainService.createProjectUser(projectUserEntity);
-            	}
-    		} else {
-    			projectUserDomainService.deleteProjectUserExceptManager(projectInfo.get().getId());
     		}
             
             result = true;
