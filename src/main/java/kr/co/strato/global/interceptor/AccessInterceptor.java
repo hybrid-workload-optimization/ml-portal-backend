@@ -30,6 +30,7 @@ public class AccessInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+		System.out.println(auth.getPrincipal().getClass());
 		if(auth.getPrincipal() instanceof JwtToken) {
 			JwtToken principal = (JwtToken)auth.getPrincipal();
 			

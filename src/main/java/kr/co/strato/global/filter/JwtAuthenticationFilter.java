@@ -6,9 +6,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.Filter;
@@ -29,6 +32,7 @@ import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import kr.co.strato.domain.user.model.UserRoleEntity;
 import kr.co.strato.global.auth.ClientAuthority;
 import kr.co.strato.global.auth.JwtAuthentication;
 import kr.co.strato.global.auth.JwtToken;
@@ -42,10 +46,12 @@ public class JwtAuthenticationFilter implements Filter {
 	
 	private String publicKey; 
 	private String clientId;
+	private String monitoringToken;
 	
-	public JwtAuthenticationFilter(String publicKey, String clientId) {
+	public JwtAuthenticationFilter(String publicKey, String clientId, String monitoringToken) {
 		this.publicKey = publicKey;
 		this.clientId = clientId;
+		this.monitoringToken = monitoringToken;
 	}
 	
 	@Override
@@ -74,10 +80,21 @@ public class JwtAuthenticationFilter implements Filter {
 		String jwtToken = getTokenStr(httpRequest);
 		log.debug("token = {}",jwtToken);
 		
-		if (jwtToken != null) {
-			if(validateToken(jwtToken)) {
+		
+
+		if (jwtToken != null) {			
+			Authentication auth = null;
+			if(jwtToken.equals(monitoringToken)) {
+				//로그인 없는 모니터링 요청인 경우
+				log.debug("Auth success. Monitoring Request !");
+				auth = getMonitoringAuthentication();
+			} else if(validateToken(jwtToken)) {
 				log.debug("Auth success. token validate !");
-				Authentication auth = getAuthentication(jwtToken);
+				auth = getAuthentication(jwtToken);
+			}
+			
+			
+			if(auth != null) {
 				SecurityContextHolder.getContext().setAuthentication(auth);
 				chain.doFilter(request, response);
 				return;
@@ -87,6 +104,7 @@ public class JwtAuthenticationFilter implements Filter {
 		} else {
 			log.error("Auth fail. Token is null.");
 		}
+		
 		httpRequest.getSession(false);
 		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
 		httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");		
@@ -125,6 +143,37 @@ public class JwtAuthenticationFilter implements Filter {
 		JwtAuthentication authentication = new JwtAuthentication(token, jwtToken, clientAuthoritys);
 		return authentication;
 	}
+	
+	
+	/**
+	 * 로그인 없이 모니터링을 위한 Authentication 생성
+	 * @return
+	 */
+	public Authentication getMonitoringAuthentication() {
+		Map<String, Map<String, List<String>>> resourceAccess = new HashMap<>();
+		Map<String, List<String>> map = new HashMap<>();
+		List<String> clientAuthoritys = new ArrayList<>();
+		clientAuthoritys.add(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN);
+		map.put("roles", clientAuthoritys);		
+		resourceAccess.put(clientId, map);
+		
+		JwtToken.Payload payloadInfo = new JwtToken.Payload();
+		payloadInfo.setPreferredUsername("MonitoringUser");	
+		payloadInfo.setResourceAccess(resourceAccess);
+		
+		
+		JwtToken token = JwtToken.builder()
+				.payload(payloadInfo)
+				.build();
+		
+		List<ClientAuthority> clientAuthoritys1 = new ArrayList<>();
+		clientAuthoritys1.add(new ClientAuthority(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN));
+		
+		JwtAuthentication authentication = new JwtAuthentication(token, token, clientAuthoritys1);
+		return authentication;
+	}
+	
+	
 	
 	public RSAPublicKey getParsePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] decode = Base64.getDecoder().decode(publicKey);
