@@ -70,14 +70,28 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 								  JPAExpressions.select(projectUserEntity.userId)
 	                                            .from(projectUserEntity)
 	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.projectUserRole.eq("PM")),
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX)),
+//	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX)),
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)
+	                                            	 , projectUserEntity.userRoleIdx.eq(
+	                                            				JPAExpressions.select(userRoleEntity.id)
+	                                            							  .from(userRoleEntity)
+	                                            							  .where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER))
+	                                            				)
+	                                            	 ),
 	                              "projectPmId"),
 						  ExpressionUtils.as(
 								  JPAExpressions.select(userEntity.userName)
 	                                            .from(userEntity)
 	                                            .join(projectUserEntity).on(userEntity.userId.eq(projectUserEntity.userId))
 	                                            //.where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq("PM")),
-	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX)),
+//	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id), projectUserEntity.userRoleIdx.eq(ProjectUserEntity.PROJECT_MANAGER_ROLE_IDX)),
+	                                            .where(projectUserEntity.projectIdx.eq(projectEntity.id)
+		                                            	 , projectUserEntity.userRoleIdx.eq(
+		                                            				JPAExpressions.select(userRoleEntity.id)
+		                                            							  .from(userRoleEntity)
+		                                            							  .where(userRoleEntity.userRoleCode.eq(ProjectUserEntity.PROJECT_MANAGER))
+		                                            				)
+		                                            	 ),
 	                              "projectPmName"),
 						  ExpressionUtils.as(
 								  Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectEntity.createdAt, "%Y-%m-%d"),
