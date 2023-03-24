@@ -34,3 +34,4 @@ spec:
   ports:
     - port: 18080
       targetPort: 18080
+      
