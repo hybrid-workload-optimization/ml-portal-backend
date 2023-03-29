@@ -55,11 +55,9 @@ public class UserService {
 	@Autowired
 	UserRoleRepository userRoleRepository;
 	
-	@Value("${portal.front.service.url}")
-	String frontUrl;
+	//@Value("${portal.front.service.url}")
+	//String frontUrl;
 	
-	@Value("${portal.backend.service.url}")
-	String backUrl;
 	
 	String INIT_PASSWORD_TEMPLATE;
 	
@@ -392,6 +390,7 @@ public class UserService {
 	 * @return
 	 */
 	private String genResetPasswordContents(String toEmail, String requestCode) {
+		/*
 		String url = frontUrl;
 		if(!url.endsWith("/")) {
 			url += "/";
@@ -407,6 +406,8 @@ public class UserService {
 		
 		String contents = INIT_PASSWORD_TEMPLATE.replace("{ICON}", icon).replace("{E-MAIL}", toEmail).replace("{LINK}", url);
 		return contents;
+		*/
+		return null;
 	}
 	
 
