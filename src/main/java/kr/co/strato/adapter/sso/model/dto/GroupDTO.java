@@ -18,7 +18,7 @@ public class GroupDTO {
 	private String description;
 	private String companyName;
 	private List<String> allowClients;
-	private UserDTO manager;
+	private UserEventDTO manager;
 	private String managerId;
 	private String createdAt;
 	private String createdBy;
