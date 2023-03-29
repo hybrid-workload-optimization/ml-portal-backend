@@ -25,6 +25,36 @@ spec:
         - containerPort: 9100
           protocol: TCP
           name: http
+        args:
+          - --path.rootfs=/host/root
+          - --path.procfs=/host/proc
+          - --path.sysfs=/host/sys
+        volumeMounts:
+          - mountPath: /host/root
+            mountPropagation: HostToContainer
+            name: root
+            readOnly: true
+          - mountPath: /host/proc
+            mountPropagation: HostToContainer
+            name: proc
+            readOnly: true
+          - mountPath: /host/sys
+            mountPropagation: HostToContainer
+            name: sys
+            readOnly: true
+      volumes:
+        - name: root
+          hostPath:
+            path: /
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
 ---
 apiVersion: v1
 kind: Service
