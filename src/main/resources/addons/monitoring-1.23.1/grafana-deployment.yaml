@@ -39,7 +39,7 @@ spec:
             path: dashboard/mysql.json
       containers:
       - name: grafana
-        image: grafana/grafana:7.5.17
+        image: grafana/grafana:8.4.3
         ports:
         - name: grafana
           containerPort: 3000
