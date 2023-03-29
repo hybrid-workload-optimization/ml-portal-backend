@@ -129,12 +129,14 @@ public class PortalEventService {
 		String dataStr = gson.toJson(data);		
 		
 		GroupDTO groupDTO = gson.fromJson(dataStr, GroupDTO.class);
-		List<String> allowClients = groupDTO.getAllowClients();
-		if(allowClients != null && !allowClients.contains(clientId)) {
-			//이 클라이언트에 허용되는 서비스 그룹이 아닌 경우 패스!
-			log.info("Service Group Event - 이 클라이언트에 지원되는 서비스 그룹이 아닙니다. ClientId: {}, ServiceGroupName: {}", clientId, groupDTO.getGroupName());
-			return;
-		}
+		
+		// 보류 : 모든 클라이언트에 서비스 그룹 생성하고 추후 변경 예정
+//		List<String> allowClients = groupDTO.getAllowClients();
+//		if(allowClients != null && !allowClients.contains(clientId)) {
+//			이 클라이언트에 허용되는 서비스 그룹이 아닌 경우 패스!
+//			log.info("Service Group Event - 이 클라이언트에 지원되는 서비스 그룹이 아닙니다. ClientId: {}, ServiceGroupName: {}", clientId, groupDTO.getGroupName());
+//			return;
+//		}
 
 		ProjectRequestDto serviceDTO = DtoMapper.groupDtoMapper(groupDTO);
 		
