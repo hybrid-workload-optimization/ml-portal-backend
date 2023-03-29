@@ -29,9 +29,17 @@ spec:
             path: dashboard/dashboard.json
           - key: gpu-dashboard.json
             path: dashboard/gpu-dashboard.json
+          - key: k8s-cluster.json
+            path: dashboard/k8s-cluster.json
+          - key: k8s-node.json
+            path: dashboard/k8s-node.json
+          - key: java-app.json
+            path: dashboard/java-app.json
+          - key: mysql.json
+            path: dashboard/mysql.json
       containers:
       - name: grafana
-        image: grafana/grafana:8.4.3
+        image: grafana/grafana:7.5.17
         ports:
         - name: grafana
           containerPort: 3000
