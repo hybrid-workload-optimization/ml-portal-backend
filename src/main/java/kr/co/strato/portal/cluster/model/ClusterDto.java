@@ -82,8 +82,9 @@ public class ClusterDto {
 	@Getter
 	@Setter
 	@NoArgsConstructor
-	public static class ListForDevops extends List {
+	public static class DetailForDevOps extends Detail {
 		private ArgoCDInfo argocd;
+		private String kubeConfig;
 	}
 	
 	@Getter
@@ -135,7 +136,7 @@ public class ClusterDto {
 	@Getter
 	@Setter
 	@NoArgsConstructor
-	public static class DetailWithMonitoring extends Detail {
+	public static class DetailForMonitoring extends Detail {
 		private String prometheusUrl;
 		private String grafanaUrl;
 	}

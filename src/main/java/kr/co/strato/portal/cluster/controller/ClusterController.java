@@ -512,15 +512,4 @@ public class ClusterController extends CommonController {
 		return new ResponseWrapper<>(info);
 	}
 	
-	@GetMapping("/api/v1/cluster/list")
-    public ResponseWrapper<List<ClusterDto.ListForDevops>> getCluterListForDevops(@RequestParam(required = true) String userId){
-		List<ClusterDto.ListForDevops> results = null;
-		try {
-			results = clusterService.getClusterListForDevops(userId);
-		} catch (Exception e) {
-			log.error("", e);
-		}
-        return new ResponseWrapper<>(results);
-    }
-	
 }

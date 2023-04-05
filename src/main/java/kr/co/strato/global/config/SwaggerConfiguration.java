@@ -46,7 +46,7 @@ public class SwaggerConfiguration {
 	}
 
 	private ApiKey apiKey() {
-		return new ApiKey(AUTHORIZATION_KEY, AUTHORIZATION_HEADER, "header");
+		return new ApiKey(AUTHORIZATION_HEADER, AUTHORIZATION_HEADER, "header");
 	}
 
 	private SecurityContext securityContext() {

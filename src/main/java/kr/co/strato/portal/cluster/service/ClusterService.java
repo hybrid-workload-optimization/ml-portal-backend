@@ -171,23 +171,6 @@ public class ClusterService {
 	}
 	
 	
-	public List<ClusterDto.ListForDevops> getClusterListForDevops(String userId) throws Exception {
-		UserDto userDto = userService.getUserInfo(userId);		
-		List<ClusterEntity> clusterList = clusterDomainService.getListByLoginUserForDevops(userDto);
-		
-		List<ClusterDto.ListForDevops> list = clusterList.stream()
-				.map(c -> ClusterDtoMapper.INSTANCE.toListForDevops(c))
-				.collect(Collectors.toList());
-		
-		for(ClusterDto.ListForDevops c : list) {
-			Long clusterIdx = c.getClusterIdx();
-			ArgoCDInfo info = mlClusterService.getArgoCDInfo(clusterIdx);
-			c.setArgocd(info);	
-		}
-		return list;
-	}
-	
-	
 	public ClusterDto.Status getClusterStatus(Long clusterIdx) {
 		ClusterDto.Status status = new ClusterDto.Status();
 		ClusterEntity clusterEntity = clusterDomainService.getNullable(clusterIdx);
@@ -652,14 +635,24 @@ public class ClusterService {
 		return getCluster(detail, clusterEntity);
 	}
 	
-	public ClusterDto.Detail getClusterWithMonitoring(Long clusterIdx) throws Exception {
+	public ClusterDto.Detail getClusterForMonitoring(Long clusterIdx) throws Exception {
 		// cluster
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		// convert from entity to dto
-		ClusterDto.DetailWithMonitoring detail = ClusterDtoMapper.INSTANCE.toDetailWithMonitoring(clusterEntity);
+		ClusterDto.DetailForMonitoring detail = ClusterDtoMapper.INSTANCE.toDetailForMonitoring(clusterEntity);
 		return getCluster(detail, clusterEntity);
-	}
+	}	
+	
+	public ClusterDto.Detail getClusterForDevOps(Long clusterIdx) throws Exception {
+		// cluster
+		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
+		
+		// convert from entity to dto
+		ClusterDto.DetailForDevOps detail = ClusterDtoMapper.INSTANCE.toDetailForDevOps(clusterEntity);
+		return getCluster(detail, clusterEntity);
+	}	
+	
 	
 	public ClusterDto.Detail getCluster(ClusterDto.Detail detail, ClusterEntity clusterEntity) throws Exception {
 		Long clusterIdx = clusterEntity.getClusterIdx();

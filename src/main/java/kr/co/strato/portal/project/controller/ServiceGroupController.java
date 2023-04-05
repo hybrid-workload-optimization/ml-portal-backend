@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +32,10 @@ public class ServiceGroupController {
 
 	@GetMapping("/{uuid}/clusters")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<ClusterDto.Detail>> getGroupClusters(@PathVariable("uuid") String uuid) {        
-    	List<ClusterDto.Detail> response = serviceGroupService.getGroupClusters(uuid);
+    public ResponseWrapper<List<ClusterDto.Detail>> getGroupClusters(
+    		@PathVariable("uuid") String uuid
+    		, @RequestParam(required = false) String requestType) {        
+    	List<ClusterDto.Detail> response = serviceGroupService.getGroupClusters(uuid, requestType);
         return new ResponseWrapper<List<ClusterDto.Detail>>(response);
     }
 }
