@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PortStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -180,7 +181,6 @@ public class MLClusterAPIAsyncService {
 			
 			if(servicePort != null) {				
 				String p = servicePort.getProtocol();
-				System.out.println(p);
 				Integer nodePort = servicePort.getNodePort();				
 				List<String> workerIps = nodeAdapterService.getWorkerNodeIps(kubeConfigId);
 				for(String ip : workerIps) {
@@ -194,6 +194,10 @@ public class MLClusterAPIAsyncService {
 	}
 	
 	public String getPublicExternalUrl(ClusterEntity cluster) {
+		return getPublicExternalUrl(cluster, "http");
+	}
+	
+	public String getPublicExternalUrl(ClusterEntity cluster, String protocol) {
 		String externalUrl = null;
 		Long kubeConfigId = cluster.getClusterId();
 		
@@ -202,10 +206,28 @@ public class MLClusterAPIAsyncService {
 		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
 		if(list != null && list.size() > 0) {
 			LoadBalancerIngress loadBalancerIngres = list.get(0);
+			
+			PortStatus port = null;
+			List<PortStatus> ports = loadBalancerIngres.getPorts();
+			if(ports != null) {
+				Optional<PortStatus> opt = ports.stream()
+						.filter(p -> p.getProtocol().toLowerCase().equals(protocol)).findFirst();
+				
+				if(opt.isPresent()) {
+					port = opt.get();
+				}
+			}
+			
+			
 			externalUrl = loadBalancerIngres.getIp();
 			if(externalUrl == null || externalUrl.isEmpty()) {
 				externalUrl = loadBalancerIngres.getHostname();
 			}
+			
+			if(port != null && port.getPort() != 80) {
+				externalUrl = String.format("%s:%d", externalUrl, port.getPort());
+			}
+			
 		}
 		return externalUrl;
 	}
