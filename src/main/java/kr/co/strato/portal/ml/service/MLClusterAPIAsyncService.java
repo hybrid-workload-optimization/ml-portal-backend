@@ -115,7 +115,7 @@ public class MLClusterAPIAsyncService {
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 		Long kubeConfigId = cluster.getClusterId();
 		
-		String externalUrl = getExternalUrl(cluster);
+		String externalUrl = getExternalUrl(cluster, "https");
 		if(externalUrl == null) {
 			log.error("Get ArgoCD url fail. clusterIdx: {}", clusterIdx);
 			log.error("External url is null.");
@@ -148,7 +148,22 @@ public class MLClusterAPIAsyncService {
 		}
 	}
 	
+	public String getExternalUrl(ClusterEntity cluster, String protocol) {		
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+			//Private Cloud			
+			return getPrivateExternalUrl(cluster, protocol);
+			
+		} else {
+			//Public Cloud
+			return getPublicExternalUrl(cluster);
+		}
+	}
+	
 	public String getPrivateExternalUrl(ClusterEntity cluster) {
+		return getPrivateExternalUrl(cluster, "http");
+	}
+	
+	public String getPrivateExternalUrl(ClusterEntity cluster, String protocol) {
 		String externalUrl = null;
 		Long kubeConfigId = cluster.getClusterId();
 		
@@ -157,14 +172,15 @@ public class MLClusterAPIAsyncService {
 			ServicePort servicePort = null;
 			
 			Optional<ServicePort> op = svc.getSpec().getPorts().stream()
-					.filter(p -> p.getNodePort() != null)
+					.filter(p -> p.getNodePort() != null && p.getAppProtocol().equals(protocol))
 					.findFirst();
 			if(op.isPresent()) {
 				servicePort = op.get();
 			}
 			
 			if(servicePort != null) {				
-				String protocol = servicePort.getProtocol();
+				String p = servicePort.getProtocol();
+				System.out.println(p);
 				Integer nodePort = servicePort.getNodePort();				
 				List<String> workerIps = nodeAdapterService.getWorkerNodeIps(kubeConfigId);
 				for(String ip : workerIps) {
