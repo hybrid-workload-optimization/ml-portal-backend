@@ -2,6 +2,7 @@ package kr.co.strato.domain.persistentVolume.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -55,7 +56,7 @@ public class PersistentVolumeEntity {
 	private String reclaimPolicy;
 	
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "storage_class_idx")
 	private StorageClassEntity storageClass;
 	

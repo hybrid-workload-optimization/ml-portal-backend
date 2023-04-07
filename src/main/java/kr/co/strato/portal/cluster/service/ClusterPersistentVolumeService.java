@@ -248,16 +248,16 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 		ClusterEntity clusterEntity = new ClusterEntity();
 		clusterEntity.setClusterIdx(clusterIdx);
 		
-		StorageClassEntity storageClassEntity = new StorageClassEntity();
+		StorageClassEntity storageClassEntity = null;
 		if(storageClassName!=null) {
-			storageClassEntity = persistentVolumeDomainService.getStorageClassId(storageClassName);
+			storageClassEntity = persistentVolumeDomainService.getStorageClassId(storageClassName);			
 		}
 		
 
 		PersistentVolumeEntity clusterPersistentVolume = PersistentVolumeEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.accessMode(accessModes).claim(claim).reclaim(reclaim).reclaimPolicy(reclaimPolicy)
-				//.storageClass(storageClassEntity)
+				.storageClass(storageClassEntity)
 				.resourceName(resourceName)
 				.type(type)
 				.path(path)
