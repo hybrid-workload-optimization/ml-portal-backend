@@ -8,8 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import kr.co.strato.global.interceptor.AccessInterceptor;
 
 
-
-@Configuration
+/*
+타 제품에서 CoMP 호출 시 로그인한 사용자가 CoMP 사용권한이 없을 경우를 대비해 CoMP 권한 채크는 제외함.
+2023.04.07 이호철
+ */
+//@Configuration
 public class WebConfig implements WebMvcConfigurer {
 
 	@Override
