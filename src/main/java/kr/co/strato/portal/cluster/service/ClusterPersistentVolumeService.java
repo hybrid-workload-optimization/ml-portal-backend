@@ -257,7 +257,7 @@ public class ClusterPersistentVolumeService extends NonNamespaceService {
 		PersistentVolumeEntity clusterPersistentVolume = PersistentVolumeEntity.builder().name(name).uid(uid).status(String.valueOf(status))
 				.createdAt(DateUtil.strToLocalDateTime(createdAt))
 				.accessMode(accessModes).claim(claim).reclaim(reclaim).reclaimPolicy(reclaimPolicy)
-				.storageClass(storageClassEntity)
+				//.storageClass(storageClassEntity)
 				.resourceName(resourceName)
 				.type(type)
 				.path(path)

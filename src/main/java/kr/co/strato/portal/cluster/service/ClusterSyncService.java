@@ -118,16 +118,17 @@ public class ClusterSyncService {
 		}
 		
 		
+		// db - insert storage class
+		if(storageClasses != null) {
+			clusterStorageClassService.synClusterStorageClassSave(storageClasses, clusterIdx);
+		}
+		
+		
 		// db - insert pv
 		if(persistentVolumes != null) {
 			clusterPersistentVolumeService.synClusterPersistentVolumeSave(persistentVolumes, clusterIdx);
 		}
 		
-		
-		// db - insert storage class
-		if(storageClasses != null) {
-			clusterStorageClassService.synClusterStorageClassSave(storageClasses, clusterIdx);
-		}
 		
 	}
 	
