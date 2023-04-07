@@ -19,8 +19,8 @@ public class SecurityConfig {
 	@Value("${auth.clientId}")
 	private String clientId;
 	
-	@Value("${auth.monitoringToken}")
-	private String monitoringToken;
+	@Value("${auth.apiToken}")
+	private String apiToken;
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,7 +44,7 @@ public class SecurityConfig {
 	 * @return
 	 */
 	public JwtAuthenticationFilter getJwtAuthenticationFilter() {
-		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(publicKey, clientId, monitoringToken);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(publicKey, clientId, apiToken);
 		return jwtAuthenticationFilter;
 	}
 }

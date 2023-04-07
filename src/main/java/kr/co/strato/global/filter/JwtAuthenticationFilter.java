@@ -46,12 +46,12 @@ public class JwtAuthenticationFilter implements Filter {
 	
 	private String publicKey; 
 	private String clientId;
-	private String monitoringToken;
+	private String apiToken;
 	
-	public JwtAuthenticationFilter(String publicKey, String clientId, String monitoringToken) {
+	public JwtAuthenticationFilter(String publicKey, String clientId, String apiToken) {
 		this.publicKey = publicKey;
 		this.clientId = clientId;
-		this.monitoringToken = monitoringToken;
+		this.apiToken = apiToken;
 	}
 	
 	@Override
@@ -84,10 +84,10 @@ public class JwtAuthenticationFilter implements Filter {
 
 		if (jwtToken != null) {			
 			Authentication auth = null;
-			if(jwtToken.equals(monitoringToken)) {
-				//로그인 없는 모니터링 요청인 경우
+			if(jwtToken.equals(apiToken)) {
+				//로그인 없는 내부 제품 API Call 요청인 경우
 				log.debug("Auth success. Monitoring Request !");
-				auth = getMonitoringAuthentication();
+				auth = getAPIUserAuthentication();
 			} else if(validateToken(jwtToken)) {
 				log.debug("Auth success. token validate !");
 				auth = getAuthentication(jwtToken);
@@ -149,7 +149,7 @@ public class JwtAuthenticationFilter implements Filter {
 	 * 로그인 없이 모니터링을 위한 Authentication 생성
 	 * @return
 	 */
-	public Authentication getMonitoringAuthentication() {
+	public Authentication getAPIUserAuthentication() {
 		Map<String, Map<String, List<String>>> resourceAccess = new HashMap<>();
 		Map<String, List<String>> map = new HashMap<>();
 		List<String> clientAuthoritys = new ArrayList<>();
@@ -158,7 +158,7 @@ public class JwtAuthenticationFilter implements Filter {
 		resourceAccess.put(clientId, map);
 		
 		JwtToken.Payload payloadInfo = new JwtToken.Payload();
-		payloadInfo.setPreferredUsername("MonitoringUser");	
+		payloadInfo.setPreferredUsername("APIUser");	
 		payloadInfo.setResourceAccess(resourceAccess);
 		
 		

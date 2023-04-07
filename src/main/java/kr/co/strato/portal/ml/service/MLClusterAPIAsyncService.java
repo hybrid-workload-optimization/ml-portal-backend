@@ -211,7 +211,8 @@ public class MLClusterAPIAsyncService {
 			List<PortStatus> ports = loadBalancerIngres.getPorts();
 			if(ports != null) {
 				Optional<PortStatus> opt = ports.stream()
-						.filter(p -> p.getProtocol().toLowerCase().equals(protocol)).findFirst();
+						.filter(p -> p.getProtocol().toLowerCase().equals(protocol))
+						.findFirst();
 				
 				if(opt.isPresent()) {
 					port = opt.get();
@@ -315,7 +316,8 @@ public class MLClusterAPIAsyncService {
 		ClusterEntity entity = publicClusterService.provisioningCluster(pParam, user);
 		return entity;
 	}
-	
+	 
+	 	
 	private String genClusterName(String mlName) {
 		int min = 10000;
 		int max = 99999;
