@@ -11,4 +11,6 @@ public class CSPAccountDto {
 	private String uuid;
 	private String csp;
 	private String accountId;
+	private String description;
+	private String note;
 }

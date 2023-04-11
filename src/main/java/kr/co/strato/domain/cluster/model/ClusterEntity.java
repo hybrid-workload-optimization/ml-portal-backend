@@ -132,4 +132,6 @@ public class ClusterEntity {
 	@Column(name = "network_location")
 	private String networkLocation;
 	
+	@Column(name = "csp_account_uuid")
+	private String cspAccountUuid;
 }

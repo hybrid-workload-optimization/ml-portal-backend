@@ -29,6 +29,10 @@ public class CSPAccountAdapterService {
 		return cspAccountProxy.getAccounts(authorizationHeader(), search);
 	}
 	
+	public CSPAccountDTO getAccount(String cspAccountUuid) {
+		return cspAccountProxy.getAccount(authorizationHeader(), cspAccountUuid);
+	}
+	
 	/**
 	 * 통합 포탈 API에 접근하기 위해 인증 정보 추가
 	 * @return

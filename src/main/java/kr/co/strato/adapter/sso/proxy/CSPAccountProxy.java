@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -17,5 +19,10 @@ public interface CSPAccountProxy {
 	public List<CSPAccountDTO> getAccounts(
 			@RequestHeader Map<String, Object> header, 
 			@RequestBody CSPAccountDTO.SearchAccount search);
+	
+	@GetMapping("/api/v1/portal/csp-account/{uuid}")
+	public CSPAccountDTO getAccount(
+			@RequestHeader Map<String, Object> header, 
+			@PathVariable("uuid") String uuid);
 	
 }

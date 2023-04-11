@@ -14,6 +14,7 @@ public abstract class AbstractDefaultParamProvider {
 	public static final String KEY_NODE_POOLS = "nodePools";
 	public static final String KEY_NODE_COUNT = "nodeCount";
 	public static final String KEY_VM_TYPE = "vmType";
+	public static final String KEY_CSP_ACCOUNT_UUID = "cspAccountUuid";
 	
 	protected abstract Map<String, Object> getDefaultProvisioningParam();
 	protected abstract Map<String, Object> getDefaultDeleteParam();

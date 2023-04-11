@@ -20,6 +20,8 @@ import kr.co.strato.adapter.cloud.common.service.CloudAdapterService;
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
+import kr.co.strato.adapter.sso.model.dto.CSPAccountDTO;
+import kr.co.strato.adapter.sso.service.CSPAccountAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
@@ -81,6 +83,9 @@ public class PublicClusterService {
 	@Autowired
 	private Environment env;
 	
+	@Autowired
+	private CSPAccountAdapterService cspAccountAdapterService;
+	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
 		return provisioningCluster(param, user, null);
 	}
@@ -115,6 +120,8 @@ public class PublicClusterService {
 		String kubeletVersion = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_KUBERNETES_VERSION);
 		String vmType =  (String)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_VM_TYPE);
 		int nodeCount = (int)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_NODE_COUNT);
+		String cspAccountUuid = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CSP_ACCOUNT_UUID);
+		
 		
 		String now = DateUtil.currentDateTime();
 		ClusterEntity clusterEntity = ClusterEntity.builder()
@@ -130,6 +137,7 @@ public class PublicClusterService {
 				.nodeCount(nodeCount)
 				.vmType(vmType)
 				.region(region)
+				.cspAccountUuid(cspAccountUuid)
 				.build();		
 		clusterDomainService.register(clusterEntity);
 		
@@ -155,6 +163,11 @@ public class PublicClusterService {
 		Long workJobIdx = workJobService.registerWorkJob(workJobDto);
 		log.info("[ProvisioningCluster] work job idx : {}", workJobIdx);
 		
+		
+		if(cspAccountUuid != null) {
+			CSPAccountDTO account = cspAccountAdapterService.getAccount(cspAccountUuid);
+			Map<String, String> accountData = account.getAccountData();
+		}
 		
 		//kafka에 넣기 위한 데이터.
 		MessageData messageData = MessageData.builder()
