@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.sso.common.DtoMapper;
@@ -22,7 +20,6 @@ import kr.co.strato.adapter.sso.model.req.UsersReq;
 import kr.co.strato.adapter.sso.proxy.ClientRoleProxy;
 import kr.co.strato.adapter.sso.proxy.GroupProxy;
 import kr.co.strato.adapter.sso.proxy.UserProxy;
-import kr.co.strato.global.auth.JwtToken;
 import kr.co.strato.portal.project.model.ProjectRequestDto;
 import kr.co.strato.portal.setting.model.AuthorityRequestDto;
 import kr.co.strato.portal.setting.model.UserDto;

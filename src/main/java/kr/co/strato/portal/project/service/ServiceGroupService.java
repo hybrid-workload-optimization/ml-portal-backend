@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import kr.co.strato.adapter.k8s.cluster.model.ClusterAdapterDto;
 import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
+import kr.co.strato.adapter.sso.model.dto.CSPAccountDTO;
+import kr.co.strato.adapter.sso.service.CSPAccountAdapterService;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
@@ -18,6 +20,8 @@ import kr.co.strato.portal.cluster.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.service.ClusterService;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
+import kr.co.strato.portal.project.model.CSPAccountDto;
+import kr.co.strato.portal.project.model.mapper.CSPAccountDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -38,6 +42,9 @@ public class ServiceGroupService {
 	
 	@Autowired
 	private ClusterAdapterService clusterAdapterService;
+	
+	@Autowired
+	private CSPAccountAdapterService cspAccountAdapterService;
 
 	/**
 	 * 서비스 그룹에 속한 클러스터 상세 정보 반환.
@@ -105,4 +112,36 @@ public class ServiceGroupService {
 			throw new NotFoundProjectException();
 		}
 	}
+	
+	public List<CSPAccountDto> getGroupCspAccount(Long projectIdx, String provider) {
+		ProjectEntity entity = projectDomainService.getProject(projectIdx);
+		if(entity != null) {
+			String uuid = entity.getUuid();
+			String csp = null;
+			if(provider != null) {
+				csp = getClusterCSP(provider);
+			}
+			List<CSPAccountDTO> list = cspAccountAdapterService.getAccounts(uuid, csp);
+			List<CSPAccountDto> result = CSPAccountDtoMapper.INSTANCE.dtoList(list);
+			return result;
+		}
+		return null;
+	}
+	
+	
+	public String getClusterCSP(String provider) {
+    	String type = null;
+    	String lowerProvider = provider.toLowerCase();
+    	if(lowerProvider.equals("azure")) {
+			type = "AZURE";
+		} else if(lowerProvider.equals("gcp")) {
+			type = "GCP";
+		} else if(lowerProvider.equals("aws")) {
+			type = "AWS";
+		} else if(lowerProvider.equals("naver")) {
+			type = "NAVER";
+		}
+    	return type;
+    }
+			
 }

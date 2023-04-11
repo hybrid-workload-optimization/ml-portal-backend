@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.project.model.CSPAccountDto;
 import kr.co.strato.portal.project.service.ServiceGroupService;
 
 /**
@@ -38,4 +39,14 @@ public class ServiceGroupController {
     	List<ClusterDto.Detail> response = serviceGroupService.getGroupClusters(uuid, requestType);
         return new ResponseWrapper<List<ClusterDto.Detail>>(response);
     }
+	
+	@GetMapping("/{projectIdx}/csp-account")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseWrapper<List<CSPAccountDto>> getGroupCspAccount(
+    		@PathVariable("projectIdx") Long projectIdx, 
+    		@RequestParam(required = false) String provider) {
+		List<CSPAccountDto> list = serviceGroupService.getGroupCspAccount(projectIdx, provider);
+		return new ResponseWrapper<List<CSPAccountDto>>(list);
+	}
+	
 }

@@ -84,6 +84,14 @@ public class ProjectDomainService {
     	return projectRepository.findById(projectIdx);
     }
     
+    public ProjectEntity getProject(Long projectIdx) {
+    	Optional<ProjectEntity> op = projectRepository.findById(projectIdx);
+    	if(op.isPresent()) {
+    		return op.get();
+    	}
+    	return null;
+    }
+    
     /**
      * Project 조회
      * @param
