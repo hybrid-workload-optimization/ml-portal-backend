@@ -190,7 +190,7 @@ public class PublicClusterService {
 		
 		
 		//CSP 계정 설정
-		if(cspAccountUuid != null && header == null) {
+		if(cspAccountUuid != null) {
 			header = getCSPAccountHeader(cspAccountUuid);
 		}
 		
@@ -504,7 +504,7 @@ public class PublicClusterService {
 				Iterator<String> iter = accountData.keySet().iterator();
 				while(iter.hasNext()) {
 					String key = iter.next();
-					if(!key.equals("primaryKey")) {
+					if(!key.equals("accountId") && !key.equals("primaryKey")) {
 						String decryptValue = EncryptUtil.decryptAES(keyArr[0], keyArr[1], accountData.get(key));
 						header.put(key, decryptValue);
 						
