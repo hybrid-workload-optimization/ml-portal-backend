@@ -121,7 +121,14 @@ public class PublicClusterService {
 			throw new BadRequestException("Invalid parameter.");
 		}
 		
-		Long projectIdx = (Long) provisioningParam.get(AbstractDefaultParamProvider.PROJECT_IDX);
+		
+		Long projectIdx = null;
+		if(provisioningParam.get(AbstractDefaultParamProvider.PROJECT_IDX) instanceof String) {
+			projectIdx = Long.parseLong((String)provisioningParam.get(AbstractDefaultParamProvider.PROJECT_IDX));
+		} else {
+			projectIdx = (Long) provisioningParam.get(AbstractDefaultParamProvider.PROJECT_IDX);
+		}
+		
 		String clusterName = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CLUSTER_NAME);
 		String clusterDesc = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CLUSTER_DESC);
 		String region = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_REGION);
