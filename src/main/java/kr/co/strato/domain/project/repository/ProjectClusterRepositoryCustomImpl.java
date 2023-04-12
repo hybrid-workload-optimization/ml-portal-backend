@@ -48,14 +48,15 @@ public class ProjectClusterRepositoryCustomImpl implements ProjectClusterReposit
 						clusterEntity.description,
 						clusterEntity.provisioningType,
 						clusterEntity.provisioningStatus,
-						/*ExpressionUtils.as(
+						clusterEntity.clusterId,
+						ExpressionUtils.as(
 							Expressions.stringTemplate("DATE_FORMAT({0}, {1})", clusterEntity.createdAt, "%Y-%m-%d %H:%i"),
 							"createdAt"
-						)*/
-						ExpressionUtils.as(
+						)
+						/*ExpressionUtils.as(
 							Expressions.stringTemplate("DATE_FORMAT({0}, {1})", projectClusterEntity.addedAt, "%Y-%m-%d %H:%i"),
 							"addedAt"
-						)
+						)*/
 				  ))
 				  .from(projectClusterEntity)
 				  .join(clusterEntity).on(projectClusterEntity.clusterIdx.eq(clusterEntity.clusterIdx))

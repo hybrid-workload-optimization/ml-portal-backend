@@ -27,6 +27,9 @@ public interface UserRepository extends JpaRepository<UserEntity, String>, Custo
 	Page<UserEntity> findByUseYn(String useYn, Pageable pageable);
 	
 	@Transactional
+	public void deleteByUserId(String userId);
+	
+	@Transactional
 	@Modifying
 	@Query(value = "update user u set u.use_yn = ?1 where u.user_id = ?2", nativeQuery = true)
 	int setUseYnByUser(String useYn, String userId);

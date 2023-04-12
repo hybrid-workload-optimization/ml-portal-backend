@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
@@ -112,7 +113,21 @@ public class PortalProjectService extends CommonController {
      */
     public List<ProjectClusterDto> getProjectClusterList(Long projectIdx) {
     	
-        return projectClusterDomainService.getProjectClusterList(projectIdx);
+    	List<ProjectClusterDto> projectClusterList = projectClusterDomainService.getProjectClusterList(projectIdx);
+    	
+    	//Health 정보 설정.
+		for(ProjectClusterDto item : projectClusterList) {
+			Long kubeConfigId = item.getClusterId();
+			String pStatus = item.getProvisioningStatus();
+			
+			log.info("Get cluster Health. clusterIdx: {}", item.getClusterIdx());
+			ClusterHealthAdapterDto health = clusterService.getClusterStatus(kubeConfigId, pStatus);
+			
+			item.setStatus(health.getHealth());
+			item.setProblem((ArrayList<String>)health.getProblem());
+		}
+		
+        return projectClusterList;
     }
     
     /**

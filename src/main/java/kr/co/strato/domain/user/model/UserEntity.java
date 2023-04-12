@@ -3,6 +3,7 @@ package kr.co.strato.domain.user.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -81,7 +82,7 @@ public class UserEntity {
 	@JoinColumn(name = "user_role_idx")
 	private UserRoleEntity userRole;
 	
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JoinColumn(name ="user_id")
 	private List<ProjectUserEntity> projectUser;
 	

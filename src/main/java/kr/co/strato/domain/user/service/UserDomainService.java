@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.strato.adapter.sso.service.PortalAdapterService;
+import kr.co.strato.domain.project.model.ProjectUserEntity;
+import kr.co.strato.domain.project.repository.ProjectUserRepository;
 import kr.co.strato.domain.user.model.UserEntity;
 import kr.co.strato.domain.user.model.UserResetPasswordEntity;
 import kr.co.strato.domain.user.model.UserRoleEntity;
@@ -34,6 +37,9 @@ public class UserDomainService {
 	
 	@Autowired
 	UserRoleRepository userRoleRepository;
+	
+	@Autowired
+	ProjectUserRepository projectUserRepository;
 	
 	@Autowired
 	UserResetPasswordRepository resetPasswordRepostory;
@@ -144,17 +150,26 @@ public class UserDomainService {
 	 * @param user
 	 * @return
 	 */
+	@Transactional
 	public String deleteUser(UserEntity user) {
 		
 		//@TODO 유저 삭제에 대한 정책 확정 필요
 		Optional<UserEntity> entity =  userRepository.findById(user.getUserId());
-
+		
 		if(entity.isPresent()) {
+			String userId = user.getUserId();
+			List<ProjectUserEntity> projectUsers = entity.get().getProjectUser();
+			
+			for(ProjectUserEntity projectUser : projectUsers) {
+				Long projectUserIdx = projectUser.getProjectIdx();
+				projectUserRepository.deleteByProjectIdxAndUserId(projectUserIdx, userId);
+			}
+			
 			entity.get().setUseYn("N");
 			userRepository.save(entity.get());
 		}
 		
-//		userRepository.deleteById(user.getUserId());
+//		userRepository.deleteByUserId(userId);
 		
 		return user.getUserId();
 	}
