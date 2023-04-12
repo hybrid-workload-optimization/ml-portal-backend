@@ -506,7 +506,8 @@ public class PublicClusterService {
 					String key = iter.next();
 					if(!key.equals("accountId") && !key.equals("primaryKey")) {
 						String decryptValue = EncryptUtil.decryptAES(keyArr[0], keyArr[1], accountData.get(key));
-						header.put(key, decryptValue);
+						String newKey = key.replaceAll("([A-Z])", "_$1").toLowerCase();
+						header.put(newKey, decryptValue);
 						
 					}
 				}
