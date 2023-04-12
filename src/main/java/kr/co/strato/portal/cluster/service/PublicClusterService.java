@@ -496,21 +496,18 @@ public class PublicClusterService {
 		Map<String, String> accountData = account.getAccountData();
 		
 		String primaryKey = (accountData != null) ? accountData.get("primaryKey") : null;
-		if (primaryKey != null) {
+		String accessKey = (accountData != null) ? accountData.get("accessKey") : null;
+		String secretKey = (accountData != null) ? accountData.get("secretKey") : null;
+		
+		if (primaryKey != null && accessKey != null && secretKey != null) {
 			String keyString = EncryptUtil.decryptRSA(primaryKey);
 			String[] keyArr = keyString.split(":");
 			if (keyArr != null && keyArr.length == 2) {
+				accessKey = EncryptUtil.decryptAES(keyArr[0], keyArr[1], accessKey);
+				secretKey = EncryptUtil.decryptAES(keyArr[0], keyArr[1], secretKey);
 				
-				Iterator<String> iter = accountData.keySet().iterator();
-				while(iter.hasNext()) {
-					String key = iter.next();
-					if(!key.equals("accountId") && !key.equals("primaryKey")) {
-						String decryptValue = EncryptUtil.decryptAES(keyArr[0], keyArr[1], accountData.get(key));
-						String newKey = key.replaceAll("([A-Z])", "_$1").toLowerCase();
-						header.put(newKey, decryptValue);
-						
-					}
-				}
+				header.put("access_key", accessKey);
+				header.put("access_secret", secretKey);
 			}
 		}
 		return header;
