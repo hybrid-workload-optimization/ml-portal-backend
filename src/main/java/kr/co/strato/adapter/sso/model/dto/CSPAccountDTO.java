@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CSPAccountDTO {
+public class CSPAccountDTO  {
 	private String uuid;
 	private String csp;
 	private Map<String, String> accountData;

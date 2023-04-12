@@ -39,7 +39,9 @@ import kr.co.strato.domain.persistentVolume.service.PersistentVolumeDomainServic
 import kr.co.strato.domain.persistentVolumeClaim.service.PersistentVolumeClaimDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
 import kr.co.strato.domain.pod.service.PodDomainService;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
+import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.domain.project.service.ProjectDomainService;
 import kr.co.strato.domain.setting.model.SettingEntity;
 import kr.co.strato.domain.setting.service.SettingDomainService;
@@ -52,14 +54,13 @@ import kr.co.strato.global.error.exception.DuplicateResourceNameException;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.model.ClusterDto;
 import kr.co.strato.portal.cluster.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.model.ClusterDto.Summary;
-import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;
@@ -136,6 +137,9 @@ public class ClusterService {
 	
 	@Value("${server.port}")
 	Integer portalBackendServicePort;
+	
+	@Autowired
+	ProjectClusterDomainService projectClusterDomainService;
 	
 	// callbackUrl - work job
 	String portalBackendServiceCallbackUrl  = "/api/v1/work-job/callback";
@@ -247,14 +251,28 @@ public class ClusterService {
 	 */
 	public Long createCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
 		ProvisioningType provisioningType = ClusterEntity.ProvisioningType.valueOf(clusterDto.getProvisioningType());
+		
+		Long projectIdx = clusterDto.getProjectIdx();
+		Long clusterIdx = null;
 		if (provisioningType == ProvisioningType.KUBECONFIG) {
-			return createK8sCluster(clusterDto, loginUser);
+			clusterIdx = createK8sCluster(clusterDto, loginUser);
 		} else if (provisioningType == ProvisioningType.KUBESPRAY) {
-			return createKubesprayCluster(clusterDto, loginUser);
+			clusterIdx = createKubesprayCluster(clusterDto, loginUser);
 		} else {
 			// aks, eks.. - not supported
-			return null;
 		}
+		
+		//서비스그룹(프로젝트)에 클러스터 추가
+		if(projectIdx != null && clusterIdx != null) {
+			ProjectClusterEntity projectClusterEntity = ProjectClusterEntity.builder()
+    				.projectIdx(projectIdx)
+    				.clusterIdx(clusterIdx)
+    				.addedAt(DateUtil.currentDateTime())
+    				.build();
+            projectClusterDomainService.createProjectCluster(projectClusterEntity);
+		}
+		
+		return clusterIdx;
 	}
 	
 	/**
@@ -320,7 +338,7 @@ public class ClusterService {
 		log.info("Cluster Synchronization started.");
 		clusterSyncService.syncCluster(clusterId, clusterEntity.getClusterIdx());
 		
-		return null;
+		return clusterEntity.getClusterIdx();
 	}
 	
 	/**
@@ -437,7 +455,7 @@ public class ClusterService {
 			throw new PortalException("Cluster creation failed");
 		}
 		
-		return workJobIdx;
+		return clusterEntity.getClusterIdx();
 	}
 	
 	/**

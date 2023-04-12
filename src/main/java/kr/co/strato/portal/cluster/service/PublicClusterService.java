@@ -3,6 +3,7 @@ package kr.co.strato.portal.cluster.service;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,11 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.project.model.ProjectClusterEntity;
+import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.global.error.exception.BadRequestException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.global.util.EncryptUtil;
 import kr.co.strato.portal.addon.service.AddonService;
 import kr.co.strato.portal.cluster.model.ModifyArgDto;
 import kr.co.strato.portal.cluster.model.PublicClusterDto;
@@ -86,6 +90,9 @@ public class PublicClusterService {
 	@Autowired
 	private CSPAccountAdapterService cspAccountAdapterService;
 	
+	@Autowired
+	ProjectClusterDomainService projectClusterDomainService;
+	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
 		return provisioningCluster(param, user, null);
 	}
@@ -114,6 +121,7 @@ public class PublicClusterService {
 			throw new BadRequestException("Invalid parameter.");
 		}
 		
+		Long projectIdx = (Long) provisioningParam.get(AbstractDefaultParamProvider.PROJECT_IDX);
 		String clusterName = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CLUSTER_NAME);
 		String clusterDesc = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CLUSTER_DESC);
 		String region = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_REGION);
@@ -141,6 +149,16 @@ public class PublicClusterService {
 				.build();		
 		clusterDomainService.register(clusterEntity);
 		
+		//서비스 그룹에 클러스터 추가
+		if(projectIdx != null) {    		
+    		ProjectClusterEntity projectClusterEntity = ProjectClusterEntity.builder()
+    				.projectIdx(projectIdx)
+    				.clusterIdx(clusterEntity.getClusterIdx())
+    				.addedAt(now)
+    				.build();
+            projectClusterDomainService.createProjectCluster(projectClusterEntity);
+		}
+		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String createParamJson = gson.toJson(provisioningParam);
 		log.info("Request Param - Provisioning cluster");
@@ -164,9 +182,9 @@ public class PublicClusterService {
 		log.info("[ProvisioningCluster] work job idx : {}", workJobIdx);
 		
 		
-		if(cspAccountUuid != null) {
-			CSPAccountDTO account = cspAccountAdapterService.getAccount(cspAccountUuid);
-			Map<String, String> accountData = account.getAccountData();
+		//CSP 계정 설정
+		if(cspAccountUuid != null && header == null) {
+			header = getCSPAccountHeader(cspAccountUuid);
 		}
 		
 		//kafka에 넣기 위한 데이터.
@@ -249,6 +267,12 @@ public class PublicClusterService {
 			Long workJobIdx = workJobService.registerWorkJob(workJobDto);
 			log.info("[DeleteCluster] work job idx : {}", workJobIdx);
 			
+			//CSP 계정 설정
+			String cspAccountUuid = clusterEntity.getCspAccountUuid();
+			if(cspAccountUuid != null && header == null) {
+				header = getCSPAccountHeader(cspAccountUuid);
+			}
+			
 			String cloudProvider = clusterEntity.getProvider();
 			AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(cloudProvider);
 			Map<String, Object> param = paramProvider.genDeleteParam(clusterName, regin);
@@ -311,6 +335,12 @@ public class PublicClusterService {
 			
 			Long workJobIdx = workJobService.registerWorkJob(workJobDto);
 			log.info("[Scale Cluster] work job idx : {}", workJobIdx);
+			
+			//CSP 계정 설정
+			String cspAccountUuid = entity.getCspAccountUuid();
+			if(cspAccountUuid != null && header == null) {
+				header = getCSPAccountHeader(cspAccountUuid);
+			}
 			
 			String cloudProvider = entity.getProvider();
 			AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(cloudProvider);
@@ -378,6 +408,11 @@ public class PublicClusterService {
 			Long workJobIdx = workJobService.registerWorkJob(workJobDto);
 			log.info("[Modify Cluster] work job idx : {}", workJobIdx);
 			
+			//CSP 계정 설정
+			String cspAccountUuid = entity.getCspAccountUuid();
+			if(cspAccountUuid != null && header == null) {
+				header = getCSPAccountHeader(cspAccountUuid);
+			}
 			
 			String cloudProvider = entity.getProvider();
 			AbstractDefaultParamProvider paramProvider = cloudAdapterService.getDefaultParamService(cloudProvider);
@@ -446,6 +481,31 @@ public class PublicClusterService {
 			return false;
 		}
 		return true;
+	}
+	
+	private Map<String, Object> getCSPAccountHeader(String cspAccountUuid) {		
+		Map<String, Object> header = new HashMap<>();
+		CSPAccountDTO account = cspAccountAdapterService.getAccount(cspAccountUuid);
+		Map<String, String> accountData = account.getAccountData();
+		
+		String primaryKey = (accountData != null) ? accountData.get("primaryKey") : null;
+		if (primaryKey != null) {
+			String keyString = EncryptUtil.decryptRSA(primaryKey);
+			String[] keyArr = keyString.split(":");
+			if (keyArr != null && keyArr.length == 2) {
+				
+				Iterator<String> iter = accountData.keySet().iterator();
+				while(iter.hasNext()) {
+					String key = iter.next();
+					if(!key.equals("primaryKey")) {
+						String decryptValue = EncryptUtil.decryptAES(keyArr[0], keyArr[1], accountData.get(key));
+						header.put(key, decryptValue);
+						
+					}
+				}
+			}
+		}
+		return header;
 	}
 
 	

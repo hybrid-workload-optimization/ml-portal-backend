@@ -20,6 +20,7 @@ public class ClusterDto {
 	@NoArgsConstructor
 	@ToString
 	public static class Form {
+		private Long projectIdx;
 		private Long clusterIdx;
 		@NotEmpty(message = "cluster name is required")
 		private String clusterName;
