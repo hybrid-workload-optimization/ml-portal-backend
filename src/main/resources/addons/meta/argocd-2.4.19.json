@@ -4,7 +4,7 @@
   "name": "ArgoCD",
   "version": "v2.4.19",
   "desc": "Provides ArgoCD Package.",
-  "iconPath": "/icons/argo-icon-color.png",
+  "iconPath": "/addons/icons/argo-icon-color.png",
   "adapter": "kr.co.strato.portal.addon.adapter.ArgoCDAdapter",
   "requiredSpec": {
   	"minKubeletVersion": "1.22.0",

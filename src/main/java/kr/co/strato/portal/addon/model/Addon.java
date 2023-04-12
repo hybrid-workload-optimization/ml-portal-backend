@@ -5,7 +5,12 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import kr.co.strato.domain.addon.model.AddonEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 public class Addon{
@@ -17,6 +22,7 @@ public class Addon{
 	private List<Package> packages;
 	private List<Parameter> parameters;	
 	private String iconPath;
+	private Icon icon;
 	
 	@JsonIgnore
 	private List<String> yamls;
@@ -29,6 +35,24 @@ public class Addon{
 	private boolean installed;
 	private String installUserId;
 	private String installAt;
+	
+	@Getter
+	@Setter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class Icon {
+		private String format;
+		private String data;
+	}
+	
+	public void setIconData(String format, String data) {
+		Icon i = Icon.builder()
+				.format(format)
+				.data(data)
+				.build();
+		icon = i;
+	}
 	
 	/**
 	 * Entity 정보 셋.

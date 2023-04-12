@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -351,12 +352,24 @@ public class AddonService {
 				for (Resource r : resources) {
 					String json = FileUtils.readLine(r.getInputStream());
 					Addon addon = gson.fromJson(json, Addon.class);
+					
+					String iconPath = addon.getIconPath();
+					Resource iconRes = resolver.getResource("classpath:" + iconPath);
+					if(iconRes != null) {
+						byte[] iconBytes = iconRes.getInputStream().readAllBytes();
+						String encodedString = Base64.getEncoder().encodeToString(iconBytes);						
+						String extension = getFileExtension(iconPath);
+						
+						addon.setIconData(extension, encodedString);
+					}
 					addons.put(addon.getAddonId(), addon);
 				}
 			}
 		}
 		return addons;
 	}
+	
+	
 
 	/**
 	 * Addon adapter 리턴.
@@ -385,5 +398,15 @@ public class AddonService {
 
 	public NodeAdapterService getNodeAdapterService() {
 		return nodeAdapterService;
+	}
+	
+	private String getFileExtension(String fileName) {
+		if(fileName != null && fileName.contains(".")) {
+			String extension = fileName.substring(
+					fileName.lastIndexOf(".") + 1, 
+					fileName.length());
+			return extension.toLowerCase();
+		}
+		return null;
 	}
 }

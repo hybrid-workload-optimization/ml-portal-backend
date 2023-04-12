@@ -4,7 +4,7 @@
   "name": "Cluster monitoring",
   "version": "v1.0",
   "desc": "Provides cluster, node, and pod monitoring function using Grafana.",
-  "iconPath": "/icons/monitoring.svg",
+  "iconPath": "/addons/icons/monitoring.svg",
   "adapter": "kr.co.strato.portal.addon.adapter.ClusterMonitoringAdapter",
   "requiredSpec": {
   	"minKubeletVersion": "1.23.1",
