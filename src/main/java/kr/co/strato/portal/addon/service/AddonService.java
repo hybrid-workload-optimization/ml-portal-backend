@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -355,8 +356,8 @@ public class AddonService {
 					
 					String iconPath = addon.getIconPath();
 					Resource iconRes = resolver.getResource("classpath:" + iconPath);
-					if(iconRes != null) {
-						byte[] iconBytes = iconRes.getInputStream().readAllBytes();
+					if(iconRes != null) {						
+						byte[] iconBytes = ByteStreams.toByteArray(iconRes.getInputStream());
 						String encodedString = Base64.getEncoder().encodeToString(iconBytes);						
 						String extension = getFileExtension(iconPath);
 						
