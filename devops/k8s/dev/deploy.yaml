@@ -23,6 +23,8 @@ spec:
         env:
         - name: ACTIVE_PROFILE
           value: {ACTIVE_PROFILE}
+      nodeSelector:
+        node: vm4
 
 ---
 apiVersion: v1
