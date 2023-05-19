@@ -139,7 +139,9 @@ public class MLClusterAPIAsyncService {
 	}
 	
 	public String getExternalUrl(ClusterEntity cluster) {		
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")
+				|| cluster.getProvider().toLowerCase().equals("vmware")
+				|| cluster.getProvider().toLowerCase().equals("openstack")) {
 			//Private Cloud			
 			return getPrivateExternalUrl(cluster);
 			
@@ -150,7 +152,9 @@ public class MLClusterAPIAsyncService {
 	}
 	
 	public String getExternalUrl(ClusterEntity cluster, String protocol) {		
-		if(cluster.getProvider().toLowerCase().equals("kubernetes")) {
+		if(cluster.getProvider().toLowerCase().equals("kubernetes")
+				|| cluster.getProvider().toLowerCase().equals("vmware")
+				|| cluster.getProvider().toLowerCase().equals("openstack")) {
 			//Private Cloud			
 			return getPrivateExternalUrl(cluster, protocol);
 			
