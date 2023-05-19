@@ -224,6 +224,8 @@ public class PublicClusterService {
 			type = "AWS";
 		} else if(lowerProvider.equals("naver")) {
 			type = "Naver";
+		} else if(lowerProvider.equals("vmware")) {
+			type = "VMware";
 		}
     	return type;
     }
@@ -777,6 +779,8 @@ public class PublicClusterService {
 			type = ProvisioningType.EKS.name();
 		} else if(provider.equals("naver")) {
 			type = ProvisioningType.NKS.name();
+		} else if(provider.equals("vmware")) {
+			type = ProvisioningType.vSphere.name();
 		}
 		return type;
 	}

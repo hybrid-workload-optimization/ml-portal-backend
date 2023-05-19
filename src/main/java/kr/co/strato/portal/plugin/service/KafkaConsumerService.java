@@ -38,7 +38,6 @@ public class KafkaConsumerService {
 	@Autowired
 	CallbackService callbackService;
 	
-	/*
 	@KafkaListener(
 			topics = "${plugin.kafka.topic.azure.response}", 
 			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
@@ -92,7 +91,19 @@ public class KafkaConsumerService {
 			log.error("", e);
 		}
 	}
-	*/
+	
+	@KafkaListener(
+			topics = "${plugin.kafka.topic.sks.response}", 
+			groupId = "${plugin.kafka.paas-portal.consumer.group}", 
+			containerFactory = "kafkaListenerContainerFactory")
+    public void vsphereConsumer(String message) {
+		log.info(message);
+		try {
+			messageJob(message);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+	}
 	
 	/**
 	 * Kafka로 부터 전송되는 메시지 처리.

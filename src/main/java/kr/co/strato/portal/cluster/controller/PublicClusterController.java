@@ -39,6 +39,7 @@ public class PublicClusterController extends CommonController {
 			+"AWS\r\n"
 			+"GCP\r\n"
 			+"Naver\r\n"
+			+"vSphere\r\n"
 			+"```\n"
 			+"***Response callback***\n"
 			+"```\n"

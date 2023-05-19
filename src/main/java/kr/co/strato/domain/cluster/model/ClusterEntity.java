@@ -40,7 +40,8 @@ public class ClusterEntity {
 		AKS,
 		GKE,
 		EKS,
-		NKS
+		NKS,
+		vSphere
 	}
 	
 	public static enum ProvisioningStatus {

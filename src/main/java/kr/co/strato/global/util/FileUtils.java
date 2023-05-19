@@ -28,11 +28,6 @@ public class FileUtils {
 		return readLineByLineJava8(file.getAbsolutePath());
 	}
 	
-	/**
-	 * �뙆�씪 �궡�슜�쓣 �뒪�듃留곸쑝濡� 由ы꽩�븳�떎.
-	 * @param filePath
-	 * @return
-	 */
 	public static String readLineByLineJava8(String filePath) throws IOException {
 		StringBuilder contentBuilder = new StringBuilder();
 		Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8);
