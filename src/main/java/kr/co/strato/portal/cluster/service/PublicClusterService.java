@@ -132,10 +132,18 @@ public class PublicClusterService {
 		String clusterDesc = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CLUSTER_DESC);
 		String region = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_REGION);
 		String kubeletVersion = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_KUBERNETES_VERSION);
-		String vmType =  (String)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_VM_TYPE);
-		int nodeCount = (int)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_NODE_COUNT);
 		String cspAccountUuid = (String) provisioningParam.get(AbstractDefaultParamProvider.KEY_CSP_ACCOUNT_UUID);
 		
+		String vmType =  null;
+		
+		if(provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS) != null) {
+			vmType = (String)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_VM_TYPE);
+		}
+		
+		int nodeCount = 0;
+		if(provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS) != null) {
+			nodeCount = (int)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_NODE_COUNT);
+		}		
 		
 		String now = DateUtil.currentDateTime();
 		ClusterEntity clusterEntity = ClusterEntity.builder()
