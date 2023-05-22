@@ -11,6 +11,7 @@ import kr.co.strato.adapter.cloud.common.proxy.InterfaceProxy;
 import kr.co.strato.adapter.cloud.eks.service.EKSDefaultParamProvider;
 import kr.co.strato.adapter.cloud.gke.service.GKSDefaultParamProvider;
 import kr.co.strato.adapter.cloud.naver.service.NaverDefaultParamProvider;
+import kr.co.strato.adapter.cloud.vsphere.service.VSphereDefaultParamProvider;
 import kr.co.strato.global.error.exception.BadRequestException;
 
 @Service
@@ -20,6 +21,7 @@ public class CloudAdapterService {
 	public static final String PROVIDER_GCP = "GCP";
 	public static final String PROVIDER_AWS = "AWS";
 	public static final String PROVIDER_NAVER = "NAVER";
+	public static final String PROVIDER_VMWARE = "VMware";
 	
 	@Autowired
 	private AKSInterfaceProxy azureInterfaceProxy;
@@ -96,6 +98,8 @@ public class CloudAdapterService {
 			paramService = new EKSDefaultParamProvider();
 		} else if(provider.toLowerCase().equals(PROVIDER_NAVER.toLowerCase())) {
 			paramService = new NaverDefaultParamProvider();
+		} else if(provider.toLowerCase().equals(PROVIDER_VMWARE.toLowerCase())) {
+			paramService = new VSphereDefaultParamProvider();
 		}
 		return paramService;
 	}
