@@ -26,6 +26,8 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.kubeconfig.model.KubeconfigEntity;
+import kr.co.strato.domain.kubeconfig.service.KubeconfigDomainService;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.global.error.exception.BadRequestException;
@@ -90,7 +92,10 @@ public class PublicClusterService {
 	private CSPAccountAdapterService cspAccountAdapterService;
 	
 	@Autowired
-	ProjectClusterDomainService projectClusterDomainService;
+	private ProjectClusterDomainService projectClusterDomainService;
+	
+	@Autowired
+	private KubeconfigDomainService kubeconfigDomainService;
 	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
 		return provisioningCluster(param, user, null);
@@ -555,11 +560,21 @@ public class PublicClusterService {
 		log.info("Callback process - provisioning finish");
 		
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
-		String cloudVender = mlSettingService.getCloudProvider();
+		//String cloudVender = mlSettingService.getCloudProvider();
 		if(clusterEntity != null) {
 			if(isSuccess && data != null && data instanceof String) {
 				String kubeConfig = (String) data;
 				try {
+					
+					
+					KubeconfigEntity entity = KubeconfigEntity.builder()
+							.configContents(kubeConfig)
+							.regDate(clusterEntity.getProvider())
+							.build();
+					entity = kubeconfigDomainService.save(entity);
+					
+					/*
+					
 					ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
 							.provider(cloudVender)
 							.configContents(Base64.getEncoder().encodeToString(kubeConfig.getBytes()))
@@ -582,46 +597,50 @@ public class PublicClusterService {
 						clusterDomainService.update(clusterEntity);
 						log.error("KubeConfig 등록 실패");
 					} else {
-						Long kubeConfigId = Long.valueOf(strClusterId);
-						clusterEntity.setClusterId(kubeConfigId);
-						clusterDomainService.update(clusterEntity);
+					
+					}
+					*/
+					
+					Long kubeConfigId = entity.getKubeConfigId();
+					clusterEntity.setClusterId(kubeConfigId);
+					clusterDomainService.update(clusterEntity);
+					
+					
+					log.info("KubeConfig 등록 완료");
+					log.info("Cluster Synchronization started.");
+					try {
+						clusterSyncService.syncCluster(kubeConfigId, clusterEntity.getClusterIdx());
+					} catch (Exception e) {
+						log.error("", e);
 						
-						
-						log.info("KubeConfig 등록 완료");
-						log.info("Cluster Synchronization started.");
-						try {
-							clusterSyncService.syncCluster(kubeConfigId, clusterEntity.getClusterIdx());
-						} catch (Exception e) {
-							log.error("", e);
-							
-						}						
-						
-						//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
-						log.info("Install Monitoring Package started.");
-						try {
-							instalAddonPackage(clusterEntity);
-						} catch (Exception e) {
-							log.error("", e);
-						}						
-						log.info("Install Monitoring Package Finished.");
-						
-						//패키지 로딩까지 30초 대기
-						try {
-							Thread.sleep(30000);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
-						
-						
-						String now = DateUtil.currentDateTime();
-						clusterEntity.setUpdatedAt(now);
-						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
-						clusterDomainService.update(clusterEntity);
-						log.info("Job cluster provisioning success.");
-						
-						
-						log.info("Cluster Synchronization finished.");
-					}					
+					}						
+					
+					//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
+					log.info("Install Monitoring Package started.");
+					try {
+						instalAddonPackage(clusterEntity);
+					} catch (Exception e) {
+						log.error("", e);
+					}						
+					log.info("Install Monitoring Package Finished.");
+					
+					//패키지 로딩까지 30초 대기
+					try {
+						Thread.sleep(30000);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					
+					
+					String now = DateUtil.currentDateTime();
+					clusterEntity.setUpdatedAt(now);
+					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+					clusterDomainService.update(clusterEntity);
+					log.info("Job cluster provisioning success.");
+					
+					
+					log.info("Cluster Synchronization finished.");
+										
 				} catch (Exception e) {
 					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
 					clusterDomainService.update(clusterEntity);

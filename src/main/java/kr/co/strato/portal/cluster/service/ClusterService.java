@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -30,6 +29,8 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
+import kr.co.strato.domain.kubeconfig.model.KubeconfigEntity;
+import kr.co.strato.domain.kubeconfig.service.KubeconfigDomainService;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.service.NamespaceDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
@@ -130,6 +131,9 @@ public class ClusterService {
 	
 	@Autowired
 	MLClusterAPIAsyncService mlClusterService;
+	
+	@Autowired
+	KubeconfigDomainService kubeconfigDomainService;
 	
 	
 	@Value("${portal.backend.service.url}")
@@ -283,26 +287,19 @@ public class ClusterService {
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	private Long createK8sCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {
-		// k8s - post cluster
-		ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
-				.provider(clusterDto.getProvider())
-				.configContents(Base64.getEncoder().encodeToString(clusterDto.getKubeConfig().getBytes()))
+	private Long createK8sCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {		
+		KubeconfigEntity entity = KubeconfigEntity.builder()
+				.configContents(clusterDto.getKubeConfig())
+				.regDate(clusterDto.getProvider())
 				.build();
+		entity = kubeconfigDomainService.save(entity);
 		
-		Long clusterId = -1L;
+		Long clusterId = entity.getKubeConfigId();
 		String clusterHealth = null;
 		String kubeleteVersion = null;
 		String clusterProblemString = null;
 		
 		try {
-			String strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
-			if (StringUtils.isEmpty(strClusterId)) {
-				throw new PortalException("Cluster registration failed");
-			}
-			
-			// kubeCofingId = clusterId
-			clusterId = Long.valueOf(strClusterId);
 			
 			// TODO : 이건 목록/상세 정보 조회 시 실시간으로 가져와야 할 듯함.. 
 			// k8s - get cluster's information(health + version)
