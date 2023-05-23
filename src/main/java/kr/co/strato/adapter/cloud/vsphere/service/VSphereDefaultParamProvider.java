@@ -8,7 +8,7 @@ import kr.co.strato.adapter.cloud.common.service.AbstractDefaultParamProvider;
 public class VSphereDefaultParamProvider extends AbstractDefaultParamProvider {
 	
 	public static final String DEFAULT_CLUSTER_NAME= "cluster01";
-	public static final String DEFAULT_KUBELET_VERSION= "1.23.12";
+	public static final String DEFAULT_KUBELET_VERSION= "1.25.7";
 	public static final String DEFAULT_REGION= "koreacentral";
 	public static final String DEFAULT_VM_TYPE= "Standard_DS2_v2";
 	public static final int DEFAULT_NODE_COUNT= 1;
