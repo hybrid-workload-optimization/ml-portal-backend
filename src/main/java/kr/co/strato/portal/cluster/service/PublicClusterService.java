@@ -569,7 +569,9 @@ public class PublicClusterService {
 					
 					KubeconfigEntity entity = KubeconfigEntity.builder()
 							.configContents(kubeConfig)
-							.regDate(clusterEntity.getProvider())
+							.provider(clusterEntity.getProvider())
+							.regDate(DateUtil.currentDateTime())
+							.modDate(DateUtil.currentDateTime())
 							.build();
 					entity = kubeconfigDomainService.save(entity);
 					

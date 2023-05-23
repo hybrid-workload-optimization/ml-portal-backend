@@ -290,7 +290,9 @@ public class ClusterService {
 	private Long createK8sCluster(ClusterDto.Form clusterDto, UserDto loginUser) throws Exception {		
 		KubeconfigEntity entity = KubeconfigEntity.builder()
 				.configContents(clusterDto.getKubeConfig())
-				.regDate(clusterDto.getProvider())
+				.provider(clusterDto.getProvider())
+				.regDate(DateUtil.currentDateTime())
+				.modDate(DateUtil.currentDateTime())
 				.build();
 		entity = kubeconfigDomainService.save(entity);
 		
