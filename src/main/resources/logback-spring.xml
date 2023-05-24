@@ -37,7 +37,7 @@
     
 	
 	<logger name="kr.co.strato" additivity="false">
-		<level value="debug"/>
+		<level value="info"/>
 		<appender-ref ref="CONSOLE"/>
 		<appender-ref ref="ROLLING_FILE"/>
 	</logger>

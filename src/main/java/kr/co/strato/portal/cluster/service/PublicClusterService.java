@@ -575,34 +575,6 @@ public class PublicClusterService {
 							.build();
 					entity = kubeconfigDomainService.save(entity);
 					
-					/*
-					
-					ClusterAdapterDto clusterAdapterDto = ClusterAdapterDto.builder()
-							.provider(cloudVender)
-							.configContents(Base64.getEncoder().encodeToString(kubeConfig.getBytes()))
-							.build();
-					
-					String strClusterId = null;
-					
-					try {
-						strClusterId = clusterAdapterService.registerCluster(clusterAdapterDto);
-					} catch (Exception e) {
-						log.error("", e);
-					}
-					
-					log.info("-----------------------------------------------");
-					log.info("등록된 clusterIdx: {}, kubeConfigId: {}", clusterEntity.getClusterIdx(), strClusterId);
-					log.info("-----------------------------------------------");
-					
-					if (StringUtils.isEmpty(strClusterId)) {
-						clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FAILED.name());
-						clusterDomainService.update(clusterEntity);
-						log.error("KubeConfig 등록 실패");
-					} else {
-					
-					}
-					*/
-					
 					Long kubeConfigId = entity.getKubeConfigId();
 					clusterEntity.setClusterId(kubeConfigId);
 					clusterDomainService.update(clusterEntity);
