@@ -25,6 +25,10 @@ spec:
           value: {ACTIVE_PROFILE}
       nodeSelector:
         node: vm4
+      hostAliases:
+      - ip: "172.16.10.67"
+        hostnames:
+        - "infra.db_addr"
 
 ---
 apiVersion: v1
