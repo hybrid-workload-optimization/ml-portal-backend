@@ -479,7 +479,7 @@ public class IngressService extends InNamespaceService {
 						//ip							
 						Long clusterIdx = ingress.getNamespace().getCluster().getClusterIdx();																
 						//List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
-						List<String> workerIps = clusterNodeService.getMasterNodeIps(clusterIdx);
+						List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
 						
 						List<ServicePort> ports = dto.getPort();
 						for(ServicePort port : ports) {

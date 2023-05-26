@@ -330,27 +330,5 @@ public class ClusterNodeService {
 		}
 		return ips;
 	}
-	
-	public List<String> getMasterNodeIps(Long clusterIdx) {
-		List<String> ips = new ArrayList<>();
-		ObjectMapper mapper = new ObjectMapper();
-		List<NodeEntity> nodes = getNodeList(clusterIdx);
-		for(NodeEntity n : nodes) {
-			String role = n.getRole();
-			
-			try {
-				List<String> map = mapper.readValue(role, new TypeReference<List<String>>() {});
-				if(map.size() == 0 || map.contains("master")) {
-					ips.add(n.getIp());
-				}
-				
-			} catch (JsonMappingException e) {
-				e.printStackTrace();
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-			}
-		}
-		return ips;
-	}
     
 }

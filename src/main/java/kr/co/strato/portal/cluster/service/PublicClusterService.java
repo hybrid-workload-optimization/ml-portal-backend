@@ -148,7 +148,9 @@ public class PublicClusterService {
 		int nodeCount = 0;
 		if(provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS) != null) {
 			nodeCount = (int)((Map)((List)provisioningParam.get(AbstractDefaultParamProvider.KEY_NODE_POOLS)).get(0)).get(AbstractDefaultParamProvider.KEY_NODE_COUNT);
-		}		
+		} else if(provisioningParam.get("workerSpec") != null) {
+			nodeCount = (int)(((Map)provisioningParam.get("workerSpec")).get(AbstractDefaultParamProvider.KEY_NODE_COUNT));
+		}
 		
 		String now = DateUtil.currentDateTime();
 		ClusterEntity clusterEntity = ClusterEntity.builder()
