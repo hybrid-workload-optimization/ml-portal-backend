@@ -154,6 +154,7 @@ public class IngressService extends InNamespaceService {
 		List<IngressRuleEntity> ruleList = ingressRuleDomainService.findByIngressId(id);
 
 		Long clusterIdx = ingressEntity.getNamespace().getCluster().getClusterIdx();
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
 		ProjectEntity projectEntity = projectDomainService.getProjectDetailByClusterId(clusterIdx);
 		Long projectIdx = projectEntity.getId();
 
@@ -169,7 +170,14 @@ public class IngressService extends InNamespaceService {
 			String host = l.getHost();
 			String path = l.getPath();
 			
-			String externalUrl = mlClusterService.getExternalUrl(ingressEntity.getCluster(), protocol);
+			String externalUrl = null;
+			
+			//KB SKS 데모를 위한 코드
+			if(cluster.getClusterName().equals("vsphere-cluster-demo")) {
+				externalUrl = "10.10.20.180:30007";
+			} else {
+				externalUrl = mlClusterService.getExternalUrl(ingressEntity.getCluster(), protocol);
+			}
 			
 			if(externalUrl != null && externalUrl.length() > 0) {
 				String endpoint = protocol + "://" + externalUrl + path;
