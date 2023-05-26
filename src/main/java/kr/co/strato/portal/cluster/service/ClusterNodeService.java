@@ -172,22 +172,9 @@ public class ClusterNodeService {
 		String name = n.getMetadata().getName();
 		String uid = n.getMetadata().getUid();
 		
-		List<String> ips = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-			.map(addr -> addr.getAddress()).collect(Collectors.toList());
-		
-		String ip = null;
-		for(String i : ips) {
-			if(ip == null) {
-				ip = i;
-			}
-			
-			if(ip.length() < i.length()) {
-				ip = i;
-			}
-		}
 
-		//String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-		//		.map(addr -> addr.getAddress()).findFirst().orElse(null);
+		String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
+				.map(addr -> addr.getAddress()).findFirst().orElse(null);
 
 		boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
 				.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
