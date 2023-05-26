@@ -29,6 +29,7 @@ import lombok.ToString;
 public class IngressControllerEntity {
 	public static final String SERVICE_TYPE_NODE_PORT = "NodePort";
 	public static final String SERVICE_TYPE_EXTERNAL_IPS = "ExternalIPs";
+	public static final String SERVICE_TYPE_LOAD_BALANCER = "LoadBalancer";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

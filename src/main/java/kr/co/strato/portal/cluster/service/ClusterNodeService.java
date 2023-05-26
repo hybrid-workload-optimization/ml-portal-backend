@@ -171,9 +171,23 @@ public class ClusterNodeService {
 		// k8s Object -> Entity
 		String name = n.getMetadata().getName();
 		String uid = n.getMetadata().getUid();
+		
+		List<String> ips = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
+			.map(addr -> addr.getAddress()).toList();
+		
+		String ip = null;
+		for(String i : ips) {
+			if(ip == null) {
+				ip = i;
+			}
+			
+			if(ip.length() < i.length()) {
+				ip = i;
+			}
+		}
 
-		String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-				.map(addr -> addr.getAddress()).findFirst().orElse(null);
+		//String ip = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
+		//		.map(addr -> addr.getAddress()).findFirst().orElse(null);
 
 		boolean status = conditions.stream().filter(condition -> condition.getType().equals("Ready"))
 				.map(condition -> condition.getStatus().equals("True")).findFirst().orElse(false);
@@ -203,6 +217,9 @@ public class ClusterNodeService {
 		
 		if(roles.contains("control-plane")) {
 			roles.remove("control-plane");
+			if(!roles.contains("master")) {
+				roles.add("master");
+			}
 		}
 		
 		
@@ -315,6 +332,28 @@ public class ClusterNodeService {
 			try {
 				List<String> map = mapper.readValue(role, new TypeReference<List<String>>() {});
 				if(map.size() == 0 || map.contains("worker")) {
+					ips.add(n.getIp());
+				}
+				
+			} catch (JsonMappingException e) {
+				e.printStackTrace();
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+		}
+		return ips;
+	}
+	
+	public List<String> getMasterNodeIps(Long clusterIdx) {
+		List<String> ips = new ArrayList<>();
+		ObjectMapper mapper = new ObjectMapper();
+		List<NodeEntity> nodes = getNodeList(clusterIdx);
+		for(NodeEntity n : nodes) {
+			String role = n.getRole();
+			
+			try {
+				List<String> map = mapper.readValue(role, new TypeReference<List<String>>() {});
+				if(map.size() == 0 || map.contains("master")) {
 					ips.add(n.getIp());
 				}
 				

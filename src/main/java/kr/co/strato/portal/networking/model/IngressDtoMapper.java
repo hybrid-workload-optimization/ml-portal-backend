@@ -49,14 +49,17 @@ public interface IngressDtoMapper {
 	
 	@Named("jsonToArray")
     default List<String> jsonToArray(String json) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<String> list = mapper.readValue(json, new TypeReference<List<String>>() {});
+		if(json != null) {
+			try {
+	            ObjectMapper mapper = new ObjectMapper();
+	            List<String> list = mapper.readValue(json, new TypeReference<List<String>>() {});
 
-            return list;
-        } catch (JsonProcessingException e) {
-            return new ArrayList<String>();
-        }
+	            return list;
+	        } catch (JsonProcessingException e) {
+	            return new ArrayList<String>();
+	        }
+		}
+        return null;
     }
 	
 }

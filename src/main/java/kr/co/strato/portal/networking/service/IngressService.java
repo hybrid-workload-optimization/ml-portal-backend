@@ -3,7 +3,9 @@ package kr.co.strato.portal.networking.service;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
+import io.fabric8.kubernetes.api.model.PortStatus;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -30,6 +34,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.ingress.service.IngressAdapterService;
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
+import kr.co.strato.adapter.k8s.service.service.ServiceAdapterService;
 import kr.co.strato.domain.IngressController.model.IngressControllerEntity;
 import kr.co.strato.domain.IngressController.service.IngressControllerDomainService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
@@ -49,6 +54,7 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
+import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.networking.model.IngressControllerDto;
 import kr.co.strato.portal.networking.model.IngressControllerDtoMapper;
 import kr.co.strato.portal.networking.model.IngressDto;
@@ -83,6 +89,12 @@ public class IngressService extends InNamespaceService {
 	
 	@Autowired
 	ProjectAuthorityService projectAuthorityService;
+	
+	@Autowired
+	private ServiceAdapterService serviceAdapterService;
+	
+	@Autowired
+	private MLClusterAPIAsyncService mlClusterService;
 
 	public Page<IngressDto.ResListDto> getIngressList(Pageable pageable, IngressDto.SearchParam searchParam) {
 		Page<IngressEntity> ingressPage = ingressDomainService.getIngressList(pageable, searchParam.getClusterIdx(),
@@ -147,10 +159,24 @@ public class IngressService extends InNamespaceService {
 
 		// 메뉴 접근권한 채크.
 		projectAuthorityService.chechAuthority(getMenuCode(), projectIdx, loginUser);
-
+		
 		IngressDto.ResDetailDto ingressDto = IngressDtoMapper.INSTANCE.toResDetailDto(ingressEntity);
 		List<IngressDto.RuleList> ruleDto = ruleList.stream().map(c -> IngressDtoMapper.INSTANCE.toRuleListDto(c))
 				.collect(Collectors.toList());
+		
+		for(IngressDto.RuleList l : ruleDto) {
+			String protocol = l.getProtocol();
+			String host = l.getHost();
+			String path = l.getPath();
+			
+			String externalUrl = mlClusterService.getExternalUrl(ingressEntity.getCluster(), protocol);
+			
+			if(externalUrl != null && externalUrl.length() > 0) {
+				String endpoint = protocol + "://" + externalUrl + path;
+				l.setEndpoints(Arrays.asList(endpoint));
+			}
+		}
+		
 		ingressDto.setRuleList(ruleDto);
 		ingressDto.setProjectIdx(projectIdx);
 		return ingressDto;
@@ -439,7 +465,7 @@ public class IngressService extends InNamespaceService {
 				String serviceType = dto.getServiceType();
 				if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_NODE_PORT)) {
 					//Node Port
-					if(host != null) {
+					if(host != null && !host.equals("-")) {
 						//host가 지정된 경우.
 						List<ServicePort> ports = dto.getPort();
 						for(ServicePort port : ports) {
@@ -452,7 +478,8 @@ public class IngressService extends InNamespaceService {
 					} else {
 						//ip							
 						Long clusterIdx = ingress.getNamespace().getCluster().getClusterIdx();																
-						List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
+						//List<String> workerIps = clusterNodeService.getWorkerNodeIps(clusterIdx);
+						List<String> workerIps = clusterNodeService.getMasterNodeIps(clusterIdx);
 						
 						List<ServicePort> ports = dto.getPort();
 						for(ServicePort port : ports) {
@@ -478,6 +505,11 @@ public class IngressService extends InNamespaceService {
 						}
 					}
 					
+				} else if(serviceType.equals(IngressControllerEntity.SERVICE_TYPE_LOAD_BALANCER)) {
+					//Public 작업 해야함
+					String externalUrl = getPublicExternalUrl(ingress.getNamespace().getCluster(), protocol);
+					String endpoint = String.format("%s://%s%s", protocol, externalUrl, path);
+					endpoints.add(endpoint);
 				}
 			} else {
 				log.error("Unknown ingress type: {}", ingressControllerName);
@@ -488,6 +520,48 @@ public class IngressService extends InNamespaceService {
 		}
 		
 		return endpoints;
+	}
+	
+	public io.fabric8.kubernetes.api.model.Service getIngressService(Long kubeConfigId) {
+		io.fabric8.kubernetes.api.model.Service s 
+				= serviceAdapterService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+		return s;
+	}
+	
+	public String getPublicExternalUrl(ClusterEntity cluster, String protocol) {
+		String externalUrl = null;
+		Long kubeConfigId = cluster.getClusterId();
+		
+		io.fabric8.kubernetes.api.model.Service s = getIngressService(kubeConfigId);
+
+		List<LoadBalancerIngress> list = s.getStatus().getLoadBalancer().getIngress();
+		if(list != null && list.size() > 0) {
+			LoadBalancerIngress loadBalancerIngres = list.get(0);
+			
+			PortStatus port = null;
+			List<PortStatus> ports = loadBalancerIngres.getPorts();
+			if(ports != null) {
+				Optional<PortStatus> opt = ports.stream()
+						.filter(p -> p.getProtocol().toLowerCase().equals(protocol))
+						.findFirst();
+				
+				if(opt.isPresent()) {
+					port = opt.get();
+				}
+			}
+			
+			
+			externalUrl = loadBalancerIngres.getIp();
+			if(externalUrl == null || externalUrl.isEmpty()) {
+				externalUrl = loadBalancerIngres.getHostname();
+			}
+			
+			if(port != null && port.getPort() != 80) {
+				externalUrl = String.format("%s:%d", externalUrl, port.getPort());
+			}
+			
+		}
+		return externalUrl;
 	}
 	
 	/**
