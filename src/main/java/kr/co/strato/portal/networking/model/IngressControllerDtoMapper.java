@@ -80,26 +80,33 @@ public interface IngressControllerDtoMapper {
 	
 	@Named("jsonToArray")
     default List<String> jsonToArray(String json) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<String> list = mapper.readValue(json, new TypeReference<List<String>>() {});
+		if(json != null) {
+			try {
+	            ObjectMapper mapper = new ObjectMapper();
+	            List<String> list = mapper.readValue(json, new TypeReference<List<String>>() {});
 
-            return list;
-        } catch (JsonProcessingException e) {
-            return new ArrayList<String>();
-        }
+	            return list;
+	        } catch (JsonProcessingException e) {
+	            return new ArrayList<String>();
+	        }
+		}
+        return null;
     }
 	
 	@Named("jsonToPort")
     default List<ServicePort> jsonToPort(String json) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<ServicePort> list = mapper.readValue(json, new TypeReference<List<ServicePort>>() {});
+		if(json != null) {
+			try {
+	            ObjectMapper mapper = new ObjectMapper();
+	            List<ServicePort> list = mapper.readValue(json, new TypeReference<List<ServicePort>>() {});
 
-            return list;
-        } catch (JsonProcessingException e) {
-            return new ArrayList<ServicePort>();
-        }
+	            return list;
+	        } catch (JsonProcessingException e) {
+	            return new ArrayList<ServicePort>();
+	        }
+
+		}
+		return null;
     }
 	
 	@Named("ipsToString")

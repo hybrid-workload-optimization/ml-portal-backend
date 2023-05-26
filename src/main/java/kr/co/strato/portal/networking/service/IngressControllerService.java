@@ -277,7 +277,8 @@ public class IngressControllerService {
 		
 		//if(cloudProvider.equals("azure") || cloudProvider.equals("aws") || cloudProvider.equals("naver")) {			
 			log.info("IngressController Create.");
-		if(clusterEntity.getProvider().toLowerCase().equals("kubernetes")) {
+		if(clusterEntity.getProvider().toLowerCase().equals("kubernetes")
+				||clusterEntity.getProvider().toLowerCase().equals("vmware")) {
 			param = IngressControllerDto.ReqCreateDto.builder()
 					.clusterIdx(clusterEntity.getClusterIdx())
 					.name("nginx")
