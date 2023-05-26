@@ -173,7 +173,7 @@ public class ClusterNodeService {
 		String uid = n.getMetadata().getUid();
 		
 		List<String> ips = n.getStatus().getAddresses().stream().filter(addr -> addr.getType().equals("InternalIP"))
-			.map(addr -> addr.getAddress()).toList();
+			.map(addr -> addr.getAddress()).collect(Collectors.toList());
 		
 		String ip = null;
 		for(String i : ips) {
