@@ -22,6 +22,7 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
 import kr.co.strato.portal.workload.model.DeploymentDto;
+import kr.co.strato.portal.workload.model.DeploymentArgDto.UpdateParam;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -112,8 +113,12 @@ public class DeploymentOnlyApiService {
 	
 	
 	//수정
-	public void update(DeploymentArgDto deploymentArgDto){
-		save(deploymentArgDto);
+	public void update(UpdateParam deploymentArgDto) {
+		ClusterEntity clusterEntity = clusterDomainService.get(deploymentArgDto.getClusterIdx());
+		Long kubeConfigId = clusterEntity.getClusterId();
+		String yaml = deploymentArgDto.getYaml();
+		
+		deploymentAdapterService.create(kubeConfigId, yaml);
 	}
 	
 	public void save(DeploymentArgDto deploymentArgDto) {

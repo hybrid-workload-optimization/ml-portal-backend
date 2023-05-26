@@ -17,6 +17,7 @@ import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.workload.model.DeploymentArgDto;
+import kr.co.strato.portal.workload.model.DeploymentArgDto.UpdateParam;
 import kr.co.strato.portal.workload.model.DeploymentDto;
 import kr.co.strato.portal.workload.service.DeploymentOnlyApiService;
 
@@ -54,7 +55,7 @@ public class DeploymentOnlyApiController extends CommonController {
 	
 	@PutMapping("/deployment")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<DeploymentDto> putDeployment(@RequestBody DeploymentArgDto deploymentArgDto) {
+	public ResponseWrapper<DeploymentDto> putDeployment(@RequestBody UpdateParam deploymentArgDto) {
 		deploymentService.update(deploymentArgDto);
 		return new ResponseWrapper<DeploymentDto>();
 	}

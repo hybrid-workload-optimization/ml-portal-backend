@@ -31,4 +31,14 @@ public class DeploymentArgDto {
 		private String namespace;
 		private String name;
     }
+	
+	@Getter
+    @Setter
+    @NoArgsConstructor
+    public static class UpdateParam {
+		private Long clusterIdx;
+		private String namespace;
+		private String name;
+		private String yaml;
+    }
 }
