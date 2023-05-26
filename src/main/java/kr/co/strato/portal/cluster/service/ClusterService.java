@@ -790,7 +790,8 @@ public class ClusterService {
 		int availableWorkerCount = 0;
 		
 		String provider = clusterEntity.getProvider();
-		if(provider.equals("Kubernetes")) {
+		if(provider.toLowerCase().equals("kubernetes")
+				||provider.toLowerCase().equals("vmware")) {
 			masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
 			workerNodes = nodes.stream().filter(n -> n.getRole().contains("worker") || "[]".equals(n.getRole())).collect(Collectors.toList());
 		} else {
