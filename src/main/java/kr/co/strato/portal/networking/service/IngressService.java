@@ -407,6 +407,10 @@ public class IngressService extends InNamespaceService {
 		} else {
 			ingressController = ingressControllerDomainService.getIngressController(cluster, ingressClass);
 		}
+		
+		if(ingressController != null) {
+			ingressController.setCluster(cluster);		
+		}
 		return ingressController;
 	}
 	
