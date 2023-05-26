@@ -94,7 +94,8 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 			}
 		} else {
 			ServiceAdapterService sService = service.getServiceAdapterService();
-			HasMetadata d = sService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
+			io.fabric8.kubernetes.api.model.Service d 
+						= sService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
 			if(d != null) {
 				Service svc = (Service) d;
 				String externalUrl = null;
@@ -104,6 +105,25 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 					externalUrl = loadBalancerIngres.getIp();
 					if(externalUrl == null || externalUrl.isEmpty()) {
 						externalUrl = loadBalancerIngres.getHostname();
+					}
+				} else {
+					ServicePort servicePort = null;					
+					Optional<ServicePort> op = svc.getSpec().getPorts().stream()
+							.filter(p -> p.getNodePort() != null && p.getAppProtocol().equals("http"))
+							.findFirst();
+					if(op.isPresent()) {
+						servicePort = op.get();
+					}
+					
+					if(servicePort != null) {				
+						Integer nodePort = servicePort.getNodePort();				
+						NodeAdapterService nodeService = service.getNodeAdapterService();
+						List<String> workerIps = nodeService.getWorkerNodeIps(kubeConfigId);
+						for(String ip : workerIps) {
+							String end = String.format("%s:%d", ip, nodePort);
+							externalUrl = end;
+							break;
+						}
 					}
 				}
 				String url = String.format("http://%s/grafana", externalUrl);
