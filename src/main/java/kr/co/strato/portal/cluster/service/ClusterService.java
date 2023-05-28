@@ -723,7 +723,7 @@ public class ClusterService {
 		ClusterAdapterDto cluster = clusterAdapterService.getCluster(clusterEntity.getClusterId());
 		log.debug("[addK8sClusterInfo] kube config : {}", cluster.getConfigContents());
 		
-		//detail.setKubeConfig(cluster.getConfigContents());
+		detail.setKubeConfig(cluster.getConfigContents());
 		// temporary code
 		//detail.setKubeConfig(clusterEntity.getKubeConfig());
 	}
