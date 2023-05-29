@@ -138,7 +138,18 @@ public class MLClusterAPIAsyncService {
 		return ArgoCDInfo.builder().url(url).password(password).build();
 	}
 	
-	public String getExternalUrl(ClusterEntity cluster) {		
+	public String getExternalUrl(ClusterEntity cluster) {
+		String externalUrl = null;
+		if(cluster.getClusterName().equals("vsphere-cluster-demo")) {
+			externalUrl = "10.10.20.180:30007";
+		} else if(cluster.getClusterName().equals("vsphere-cluster-create")) {
+			externalUrl = "10.10.20.185:30007"; 
+		}
+		
+		if(externalUrl != null) {
+			return externalUrl;
+		}
+		
 		if(cluster.getProvider().toLowerCase().equals("kubernetes")
 				|| cluster.getProvider().toLowerCase().equals("vmware")
 				|| cluster.getProvider().toLowerCase().equals("openstack")) {
