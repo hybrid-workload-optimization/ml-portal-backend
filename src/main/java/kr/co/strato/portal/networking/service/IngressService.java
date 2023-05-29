@@ -175,6 +175,8 @@ public class IngressService extends InNamespaceService {
 			//KB SKS 데모를 위한 코드
 			if(cluster.getClusterName().equals("vsphere-cluster-demo")) {
 				externalUrl = "10.10.20.180:30007";
+			} else if(cluster.getClusterName().equals("vsphere-cluster-create")) {
+				externalUrl = "10.10.20.185:30007";
 			} else {
 				externalUrl = mlClusterService.getExternalUrl(ingressEntity.getCluster(), protocol);
 			}
