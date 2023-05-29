@@ -125,6 +125,7 @@ public class ClusterDto {
 		
 		private String vmType;
 		private Integer nodeCount;
+		private String kubeConfig;
 		
 		//PROD, STAGE, DEV
 		private String useType;
