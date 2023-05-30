@@ -345,6 +345,9 @@ public class PublicClusterService {
 		String callbackUrl = scaleDto.getCallbackUrl();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		
+		ClusterEntity.ProvisioningStatus clusterStatus = ClusterEntity.ProvisioningStatus.SCALE_IN;	
+		setClusterStatus(clusterIdx, clusterStatus);
+		
 		if(entity != null) {
 			String clusterName = entity.getClusterName();
 			Integer nodeCount = scaleDto.getNodeCount();
