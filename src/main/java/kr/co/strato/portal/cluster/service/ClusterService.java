@@ -232,6 +232,9 @@ public class ClusterService {
 				//배포 실패
 				health.setHealth("Fail");
 				health.addProbleam("Cluster deployment failed.");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE.toString())) {
+				
+				health.setHealth("Scale in");
 			} else if(pStatus.equals(ProvisioningStatus.PENDING.toString())) {
 				//배포 실패
 				health.setHealth("Waiting");

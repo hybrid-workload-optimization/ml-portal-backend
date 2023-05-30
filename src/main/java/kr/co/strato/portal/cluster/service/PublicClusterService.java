@@ -715,7 +715,7 @@ public class PublicClusterService {
 	}
 	
 	public void scaleStart(Long clusterIdx, boolean isSuccess, Object data) {
-		ClusterEntity.ProvisioningStatus clusterStatus = ClusterEntity.ProvisioningStatus.SCALE;		 
+		ClusterEntity.ProvisioningStatus clusterStatus = ClusterEntity.ProvisioningStatus.SCALE_IN;		 
 		if(!isSuccess) {
 			clusterStatus = ClusterEntity.ProvisioningStatus.FAILED;
 		}		
