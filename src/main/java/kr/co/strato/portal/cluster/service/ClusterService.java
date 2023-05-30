@@ -235,6 +235,9 @@ public class ClusterService {
 			} else if(pStatus.equals(ProvisioningStatus.PENDING.toString())) {
 				//배포 실패
 				health.setHealth("Waiting");
+			} else {
+				//배포 실패
+				health.setHealth("Waiting");
 			}
 		} else {
 			

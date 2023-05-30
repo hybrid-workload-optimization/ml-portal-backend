@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningType;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.kubeconfig.model.KubeconfigEntity;
 import kr.co.strato.domain.kubeconfig.service.KubeconfigDomainService;
+import kr.co.strato.domain.node.model.NodeEntity;
+import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.project.model.ProjectClusterEntity;
 import kr.co.strato.domain.project.service.ProjectClusterDomainService;
 import kr.co.strato.global.error.exception.BadRequestException;
@@ -96,6 +99,9 @@ public class PublicClusterService {
 	
 	@Autowired
 	private KubeconfigDomainService kubeconfigDomainService;
+	
+	@Autowired
+	private NodeDomainService nodeDomainService;
 	
 	public ClusterEntity provisioningCluster(PublicClusterDto.Povisioning param, UserDto user) {
 		return provisioningCluster(param, user, null);
@@ -342,6 +348,19 @@ public class PublicClusterService {
 		if(entity != null) {
 			String clusterName = entity.getClusterName();
 			Integer nodeCount = scaleDto.getNodeCount();
+			
+			int masterCount = 0;
+			// node
+			List<NodeEntity> nodes = nodeDomainService.getNodeList(clusterIdx);
+			if(nodes != null) {
+				List<NodeEntity> masterNodes = nodes.stream().filter(n -> n.getRole().contains("master")).collect(Collectors.toList());
+				masterCount = masterNodes.size();
+			}
+			
+			if(masterCount > 0) {
+				nodeCount = nodeCount - masterCount;
+			}
+			
 						
 			//WorkJob 등록
 			WorkJobDto workJobDto = WorkJobDto.builder().
