@@ -93,6 +93,26 @@ public class ClusterMonitoringAdapter implements AddonAdapter {
 				}
 			}
 		} else {
+			
+			//KB 데모
+			String eUrl = null;
+			if(cluster.getClusterName().equals("vsphere-cluster-demo")) {
+				eUrl = "10.10.20.180:30007";
+			} else if(cluster.getClusterName().equals("vsphere-cluster-create")) {
+				eUrl = "10.10.20.185:30007"; 
+			}
+			
+			if(eUrl != null) {
+				
+				String url1 = String.format("http://%s/grafana", eUrl);
+				
+				List<String> endpoints = new ArrayList<>();
+				endpoints.add(url1);
+				endpoint.setEndpoints(endpoints);
+				return;
+			}
+			
+			
 			ServiceAdapterService sService = service.getServiceAdapterService();
 			io.fabric8.kubernetes.api.model.Service d 
 						= sService.get(kubeConfigId, "ingress-nginx", "ingress-nginx-controller");
