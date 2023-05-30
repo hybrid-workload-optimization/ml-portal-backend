@@ -360,6 +360,8 @@ public class PublicClusterService {
 			if(masterCount > 0) {
 				nodeCount = nodeCount - masterCount;
 			}
+			log.info("masterCount: {}", masterCount);
+			log.info("nodeCount: {}", nodeCount);
 			
 						
 			//WorkJob 등록
