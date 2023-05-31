@@ -86,6 +86,13 @@ public class ClusterNodeController {
 		return new ResponseWrapper<>(resBody);
 	}
 	
+	@GetMapping("/api/v1/cluster/clusterNodes/detail/{clusterIdx}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<List<ClusterNodeDto.ResDetailDto>> getClusterNodesDetail(@PathVariable("clusterIdx") Long clusterIdx) {
+		List<ClusterNodeDto.ResDetailDto> nodeDetails = nodeService.getClusterNodesDetail(clusterIdx);
+		return new ResponseWrapper<>(nodeDetails);
+	}
+	
 	@GetMapping("/api/v1/cluster/clusterNodesYaml")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<String> getNodeYaml(@RequestParam Long kubeConfigId,String name) {

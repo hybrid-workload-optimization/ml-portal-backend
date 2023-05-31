@@ -26,6 +26,7 @@ import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.pod.model.PodMapper;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.domain.node.model.NodeEntity;
 import kr.co.strato.domain.node.service.NodeDomainService;
 import kr.co.strato.domain.pod.model.PodEntity;
@@ -34,7 +35,9 @@ import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class ClusterNodeService {
 
@@ -45,6 +48,9 @@ public class ClusterNodeService {
 	
 	@Autowired
     private PodAdapterService podAdapterService;
+	
+	@Autowired
+	private ClusterDomainService clusterDomainService;
 	
 
 	/**
@@ -130,6 +136,39 @@ public class ClusterNodeService {
     	clusterNodeDto.setChartDto(chartNode);
     	
     	return clusterNodeDto;
+    }
+    
+    public List<ClusterNodeDto.ResDetailDto> getClusterNodesDetail(Long clusterIdx) {
+    	ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+    	if(cluster == null) {
+    		log.error("존재하지 않는 Cluster 입니다. clusterIdx: {}", clusterIdx);
+    	}
+    	
+    	Long kubeconfigId = cluster.getClusterId();
+    	List<NodeEntity> nodes = nodeDomainService.getNodeList(clusterIdx);
+    	
+    	List<ClusterNodeDto.ResDetailDto> list = new ArrayList<>();
+    	
+    	for(NodeEntity n : nodes) {
+    		String nodeName = n.getName();
+    		
+    		Node node = nodeAdapterService.getNodeDetail(kubeconfigId, nodeName);
+        	
+        	List<Pod> k8sPods = podAdapterService.getList(kubeconfigId, nodeName, null, null, null);
+        	List<PodEntity> pods =  k8sPods.stream().map( s -> {
+        		PodEntity pod = PodMapper.INSTANCE.toEntity(s);
+        		return pod;
+        	}).collect(Collectors.toList());
+        	
+        	ClusterNodeDto.ResDetailChartDto chartNode = new ClusterNodeDto.ResDetailChartDto();
+        	setUsage(node, pods,chartNode);
+        	
+        	ClusterNodeDto.ResDetailDto clusterNodeDto = ClusterNodeDtoMapper.INSTANCE.toResDetailDto(n);
+        	clusterNodeDto.setChartDto(chartNode);
+        	
+        	list.add(clusterNodeDto);
+    	}
+    	return list;    	
     }
 	
 	
