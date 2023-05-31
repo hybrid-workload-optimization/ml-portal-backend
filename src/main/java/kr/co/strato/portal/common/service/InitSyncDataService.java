@@ -81,7 +81,7 @@ public class InitSyncDataService {
 	
 					Long resultIdx = authorityService.postUserRole(role);
 					
-					log.info("result iddx: {}", resultIdx);
+					log.info("result idx: {}", resultIdx);
 
 				}
 				
