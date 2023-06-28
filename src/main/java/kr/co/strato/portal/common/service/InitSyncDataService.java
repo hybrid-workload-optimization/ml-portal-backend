@@ -59,7 +59,7 @@ public class InitSyncDataService {
 	
 	
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	String clientId;
 	
 	/**

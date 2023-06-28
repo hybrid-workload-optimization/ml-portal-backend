@@ -34,7 +34,7 @@ public class PortalEventService {
 	@Autowired
 	private PortalProjectService projectService;
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	private String clientId;
 	
 	public static final String EVENT_CREATED = "created";

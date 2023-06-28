@@ -68,7 +68,7 @@ public class AuthorityService {
 	@Autowired
 	private PortalAdapterService clientRoleAdapterService;
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	private String clientId;
 	
 	

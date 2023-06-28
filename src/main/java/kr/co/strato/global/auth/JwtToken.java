@@ -1,8 +1,9 @@
 package kr.co.strato.global.auth;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -24,23 +25,31 @@ public class JwtToken {
 	 */
 	public List<String> getClientRoles(String clientId) {
 		if(payload != null) {
-			Map<String, List<String>> res = payload.getResourceAccess().get(clientId);
-			if(res != null) {
-				return res.get("roles");
-			}
+			List<String> role = payload.getResourceAccess().get(clientId);
+			return role;
 		}
 		return null;
 	}
 	
 	public void setClientRole(String clientId, List<String> roles) {
 		if(payload != null) {
-			Map<String, List<String>> res = payload.getResourceAccess().get(clientId);
+			List<String> res = payload.getResourceAccess().get(clientId);
 			if(res == null) {
-				res = new HashMap<>();
-				payload.getResourceAccess().put(clientId, res);
+				res.addAll(roles);
 			}
-			res.put("roles", roles);
 		}
+	}
+	
+	/**
+	 * 접근 가능한 클라이언트 리스
+	 * @return
+	 */
+	public List<String> getAuthorizedClients() {
+		if(payload != null) {
+			Set<String> keys = payload.getResourceAccess().keySet();
+			return new ArrayList<>(keys);
+		}
+		return null;
 	}
 	
 	/**
@@ -55,7 +64,7 @@ public class JwtToken {
 				return ((String)aud).equals(clientId);
 			} else if(aud instanceof List) {
 				return ((List)aud).contains(clientId);
-			} 
+			}
 		}
 		return false;
 	}
@@ -69,7 +78,7 @@ public class JwtToken {
 	
 	@Data
 	public static class Payload {
-		private String exp; 
+		private String exp;
 		private String iat;
 		private String jti;
 		private String iss;
@@ -84,8 +93,10 @@ public class JwtToken {
 		@SerializedName("realm_access")
 		private Map<String, List<String>> realmAccess;
 		@SerializedName("resource_access")
-		private Map<String, Map<String, List<String>>> resourceAccess;
-		private String scope;
+		private Map<String, List<String>> resourceAccess;
+		@SerializedName("group_access")
+		private Map<String, Map<String, String>> groupAccess;
+		private String[] scope;
 		private String sid;
 		@SerializedName("email_verified")
 		private Boolean emailVerified;

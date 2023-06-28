@@ -1,4 +1,4 @@
-package kr.co.strato.global.filter;
+package kr.co.strato.oauth.filter;
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -7,25 +7,22 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.filter.GenericFilterBean;
 
 import com.google.gson.Gson;
 
@@ -39,12 +36,10 @@ import kr.co.strato.global.auth.JwtToken;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JwtAuthenticationFilter implements Filter {
+public class JwtAuthenticationFilter extends GenericFilterBean {
 	public static final String AUTHORIZATION_KEY = "Authorization";
 	
-	private final List<String> allowUrls = Arrays.asList("/login", "/sso/login", "/error", "/favicon.ico", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**", "/sse/v1/alert/receive");
-	
-	private String publicKey; 
+	private String publicKey;
 	private String clientId;
 	private String apiToken;
 	
@@ -54,39 +49,21 @@ public class JwtAuthenticationFilter implements Filter {
 		this.apiToken = apiToken;
 	}
 	
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		
-		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
-			throw new ServletException("just supports HTTP requests");
-		}
-		
+	 @Override
+	 public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {	
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		
-		String requestURI = httpRequest.getRequestURI();
-		log.debug("Request URI : " + requestURI);
-		
-		AntPathMatcher antPathMatcher = new AntPathMatcher();
-		for(String allowUrl : allowUrls) {
-			if(antPathMatcher.match(allowUrl, requestURI)) {
-				chain.doFilter(request, response);
-				return;
-			}
-		}
 		
 		log.debug("JwtAuthenticationFilter start. ");
 		String jwtToken = getTokenStr(httpRequest);
 		log.debug("token = {}",jwtToken);
 		
-		
-
-		if (jwtToken != null) {			
+		if (jwtToken != null) {
+			
 			Authentication auth = null;
 			if(jwtToken.equals(apiToken)) {
-				//로그인 없는 내부 제품 API Call 요청인 경우
-				log.debug("Auth success. Monitoring Request !");
+				//로그인 없는 싱크 요청인 경우
+				log.debug("Auth success. Sync Request !");
 				auth = getAPIUserAuthentication();
 			} else if(validateToken(jwtToken)) {
 				log.debug("Auth success. token validate !");
@@ -100,14 +77,20 @@ public class JwtAuthenticationFilter implements Filter {
 				return;
 			} else {
 				log.error("Auth fail. Token is not valid.");
+				
+				//401 처리
+				//httpRequest.getSession(false);
+				//httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
+				//httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");	
 			}
 		} else {
 			log.error("Auth fail. Token is null.");
 		}
+		//httpRequest.getSession(false);
+		//httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
+		//httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");	
 		
-		httpRequest.getSession(false);
-		httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
-		httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");		
+		chain.doFilter(request, response);
 	}
 	
 	/**
@@ -123,6 +106,25 @@ public class JwtAuthenticationFilter implements Filter {
 			}
 			return headerAuth;
 		}
+		/*
+		else {
+			//자동 로그인 임시 코드
+			String authServerUrl = "http://172.16.10.177:8580/auth/"; 
+			String realm = "strato-platform";
+			String clientId = "strato-portal";
+			Map<String, Object> clientCredentials = new HashMap<>();
+			clientCredentials.put("secret", "LnLcQUFRvtRl6gUwJbKsWulVPYyt4BvF");
+			
+			Configuration configuration = new Configuration(authServerUrl, realm, clientId, clientCredentials, null);
+			
+			AuthzClient authzClient = AuthzClient.create(configuration);			
+			AccessTokenResponse response = authzClient.obtainAccessToken("demouser", "test1234");
+			//AccessTokenResponse response = authzClient.obtainAccessToken("demouser", "test1234");
+			
+			String token = response.getToken();
+			return token;
+		}
+		*/
 		return null;
 	}
 	
@@ -144,18 +146,15 @@ public class JwtAuthenticationFilter implements Filter {
 		return authentication;
 	}
 	
-	
 	/**
 	 * 로그인 없이 모니터링을 위한 Authentication 생성
 	 * @return
 	 */
 	public Authentication getAPIUserAuthentication() {
-		Map<String, Map<String, List<String>>> resourceAccess = new HashMap<>();
-		Map<String, List<String>> map = new HashMap<>();
+		Map<String, List<String>> resourceAccess = new HashMap<>();
 		List<String> clientAuthoritys = new ArrayList<>();
-		clientAuthoritys.add(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN);
-		map.put("roles", clientAuthoritys);		
-		resourceAccess.put(clientId, map);
+		clientAuthoritys.add(UserRoleEntity.ROLE_CODE_SYSTEM_ADMIN);	
+		resourceAccess.put(clientId, clientAuthoritys);		
 		
 		JwtToken.Payload payloadInfo = new JwtToken.Payload();
 		payloadInfo.setPreferredUsername("APIUser");	
@@ -174,7 +173,6 @@ public class JwtAuthenticationFilter implements Filter {
 	}
 	
 	
-	
 	public RSAPublicKey getParsePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] decode = Base64.getDecoder().decode(publicKey);
         X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(decode);
@@ -189,9 +187,10 @@ public class JwtAuthenticationFilter implements Filter {
 		String header = new String(decoder.decode(chunks[0]));
 		String payload = new String(decoder.decode(chunks[1]));
 		
+		System.out.println(payload);
+		
 		Gson gson = new Gson();
 
-		
 		JwtToken.Header headerInfo = gson.fromJson(header, JwtToken.Header.class);
 		JwtToken.Payload payloadInfo = gson.fromJson(payload, JwtToken.Payload.class);
 		

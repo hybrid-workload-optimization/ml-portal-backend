@@ -44,7 +44,7 @@ public class PortalAdapterService {
 	@Autowired
 	private GroupProxy groupProxy;
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	private String clientId;
 	
 	@Value("${auth.syncToken}")
