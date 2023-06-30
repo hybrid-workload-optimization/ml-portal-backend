@@ -54,9 +54,17 @@ dependencies {
 	
 	//Security & JWT
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-oauth2-core:5.8.3'
+	implementation 'org.springframework.security:spring-security-oauth2-client:5.8.3'
+	implementation 'org.springframework.security:spring-security-oauth2-jose:5.8.3'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+	implementation 'com.nimbusds:nimbus-jose-jwt:9.25.6'
+    
+    
     
     //Jaeger tracing
 	implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.3.1'

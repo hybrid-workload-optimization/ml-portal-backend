@@ -18,7 +18,7 @@ public class PortalEventReceiver {
 	@Autowired
 	private PortalEventService eventService;
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	String clientId;
 	
     public static final String TYPE_USER = "user";

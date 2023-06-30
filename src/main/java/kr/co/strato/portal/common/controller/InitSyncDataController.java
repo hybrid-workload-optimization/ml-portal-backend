@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class InitSyncDataController {
 
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	String clientId;
 	
 	@Autowired

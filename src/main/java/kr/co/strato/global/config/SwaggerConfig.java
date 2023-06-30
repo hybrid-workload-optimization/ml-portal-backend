@@ -14,8 +14,10 @@ public class SwaggerConfig {
     public Docket api(){
         return new Docket(DocumentationType.OAS_30)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal"))
+                .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
+        
+        
     }
 }

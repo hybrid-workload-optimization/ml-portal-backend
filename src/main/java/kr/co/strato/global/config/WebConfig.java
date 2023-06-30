@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import kr.co.strato.global.interceptor.AccessInterceptor;
 
 
-@Configuration
+//@Configuration
 public class WebConfig implements WebMvcConfigurer {
 
 	@Override

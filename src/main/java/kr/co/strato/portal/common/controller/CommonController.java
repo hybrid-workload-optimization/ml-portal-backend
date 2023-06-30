@@ -14,7 +14,7 @@ import kr.co.strato.portal.setting.model.UserDto.UserRole;
 @RestController
 public class CommonController {
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	private String clientId;
 	
 	/**
@@ -41,4 +41,5 @@ public class CommonController {
 		}
 		return null;
 	}
+	
 }

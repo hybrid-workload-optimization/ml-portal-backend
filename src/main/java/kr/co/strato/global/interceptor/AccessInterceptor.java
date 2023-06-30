@@ -23,7 +23,7 @@ public class AccessInterceptor implements HandlerInterceptor {
 	private final String STRATO_PORTAL_ROLE_SYSTEM_ADMIN = "System Admin";
 	private final String STRATO_PORTAL_ROLE_COMPANY_MANAGER = "Company Manager";
 	
-	@Value("${auth.clientId}")
+	@Value("${auth.client.client-id}")
 	private String clientId;
 
 	@Override

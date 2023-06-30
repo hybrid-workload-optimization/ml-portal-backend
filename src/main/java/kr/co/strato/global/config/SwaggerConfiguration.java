@@ -22,7 +22,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfiguration {
 
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	public static final String AUTHORIZATION_KEY = "access-token";
+	public static final String AUTHORIZATION_KEY = "Authorization";
 
 	private ApiInfo apiInfo() {
 		return new ApiInfo("Machine learning REST API",
