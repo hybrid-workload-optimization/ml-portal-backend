@@ -95,9 +95,18 @@ public class DtoMapper {
 		}
 
 		if(userDTO.getRoles() != null && userDTO.getRoles().size() > 0) {
-			String roleName = userDTO.getRoles().get(0);
 			userRole = new UserRole();
-			userRole.setUserRoleName(roleName);
+			for(String role : userDTO.getRoles()) {
+				if(role.equals("PROJECT_MEMBER") || 
+				   role.equals("PROJECT_MANAGER") ||
+				   role.equals("SYSTEM_ADMIN") ||
+				   role.equals("PORTAL_ADMIN")
+				   ) 
+				{
+					String roleName = role;
+					userRole.setUserRoleName(roleName);
+				}
+			}
 		}
 		
 		serviceDto.setUserRole(userRole);
