@@ -40,6 +40,7 @@ public class ResourceListSearchInfo {
     private Map<String, String> selector;
     private String name;
 
-
-
+    //Workload
+    @ApiModelProperty(value="kinds", example="{\"deployment\", \"replicaset\"}", required=false)
+    private String[] kinds;
 }

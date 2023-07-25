@@ -1,11 +1,11 @@
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `paas_portal` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `strato_portal` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;
 
-USE `paas_portal`;
+USE `strato_portal`;
 
 
 
-create user 'paas'@'%' identified by 'sptek1234';
-GRANT ALL PRIVILEGES ON paas_portal.* TO 'paas'@'%';
+create user 'strato_portal_admin'@'%' identified by 'strato1234';
+GRANT ALL PRIVILEGES ON strato_portal.* TO 'strato_portal_admin'@'%';
 
 --
 -- Table structure for table `cluster`
