@@ -50,6 +50,7 @@ public class WorkloadService {
 			ResourceListSearchInfo search = ResourceListSearchInfo.builder()
 					.kubeConfigId(kubeConfigId)
 					.kinds(param.getKinds())
+					.name(param.getName())
 					.namespace(param.getNamespace())
 					.build();
 			
@@ -86,6 +87,9 @@ public class WorkloadService {
 				}
 			}
 			
+			
+			String keyword = param.getName();
+			
 			Iterator<String> iter = map.keySet().iterator();
 			while(iter.hasNext()) {
 				WorkloadItem item = map.get(iter.next());
@@ -95,6 +99,14 @@ public class WorkloadService {
 				
 				String uid = data.getMetadata().getUid();
 				String name = data.getMetadata().getName();
+				
+				if(keyword != null && keyword.length() > 0) {
+					//키워드 검색인 경우 이름으로 필터링
+					if(!name.contains(keyword)) {
+						continue;
+					}
+				}
+				
 				String namespace = data.getMetadata().getNamespace();
 				String kind = data.getKind();				
 				Map<String, String> labels = data.getMetadata().getLabels();

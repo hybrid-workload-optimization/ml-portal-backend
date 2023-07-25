@@ -35,6 +35,7 @@ public class WorkloadDto {
     @ToString
     public static class SearchParam {
         private Long clusterIdx;
+        private String name;
         private String namespace;
         private String[] kinds;
     }
