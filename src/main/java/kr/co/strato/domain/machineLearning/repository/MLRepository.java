@@ -1,5 +1,6 @@
 package kr.co.strato.domain.machineLearning.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface MLRepository extends JpaRepository<MLEntity, Long>, CustomMLRep
 	public Optional<MLEntity> findByMlId(String mlId);
 	
 	public Optional<MLEntity> findByClusterIdx(Long clusterIdx);
+	
+	public List<String> findCronByClusterIdx(Long clusterIdx);
 	
 	@Transactional
 	public void deleteByMlId(String mlId);

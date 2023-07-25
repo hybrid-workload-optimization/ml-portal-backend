@@ -29,6 +29,10 @@ public class MLDomainService {
 		return mlEntity.getId();
 	}
 	
+	public List<MLEntity> getList() {
+		return mlRepository.getMLList();
+    }
+	
 	public List<MLEntity> getList(String userId, String name) {
 		return mlRepository.getMLList(userId, name);
     }
@@ -57,6 +61,11 @@ public class MLDomainService {
 		} else {
 			throw new NotFoundResourceException("ML : " + mlId);
 		}
+	}
+	
+	public List<String> getCronsByClusterIdx(Long clusterIdx) {
+		List<String> crons = mlRepository.getCronsByClusterIdx(clusterIdx);
+		return crons;
 	}
 	
 	public void deleteByMlId(String mlId) {

@@ -28,6 +28,7 @@ import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.model.MLDtoMapper;
 import kr.co.strato.portal.ml.model.MLResourceDto;
+import kr.co.strato.portal.ml.model.MLScheduleDTO;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -73,6 +74,7 @@ public class MLInterfaceAPIAsyncService {
 		String mlId = applyDto.getMlId();
 		String yamStr = Base64Util.decode(applyDto.getYaml());
 		String stepCode = applyDto.getMlStepCode();
+		String cron = applyDto.getCronSchedule();
 		
 		log.info("ML ID: {}", mlId);
 		log.info("ML Name: {}", mlName);
@@ -100,6 +102,7 @@ public class MLInterfaceAPIAsyncService {
 			entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
 			entity.setClusterIdx(clusterIdx);
 			entity.setUpdatedAt(now);
+			entity.setCronSchedule(cron);
 			if(isNew) {
 				entity.setCreatedAt(now);
 				entity.setStatus(MLEntity.STATUS_PENDING);
@@ -136,6 +139,17 @@ public class MLInterfaceAPIAsyncService {
 			projectMappingEntity.setProject(projectEntity);
 			mlProjectDoaminService.save(projectMappingEntity);
 			*/
+			
+			// cron 스케줄링
+			String cronExpression = applyDto.getCronSchedule();
+			if(cronExpression != null) {
+				MLScheduleDTO dto = new MLScheduleDTO();
+				dto.setMlId(mlId);
+				dto.setClusterIdx(clusterIdx);
+				
+				ScheduledTaskService scheduledTask = new ScheduledTaskService();
+		    	scheduledTask.scheduleTask(dto);
+			}
 			
 			return entity;
 		}

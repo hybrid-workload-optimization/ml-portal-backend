@@ -6,6 +6,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.domain.machineLearning.model.QMLEntity;
 
@@ -39,4 +40,39 @@ public class CustomMLRepositoryImpl implements CustomMLRepository {
         List<MLEntity> content = results.getResults();
 		return content;
 	}
+	
+	@Override
+	public List<MLEntity> getMLList() {
+		QMLEntity qEntity = QMLEntity.mLEntity;
+
+        QueryResults<MLEntity> results = jpaQueryFactory
+        		.select(qEntity)
+                .from(qEntity)
+                .orderBy(qEntity.id.desc())
+                .fetchResults();
+
+        List<MLEntity> content = results.getResults();
+		return content;
+	}
+	
+	@Override
+	public List<String> getCronsByClusterIdx(Long clusterIdx) {
+		QMLEntity qEntity = QMLEntity.mLEntity;
+		
+		BooleanBuilder builder = new BooleanBuilder();
+        if (clusterIdx != null) {
+        	builder.and(qEntity.clusterIdx.eq(clusterIdx));
+        }
+		
+		QueryResults<String> results = jpaQueryFactory
+        		.select(qEntity.cronSchedule)
+                .from(qEntity)
+                .where(builder)
+                .fetchResults();
+
+        List<String> content = results.getResults();
+		return content;
+	}
+	
+	
 }

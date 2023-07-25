@@ -52,6 +52,7 @@ public class MLDto {
 		private String mlStepCode;
 		private String yaml;
 		private String callbackUrl;
+		private String cronSchedule;
 	}
 	
 	@Getter

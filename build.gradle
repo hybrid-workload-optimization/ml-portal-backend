@@ -104,6 +104,9 @@ dependencies {
 	implementation group: 'io.fabric8', name: 'kubernetes-model-node', version: '5.11.2'
 	implementation group: 'io.fabric8', name: 'kubernetes-model-common', version: '5.11.2'
 	
+	// https://mvnrepository.com/artifact/com.cronutils/cron-utils
+	implementation group: 'com.cronutils', name: 'cron-utils', version: '9.2.0'
+	
 	implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
 	implementation 'org.springframework.kafka:spring-kafka'
 }
