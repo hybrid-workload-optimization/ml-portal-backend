@@ -1,4 +1,4 @@
-package kr.co.strato.portal.workload.service;
+package kr.co.strato.portal.workload.v2.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,17 +17,24 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodCondition;
 import io.fabric8.kubernetes.api.model.PodStatus;
+import io.fabric8.kubernetes.api.model.apps.DaemonSet;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.portal.workload.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class WorkloadService {
+public class WorkloadServiceV2 {
 	
 	@Autowired
 	private ClusterDomainService clusterDomainService;
@@ -35,6 +42,32 @@ public class WorkloadService {
 	@Autowired
 	private WorkloadAdapterService workloadAdapterService;
 	
+	@Autowired
+	private DeploymentServiceV2 deploymentService;
+	
+	@Autowired
+	private StatefulSetServiceV2 statefulSetService;
+	
+	@Autowired
+	private PodServiceV2 podService;
+	
+	@Autowired
+	private CronJobServiceV2 cronJobService;
+	
+	@Autowired
+	private JobServiceV2 jobService;
+	
+	@Autowired
+	private DaemonSetServiceV2 daemonSetService;
+	
+	@Autowired
+	private ReplicaSetServiceV2 replicaSetService;
+	
+	/**
+	 * 워크로드 리스트 조회
+	 * @param param
+	 * @return
+	 */
 	public List<WorkloadDto.List> getList(WorkloadDto.SearchParam param) {
 		Long clusterIdx = param.getClusterIdx();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
@@ -145,6 +178,64 @@ public class WorkloadService {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	public WorkloadCommonDto getDetail(WorkloadDto.DetailParam param) {
+		Long clusterIdx = param.getClusterIdx();
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		
+		Long kubeConfigId = entity.getClusterId();
+		String kind = param.getKind();
+		String namespace = param.getNamespace();
+		String name = param.getName();
+		
+		HasMetadata data = workloadAdapterService.getDetail(kubeConfigId, kind, namespace, name);
+		
+		WorkloadCommonDto dto = null;
+		try {
+			if(data != null) {
+				dto = toDto(entity, data);
+			} else {
+				log.error("데이터가 존재하지 않아 상세 정보를 조회할 수 없습니다.");
+				log.error("kubeConfigId: {}, kind: {}, namespace: {}, name: {}", kubeConfigId, kind, namespace, name);
+			}
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		return dto;
+	}
+	
+	/**
+	 * 프론트에 내려줄 dto로 변환.
+	 * @param data
+	 * @return
+	 * @throws Exception
+	 */
+	private WorkloadCommonDto toDto(ClusterEntity clusterEntity, HasMetadata data) throws Exception {
+		WorkloadCommonV2 workloadService = null;
+		if(data instanceof Deployment) {
+			workloadService = deploymentService;
+		} else if(data instanceof StatefulSet) {
+			workloadService = statefulSetService;
+		} else if(data instanceof Pod) {
+			workloadService = podService;
+		} else if(data instanceof CronJob) {
+			workloadService = cronJobService;
+		} else if(data instanceof Job) {
+			workloadService = jobService;
+		} else if(data instanceof DaemonSet) {
+			workloadService = daemonSetService;
+		} else if(data instanceof ReplicaSet) {
+			workloadService = replicaSetService;
+		}
+		
+		WorkloadCommonDto dto = null;
+		if(workloadService != null) {
+			dto = workloadService.toDto(clusterEntity, data);
+		} else {
+			log.error("DTO 변환 실패! 지원하지 않는 서비스 타입입니다. kind: {}", data.getKind());
+		}
+		return dto;
 	}
 	
 	/**

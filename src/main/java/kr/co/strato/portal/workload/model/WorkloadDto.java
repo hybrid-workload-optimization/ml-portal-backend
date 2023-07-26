@@ -25,8 +25,7 @@ public class WorkloadDto {
 		private Integer podCountReady;
 		private String health;
 		private Map<String, String> labels;
-		private String createAt;		
-		
+		private String createAt;
 	}
 
 	@Getter
@@ -38,5 +37,16 @@ public class WorkloadDto {
         private String name;
         private String namespace;
         private String[] kinds;
+    }
+	
+	@Getter
+    @Setter
+    @NoArgsConstructor
+    @ToString
+    public static class DetailParam {
+        private Long clusterIdx;
+        private String kind;
+        private String namespace;
+        private String name;
     }
 }
