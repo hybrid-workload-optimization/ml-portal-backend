@@ -141,7 +141,7 @@ public class PodServiceV2 extends WorkloadCommonV2 {
 	public List<PodDto> getPodByOwnerUid(Long kubeConfigId, String ownerUid) throws Exception  {
 		List<Pod> pods = podAdapterService.getList(kubeConfigId, null, ownerUid, null, null);
 		if(pods != null && pods.size() > 0) {
-			List<PodDto> list = pods.stream().map(p -> toDto(kubeConfigId, p)).toList();
+			List<PodDto> list = pods.stream().map(p -> toDto(kubeConfigId, p)).collect(Collectors.toList());
 			return list;
 		}
 		return null;

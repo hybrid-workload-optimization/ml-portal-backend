@@ -2,6 +2,7 @@ package kr.co.strato.portal.workload.v2.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class ReplicaSetServiceV2 extends WorkloadCommonV2 {
 	public List<ReplicaSetDto> getJobByOwnerUid(Long kubeConfigId, String ownerUid) throws Exception  {
 		List<ReplicaSet> list = replicaSetSetAdapterService.getListFromOwnerUid(kubeConfigId, ownerUid);
 		if(list != null && list.size() > 0) {
-			List<ReplicaSetDto> newList = list.stream().map(j -> toDto(kubeConfigId, j)).toList();
+			List<ReplicaSetDto> newList = list.stream().map(j -> toDto(kubeConfigId, j)).collect(Collectors.toList());
 			return newList;
 		}
 		return null;
