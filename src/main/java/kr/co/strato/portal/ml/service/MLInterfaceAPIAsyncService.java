@@ -141,15 +141,15 @@ public class MLInterfaceAPIAsyncService {
 			*/
 			
 			// cron 스케줄링
-			String cronExpression = applyDto.getCronSchedule();
-			if(cronExpression != null) {
-				MLScheduleDTO dto = new MLScheduleDTO();
-				dto.setMlId(mlId);
-				dto.setClusterIdx(clusterIdx);
-				
-				ScheduledTaskService scheduledTask = new ScheduledTaskService();
-		    	scheduledTask.scheduleTask(dto);
-			}
+//			String cronExpression = applyDto.getCronSchedule();
+//			if(cronExpression != null) {
+//				MLScheduleDTO dto = new MLScheduleDTO();
+//				dto.setMlId(mlId);
+//				dto.setClusterIdx(clusterIdx);
+//				
+//				ScheduledTaskService scheduledTask = new ScheduledTaskService();
+//		    	scheduledTask.scheduleTask(dto);
+//			}
 			
 			return entity;
 		}

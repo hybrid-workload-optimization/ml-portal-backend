@@ -18,7 +18,6 @@ import kr.co.strato.portal.ml.model.MLDto;
 import kr.co.strato.portal.ml.model.MLScheduleDTO;
 import kr.co.strato.portal.ml.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
-import kr.co.strato.portal.ml.service.ScheduledTaskService;
 
 @RequestMapping("/api/v1/ml")
 @Api(tags = {"ML 시작/종료/삭제 등. KETI에서 호출하는 API"})
@@ -85,19 +84,19 @@ public class MLInterfaceAPIController {
 		return new ResponseWrapper<>(detail);
 	}
 	
-	@GetMapping("/schedule/test")
-	public boolean scheduleTest() {
-		
-		String cronExpression = "0 * 9,18 ? * 1-5";
-		
-		MLScheduleDTO dto = new MLScheduleDTO();
-		dto.setMlId("test");
-		dto.setClusterIdx((long) 700);
-		
-		ScheduledTaskService scheduledTask = new ScheduledTaskService();
-    	scheduledTask.scheduleTask(dto);
-
-		return true;
-	}
+//	@GetMapping("/schedule/test")
+//	public boolean scheduleTest() {
+//		
+//		String cronExpression = "0 * 9,18 ? * 1-5";
+//		
+//		MLScheduleDTO dto = new MLScheduleDTO();
+//		dto.setMlId("test");
+//		dto.setClusterIdx((long) 700);
+//		
+//		ScheduledTaskService scheduledTask = new ScheduledTaskService();
+//    	scheduledTask.scheduleTask(dto);
+//
+//		return true;
+//	}
 	
 }
