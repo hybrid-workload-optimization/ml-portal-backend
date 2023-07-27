@@ -1,5 +1,7 @@
 package kr.co.strato.portal.workload.v2.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,4 +17,5 @@ public class StatefulSetDto extends WorkloadCommonDto {
 	 private String image;
 	 private Integer replicas;
      private Integer readyReplicas;
+     private List<PodDto> pods;
 }

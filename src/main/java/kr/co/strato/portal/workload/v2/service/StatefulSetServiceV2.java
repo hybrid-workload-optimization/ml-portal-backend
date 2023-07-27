@@ -10,11 +10,17 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.adapter.k8s.statefulset.service.StatefulSetAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.portal.workload.v2.model.PodDto;
 import kr.co.strato.portal.workload.v2.model.StatefulSetDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class StatefulSetServiceV2 extends WorkloadCommonV2 {
+	
+	@Autowired
+	private PodServiceV2 podService;
 	
 	@Autowired
 	private StatefulSetAdapterService statefulSetAdapterService;
@@ -33,10 +39,18 @@ public class StatefulSetServiceV2 extends WorkloadCommonV2 {
 		String image = s.getSpec().getTemplate().getSpec().getContainers().get(0).getImage();
 		Integer replicas = s.getStatus().getReplicas();
 	    Integer readyReplicas = s.getStatus().getReadyReplicas();
+	    
+	    List<PodDto> pods = null;
+		try {
+			pods = podService.getPodByOwnerUid(kubeConfigId, dto.getUid());
+		} catch (Exception e) {
+			log.error("", e);
+		}
 		
 	    dto.setImage(image);
 	    dto.setReplicas(replicas);
 	    dto.setReadyReplicas(readyReplicas);
+	    dto.setPods(pods);
 		return dto;
 	}
 	
