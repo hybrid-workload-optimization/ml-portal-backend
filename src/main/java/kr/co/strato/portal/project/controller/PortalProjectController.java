@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.error.exception.AleadyProjectNameException;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import kr.co.strato.portal.common.controller.CommonController;
 import kr.co.strato.portal.project.model.ProjectClusterDto;
 import kr.co.strato.portal.project.model.ProjectDto;

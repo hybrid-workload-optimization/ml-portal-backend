@@ -14,7 +14,7 @@ import kr.co.strato.domain.cluster.model.QClusterEntity;
 import kr.co.strato.domain.cronjob.model.CronJobEntity;
 import kr.co.strato.domain.cronjob.model.QCronJobEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
-import kr.co.strato.portal.workload.model.CronJobArgDto;
+import kr.co.strato.portal.workload.v1.model.CronJobArgDto;
 
 public class CustomCronJobRepositoryImpl  implements CustomCronJobRepository{
 	private final JPAQueryFactory jpaQueryFactory;

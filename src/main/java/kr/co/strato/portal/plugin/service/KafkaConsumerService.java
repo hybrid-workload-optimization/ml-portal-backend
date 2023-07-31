@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.service.PublicClusterService;
+import kr.co.strato.portal.cluster.v1.service.PublicClusterService;
 import kr.co.strato.portal.common.service.CallbackService;
 import kr.co.strato.portal.ml.model.CallbackData;
 import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;

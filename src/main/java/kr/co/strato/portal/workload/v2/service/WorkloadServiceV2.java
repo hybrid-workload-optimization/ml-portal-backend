@@ -27,9 +27,10 @@ import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
-import kr.co.strato.portal.workload.model.WorkloadDto;
+import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.portal.workload.v1.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
-import lombok.Data;
+import kr.co.strato.portal.workload.v2.model.WorkloadItem;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -77,19 +78,32 @@ public class WorkloadServiceV2 {
 			return null;
 		}
 		
+		Long kubeConfigId = entity.getClusterId();
+		ResourceListSearchInfo search = ResourceListSearchInfo.builder()
+				.kubeConfigId(kubeConfigId)
+				.kinds(param.getKinds())
+				.name(param.getName())
+				.namespace(param.getNamespace())
+				.build();
+		
+		
+		List<HasMetadata> list = null;
+		try {
+			list = workloadAdapterService.getList(search);
+		} catch (Exception e) {
+			log.error("", e);
+			throw new PortalException("리소스 조회 실패!");
+		}
+		return getList(list, param.getName());
+	}
+	
+	public List<WorkloadDto.List> getList(List<HasMetadata> list) {
+		return getList(list, null);
+	}
+	
+	public List<WorkloadDto.List> getList(List<HasMetadata> list, String keyword) {
 		List<WorkloadDto.List> result = new ArrayList<>();
-		try {			
-			Long kubeConfigId = entity.getClusterId();
-			ResourceListSearchInfo search = ResourceListSearchInfo.builder()
-					.kubeConfigId(kubeConfigId)
-					.kinds(param.getKinds())
-					.name(param.getName())
-					.namespace(param.getNamespace())
-					.build();
-			
-			
-			List<HasMetadata> list = workloadAdapterService.getList(search);
-			
+		try {
 			//uid를 키로 맵으로 변환
 			Map<String, WorkloadItem> map = new HashMap<>();
 			for(HasMetadata data : list) {
@@ -119,9 +133,6 @@ public class WorkloadServiceV2 {
 					map.remove(uid);
 				}
 			}
-			
-			
-			String keyword = param.getName();
 			
 			Iterator<String> iter = map.keySet().iterator();
 			while(iter.hasNext()) {
@@ -244,7 +255,7 @@ public class WorkloadServiceV2 {
 	 * @param pods
 	 * @return
 	 */
-	private Integer getReadyPodCount(HasMetadata data, List<Pod> pods) {
+	public Integer getReadyPodCount(HasMetadata data, List<Pod> pods) {
 		//워크로드 리소스의 파드가 0이면 건강 상태를 알지못함 으로 처리
 		Integer readyCount = 0;
 		if(pods.size() > 0) {
@@ -275,7 +286,7 @@ public class WorkloadServiceV2 {
 	 * @param readyPodCount
 	 * @return
 	 */
-	private String getHealth(HasMetadata data, List<Pod> pods, Integer readyPodCount) {
+	public String getHealth(HasMetadata data, List<Pod> pods, Integer readyPodCount) {
 		//워크로드 리소스의 파드가 0이면 건강 상태를 알지못함 으로 처리
 		String health = "Unknown";
 		if(pods.size() > 0) {
@@ -306,25 +317,4 @@ public class WorkloadServiceV2 {
 		}
 		return list;
 	}
-	
-	@Data
-	public static class WorkloadItem {
-        private HasMetadata data;
-        private List<WorkloadItem> children;
-        
-        public WorkloadItem(HasMetadata data) {
-        	this.children = new ArrayList<>();
-        	this.data = data;
-        }
-        
-        public void addChild(WorkloadItem child) {
-        	if(!this.children.contains(child)) {
-        		this.children.add(child);
-        	}
-        }
-        
-        public void removeChild(WorkloadItem child) {
-        	this.children.remove(child);
-        }
-    }
 } 

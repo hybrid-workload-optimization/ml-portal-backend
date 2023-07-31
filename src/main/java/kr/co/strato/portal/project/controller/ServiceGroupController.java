@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import kr.co.strato.portal.project.model.CSPAccountDto;
 import kr.co.strato.portal.project.service.ServiceGroupService;
 

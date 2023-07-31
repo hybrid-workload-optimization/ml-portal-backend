@@ -15,7 +15,7 @@ import kr.co.strato.domain.deployment.model.DeploymentEntity;
 import kr.co.strato.domain.deployment.model.QDeploymentEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
-import kr.co.strato.portal.workload.model.DeploymentArgDto;
+import kr.co.strato.portal.workload.v1.model.DeploymentArgDto;
 
 public class CustomDeploymentRepositoryImpl  implements CustomDeploymentRepository{
 	private final JPAQueryFactory jpaQueryFactory;

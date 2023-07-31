@@ -22,7 +22,7 @@ import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.adapter.k8s.common.proxy.PodProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
-import kr.co.strato.portal.workload.model.PodDto;
+import kr.co.strato.portal.workload.v1.model.PodDto;
 import lombok.extern.slf4j.Slf4j;
 
 

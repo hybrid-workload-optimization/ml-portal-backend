@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.workload.model.WorkloadDto;
+import kr.co.strato.portal.workload.v1.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.service.WorkloadServiceV2;
 
 @RequestMapping("/api/v1/workload")

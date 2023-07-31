@@ -16,13 +16,13 @@ import kr.co.strato.portal.config.service.SecretService;
 import kr.co.strato.portal.ml.service.MLServiceInterface;
 import kr.co.strato.portal.networking.service.IngressService;
 import kr.co.strato.portal.networking.service.K8sServiceService;
-import kr.co.strato.portal.workload.service.CronJobService;
-import kr.co.strato.portal.workload.service.DaemonSetService;
-import kr.co.strato.portal.workload.service.DeploymentService;
-import kr.co.strato.portal.workload.service.JobService;
-import kr.co.strato.portal.workload.service.PodService;
-import kr.co.strato.portal.workload.service.ReplicaSetService;
-import kr.co.strato.portal.workload.service.StatefulSetService;
+import kr.co.strato.portal.workload.v1.service.CronJobService;
+import kr.co.strato.portal.workload.v1.service.DaemonSetService;
+import kr.co.strato.portal.workload.v1.service.DeploymentService;
+import kr.co.strato.portal.workload.v1.service.JobService;
+import kr.co.strato.portal.workload.v1.service.PodService;
+import kr.co.strato.portal.workload.v1.service.ReplicaSetService;
+import kr.co.strato.portal.workload.v1.service.StatefulSetService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service

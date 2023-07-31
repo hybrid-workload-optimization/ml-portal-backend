@@ -16,6 +16,15 @@ public class DateUtil {
 
         return local;
     }
+    
+    public static String strToNewFormatter(String text){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		LocalDateTime local = LocalDateTime.parse(text, formatter);
+		local = local.plusHours(9L);
+		
+		DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return local.format(newFormatter);
+    }
 
     public static LocalDateTime strToLocalDateTime(String text, String pattern){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
@@ -119,5 +128,48 @@ public class DateUtil {
     public static Date toDate(String date, String dateFormat) throws ParseException {
     	SimpleDateFormat format = new SimpleDateFormat(dateFormat);
     	return format.parse(date);
+    }
+    
+    public static boolean isToday(String date) {
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    	LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+    	dateTime = dateTime.plusHours(9L);
+    	
+    	LocalDateTime today = LocalDate.now().atStartOfDay();
+    	return dateTime.isAfter(today);
+    }
+    
+    public static boolean isWithin30minutes(String date) {
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    	LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+    	
+    	LocalDateTime today = LocalDateTime.now();
+    	LocalDateTime minus30minutes = today.minusMinutes(30);    	
+    	return dateTime.isAfter(minus30minutes);
+    }
+    
+    public static void main(String[] args) {
+    	/*
+    	String str = "2023-07-28 00:00:12";
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    	LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+    	LocalDateTime today = LocalDate.now().atStartOfDay();
+    	
+    	System.out.println(dateTime + ", " + today);
+    	boolean after = dateTime.isAfter(today);
+    	System.out.println(after);
+    	*/
+    	
+    	String str = "2023-07-31 10:23:12";
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    	LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+    	
+    	LocalDateTime today = LocalDateTime.now();
+    	LocalDateTime minus30minutes = today.minusMinutes(30);
+    	//DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    	System.out.println(minus30minutes.format(formatter));
+    	
+    	boolean after = dateTime.isAfter(minus30minutes);
+    	System.out.println(after);
     }
 }

@@ -15,7 +15,7 @@ import kr.co.strato.domain.job.model.JobEntity;
 import kr.co.strato.domain.job.model.QJobEntity;
 import kr.co.strato.domain.namespace.model.NamespaceEntity;
 import kr.co.strato.domain.namespace.model.QNamespaceEntity;
-import kr.co.strato.portal.workload.model.JobArgDto;
+import kr.co.strato.portal.workload.v1.model.JobArgDto;
 
 public class CustomJobRepositoryImpl  implements CustomJobRepository{
 	

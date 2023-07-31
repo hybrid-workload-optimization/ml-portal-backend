@@ -51,7 +51,7 @@ import kr.co.strato.global.error.exception.DuplicateIngressPathException;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.service.ClusterNodeService;
+import kr.co.strato.portal.cluster.v1.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;

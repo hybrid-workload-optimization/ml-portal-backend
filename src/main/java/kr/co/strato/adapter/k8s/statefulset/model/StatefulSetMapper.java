@@ -5,7 +5,7 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import kr.co.strato.domain.statefulset.model.StatefulSetEntity;
 import kr.co.strato.global.error.exception.InternalServerException;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.model.ClusterDtoMapper;
+import kr.co.strato.portal.cluster.v1.model.ClusterDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

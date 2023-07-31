@@ -19,7 +19,8 @@ public enum ResourceType {
     pvc,
     configMap,
     secret,
-    ingressClass;
+    ingressClass,
+    resourceQuota;
 
     public String get(){
         return this.toString();

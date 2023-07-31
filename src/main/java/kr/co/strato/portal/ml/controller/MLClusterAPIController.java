@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.model.ModifyArgDto;
-import kr.co.strato.portal.cluster.model.ScaleArgDto;
+import kr.co.strato.portal.cluster.v1.model.ModifyArgDto;
+import kr.co.strato.portal.cluster.v1.model.ScaleArgDto;
 import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
 
 @RequestMapping("/api/v1/ml/cluster")

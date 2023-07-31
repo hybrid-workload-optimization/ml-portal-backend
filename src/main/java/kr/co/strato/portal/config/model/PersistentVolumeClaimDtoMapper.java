@@ -18,7 +18,7 @@ import kr.co.strato.domain.daemonset.model.DaemonSetEntity;
 import kr.co.strato.domain.persistentVolumeClaim.model.PersistentVolumeClaimEntity;
 import kr.co.strato.domain.project.model.ProjectEntity;
 import kr.co.strato.portal.project.model.ProjectDto;
-import kr.co.strato.portal.workload.model.DaemonSetDto;
+import kr.co.strato.portal.workload.v1.model.DaemonSetDto;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PersistentVolumeClaimDtoMapper {

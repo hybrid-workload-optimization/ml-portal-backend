@@ -11,8 +11,8 @@ import org.mapstruct.factory.Mappers;
 
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.node.model.NodeEntity;
-import kr.co.strato.portal.cluster.model.ClusterNodeDto;
-import kr.co.strato.portal.cluster.model.ClusterNodeDtoMapper;
+import kr.co.strato.portal.cluster.v1.model.ClusterNodeDto;
+import kr.co.strato.portal.cluster.v1.model.ClusterNodeDtoMapper;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface MLClusterDtoMapper {

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.cluster.service.PublicClusterService;
+import kr.co.strato.portal.cluster.v1.service.PublicClusterService;
 import kr.co.strato.portal.ml.model.CallbackData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;

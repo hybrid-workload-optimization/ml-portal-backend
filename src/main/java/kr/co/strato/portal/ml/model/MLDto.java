@@ -3,7 +3,7 @@ package kr.co.strato.portal.ml.model;
 import java.time.LocalDateTime;
 
 import kr.co.strato.global.model.PageRequest;
-import kr.co.strato.portal.cluster.model.ClusterDto;
+import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import lombok.Getter;
 import lombok.Setter;
 
