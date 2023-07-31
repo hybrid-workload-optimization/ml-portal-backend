@@ -77,9 +77,8 @@ public class NodeService {
 
 		String k8sVersion = n.getApiVersion();
 		String podCidr = n.getSpec().getPodCIDR();
-
-		float cpuCapacity = Float.parseFloat(n.getStatus().getCapacity().get("cpu").getAmount().replaceAll("[^0-9]", ""));
-		float memoryCapacity = Float.parseFloat(n.getStatus().getCapacity().get("memory").getAmount().replaceAll("[^0-9]", ""));
+		
+		
 		String image = n.getStatus().getNodeInfo().getOsImage();
 		String kernelVersion = n.getStatus().getNodeInfo().getKernelVersion();
 		String architecture = n.getStatus().getNodeInfo().getArchitecture();
@@ -111,8 +110,6 @@ public class NodeService {
 				.name(name)
 				.ip(ip)
 				.status(Boolean.toString(status))
-				.allocatedCpu(cpuCapacity)
-				.allocatedMemory(memoryCapacity)
 				.podStatus(podStatus)
 				.role(roles)
 				.usageDto(usageDto)

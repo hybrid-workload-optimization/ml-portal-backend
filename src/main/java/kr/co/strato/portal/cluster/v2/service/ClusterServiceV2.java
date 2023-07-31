@@ -25,6 +25,7 @@ import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.PodSummary;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.WorkloadSummary;
 import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
+import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
 import kr.co.strato.portal.workload.v1.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.service.WorkloadServiceV2;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,9 @@ public class ClusterServiceV2 {
 	
 	@Autowired
 	private NamespaceService namespaceService;
+	
+	@Autowired
+	private PersistentVolumeService pvService;
 
 	/**
 	 * 클러스터 Overview 화면 데이터 조회.
@@ -76,8 +80,9 @@ public class ClusterServiceV2 {
 			
 			List<NamespaceDto.ListDto> namespaceList = namespaceService.getList(kubeConfigId, podList);
 			List<NodeDto.ListDto> nodeList = nodeService.getList(kubeConfigId, podList);
+			List<PersistentVolumeDto.ListDto> pvList = pvService.getList(kubeConfigId);
 			
-			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, workloads, podList);			
+			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList);			
 			List<WorkloadDto.List> getControlPlaneComponents = getControlPlaneComponents(workloads);			
 			WorkloadSummary workloadSummary = getWorkloadSummary(workloads);			
 			PodSummary podSummary = getPodSummary(podList);
@@ -103,6 +108,7 @@ public class ClusterServiceV2 {
 			ClusterEntity cluster, 
 			List<NodeDto.ListDto> nodeList,
 			List<NamespaceDto.ListDto> namespaceList,
+			List<PersistentVolumeDto.ListDto> pvList,
 			List<WorkloadDto.List> workloads,
 			List<Pod> podList) {
 		
@@ -116,18 +122,28 @@ public class ClusterServiceV2 {
 		
 		Integer nodeCount = nodeList.size();
 		
-		float cpuTotal = 0;
-		float memoryTotal = 0;
+		double cpuTotal = 0;
+		double memoryTotal = 0;
 		
 		double cpuUsage = 0;
 		double memoryUsage = 0;
 		
 		for(NodeDto.ListDto n : nodeList) {
-			cpuTotal += n.getAllocatedCpu();
-			memoryTotal += n.getAllocatedMemory();
+			cpuTotal += n.getUsageDto().getCpuCapacity();
+			memoryTotal += n.getUsageDto().getMemoryCapacity();
 			
 			cpuUsage += n.getUsageDto().getCpuRequests();
 			memoryUsage += n.getUsageDto().getMemoryRequests();
+		}
+		
+		double storageTotal = 0;
+		double storageUsage = 0;
+		
+		for(PersistentVolumeDto.ListDto dto : pvList) {
+			storageTotal += dto.getSize();
+			if(dto.getStatus().equals("Bound")) {
+				storageUsage += dto.getSize();
+			}
 		}
 		
 		ClusterOverviewDto.ClusterSummary summary = ClusterOverviewDto.ClusterSummary.builder()
@@ -145,13 +161,14 @@ public class ClusterServiceV2 {
 				
 				.cpuTotal(cpuTotal)
 				.memoryTotal(memoryTotal)
-				.cpuUsage((float)cpuUsage)
-				.memoryUsage((float)memoryUsage)
+				.cpuUsage(cpuUsage)
+				.memoryUsage(memoryUsage)
+				.storageTotal(storageTotal)
+				.storageUsage(storageUsage)
 				
-				.totalStorage(0)
 				.countNode(nodeCount)
 				.countNamespace(namespaceList.size())
-				.countPV(null)
+				.countPV(pvList.size())
 				.countWorkload(workloads.size())
 				.countPod(podList.size())
 				.build();

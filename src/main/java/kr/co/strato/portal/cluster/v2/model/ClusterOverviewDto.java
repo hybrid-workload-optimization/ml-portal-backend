@@ -42,11 +42,12 @@ public class ClusterOverviewDto {
 		private String serviceCidr;
 		private String podCidr;
 		
-		private float cpuTotal;
-		private float memoryTotal;
-		private float cpuUsage;
-		private float memoryUsage;
-		private float totalStorage;
+		private double cpuTotal;
+		private double memoryTotal;
+		private double cpuUsage;
+		private double memoryUsage;
+		private double storageTotal;
+		private double storageUsage;
 		
 		private Integer countNode;
 		private Integer countNamespace;

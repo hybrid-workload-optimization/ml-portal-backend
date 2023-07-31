@@ -16,8 +16,6 @@ public class NodeDto {
 		private String name;
 		private String ip;
 		private String status;
-		private float allocatedCpu;
-		private float allocatedMemory;
 		private String podStatus;
 		private List<String> role;
 		private NodeUsageDto usageDto;
