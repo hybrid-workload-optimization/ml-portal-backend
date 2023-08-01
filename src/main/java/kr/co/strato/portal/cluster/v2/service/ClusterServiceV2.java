@@ -13,7 +13,6 @@ import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
-import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
@@ -23,6 +22,11 @@ import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.PodList;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.PodSummary;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.WorkloadSummary;
+import kr.co.strato.portal.cluster.v2.runnable.GetNamespaceListRunnable;
+import kr.co.strato.portal.cluster.v2.runnable.GetNodeListRunnable;
+import kr.co.strato.portal.cluster.v2.runnable.GetPersistentVolumeRunnable;
+import kr.co.strato.portal.cluster.v2.runnable.GetWorkloadListRunnable;
+import kr.co.strato.portal.cluster.v2.runnable.WorkloadRunnableExecuter;
 import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
 import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
@@ -64,23 +68,64 @@ public class ClusterServiceV2 {
 		}
 		
 		Long kubeConfigId = clusterEntity.getClusterId();
-		ResourceListSearchInfo search = ResourceListSearchInfo.builder()
-				.kubeConfigId(kubeConfigId)
-				.build();
+		
+		GetWorkloadListRunnable workloadRunnable = new GetWorkloadListRunnable(workloadAdapterService, kubeConfigId);
+		GetPersistentVolumeRunnable pvRunnable = new GetPersistentVolumeRunnable(pvService, kubeConfigId);
+		
+		WorkloadRunnableExecuter executer = new WorkloadRunnableExecuter();
+		executer.addWorkloadRunnable(workloadRunnable);
+		executer.addWorkloadRunnable(pvRunnable);
+		executer.run();
 		
 		try {
-			List<HasMetadata> list = workloadAdapterService.getList(search);
-			List<WorkloadDto.List> workloads = workloadService.getList(list);
 			
+			List<HasMetadata> list = null;
+			List<PersistentVolumeDto.ListDto> pvList = null;
+			List<NamespaceDto.ListDto> namespaceList = null;
+			List<NodeDto.ListDto> nodeList = null;
 			
-			List<Pod> podList = list.stream()
-					.filter(d -> d instanceof Pod)
-					.map(d -> (Pod)d)
-					.collect(Collectors.toList());
+			List<WorkloadDto.List> workloads = null;
+			List<Pod> podList = null;
 			
-			List<NamespaceDto.ListDto> namespaceList = namespaceService.getList(kubeConfigId, podList);
-			List<NodeDto.ListDto> nodeList = nodeService.getList(kubeConfigId, podList);
-			List<PersistentVolumeDto.ListDto> pvList = pvService.getList(kubeConfigId);
+			if(executer.getResult(workloadRunnable) != null) {
+				list = (List<HasMetadata>)executer.getResult(workloadRunnable);
+			} else {
+				log.error("Workload 리스트 조회 실패!");
+			}
+			
+			if(executer.getResult(pvRunnable) != null) {
+				pvList = (List<PersistentVolumeDto.ListDto>)executer.getResult(pvRunnable);
+			} else {
+				log.error("PersistentVolume 리스트 조회 실패!");
+			}
+			
+			if(list != null) {
+				workloads = workloadService.getList(list);
+				podList = list.stream()
+						.filter(d -> d instanceof Pod)
+						.map(d -> (Pod)d)
+						.collect(Collectors.toList());
+				
+				GetNamespaceListRunnable namespaceRunnable = new GetNamespaceListRunnable(namespaceService, podList, kubeConfigId);
+				GetNodeListRunnable nodeRunnable = new GetNodeListRunnable(nodeService, podList, kubeConfigId);
+				
+				executer = new WorkloadRunnableExecuter();
+				executer.addWorkloadRunnable(namespaceRunnable);
+				executer.addWorkloadRunnable(nodeRunnable);
+				executer.run();
+				
+				if(executer.getResult(namespaceRunnable) != null) {
+					namespaceList = (List<NamespaceDto.ListDto>) executer.getResult(namespaceRunnable);
+				} else {
+					log.error("Namespace 리스트 조회 실패!");
+				}
+				
+				if(executer.getResult(nodeRunnable) != null) {
+					nodeList = (List<NodeDto.ListDto>) executer.getResult(nodeRunnable);
+				} else {
+					log.error("Node 리스트 조회 실패!");
+				}
+			}
 			
 			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList);			
 			List<WorkloadDto.List> getControlPlaneComponents = getControlPlaneComponents(workloads);			
@@ -103,7 +148,16 @@ public class ClusterServiceV2 {
 		return null;
 	}
 	
-	
+	/**
+	 * 클러스터 전체 요약 정보 조회
+	 * @param cluster
+	 * @param nodeList
+	 * @param namespaceList
+	 * @param pvList
+	 * @param workloads
+	 * @param podList
+	 * @return
+	 */
 	private ClusterOverviewDto.ClusterSummary getClusterSummary(
 			ClusterEntity cluster, 
 			List<NodeDto.ListDto> nodeList,
