@@ -1,5 +1,6 @@
 package kr.co.strato.portal.cluster.v2.runnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -28,7 +29,7 @@ public class GetWorkloadListRunnable extends WorkloadRunnable {
 		ResourceListSearchInfo search = ResourceListSearchInfo.builder()
 				.kubeConfigId(kubeConfigId)
 				.build();		
-		List<HasMetadata> list = null;
+		List<HasMetadata> list = new ArrayList<>();
 		try {
 			list = workloadAdapterService.getList(search);
 		} catch (Exception e) {

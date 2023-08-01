@@ -79,62 +79,48 @@ public class ClusterServiceV2 {
 		
 		try {
 			
-			List<HasMetadata> list = null;
-			List<PersistentVolumeDto.ListDto> pvList = null;
-			List<NamespaceDto.ListDto> namespaceList = null;
-			List<NodeDto.ListDto> nodeList = null;
+			List<HasMetadata> list = (List<HasMetadata>)executer.getResult(workloadRunnable);
+			List<PersistentVolumeDto.ListDto> pvList = (List<PersistentVolumeDto.ListDto>)executer.getResult(pvRunnable);
 			
-			List<WorkloadDto.List> workloads = null;
-			List<Pod> podList = null;
 			
-			if(executer.getResult(workloadRunnable) != null) {
-				list = (List<HasMetadata>)executer.getResult(workloadRunnable);
-			} else {
-				log.error("Workload 리스트 조회 실패!");
-			}
 			
-			if(executer.getResult(pvRunnable) != null) {
-				pvList = (List<PersistentVolumeDto.ListDto>)executer.getResult(pvRunnable);
-			} else {
-				log.error("PersistentVolume 리스트 조회 실패!");
-			}
+			List<WorkloadDto.List>  workloads = workloadService.getList(list);
+			List<Pod> podList = list.stream()
+					.filter(d -> d instanceof Pod)
+					.map(d -> (Pod)d)
+					.collect(Collectors.toList());
 			
-			if(list != null) {
-				workloads = workloadService.getList(list);
-				podList = list.stream()
-						.filter(d -> d instanceof Pod)
-						.map(d -> (Pod)d)
-						.collect(Collectors.toList());
-				
-				GetNamespaceListRunnable namespaceRunnable = new GetNamespaceListRunnable(namespaceService, podList, kubeConfigId);
-				GetNodeListRunnable nodeRunnable = new GetNodeListRunnable(nodeService, podList, kubeConfigId);
-				
-				executer = new WorkloadRunnableExecuter();
-				executer.addWorkloadRunnable(namespaceRunnable);
-				executer.addWorkloadRunnable(nodeRunnable);
-				executer.run();
-				
-				if(executer.getResult(namespaceRunnable) != null) {
-					namespaceList = (List<NamespaceDto.ListDto>) executer.getResult(namespaceRunnable);
-				} else {
-					log.error("Namespace 리스트 조회 실패!");
-				}
-				
-				if(executer.getResult(nodeRunnable) != null) {
-					nodeList = (List<NodeDto.ListDto>) executer.getResult(nodeRunnable);
-				} else {
-					log.error("Node 리스트 조회 실패!");
-				}
-			}
+			GetNamespaceListRunnable namespaceRunnable = new GetNamespaceListRunnable(namespaceService, podList, kubeConfigId);
+			GetNodeListRunnable nodeRunnable = new GetNodeListRunnable(nodeService, podList, kubeConfigId);
+			
+			executer = new WorkloadRunnableExecuter();
+			executer.addWorkloadRunnable(namespaceRunnable);
+			executer.addWorkloadRunnable(nodeRunnable);
+			executer.run();
+			
+			
+			List<NamespaceDto.ListDto> namespaceList = (List<NamespaceDto.ListDto>) executer.getResult(namespaceRunnable);
+			List<NodeDto.ListDto> nodeList = (List<NodeDto.ListDto>) executer.getResult(nodeRunnable);
+			
+			
 			
 			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList);			
-			List<WorkloadDto.List> getControlPlaneComponents = getControlPlaneComponents(workloads);			
-			WorkloadSummary workloadSummary = getWorkloadSummary(workloads);			
-			PodSummary podSummary = getPodSummary(podList);
+			
+			List<WorkloadDto.List> controlPlaneComponents = null;
+			WorkloadSummary workloadSummary = null;
+			if(workloads != null) {
+				controlPlaneComponents = getControlPlaneComponents(workloads);			
+				workloadSummary = getWorkloadSummary(workloads);	
+			}
+			
+			PodSummary podSummary = null;
+			if(podList != null) {
+				podSummary = getPodSummary(podList);
+			}
 			
 			ClusterOverviewDto.Overview overview = ClusterOverviewDto.Overview.builder()
 					.clusterSummary(clusterSummary)
-					.controlPlaneComponent(getControlPlaneComponents)
+					.controlPlaneComponent(controlPlaneComponents)
 					.workloadSummary(workloadSummary)
 					.nodes(nodeList)
 					.namespaces(namespaceList)
@@ -174,31 +160,37 @@ public class ClusterServiceV2 {
 		String createAt = cluster.getCreatedAt();
 		String createBy = cluster.getCreateUserId();
 		
-		Integer nodeCount = nodeList.size();
-		
+		Integer nodeCount = 0;		
 		double cpuTotal = 0;
 		double memoryTotal = 0;
 		
 		double cpuUsage = 0;
 		double memoryUsage = 0;
 		
-		for(NodeDto.ListDto n : nodeList) {
-			cpuTotal += n.getUsageDto().getCpuCapacity();
-			memoryTotal += n.getUsageDto().getMemoryCapacity();
-			
-			cpuUsage += n.getUsageDto().getCpuRequests();
-			memoryUsage += n.getUsageDto().getMemoryRequests();
+		if(nodeList != null) {
+			nodeCount = nodeList.size();
+			for(NodeDto.ListDto n : nodeList) {
+				cpuTotal += n.getUsageDto().getCpuCapacity();
+				memoryTotal += n.getUsageDto().getMemoryCapacity();
+				
+				cpuUsage += n.getUsageDto().getCpuRequests();
+				memoryUsage += n.getUsageDto().getMemoryRequests();
+			}
 		}
+		
 		
 		double storageTotal = 0;
 		double storageUsage = 0;
 		
-		for(PersistentVolumeDto.ListDto dto : pvList) {
-			storageTotal += dto.getSize();
-			if(dto.getStatus().equals("Bound")) {
-				storageUsage += dto.getSize();
+		if(pvList != null) {
+			for(PersistentVolumeDto.ListDto dto : pvList) {
+				storageTotal += dto.getSize();
+				if(dto.getStatus().equals("Bound")) {
+					storageUsage += dto.getSize();
+				}
 			}
 		}
+		
 		
 		ClusterOverviewDto.ClusterSummary summary = ClusterOverviewDto.ClusterSummary.builder()
 				.name(name)
