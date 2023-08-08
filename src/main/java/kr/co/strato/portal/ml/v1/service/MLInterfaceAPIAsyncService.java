@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +24,11 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.common.service.CallbackService;
-import kr.co.strato.portal.ml.model.MLDto;
-import kr.co.strato.portal.ml.model.MLDto.ListArg;
-import kr.co.strato.portal.ml.model.MLDtoMapper;
-import kr.co.strato.portal.ml.model.MLResourceDto;
-import kr.co.strato.portal.ml.model.MLScheduleDTO;
+import kr.co.strato.portal.ml.v1.model.MLDto;
+import kr.co.strato.portal.ml.v1.model.MLDtoMapper;
+import kr.co.strato.portal.ml.v1.model.MLResourceDto;
+import kr.co.strato.portal.ml.v1.model.MLScheduleDTO;
+import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
 import lombok.extern.slf4j.Slf4j;
 
 @Service

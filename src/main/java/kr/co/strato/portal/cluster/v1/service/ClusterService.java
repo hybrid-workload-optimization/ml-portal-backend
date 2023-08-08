@@ -61,7 +61,7 @@ import kr.co.strato.portal.cluster.v1.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.v1.model.PublicClusterDto;
 import kr.co.strato.portal.cluster.v1.model.ClusterDto.Node;
 import kr.co.strato.portal.cluster.v1.model.ClusterDto.Summary;
-import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
+import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.UserService;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobData;

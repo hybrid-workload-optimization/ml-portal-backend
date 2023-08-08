@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.controller;
+package kr.co.strato.portal.ml.v1.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.ml.model.CallbackData;
-import kr.co.strato.portal.ml.service.ClusterJobCallbackService;
+import kr.co.strato.portal.ml.v1.model.CallbackData;
+import kr.co.strato.portal.ml.v1.service.ClusterJobCallbackService;
 
 @RestController
 @Api(tags = {"Cluster Job Callback API(Async 응답 전용)"})

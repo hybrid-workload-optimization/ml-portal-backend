@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.ml.model.MLDto;
+import kr.co.strato.portal.ml.v1.model.MLDto;
 
 @Service
 public class CallbackService {

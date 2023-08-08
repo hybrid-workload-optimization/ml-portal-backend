@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.model;
+package kr.co.strato.portal.ml.v1.model;
 
 public enum MLStepCode {	
 	Pretreatment("ml-step-100"),

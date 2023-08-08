@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +23,10 @@ import kr.co.strato.domain.machineLearning.service.MLResourceDomainService;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import kr.co.strato.portal.cluster.v1.service.ClusterService;
-import kr.co.strato.portal.ml.model.MLDto;
-import kr.co.strato.portal.ml.model.MLDto.ListArg;
-import kr.co.strato.portal.ml.model.MLDtoMapper;
-import kr.co.strato.portal.ml.model.MLResourceDto;
+import kr.co.strato.portal.ml.v1.model.MLDto;
+import kr.co.strato.portal.ml.v1.model.MLDtoMapper;
+import kr.co.strato.portal.ml.v1.model.MLResourceDto;
+import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

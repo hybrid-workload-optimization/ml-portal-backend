@@ -84,6 +84,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 				//httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");	
 			}
 		} else {
+			String requestUri = httpRequest.getRequestURI();
+			System.out.println(requestUri);
 			log.error("Auth fail. Token is null.");
 		}
 		//httpRequest.getSession(false);

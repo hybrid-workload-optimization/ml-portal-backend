@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.work.model.WorkJobEntity;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.v1.service.PublicClusterService;
-import kr.co.strato.portal.ml.model.CallbackData;
+import kr.co.strato.portal.ml.v1.model.CallbackData;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobStatus;
 import kr.co.strato.portal.work.model.WorkJob.WorkJobType;
 import kr.co.strato.portal.work.service.WorkJobService;

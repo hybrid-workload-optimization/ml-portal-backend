@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

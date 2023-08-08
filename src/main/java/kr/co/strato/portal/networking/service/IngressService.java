@@ -54,7 +54,7 @@ import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.v1.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.InNamespaceService;
 import kr.co.strato.portal.common.service.ProjectAuthorityService;
-import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
+import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.networking.model.IngressControllerDto;
 import kr.co.strato.portal.networking.model.IngressControllerDtoMapper;
 import kr.co.strato.portal.networking.model.IngressDto;

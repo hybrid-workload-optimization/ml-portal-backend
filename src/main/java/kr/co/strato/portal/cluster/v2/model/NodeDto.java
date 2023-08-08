@@ -1,6 +1,7 @@
 package kr.co.strato.portal.cluster.v2.model;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class NodeDto {
 		private String podStatus;
 		private List<String> role;
 		private NodeUsageDto usageDto;
+		private Map<String, String> labels;
 		private String createdAt;
 	}
 	

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,8 +85,8 @@ public class NodeService {
 		String architecture = n.getStatus().getNodeInfo().getArchitecture();
 		String kubeletVersion = n.getStatus().getNodeInfo().getKubeletVersion();
 
-		String annotations = mapper.writeValueAsString(n.getMetadata().getAnnotations());
-		String label = mapper.writeValueAsString(n.getMetadata().getLabels());
+		Map<String, String> annotations = n.getMetadata().getAnnotations();
+		Map<String, String> labels = n.getMetadata().getLabels();
 		String condition = mapper.writeValueAsString(conditions);
 
 		List<String> roles = new ArrayList<>();
@@ -112,6 +113,7 @@ public class NodeService {
 				.status(Boolean.toString(status))
 				.podStatus(podStatus)
 				.role(roles)
+				.labels(labels)
 				.usageDto(usageDto)
 				.createdAt(createdAt)
 				.build();

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import kr.co.strato.adapter.k8s.ingressController.model.ServicePort;
-import kr.co.strato.portal.ml.model.MessageData;
+import kr.co.strato.portal.ml.v1.model.MessageData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

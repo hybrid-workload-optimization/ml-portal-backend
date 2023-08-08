@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.controller;
+package kr.co.strato.portal.ml.v1.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,10 +14,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.ml.model.MLDto;
-import kr.co.strato.portal.ml.model.MLDto.ListArg;
-import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
-import kr.co.strato.portal.ml.service.MLPortalService;
+import kr.co.strato.portal.ml.v1.model.MLDto;
+import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.v1.service.MLInterfaceAPIAsyncService;
+import kr.co.strato.portal.ml.v1.service.MLPortalService;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @RequestMapping("/api/v1/ml/portal")

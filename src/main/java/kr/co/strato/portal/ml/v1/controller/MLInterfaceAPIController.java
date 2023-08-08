@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.controller;
+package kr.co.strato.portal.ml.v1.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,10 +14,10 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.ml.model.MLDto;
-import kr.co.strato.portal.ml.model.MLScheduleDTO;
-import kr.co.strato.portal.ml.model.MLDto.ListArg;
-import kr.co.strato.portal.ml.service.MLInterfaceAPIAsyncService;
+import kr.co.strato.portal.ml.v1.model.MLDto;
+import kr.co.strato.portal.ml.v1.model.MLScheduleDTO;
+import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
+import kr.co.strato.portal.ml.v1.service.MLInterfaceAPIAsyncService;
 
 @RequestMapping("/api/v1/ml")
 @Api(tags = {"ML 시작/종료/삭제 등. KETI에서 호출하는 API"})

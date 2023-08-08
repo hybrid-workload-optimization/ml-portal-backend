@@ -19,7 +19,7 @@ import kr.co.strato.global.error.exception.NotFoundProjectException;
 import kr.co.strato.portal.cluster.v1.model.ArgoCDInfo;
 import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import kr.co.strato.portal.cluster.v1.service.ClusterService;
-import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
+import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.project.model.CSPAccountDto;
 import kr.co.strato.portal.project.model.mapper.CSPAccountDtoMapper;
 import lombok.extern.slf4j.Slf4j;

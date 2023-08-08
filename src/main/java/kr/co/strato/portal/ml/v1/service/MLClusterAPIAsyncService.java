@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -78,9 +78,13 @@ public class MLClusterAPIAsyncService {
 	
 	public String getPrometheusUrl(Long clusterIdx) {	
 		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		return getPrometheusUrl(cluster);
+	}
+	
+	public String getPrometheusUrl(ClusterEntity cluster) {
 		String externalUrl = getExternalUrl(cluster);		
 		if(externalUrl == null) {
-			log.error("Get Prometheus url fail. clusterIdx: {}", clusterIdx);
+			log.error("Get Prometheus url fail. clusterIdx: {}", cluster.getClusterIdx());
 			log.error("External url is null.");
 		}
 		

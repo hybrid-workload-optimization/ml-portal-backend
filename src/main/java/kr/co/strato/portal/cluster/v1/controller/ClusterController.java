@@ -28,7 +28,7 @@ import kr.co.strato.portal.cluster.v1.model.ClusterDto;
 import kr.co.strato.portal.cluster.v1.model.ClusterNodeDto;
 import kr.co.strato.portal.cluster.v1.service.ClusterService;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.ml.service.MLClusterAPIAsyncService;
+import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
 import kr.co.strato.portal.work.model.WorkHistory.WorkAction;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu1;
 import kr.co.strato.portal.work.model.WorkHistory.WorkMenu2;

@@ -1,4 +1,4 @@
-package kr.co.strato.portal.ml.service;
+package kr.co.strato.portal.ml.v1.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
