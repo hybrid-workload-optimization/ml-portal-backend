@@ -41,7 +41,7 @@ public class WorkloadController {
 	}
 	
 	@ApiOperation(value="Workload 생성 및 업데이트")
-	@PostMapping("/detail")
+	@PostMapping("/apply")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseWrapper<List<WorkloadDto.List>> apply(@RequestBody WorkloadDto.ApplyDto param) {
 		List<WorkloadDto.List> list = workloadService.apply(param);
