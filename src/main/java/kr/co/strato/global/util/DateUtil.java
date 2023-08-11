@@ -131,7 +131,7 @@ public class DateUtil {
     }
     
     public static boolean isToday(String date) {
-    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     	LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
     	dateTime = dateTime.plusHours(9L);
     	
