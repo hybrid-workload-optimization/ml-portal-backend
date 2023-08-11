@@ -42,10 +42,10 @@ public class PodServiceV2 extends WorkloadCommonV2 {
 
 	@Override
 	public WorkloadCommonDto toDto(ClusterEntity clusterEntity, HasMetadata data) throws Exception {
-		return toDto(clusterEntity.getClusterId(), data);
+		return toDtoForId(clusterEntity.getClusterId(), data);
 	}
 	
-	public PodDto toDto(Long kubeconfigId, HasMetadata data) {
+	public PodDto toDtoForId(Long kubeconfigId, HasMetadata data) {
 		PodDto dto = new PodDto();
 		
 		try {
@@ -98,21 +98,25 @@ public class PodServiceV2 extends WorkloadCommonV2 {
 					.collect(toList());
 			
 			List<PersistentVolumeClaimDto> pvcList = new ArrayList<>();
-			for(String pvcName : pvcNames) {
-				try {
-					PersistentVolumeClaim pvc = persistentVolumeClaimAdapterService.get(kubeconfigId, namespace, pvcName);
-					
-					if(pvc != null) {
-						PersistentVolumeClaimDto pvcDto = pvcService.toDto(pvc);
+			
+			if(kubeconfigId != null) {
+				for(String pvcName : pvcNames) {
+					try {
+						PersistentVolumeClaim pvc = persistentVolumeClaimAdapterService.get(kubeconfigId, namespace, pvcName);
 						
-						if (pvcDto != null) {
-							pvcList.add(pvcDto);
+						if(pvc != null) {
+							PersistentVolumeClaimDto pvcDto = pvcService.toDto(pvc);
+							
+							if (pvcDto != null) {
+								pvcList.add(pvcDto);
+							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
+			
 	        
 	        dto.setNode(nodeName);
 	        dto.setIp(ip);
@@ -141,7 +145,7 @@ public class PodServiceV2 extends WorkloadCommonV2 {
 	public List<PodDto> getPodByOwnerUid(Long kubeConfigId, String ownerUid) throws Exception  {
 		List<Pod> pods = podAdapterService.getList(kubeConfigId, null, ownerUid, null, null);
 		if(pods != null && pods.size() > 0) {
-			List<PodDto> list = pods.stream().map(p -> toDto(kubeConfigId, p)).collect(Collectors.toList());
+			List<PodDto> list = pods.stream().map(p -> toDtoForId(kubeConfigId, p)).collect(Collectors.toList());
 			return list;
 		}
 		return null;

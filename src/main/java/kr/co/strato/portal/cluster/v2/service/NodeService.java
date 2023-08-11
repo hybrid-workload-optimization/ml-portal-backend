@@ -20,6 +20,8 @@ import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
+import kr.co.strato.portal.workload.v2.model.PodDto;
+import kr.co.strato.portal.workload.v2.service.PodServiceV2;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,6 +36,9 @@ public class NodeService {
 	
 	@Autowired
 	private ClusterDomainService clusterDomainService;
+	
+	@Autowired
+	private PodServiceV2 podService;
 	
 	public List<NodeDto.ListDto> getListForClusterIdx(Long clusterIdx) {
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
@@ -147,6 +152,9 @@ public class NodeService {
 			detail.setAnnotation(annotations);
 			detail.setLabel(labels);
 			detail.setConditions(conditions);
+			
+			List<PodDto> podDtoList = pods.stream().map(p -> podService.toDtoForId(null, p)).collect(Collectors.toList());
+			detail.setPods(podDtoList);
 		}
 		
 		/*

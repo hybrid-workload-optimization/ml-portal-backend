@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.fabric8.kubernetes.api.model.NodeCondition;
+import kr.co.strato.portal.workload.v2.model.PodDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class NodeDto {
 		private Map<String, String> annotation;
 		private Map<String, String> label;
 		private List<NodeCondition> conditions;
+		private List<PodDto> pods;
 	}
 	
 	@Getter
