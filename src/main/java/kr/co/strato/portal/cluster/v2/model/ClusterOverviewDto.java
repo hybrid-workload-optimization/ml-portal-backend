@@ -3,7 +3,7 @@ package kr.co.strato.portal.cluster.v2.model;
 import java.util.List;
 import java.util.Map;
 
-import kr.co.strato.portal.workload.v1.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -28,8 +28,9 @@ import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
-import kr.co.strato.portal.workload.v1.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadItem;
 import lombok.extern.slf4j.Slf4j;
@@ -318,4 +319,20 @@ public class WorkloadServiceV2 {
 		}
 		return list;
 	}
+	
+	/**
+	 * Workload 리소스 생성.
+	 * @param param
+	 * @return
+	 */
+	public List<WorkloadDto.List> apply(WorkloadDto.ApplyDto param) {
+		Long clusterIdx = param.getClusterIdx();
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		
+		Long kubeConfigId = entity.getClusterId();
+		String yaml = Base64Util.decode(param.getYaml());
+		
+		List<HasMetadata> list = workloadAdapterService.apply(kubeConfigId, yaml);
+		return getList(list);
+	}	
 } 

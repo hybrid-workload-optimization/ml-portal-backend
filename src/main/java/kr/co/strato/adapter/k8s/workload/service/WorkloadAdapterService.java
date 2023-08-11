@@ -21,6 +21,8 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
+import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
 import kr.co.strato.adapter.k8s.common.proxy.WorkloadProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
@@ -35,6 +37,9 @@ public class WorkloadAdapterService {
 	
 	@Autowired
     private InNamespaceProxy inNamespaceProxy;
+	
+	@Autowired
+	private CommonProxy commonProxy;
 	
 	/**
 	 * 워크로드 리스트 조회
@@ -107,6 +112,49 @@ public class WorkloadAdapterService {
             throw new InternalServerException("k8s interface 통신 에러 - pod 조회 에러");
         }
 	}
+	
+	/**
+	 * 워크로드 리소스 생성 및 업데이트
+	 * @param kubeConfigId
+	 * @param yamlStr
+	 * @return
+	 */
+	public List<HasMetadata> apply(Long kubeConfigId, String yamlStr) {
+        YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlStr).build();
+        try{
+            String response = commonProxy.apply(param);            
+            
+            Yaml yaml = new Yaml();
+    		ObjectMapper mapper = new ObjectMapper(); 
+    		
+    		List<HasMetadata> list = new ArrayList<>();
+    		Iterable<Object> iter = yaml.loadAll(response);
+    		
+    		for(Object object : iter) {
+    			if(object instanceof ArrayList) {
+    				for(Object o : (ArrayList) object) {
+    					if(o instanceof Map) {
+    						try {						
+    							Map map = (Map) o;
+    							String kind = (String)map.get("kind");
+    							
+    							TypeReference t = getTypeReference(kind);
+    							String jsonStr = mapper.writeValueAsString(map);
+    							HasMetadata result = (HasMetadata)mapper.readValue(jsonStr, t);
+    							list.add(result);
+    						} catch (Exception e) {
+    							log.error("", e);
+    						}
+    					}
+    				}
+    			}
+    		}
+            return list;
+        } catch (Exception e){
+            log.error(e.getMessage(), e);
+            throw new InternalServerException("k8s interface 통신 에러 - 리소스 생성 에러");
+        }
+    }
 	
 	private TypeReference getTypeReference(String kind) {
 		String type = kind.toLowerCase();

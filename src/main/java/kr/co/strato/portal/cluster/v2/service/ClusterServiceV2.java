@@ -33,7 +33,7 @@ import kr.co.strato.portal.cluster.v2.runnable.GetNodeListRunnable;
 import kr.co.strato.portal.cluster.v2.runnable.GetPersistentVolumeRunnable;
 import kr.co.strato.portal.cluster.v2.runnable.GetWorkloadListRunnable;
 import kr.co.strato.portal.cluster.v2.runnable.WorkloadRunnableExecuter;
-import kr.co.strato.portal.workload.v1.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.service.WorkloadServiceV2;
 import lombok.extern.slf4j.Slf4j;
 

@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.workload.v1.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.service.WorkloadServiceV2;
 
+@Api(tags = {"Workload API"})
 @RequestMapping("/api/v1/workload")
 @RestController
 public class WorkloadController {
@@ -38,5 +40,11 @@ public class WorkloadController {
 		return new ResponseWrapper<Object>(result);
 	}
 	
-	
+	@ApiOperation(value="Workload 생성 및 업데이트")
+	@PostMapping("/detail")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<List<WorkloadDto.List>> apply(@RequestBody WorkloadDto.ApplyDto param) {
+		List<WorkloadDto.List> list = workloadService.apply(param);
+		return new ResponseWrapper<List<WorkloadDto.List>>(list);
+	}	
 }
