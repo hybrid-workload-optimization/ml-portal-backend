@@ -20,6 +20,16 @@ import lombok.ToString;
 @NoArgsConstructor
 public class NamespaceDto {
 	
+	private String uid;
+	private String name;
+	private String status;
+	private String createdAt;
+	private Map<String, String> annotation;
+	private Map<String, String> label;
+	private String podStatus;
+	private ResourceQuotaDto resourceQuota;
+	
+	
 	@Getter
 	@Setter
 	@NoArgsConstructor
@@ -36,7 +46,7 @@ public class NamespaceDto {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class ListDto{
+	public static class ListDto {
 		private String uid;
     	private String name;
     	private String status;
@@ -50,20 +60,8 @@ public class NamespaceDto {
 	
     @Getter
     @Setter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class DetailDto{
-    	private Long id;
-    	private String name;
-    	private String uid;
-    	private String ip;
-    	private String status;
-    	private LocalDateTime createdAt;
-    	private Long clusterIdx;
-    	private Long clusterId;
-    	private HashMap<String, Object> annotation;
-    	private HashMap<String, Object> label;
+    public static class DetailDto extends ListDto {
+    	
     }
 	
 	@Getter

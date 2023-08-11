@@ -16,7 +16,10 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceQuota;
 import io.fabric8.kubernetes.api.model.ResourceQuotaStatus;
 import kr.co.strato.adapter.k8s.namespace.service.NamespaceAdapterService;
+import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
 import kr.co.strato.adapter.k8s.resourcequota.service.ResourceQuotaAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
 import kr.co.strato.portal.cluster.v2.model.NamespaceDto.ResourceQuotaDto;
@@ -32,6 +35,35 @@ public class NamespaceService {
 	@Autowired
 	private ResourceQuotaAdapterService resourceQuotaAdapterService;
 	
+	@Autowired
+	private ClusterDomainService clusterDomainService;
+	
+	@Autowired
+    private PodAdapterService podAdapterService;
+	
+	public List<NamespaceDto.ListDto> getList(Long clusterIdx) {
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		
+		List<Pod> pods = podAdapterService.getList(kubeConfigId, null, null, null, null);
+		return getList(kubeConfigId, pods);
+	}
+	
+	public NamespaceDto.ListDto getDetail(Long clusterIdx, String name) {
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		
+		List<Pod> pods = podAdapterService.getList(kubeConfigId, null, null, name, null);
+		Namespace namespace = namespaceAdapterService.getNamespace(kubeConfigId, name);
+		
+		NamespaceDto.ListDto dto = null;
+		try {
+			dto = getNamespaceDto(kubeConfigId, namespace, pods);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		return dto;
+	}
 	
 	public List<NamespaceDto.ListDto> getList(Long kubeConfigId, List<Pod> podList) {
 		List<NamespaceDto.ListDto> list = new ArrayList<>();

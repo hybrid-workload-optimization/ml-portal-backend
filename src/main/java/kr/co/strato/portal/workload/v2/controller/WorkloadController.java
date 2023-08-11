@@ -37,4 +37,6 @@ public class WorkloadController {
 		Object result = workloadService.getDetail(param);
 		return new ResponseWrapper<Object>(result);
 	}
+	
+	
 }
