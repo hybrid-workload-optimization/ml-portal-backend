@@ -3,8 +3,11 @@ package kr.co.strato.portal.cluster.v2.model;
 import java.util.List;
 import java.util.Map;
 
+import io.fabric8.kubernetes.api.model.NodeCondition;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 public class NodeDto {
@@ -12,6 +15,8 @@ public class NodeDto {
 	@Getter
 	@Setter
 	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor
 	public static class ListDto {
 		private String uid;
 		private String name;
@@ -22,6 +27,23 @@ public class NodeDto {
 		private NodeUsageDto usageDto;
 		private Map<String, String> labels;
 		private String createdAt;
+	}
+	
+	@Getter
+	@Setter
+	public static class DetailDto extends ListDto {
+		private String k8sVersion;
+		private float allocatedCpu;
+		private float allocatedMemory;
+		private String podCidr;
+		private String osImage;
+		private String kernelVersion;
+		private String architecture;
+		private String kubeletVersion;
+		//private String kubeproxyVersion;
+		private Map<String, String> annotation;
+		private Map<String, String> label;
+		private List<NodeCondition> conditions;
 	}
 	
 	@Getter

@@ -1,6 +1,9 @@
 package kr.co.strato.portal.cluster.v2.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,8 +160,16 @@ public class ClusterServiceV2 {
 		String region = cluster.getRegion();
 		String version = cluster.getProviderVersion();
 		String status = cluster.getProvisioningStatus();
-		String createAt = cluster.getCreatedAt();
+		String createAt = null;
 		String createBy = cluster.getCreateUserId();
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
+		try {
+			Date date = formatter.parse(cluster.getCreatedAt());
+			createAt = formatter.format(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}	
 		
 		Integer nodeCount = 0;		
 		double cpuTotal = 0;

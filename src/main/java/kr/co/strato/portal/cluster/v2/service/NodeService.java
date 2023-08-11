@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeCondition;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -37,6 +35,18 @@ public class NodeService {
 		return getList(kubeConfigId, podList);
 	}
 	
+	public NodeDto.DetailDto getNode(Long kubeConfigId, String nodeName) {
+		List<Pod> podList = podAdapterService.getList(kubeConfigId, nodeName, null, null, null);
+		Node node = nodeAdapterService.getNodeDetail(kubeConfigId, nodeName);
+		NodeDto.DetailDto detail = new NodeDto.DetailDto();
+		try {
+			getNodeDto(node, podList, detail);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		return detail;
+	}
+	
 	public List<NodeDto.ListDto> getList(Long kubeConfigId, List<Pod> podList) {
 		List<NodeDto.ListDto> list = new ArrayList<>();
 		List<Node> nodeList = nodeAdapterService.getNodeList(kubeConfigId);
@@ -49,19 +59,17 @@ public class NodeService {
 					.collect(Collectors.toList());
 			
 			try {
-				NodeDto.ListDto dto = getNodeDto(n, pods);
+				NodeDto.ListDto dto = new NodeDto.ListDto();
+				getNodeDto(n, pods, dto);
 				list.add(dto);
 			} catch (Exception e) {
 				log.error("", e);
 			}
 		}
 		return list;
-		
 	}
 	
-	public NodeDto.ListDto getNodeDto(Node n, List<Pod> pods) throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
-		
+	public void getNodeDto(Node n, List<Pod> pods, NodeDto.ListDto dto) throws Exception {
         List<NodeCondition> conditions = n.getStatus().getConditions();
 		// k8s Object -> Entity
 		String name = n.getMetadata().getName();
@@ -87,7 +95,6 @@ public class NodeService {
 
 		Map<String, String> annotations = n.getMetadata().getAnnotations();
 		Map<String, String> labels = n.getMetadata().getLabels();
-		String condition = mapper.writeValueAsString(conditions);
 
 		List<String> roles = new ArrayList<>();
 		n.getMetadata().getLabels().keySet().stream().filter(l -> l.contains("node-role"))
@@ -105,7 +112,30 @@ public class NodeService {
 			usageDto = setUsage(n, pods);
 		}
 		
+		dto.setUid(uid);
+		dto.setName(name);
+		dto.setIp(ip);
+		dto.setStatus(Boolean.toString(status));
+		dto.setPodStatus(podStatus);
+		dto.setRole(roles);
+		dto.setLabels(labels);
+		dto.setUsageDto(usageDto);
+		dto.setCreatedAt(createdAt);
 		
+		if(dto instanceof NodeDto.DetailDto) {
+			NodeDto.DetailDto detail = (NodeDto.DetailDto) dto;
+			detail.setK8sVersion(k8sVersion);
+			detail.setPodCidr(podCidr);
+			detail.setOsImage(image);
+			detail.setKernelVersion(kernelVersion);
+			detail.setArchitecture(architecture);
+			detail.setKubeletVersion(kubeletVersion);
+			detail.setAnnotation(annotations);
+			detail.setLabel(labels);
+			detail.setConditions(conditions);
+		}
+		
+		/*
 		NodeDto.ListDto listDto = NodeDto.ListDto.builder()
 				.uid(uid)
 				.name(name)
@@ -119,6 +149,7 @@ public class NodeService {
 				.build();
 		
         return listDto;
+        */
 	}
 
 	public NodeDto.NodeUsageDto setUsage(Node node, List<Pod> pods) {

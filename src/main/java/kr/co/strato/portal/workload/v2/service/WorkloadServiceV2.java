@@ -28,6 +28,7 @@ import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
+import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.v1.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadItem;
@@ -157,7 +158,7 @@ public class WorkloadServiceV2 {
 				Integer podCountTotal = pods.size();
 				Integer podCountReady = getReadyPodCount(data, pods);
 				String health = getHealth(data, pods, podCountReady);
-				String createAt = data.getMetadata().getCreationTimestamp();
+				String createAt = DateUtil.strToNewFormatter(data.getMetadata().getCreationTimestamp());
 				
 				WorkloadDto.List listItem = WorkloadDto.List.builder()
 						.uid(uid)
