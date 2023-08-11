@@ -24,16 +24,16 @@ public class NodeControllerV2 {
 	@GetMapping("/{clusterIdx}/list")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<List<NodeDto.ListDto>> getNodeList(@PathVariable(required = true) Long clusterIdx) {
-        List<NodeDto.ListDto> list = nodeService.getList(clusterIdx);
+        List<NodeDto.ListDto> list = nodeService.getListForClusterIdx(clusterIdx);
         return new ResponseWrapper<>(list);
     }
 	
 	@GetMapping("/{clusterIdx}/{nodeName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<NodeDto.ListDto>> getNodeDetail(
+    public ResponseWrapper<NodeDto.DetailDto> getNodeDetail(
     		@PathVariable(required = true) Long clusterIdx,
     		@PathVariable(required = true) String nodeName) {
-        List<NodeDto.ListDto> list = nodeService.getList(clusterIdx);
-        return new ResponseWrapper<>(list);
+		NodeDto.DetailDto node = nodeService.getNode(clusterIdx, nodeName);
+        return new ResponseWrapper<>(node);
     }
 }

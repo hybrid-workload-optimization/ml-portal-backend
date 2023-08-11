@@ -17,6 +17,8 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import kr.co.strato.adapter.k8s.node.service.NodeAdapterService;
 import kr.co.strato.adapter.k8s.pod.service.PodAdapterService;
+import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,12 +32,24 @@ public class NodeService {
 	@Autowired
 	private NodeAdapterService nodeAdapterService;
 	
+	@Autowired
+	private ClusterDomainService clusterDomainService;
+	
+	public List<NodeDto.ListDto> getListForClusterIdx(Long clusterIdx) {
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		return getList(kubeConfigId);
+	}
+	
 	public List<NodeDto.ListDto> getList(Long kubeConfigId) {
 		List<Pod> podList = podAdapterService.getList(kubeConfigId, null, null, null, null);
 		return getList(kubeConfigId, podList);
 	}
 	
-	public NodeDto.DetailDto getNode(Long kubeConfigId, String nodeName) {
+	public NodeDto.DetailDto getNode(Long clusterIdx, String nodeName) {
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		
 		List<Pod> podList = podAdapterService.getList(kubeConfigId, nodeName, null, null, null);
 		Node node = nodeAdapterService.getNodeDetail(kubeConfigId, nodeName);
 		NodeDto.DetailDto detail = new NodeDto.DetailDto();
