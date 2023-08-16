@@ -133,7 +133,7 @@ public class WorkloadServiceV2 {
 						
 						if(parentItem != null && childItem != null) {
 							parentItem.addChild(childItem);
-						}
+						} 
 					}
 					
 					//리스트에서 제거
