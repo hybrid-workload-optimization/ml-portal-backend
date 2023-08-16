@@ -108,10 +108,12 @@ public class WorkloadServiceV2 {
 		try {
 			//uid를 키로 맵으로 변환
 			Map<String, WorkloadItem> map = new HashMap<>();
+			Map<String, WorkloadItem> mapList = new HashMap<>();
 			for(HasMetadata data : list) {
 				String uid = data.getMetadata().getUid();
 				WorkloadItem item = new WorkloadItem(data);
 				map.put(uid, item);
+				mapList.put(uid, item);
 			}
 			
 			//부모 자식 구조 생성 및 자식 아이템 리스트에서 제거
@@ -119,6 +121,9 @@ public class WorkloadServiceV2 {
 				List<OwnerReference> ownerRef = data.getMetadata().getOwnerReferences();
 				if(ownerRef != null && ownerRef.size() > 0) {
 					String uid = data.getMetadata().getUid();
+					String name = data.getMetadata().getName();
+					String kind = data.getKind();
+					
 					for(OwnerReference r : ownerRef) {
 						String ownerRefUid = r.getUid();
 						
@@ -132,19 +137,20 @@ public class WorkloadServiceV2 {
 					}
 					
 					//리스트에서 제거
-					map.remove(uid);
+					mapList.remove(uid);
 				}
 			}
 			
-			Iterator<String> iter = map.keySet().iterator();
+			Iterator<String> iter = mapList.keySet().iterator();
 			while(iter.hasNext()) {
-				WorkloadItem item = map.get(iter.next());
+				WorkloadItem item = mapList.get(iter.next());
 				HasMetadata data = item.getData();
 				
 				List<Pod> pods = getPods(item);
 				
 				String uid = data.getMetadata().getUid();
 				String name = data.getMetadata().getName();
+				
 				
 				if(keyword != null && keyword.length() > 0) {
 					//키워드 검색인 경우 이름으로 필터링
@@ -304,8 +310,7 @@ public class WorkloadServiceV2 {
 	 * @return
 	 */
 	private List<Pod> getPods(WorkloadItem item) {
-		List<Pod> list = new ArrayList<>();
-		
+		List<Pod> list = new ArrayList<>();	
 		List<WorkloadItem> children = item.getChildren();
 		for(WorkloadItem child: children) {
 			if(child.getData() instanceof Pod) {
