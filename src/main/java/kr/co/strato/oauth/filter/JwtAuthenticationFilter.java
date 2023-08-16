@@ -56,7 +56,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 		
 		log.debug("JwtAuthenticationFilter start. ");
 		String jwtToken = getTokenStr(httpRequest);
-		log.debug("token = {}",jwtToken);
+		log.info("token = {}",jwtToken);
 		
 		if (jwtToken != null) {
 			
