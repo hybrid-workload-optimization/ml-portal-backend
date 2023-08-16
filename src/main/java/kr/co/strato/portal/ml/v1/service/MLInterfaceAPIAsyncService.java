@@ -74,7 +74,9 @@ public class MLInterfaceAPIAsyncService {
 		String mlId = applyDto.getMlId();
 		String yamStr = Base64Util.decode(applyDto.getYaml());
 		String stepCode = applyDto.getMlStepCode();
-		String cron = applyDto.getCronSchedule();
+		String startCron = applyDto.getStartCronSchedule();
+		String endCron = applyDto.getEndCronSchedule();
+		
 		
 		log.info("ML ID: {}", mlId);
 		log.info("ML Name: {}", mlName);
@@ -102,7 +104,9 @@ public class MLInterfaceAPIAsyncService {
 			entity = MLDtoMapper.INSTANCE.toEntity(applyDto);
 			entity.setClusterIdx(clusterIdx);
 			entity.setUpdatedAt(now);
-			entity.setCronSchedule(cron);
+			entity.setStartCronSchedule(startCron);
+			entity.setEndCronSchedule(endCron);
+			
 			if(isNew) {
 				entity.setCreatedAt(now);
 				entity.setStatus(MLEntity.STATUS_PENDING);
@@ -141,15 +145,15 @@ public class MLInterfaceAPIAsyncService {
 			*/
 			
 			// cron 스케줄링
-//			String cronExpression = applyDto.getCronSchedule();
-//			if(cronExpression != null) {
-//				MLScheduleDTO dto = new MLScheduleDTO();
-//				dto.setMlId(mlId);
-//				dto.setClusterIdx(clusterIdx);
-//				
-//				ScheduledTaskService scheduledTask = new ScheduledTaskService();
-//		    	scheduledTask.scheduleTask(dto);
-//			}
+			if(startCron != null && endCron != null) {
+				MLScheduleDTO dto = new MLScheduleDTO();
+				dto.setMlId(mlId);
+				dto.setClusterIdx(clusterIdx);
+				
+				ScheduledTaskService scheduledTask = new ScheduledTaskService();
+		    	scheduledTask.scheduleTask(dto);
+			
+			}
 			
 			return entity;
 		}

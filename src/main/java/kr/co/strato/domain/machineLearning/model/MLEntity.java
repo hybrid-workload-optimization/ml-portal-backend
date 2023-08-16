@@ -39,5 +39,7 @@ public class MLEntity {
 	private String createdAt;	
 	private String updatedAt;
 	private String callbackUrl;
-	private String cronSchedule;
+	private String startCronSchedule;
+	private String endCronSchedule;
+	
 }
