@@ -113,7 +113,7 @@ public class ScheduledTaskService {
     }
 
     // 최초 시작시 ML 조회하여 cron 스케줄링 실행
-    @PostConstruct
+    //@PostConstruct
     public void initScheduleStart() {
     	
     	mlDomainService = ApplicationContextProvider.getBean(MLDomainService.class);
