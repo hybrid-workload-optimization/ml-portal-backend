@@ -63,9 +63,9 @@ public class MLDomainService {
 		}
 	}
 	
-	public List<String> getCronsByClusterIdx(Long clusterIdx) {
-		List<String> crons = mlRepository.getCronsByClusterIdx(clusterIdx);
-		return crons;
+	public List<MLEntity> getCronsByClusterIdx(Long clusterIdx) {
+		List<MLEntity> entity = mlRepository.getByClusterIdx(clusterIdx);
+		return entity;
 	}
 	
 	public void deleteByMlId(String mlId) {

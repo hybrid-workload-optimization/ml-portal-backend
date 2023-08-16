@@ -56,7 +56,7 @@ public class CustomMLRepositoryImpl implements CustomMLRepository {
 	}
 	
 	@Override
-	public List<String> getCronsByClusterIdx(Long clusterIdx) {
+	public List<MLEntity> getByClusterIdx(Long clusterIdx) {
 		QMLEntity qEntity = QMLEntity.mLEntity;
 		
 		BooleanBuilder builder = new BooleanBuilder();
@@ -64,13 +64,13 @@ public class CustomMLRepositoryImpl implements CustomMLRepository {
         	builder.and(qEntity.clusterIdx.eq(clusterIdx));
         }
 		
-		QueryResults<String> results = jpaQueryFactory
-        		.select(qEntity.cronSchedule)
+		QueryResults<MLEntity> results = jpaQueryFactory
+        		.select(qEntity)
                 .from(qEntity)
                 .where(builder)
                 .fetchResults();
 
-        List<String> content = results.getResults();
+        List<MLEntity> content = results.getResults();
 		return content;
 	}
 	
