@@ -45,6 +45,8 @@ public class DashboardServiceV2 {
 		int controlPlaneUtilization = 0;
 		int workerUtilization = 0;
 		
+		String nodeUtilizationState = "Unknown";
+		
 		List<ClusterSummary> clusterSummaryList = new ArrayList<>();
 		
 		if(clusters != null && clusters.size() > 0) {
@@ -92,6 +94,16 @@ public class DashboardServiceV2 {
 			controlPlaneUtilization = Long.valueOf(Math.round((double) controlPlaneReadyCount / (double) controlPlaneCount * 100)).intValue();
 			workerUtilization = Long.valueOf(Math.round((double) workerReadyCount / (double) workerCount * 100)).intValue();
 			
+			//90 이상 Good
+			//90 미만 70 이상 Warning
+			//70 미만 Bad
+			if(totalUtilization >= 90) {
+				nodeUtilizationState = "Good";
+			} else if(totalUtilization > 70) {
+				nodeUtilizationState = "Warning";
+			} else {
+				nodeUtilizationState = "Bad";
+			}
 			
 		}
 		DashboardDto dashboard = DashboardDto.builder()
@@ -106,6 +118,7 @@ public class DashboardServiceV2 {
 				.controlPlaneUtilization(controlPlaneUtilization)
 				.workerUtilization(workerUtilization)
 				.clusterSummaryList(clusterSummaryList)
+				.nodeUtilizationState(nodeUtilizationState)
 				.build();
 		
 		return dashboard;	
