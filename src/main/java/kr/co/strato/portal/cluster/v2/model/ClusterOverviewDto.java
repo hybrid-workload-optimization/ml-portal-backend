@@ -31,6 +31,7 @@ public class ClusterOverviewDto {
 	@Builder
 	public static class ClusterSummary {
 		private String name;
+		private String description;
 		private String provider;
 		private String region;
 		private String vision;

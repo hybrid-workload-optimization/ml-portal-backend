@@ -1,4 +1,4 @@
-package kr.co.strato.portal.dashboard.service;
+package kr.co.strato.portal.dashboard.v1.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +33,7 @@ import kr.co.strato.portal.cluster.v1.model.ClusterNodeDtoMapper;
 import kr.co.strato.portal.cluster.v1.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.cluster.v1.service.ClusterNodeService;
 import kr.co.strato.portal.common.service.SelectService;
-import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
+import kr.co.strato.portal.dashboard.v1.model.SystemAdminNodeStateDto;
 import kr.co.strato.portal.setting.model.UserDto;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

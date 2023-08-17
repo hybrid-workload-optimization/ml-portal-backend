@@ -1,4 +1,4 @@
-package kr.co.strato.portal.dashboard.controller;
+package kr.co.strato.portal.dashboard.v1.controller;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.v1.model.ClusterNodeDto.ResListDetailDto;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.dashboard.model.SystemAdminNodeStateDto;
-import kr.co.strato.portal.dashboard.service.DashboardService;
+import kr.co.strato.portal.dashboard.v1.model.SystemAdminNodeStateDto;
+import kr.co.strato.portal.dashboard.v1.service.DashboardService;
 
 @RestController
 public class DashboardController extends CommonController {

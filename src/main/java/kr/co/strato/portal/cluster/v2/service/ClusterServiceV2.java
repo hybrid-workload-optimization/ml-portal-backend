@@ -64,12 +64,15 @@ public class ClusterServiceV2 {
 	 * @param clusterIdx
 	 * @return
 	 */
-	public Object getOverview(Long clusterIdx) {
+	public ClusterOverviewDto.Overview getOverview(Long clusterIdx) {
 		ClusterEntity clusterEntity = clusterDomainService.get(clusterIdx);
 		if(clusterEntity == null) {
 			throw new PortalException("Not Found Cluster.");
 		}
-		
+		return getOverview(clusterEntity);
+	}
+	
+	public ClusterOverviewDto.Overview getOverview(ClusterEntity clusterEntity) {
 		Long kubeConfigId = clusterEntity.getClusterId();
 		
 		GetWorkloadListRunnable workloadRunnable = new GetWorkloadListRunnable(workloadAdapterService, kubeConfigId);
@@ -156,6 +159,7 @@ public class ClusterServiceV2 {
 			List<Pod> podList) {
 		
 		String name = cluster.getClusterName();
+		String description = cluster.getDescription();
 		String provider = cluster.getProvider();
 		String region = cluster.getRegion();
 		String version = cluster.getProviderVersion();
@@ -205,6 +209,7 @@ public class ClusterServiceV2 {
 		
 		ClusterOverviewDto.ClusterSummary summary = ClusterOverviewDto.ClusterSummary.builder()
 				.name(name)
+				.description(description)
 				.provider(provider)
 				.region(region)
 				.vision(version)

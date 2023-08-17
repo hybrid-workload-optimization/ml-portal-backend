@@ -1,4 +1,4 @@
-package kr.co.strato.portal.dashboard.model;
+package kr.co.strato.portal.dashboard.v1.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class DashboardSystemAdminInfoDto {
+public class SystemAdminNodeStateDto {
 	private int projectCount;
 	private int clusterCount;
 	
@@ -25,6 +25,5 @@ public class DashboardSystemAdminInfoDto {
 	int workerUtilization;
 	
 	private String nodeUtilizationState;
-	
 	private int restartWithinTenMinutes;
 }
