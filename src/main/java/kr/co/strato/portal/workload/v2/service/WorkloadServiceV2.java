@@ -1,6 +1,7 @@
 package kr.co.strato.portal.workload.v2.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto.ResourceParam;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadItem;
 import lombok.extern.slf4j.Slf4j;
@@ -339,5 +341,27 @@ public class WorkloadServiceV2 {
 		
 		List<HasMetadata> list = workloadAdapterService.apply(kubeConfigId, yaml);
 		return getList(list);
-	}	
+	}
+	
+	/**
+	 * 리소스 삭제
+	 * @return
+	 */
+	public boolean delete(ResourceParam p) {
+		ClusterEntity entity = clusterDomainService.get(p.getClusterIdx());
+		Long kubeConfigId = entity.getClusterId();
+		return workloadAdapterService.delete(kubeConfigId, p.getKind(), p.getNamespace(), p.getName());
+	}
+	
+	/**
+	 * 리소스 yaml 조회
+	 * @param p
+	 * @return
+	 */
+	public String getResourceYaml(ResourceParam p) {
+		ClusterEntity entity = clusterDomainService.get(p.getClusterIdx());
+		Long kubeConfigId = entity.getClusterId();
+		String yaml = workloadAdapterService.resourceYaml(kubeConfigId, p.getKind(), p.getNamespace(), p.getName());
+		return Base64.getEncoder().encodeToString(yaml.getBytes());
+	}
 } 

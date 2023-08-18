@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
+import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
@@ -155,6 +156,42 @@ public class WorkloadAdapterService {
             throw new InternalServerException("k8s interface 통신 에러 - 리소스 생성 에러");
         }
     }
+	
+	/**
+	 * 리소스 삭제
+	 * @param kubeConfigId
+	 * @param kind
+	 * @param namespace
+	 * @param name
+	 * @return
+	 */
+	public boolean delete(Long kubeConfigId, String kind, String namespace, String name) {
+		WorkloadResourceInfo body = WorkloadResourceInfo.builder()
+                .kubeConfigId(kubeConfigId)
+                .namespace(namespace)
+                .name(name)
+                .build();
+		
+		String resourceType = getResourceType(kind);
+		boolean response = inNamespaceProxy.deleteResource(resourceType, body);
+		return response;
+	}
+	
+	/**
+	 * 리소스 yaml 정보 조회
+	 * @param kubeConfigId
+	 * @param kind
+	 * @param namespace
+	 * @param name
+	 * @return
+	 */
+	public String resourceYaml(Long kubeConfigId, String kind, String namespace, String name) {
+		String resourceType = getResourceType(kind);
+		String yaml = inNamespaceProxy.getResourceYaml(resourceType, kubeConfigId, namespace, name);
+		return yaml;
+	}
+	
+	
 	
 	private TypeReference getTypeReference(String kind) {
 		String type = kind.toLowerCase();

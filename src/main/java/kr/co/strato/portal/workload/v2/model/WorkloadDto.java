@@ -57,4 +57,15 @@ public class WorkloadDto {
         private Long clusterIdx;
         private String yaml;
     }
+	
+	@Getter
+    @Setter
+    @NoArgsConstructor
+    @ToString
+    public static class ResourceParam {
+        private Long clusterIdx;
+        private String kind;
+        private String namespace;
+        private String name;
+    }
 }

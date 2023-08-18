@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +47,21 @@ public class WorkloadController {
 	public ResponseWrapper<List<WorkloadDto.List>> apply(@RequestBody WorkloadDto.ApplyDto param) {
 		List<WorkloadDto.List> list = workloadService.apply(param);
 		return new ResponseWrapper<List<WorkloadDto.List>>(list);
-	}	
+	}
+	
+	@ApiOperation(value="Workload 삭제")
+	@DeleteMapping("/delete")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<Boolean> delete(@RequestBody WorkloadDto.ResourceParam param) {
+		boolean isDelete = workloadService.delete(param);
+		return new ResponseWrapper<Boolean>(isDelete);
+	}
+	
+	@ApiOperation(value="Workload yaml 조회")
+	@PostMapping("/yaml")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseWrapper<String> getYaml(@RequestBody WorkloadDto.ResourceParam param) {
+		String yaml = workloadService.getResourceYaml(param);
+		return new ResponseWrapper<String>(yaml);
+	}
 }
