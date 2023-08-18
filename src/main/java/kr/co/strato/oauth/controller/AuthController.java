@@ -42,6 +42,9 @@ import reactor.core.publisher.Mono;
 @RestController
 public class AuthController {
 	
+	@Value("${auth.client.url}")
+	private String clientUrl;
+	
 	@Value("${auth.server.url}")
 	private String authServerUrl;
 
@@ -59,7 +62,7 @@ public class AuthController {
     public void login(
     		HttpServletResponse httpServletResponse,
     		@RequestParam String redirectUrl) throws IOException {
-		String url = String.format("/oauth2/authorization/%s-oidc?redirect_uri=%s", clientId, redirectUrl);
+		String url = String.format("%s/oauth2/authorization/%s-oidc?redirect_uri=%s", clientUrl, clientId, redirectUrl);
 		log.info("Redirect login page: {}", url);
 		httpServletResponse.sendRedirect(url);
 	}
