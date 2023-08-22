@@ -55,6 +55,7 @@ public class ClusterOverviewDto {
 		private Integer countPV;
 		private Integer countWorkload;
 		private Integer countPod;
+		private ClusterDto.Status healthy;
 	}
 	
 	@Getter

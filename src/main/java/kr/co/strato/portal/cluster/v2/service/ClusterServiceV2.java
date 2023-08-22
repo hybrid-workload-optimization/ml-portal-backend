@@ -16,11 +16,15 @@ import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
+import kr.co.strato.adapter.k8s.cluster.model.ClusterHealthAdapterDto;
+import kr.co.strato.adapter.k8s.cluster.service.ClusterAdapterService;
 import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
+import kr.co.strato.domain.cluster.model.ClusterEntity.ProvisioningStatus;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.cluster.v2.model.ClusterDto;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.PodList;
 import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto.PodSummary;
@@ -58,6 +62,9 @@ public class ClusterServiceV2 {
 	
 	@Autowired
 	private PersistentVolumeService pvService;
+	
+	@Autowired
+	ClusterAdapterService clusterAdapterService;
 
 	/**
 	 * 클러스터 Overview 화면 데이터 조회.
@@ -73,6 +80,10 @@ public class ClusterServiceV2 {
 	}
 	
 	public ClusterOverviewDto.Overview getOverview(ClusterEntity clusterEntity) {
+		return getOverview(clusterEntity, false);
+	}
+	
+	public ClusterOverviewDto.Overview getOverview(ClusterEntity clusterEntity, boolean attachHealty) {
 		Long kubeConfigId = clusterEntity.getClusterId();
 		
 		GetWorkloadListRunnable workloadRunnable = new GetWorkloadListRunnable(workloadAdapterService, kubeConfigId);
@@ -110,7 +121,7 @@ public class ClusterServiceV2 {
 			
 			
 			
-			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList);			
+			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList, attachHealty);			
 			
 			List<WorkloadDto.List> controlPlaneComponents = null;
 			WorkloadSummary workloadSummary = null;
@@ -156,7 +167,8 @@ public class ClusterServiceV2 {
 			List<NamespaceDto.ListDto> namespaceList,
 			List<PersistentVolumeDto.ListDto> pvList,
 			List<WorkloadDto.List> workloads,
-			List<Pod> podList) {
+			List<Pod> podList,
+			boolean attachHealty) {
 		
 		String name = cluster.getClusterName();
 		String description = cluster.getDescription();
@@ -206,6 +218,10 @@ public class ClusterServiceV2 {
 			}
 		}
 		
+		ClusterDto.Status healthy = null;
+		if(attachHealty) {
+			healthy = getClusterStatus(cluster);
+		}
 		
 		ClusterOverviewDto.ClusterSummary summary = ClusterOverviewDto.ClusterSummary.builder()
 				.name(name)
@@ -233,6 +249,7 @@ public class ClusterServiceV2 {
 				.countPV(pvList.size())
 				.countWorkload(workloads.size())
 				.countPod(podList.size())
+				.healthy(healthy)
 				.build();
 		return summary;
 	}
@@ -379,6 +396,84 @@ public class ClusterServiceV2 {
 				.podRestartList(restartWithin30minutesList)
 				.build();
 		return summary;
+	}
+	
+	/**
+	 * 클러스터 상태 정보 조회
+	 * @param clusterEntity
+	 * @return
+	 */
+	public ClusterDto.Status getClusterStatus(ClusterEntity clusterEntity) {
+		ClusterDto.Status status = new ClusterDto.Status();
+		if(clusterEntity != null) {
+			Long kubeConfigId = clusterEntity.getClusterId();
+			String pStatus = clusterEntity.getProvisioningStatus();
+			
+			ClusterHealthAdapterDto health = getClusterStatus(kubeConfigId, pStatus);
+			status.setStatus(health.getHealth());
+			status.setProblem(status.getProblem());
+		} else {
+			status.setStatus("deleted");
+		}
+		return status;
+	}
+	
+	public ClusterHealthAdapterDto getClusterStatus(Long kubeConfigId, String pStatus) {
+		ClusterHealthAdapterDto health = new ClusterHealthAdapterDto();
+		if(pStatus != null) {
+			if(pStatus.equals(ProvisioningStatus.FINISHED.toString())) {
+				if(kubeConfigId != null) {
+					try {
+						health = clusterAdapterService.getClusterHealthInfo(kubeConfigId);
+					} catch(Exception e) {
+						// Health 정보를 가져올 수 없는 경우.
+						health = new ClusterHealthAdapterDto();
+						health.setHealth("Unhealthy");
+						health.addProbleam("Could not get cluster information.");
+					}
+				}
+				
+			} else if(pStatus.equals(ProvisioningStatus.READY.toString())) {
+				//배포 준비
+				health.setHealth("Waiting");
+			} else if( pStatus.equals(ProvisioningStatus.STARTED.toString())) {
+				//배포중
+				health.setHealth("Deploying");
+			} else if(pStatus.equals(ProvisioningStatus.DELETING.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Deleting");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE_OUT.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Scale out");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE_IN.toString())) {
+				//클러스터 삭제 중
+				health.setHealth("Scale in");
+			} else if(pStatus.equals(ProvisioningStatus.FAILED.toString())) {
+				//배포 실패
+				health.setHealth("Fail");
+				health.addProbleam("Cluster deployment failed.");
+			} else if(pStatus.equals(ProvisioningStatus.SCALE.toString())) {
+				
+				health.setHealth("Scale in");
+			} else if(pStatus.equals(ProvisioningStatus.PENDING.toString())) {
+				//배포 실패
+				health.setHealth("Waiting");
+			} else {
+				//배포 실패
+				health.setHealth("Waiting");
+			}
+		} else {
+			
+			health.setHealth("Error");
+			health.addProbleam("Cluster deployment information does not exist.");
+		}
+		
+		
+		if(health.getHealth() == null) {
+			health.setHealth("Error");
+			health.addProbleam("Unknown Error.");
+		}
+		return health;
 	}
 	
 }

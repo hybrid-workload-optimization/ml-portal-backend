@@ -162,7 +162,7 @@ public class DashboardServiceV2 {
 		@Override
 		public void run() {
 			try {
-				this.overview = clusterService.getOverview(clusterEntity);
+				this.overview = clusterService.getOverview(clusterEntity, true);
 			} catch (Exception e) {
 				log.error("", e);
 			} finally {
