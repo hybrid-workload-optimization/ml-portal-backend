@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import kr.co.strato.adapter.k8s.common.model.ApplyResult;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
 import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
@@ -120,37 +121,49 @@ public class WorkloadAdapterService {
 	 * @param yamlStr
 	 * @return
 	 */
-	public List<HasMetadata> apply(Long kubeConfigId, String yamlStr) {
+	public ApplyResult.Result apply(Long kubeConfigId, String yamlStr) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yamlStr).build();
         try{
-            String response = commonProxy.apply(param);            
+        	List<HasMetadata> list = null;
+        	ApplyResult.Response response = commonProxy.applyV2(param);
+        	if(response.isSuccess()) {
+        		list = new ArrayList<>();
+        		String resourceStr = response.getResources();
+        		
+        		Yaml yaml = new Yaml();
+        		ObjectMapper mapper = new ObjectMapper(); 
+        		
+        		
+        		Iterable<Object> iter = yaml.loadAll(resourceStr);
+        		
+        		for(Object object : iter) {
+        			if(object instanceof ArrayList) {
+        				for(Object o : (ArrayList) object) {
+        					if(o instanceof Map) {
+        						try {						
+        							Map map = (Map) o;
+        							String kind = (String)map.get("kind");
+        							
+        							TypeReference t = getTypeReference(kind);
+        							String jsonStr = mapper.writeValueAsString(map);
+        							HasMetadata resource = (HasMetadata)mapper.readValue(jsonStr, t);
+        							list.add(resource);
+        						} catch (Exception e) {
+        							log.error("", e);
+        						}
+        					}
+        				}
+        			}
+        		}
+        	}
+        	
+        	ApplyResult.Result result = ApplyResult.Result.builder()
+        			.success(response.isSuccess())
+        			.errorMessage(response.getErrorMessage())
+        			.resources(list)
+        			.build();
             
-            Yaml yaml = new Yaml();
-    		ObjectMapper mapper = new ObjectMapper(); 
-    		
-    		List<HasMetadata> list = new ArrayList<>();
-    		Iterable<Object> iter = yaml.loadAll(response);
-    		
-    		for(Object object : iter) {
-    			if(object instanceof ArrayList) {
-    				for(Object o : (ArrayList) object) {
-    					if(o instanceof Map) {
-    						try {						
-    							Map map = (Map) o;
-    							String kind = (String)map.get("kind");
-    							
-    							TypeReference t = getTypeReference(kind);
-    							String jsonStr = mapper.writeValueAsString(map);
-    							HasMetadata result = (HasMetadata)mapper.readValue(jsonStr, t);
-    							list.add(result);
-    						} catch (Exception e) {
-    							log.error("", e);
-    						}
-    					}
-    				}
-    			}
-    		}
-            return list;
+            return result;
         } catch (Exception e){
             log.error(e.getMessage(), e);
             throw new InternalServerException("k8s interface 통신 에러 - 리소스 생성 에러");

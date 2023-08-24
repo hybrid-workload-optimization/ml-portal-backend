@@ -1,5 +1,6 @@
 package kr.co.strato.portal.workload.v2.model;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ public class WorkloadDto {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class List {
+	public static class ListDto {
 		private String uid;
 		private String name;
 		private String namespace;
@@ -56,6 +57,17 @@ public class WorkloadDto {
     public static class ApplyDto {
         private Long clusterIdx;
         private String yaml;
+    }
+	
+	@Getter
+    @Setter
+    @Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+    public static class ApplyResultDto {
+		private boolean success;	
+		private String errorMessage;
+		private List<ListDto> resources;
     }
 	
 	@Getter

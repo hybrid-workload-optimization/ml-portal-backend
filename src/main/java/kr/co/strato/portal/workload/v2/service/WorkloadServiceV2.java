@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.batch.v1.CronJob;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import kr.co.strato.adapter.k8s.common.model.ApplyResult;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.workload.service.WorkloadAdapterService;
 import kr.co.strato.domain.cluster.model.ClusterEntity;
@@ -32,6 +33,7 @@ import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto;
+import kr.co.strato.portal.workload.v2.model.WorkloadDto.ApplyResultDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto.ResourceParam;
 import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadItem;
@@ -73,7 +75,7 @@ public class WorkloadServiceV2 {
 	 * @param param
 	 * @return
 	 */
-	public List<WorkloadDto.List> getList(WorkloadDto.SearchParam param) {
+	public List<WorkloadDto.ListDto> getList(WorkloadDto.SearchParam param) {
 		Long clusterIdx = param.getClusterIdx();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		if(entity == null) {
@@ -101,12 +103,12 @@ public class WorkloadServiceV2 {
 		return getList(list, param.getName());
 	}
 	
-	public List<WorkloadDto.List> getList(List<HasMetadata> list) {
+	public List<WorkloadDto.ListDto> getList(List<HasMetadata> list) {
 		return getList(list, null);
 	}
 	
-	public List<WorkloadDto.List> getList(List<HasMetadata> list, String keyword) {
-		List<WorkloadDto.List> result = new ArrayList<>();
+	public List<WorkloadDto.ListDto> getList(List<HasMetadata> list, String keyword) {
+		List<WorkloadDto.ListDto> result = new ArrayList<>();
 		try {
 			//uid를 키로 맵으로 변환
 			Map<String, WorkloadItem> map = new HashMap<>();
@@ -169,7 +171,7 @@ public class WorkloadServiceV2 {
 				String health = getHealth(data, pods, podCountReady);
 				String createAt = DateUtil.strToNewFormatter(data.getMetadata().getCreationTimestamp());
 				
-				WorkloadDto.List listItem = WorkloadDto.List.builder()
+				WorkloadDto.ListDto listItem = WorkloadDto.ListDto.builder()
 						.uid(uid)
 						.name(name)
 						.namespace(namespace)
@@ -185,10 +187,10 @@ public class WorkloadServiceV2 {
 			}
 			
 			//생성일자 기준 오름차순 정렬
-			Collections.sort(result, new Comparator<WorkloadDto.List>() {
+			Collections.sort(result, new Comparator<WorkloadDto.ListDto>() {
 
 				@Override
-				public int compare(WorkloadDto.List o1, WorkloadDto.List o2) {
+				public int compare(WorkloadDto.ListDto o1, WorkloadDto.ListDto o2) {
 					String createAto1 = o1.getCreateAt();
 					String createAto2 = o2.getCreateAt();
 					return createAto2.compareTo(createAto1);
@@ -332,15 +334,26 @@ public class WorkloadServiceV2 {
 	 * @param param
 	 * @return
 	 */
-	public List<WorkloadDto.List> apply(WorkloadDto.ApplyDto param) {
+	public ApplyResultDto apply(WorkloadDto.ApplyDto param) {
 		Long clusterIdx = param.getClusterIdx();
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		
 		Long kubeConfigId = entity.getClusterId();
 		String yaml = Base64Util.decode(param.getYaml());
 		
-		List<HasMetadata> list = workloadAdapterService.apply(kubeConfigId, yaml);
-		return getList(list);
+		ApplyResult.Result result = workloadAdapterService.apply(kubeConfigId, yaml);
+		
+		List<WorkloadDto.ListDto> list = null;
+		if(result.isSuccess()) {
+			list = getList(result.getResources());
+		}
+		
+		ApplyResultDto resultDto = ApplyResultDto.builder()
+				.success(result.isSuccess())
+				.errorMessage(result.getErrorMessage())
+				.resources(list)
+				.build();
+		return resultDto;
 	}
 	
 	/**
@@ -350,7 +363,12 @@ public class WorkloadServiceV2 {
 	public boolean delete(ResourceParam p) {
 		ClusterEntity entity = clusterDomainService.get(p.getClusterIdx());
 		Long kubeConfigId = entity.getClusterId();
-		return workloadAdapterService.delete(kubeConfigId, p.getKind(), p.getNamespace(), p.getName());
+		boolean isOk = workloadAdapterService.delete(kubeConfigId, p.getKind(), p.getNamespace(), p.getName());
+		if(isOk) {
+			//TODO: 리소스 삭제 완료까지 대기 처리
+			
+		}
+		return isOk;
 	}
 	
 	/**

@@ -101,7 +101,7 @@ public class ClusterServiceV2 {
 			
 			
 			
-			List<WorkloadDto.List>  workloads = workloadService.getList(list);
+			List<WorkloadDto.ListDto>  workloads = workloadService.getList(list);
 			List<Pod> podList = list.stream()
 					.filter(d -> d instanceof Pod)
 					.map(d -> (Pod)d)
@@ -123,7 +123,7 @@ public class ClusterServiceV2 {
 			
 			ClusterOverviewDto.ClusterSummary clusterSummary = getClusterSummary(clusterEntity, nodeList, namespaceList, pvList, workloads, podList, attachHealty);			
 			
-			List<WorkloadDto.List> controlPlaneComponents = null;
+			List<WorkloadDto.ListDto> controlPlaneComponents = null;
 			WorkloadSummary workloadSummary = null;
 			if(workloads != null) {
 				controlPlaneComponents = getControlPlaneComponents(workloads);			
@@ -166,7 +166,7 @@ public class ClusterServiceV2 {
 			List<NodeDto.ListDto> nodeList,
 			List<NamespaceDto.ListDto> namespaceList,
 			List<PersistentVolumeDto.ListDto> pvList,
-			List<WorkloadDto.List> workloads,
+			List<WorkloadDto.ListDto> workloads,
 			List<Pod> podList,
 			boolean attachHealty) {
 		
@@ -259,8 +259,8 @@ public class ClusterServiceV2 {
 	 * @param workloads
 	 * @return
 	 */
-	private List<WorkloadDto.List> getControlPlaneComponents(List<WorkloadDto.List> workloads) {
-		List<WorkloadDto.List> list = workloads.stream()
+	private List<WorkloadDto.ListDto> getControlPlaneComponents(List<WorkloadDto.ListDto> workloads) {
+		List<WorkloadDto.ListDto> list = workloads.stream()
 				.filter(w -> w.getNamespace().equals("kube-system"))
 				.collect(Collectors.toList());
 		return list;
@@ -271,16 +271,16 @@ public class ClusterServiceV2 {
 	 * @param workloads
 	 * @return
 	 */
-	private WorkloadSummary getWorkloadSummary(List<WorkloadDto.List> workloads) {
-		List<WorkloadDto.List> deployments = new ArrayList<>();
-		List<WorkloadDto.List> statefulSets = new ArrayList<>();
-		List<WorkloadDto.List> cronJobs = new ArrayList<>();
-		List<WorkloadDto.List> jobs = new ArrayList<>();
-		List<WorkloadDto.List> replicaSets = new ArrayList<>();
-		List<WorkloadDto.List> daemonSets = new ArrayList<>();
+	private WorkloadSummary getWorkloadSummary(List<WorkloadDto.ListDto> workloads) {
+		List<WorkloadDto.ListDto> deployments = new ArrayList<>();
+		List<WorkloadDto.ListDto> statefulSets = new ArrayList<>();
+		List<WorkloadDto.ListDto> cronJobs = new ArrayList<>();
+		List<WorkloadDto.ListDto> jobs = new ArrayList<>();
+		List<WorkloadDto.ListDto> replicaSets = new ArrayList<>();
+		List<WorkloadDto.ListDto> daemonSets = new ArrayList<>();
 		
-		List<WorkloadDto.List> todayWorkload = new ArrayList<>();
-		for(WorkloadDto.List l : workloads) {
+		List<WorkloadDto.ListDto> todayWorkload = new ArrayList<>();
+		for(WorkloadDto.ListDto l : workloads) {
 			String createAt = l.getCreateAt();
 			String lowerKind = l.getKind().toLowerCase();
 			if(lowerKind.equals("deployment")) {

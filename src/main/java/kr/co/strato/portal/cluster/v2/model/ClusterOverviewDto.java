@@ -19,7 +19,7 @@ public class ClusterOverviewDto {
 	@Builder
 	public static class Overview {
 		private ClusterSummary clusterSummary;
-		private List<WorkloadDto.List> controlPlaneComponent;
+		private List<WorkloadDto.ListDto> controlPlaneComponent;
 		private List<NodeDto.ListDto> nodes;
 		private List<NamespaceDto.ListDto> namespaces;
 		private WorkloadSummary workloadSummary;
@@ -62,13 +62,13 @@ public class ClusterOverviewDto {
 	@Setter
 	@Builder
 	public static class WorkloadSummary {
-		private List<WorkloadDto.List> deployments;
-		private List<WorkloadDto.List> statefulSets;
-		private List<WorkloadDto.List> cronJobs;
-		private List<WorkloadDto.List> jobs;
-		private List<WorkloadDto.List> replicaSets;
-		private List<WorkloadDto.List> daemonSets;
-		private List<WorkloadDto.List> todayDeployedWorkload;
+		private List<WorkloadDto.ListDto> deployments;
+		private List<WorkloadDto.ListDto> statefulSets;
+		private List<WorkloadDto.ListDto> cronJobs;
+		private List<WorkloadDto.ListDto> jobs;
+		private List<WorkloadDto.ListDto> replicaSets;
+		private List<WorkloadDto.ListDto> daemonSets;
+		private List<WorkloadDto.ListDto> todayDeployedWorkload;
 	}
 	
 	@Getter
