@@ -95,47 +95,53 @@ public class AuthController {
 	@PostMapping(value = "/refresh_token")
     public Oauth2Token.TokenResponse refreshToken(
     		@RequestBody Oauth2Token.RefreshTokenRequest refresh)  throws IOException {
-		String refreshToken = refresh.getRefresh_token();
 		
-		log.info("Token Refresh");
-		log.info("Refresh Token: {}", refreshToken);
-		if(!StringUtils.hasText(refreshToken)) {
-			log.error("Refresh Token이 존재하지 않습니다.");
-			return null;
+		Oauth2Token.TokenResponse result = null;
+		
+		try {
+			String refreshToken = refresh.getRefresh_token();
+			
+			log.info("Token Refresh");
+			log.info("Refresh Token: {}", refreshToken);
+			if(!StringUtils.hasText(refreshToken)) {
+				log.error("Refresh Token이 존재하지 않습니다.");
+				return null;
+			}
+	        
+			Map<String, String> body = new HashMap<>();
+			body.put("grant_type", "refresh_token");
+			body.put("refresh_token", refreshToken);
+			
+			
+			MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+			formData.add("grant_type", "refresh_token");
+			formData.add("refresh_token", refreshToken);
+			
+			
+			result = this.webClient
+			          .post()
+			          .uri("/oauth2/token")
+			          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			          .body(BodyInserters.fromFormData(formData))
+			          .retrieve()
+			          .bodyToMono(Oauth2Token.TokenResponse.class)
+			          .block();
+			
+			if(result != null) {
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				log.info("Refresh Token Result: {}", gson.toJson(result));
+			} else {
+				log.info("Refresh Token Response is null.");
+			}
+			
+			
+			
+			long timestamp = System.currentTimeMillis() / 1000;
+			timestamp += result.getExpires_in();		
+			result.setExpires_at(timestamp);
+		} catch (Exception e) {
+			log.error("", e);
 		}
-        
-		Map<String, String> body = new HashMap<>();
-		body.put("grant_type", "refresh_token");
-		body.put("refresh_token", refreshToken);
-		
-		
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-		formData.add("grant_type", "refresh_token");
-		formData.add("refresh_token", refreshToken);
-		
-		
-		Oauth2Token.TokenResponse result = this.webClient
-		          .post()
-		          .uri("/oauth2/token")
-		          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-		          .body(BodyInserters.fromFormData(formData))
-		          .retrieve()
-		          .bodyToMono(Oauth2Token.TokenResponse.class)
-		          .block();
-		
-		if(result != null) {
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			log.info("Refresh Token Result: {}", gson.toJson(result));
-		} else {
-			log.info("Refresh Token Response is null.");
-		}
-		
-		
-		
-		long timestamp = System.currentTimeMillis() / 1000;
-		timestamp += result.getExpires_in();		
-		result.setExpires_at(timestamp);
-		
 		return result;
 	}
 	
