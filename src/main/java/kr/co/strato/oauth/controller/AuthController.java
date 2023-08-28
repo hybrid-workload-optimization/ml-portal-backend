@@ -30,6 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.oauth.model.Oauth2Token;
@@ -94,6 +97,8 @@ public class AuthController {
     		@RequestBody Oauth2Token.RefreshTokenRequest refresh)  throws IOException {
 		String refreshToken = refresh.getRefresh_token();
 		
+		log.info("Token Refresh");
+		log.info("Refresh Token: {}", refreshToken);
 		if(!StringUtils.hasText(refreshToken)) {
 			log.error("Refresh Token이 존재하지 않습니다.");
 			return null;
@@ -117,6 +122,15 @@ public class AuthController {
 		          .retrieve()
 		          .bodyToMono(Oauth2Token.TokenResponse.class)
 		          .block();
+		
+		if(result != null) {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			log.info("Refresh Token Result: {}", gson.toJson(result));
+		} else {
+			log.info("Refresh Token Response is null.");
+		}
+		
+		
 		
 		long timestamp = System.currentTimeMillis() / 1000;
 		timestamp += result.getExpires_in();		
