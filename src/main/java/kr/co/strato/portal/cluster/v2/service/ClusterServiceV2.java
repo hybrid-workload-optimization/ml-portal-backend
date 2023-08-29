@@ -370,23 +370,31 @@ public class ClusterServiceV2 {
             		podStatus = reason;
             	}
             }
+            if(podStatus == null) {
+            	podStatus = "Pending";
+            }
+            
             l.setStatus(podStatus);
             
-          //파드 가동률
+            //파드 가동률            
 			List<PodList> operatingList = podOperatingRate.get(podStatus);
 			if(operatingList == null) {
 				operatingList = new ArrayList<>();
+				System.out.println(podStatus);
 				podOperatingRate.put(podStatus, operatingList);
 			}
 			operatingList.add(l);	
 			
 			//노드별 파드 배포현황
-			List<PodList> deployedByNodeList = podDeployedByNode.get(nodeName);
-			if(deployedByNodeList == null) {
-				deployedByNodeList = new ArrayList<>();
-				podDeployedByNode.put(nodeName, deployedByNodeList);
+			if(nodeName != null) {
+				List<PodList> deployedByNodeList = podDeployedByNode.get(nodeName);
+				if(deployedByNodeList == null) {
+					deployedByNodeList = new ArrayList<>();
+					podDeployedByNode.put(nodeName, deployedByNodeList);
+				}
+				deployedByNodeList.add(l);
 			}
-			deployedByNodeList.add(l);
+			
 		}
 		
 		PodSummary summary = PodSummary.builder()

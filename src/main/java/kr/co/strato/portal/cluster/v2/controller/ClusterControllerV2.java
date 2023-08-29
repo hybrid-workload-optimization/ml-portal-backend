@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.global.model.ResponseWrapper;
+import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto;
 import kr.co.strato.portal.cluster.v2.service.ClusterServiceV2;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +25,8 @@ public class ClusterControllerV2 {
 	
 	@Operation(summary = "Overview 정보 조회", description = "Overview 정보를 조회한다.")
 	@GetMapping("/{clusterIdx}/overview")
-    public ResponseWrapper<Object> getOverview(@PathVariable(required = true) Long clusterIdx) {
-		Object result = clusterService.getOverview(clusterIdx);
+    public ResponseWrapper<ClusterOverviewDto.Overview> getOverview(@PathVariable(required = true) Long clusterIdx) {
+		ClusterOverviewDto.Overview result = clusterService.getOverview(clusterIdx);
 		return new ResponseWrapper<>(result);
 	}
 	
