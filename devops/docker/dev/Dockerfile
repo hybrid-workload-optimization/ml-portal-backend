@@ -1,5 +1,13 @@
 FROM docker.io/openjdk:8u201-alpine
 
+#인증서 관련 설정
+ADD cer/root.cer /root.cer
+ADD cer/ca.cer /ca.cer
+
+RUN keytool -import -trustcacerts -keystore $JAVA_HOME/jre/lib/security/cacerts -alias letsroot -file root.cer -storepass changeit -noprompt
+RUN keytool -import -trustcacerts -keystore $JAVA_HOME/jre/lib/security/cacerts -alias letsca -file ca.cer -storepass changeit -noprompt
+
+
 ARG INSTALL_PATH=/strato
 ARG JAR_NAME=ARTIFACT_NAME
 
