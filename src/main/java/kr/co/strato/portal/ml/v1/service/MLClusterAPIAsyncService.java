@@ -178,23 +178,36 @@ public class MLClusterAPIAsyncService {
 		
 		io.fabric8.kubernetes.api.model.Service svc = getIngressService(kubeConfigId);
 		if(svc != null) {
-			ServicePort servicePort = null;
+			String type = svc.getSpec().getType();
 			
-			Optional<ServicePort> op = svc.getSpec().getPorts().stream()
-					.filter(p -> p.getNodePort() != null && p.getAppProtocol().equals(protocol))
-					.findFirst();
-			if(op.isPresent()) {
-				servicePort = op.get();
-			}
-			
-			if(servicePort != null) {				
-				String p = servicePort.getProtocol();
-				Integer nodePort = servicePort.getNodePort();				
-				List<String> workerIps = nodeAdapterService.getWorkerNodeIps(kubeConfigId);
-				for(String ip : workerIps) {
-					String end = String.format("%s:%d", ip, nodePort);
+			if(type.equals("LoadBalancer")) {
+				
+				List<String> externalIps = svc.getSpec().getExternalIPs();
+				if(externalIps != null && externalIps.size() > 0) {
+					String externalIp = externalIps.get(0);
+					String end = String.format("%s", externalIp);
 					externalUrl = end;
-					break;
+				}
+			} 
+			
+			if(externalUrl == null) {
+				ServicePort servicePort = null;
+				Optional<ServicePort> op = svc.getSpec().getPorts().stream()
+						.filter(p -> p.getNodePort() != null && p.getAppProtocol().equals(protocol))
+						.findFirst();
+				if(op.isPresent()) {
+					servicePort = op.get();
+				}
+				
+				if(servicePort != null) {				
+					String p = servicePort.getProtocol();
+					Integer nodePort = servicePort.getNodePort();				
+					List<String> workerIps = nodeAdapterService.getWorkerNodeIps(kubeConfigId);
+					for(String ip : workerIps) {
+						String end = String.format("%s:%d", ip, nodePort);
+						externalUrl = end;
+						break;
+					}
 				}
 			}
 		}

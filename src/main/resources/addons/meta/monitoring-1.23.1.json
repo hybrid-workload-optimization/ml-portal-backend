@@ -12,9 +12,9 @@
     "hwSpec": "4Core 8GB 50GB 2Node"
   },
   "yamls": [
+	"addons/monitoring-1.23.1/monitoring-namespace.yaml",
 	"addons/monitoring-1.23.1/dcgm-exporter.yaml",
     "addons/monitoring-1.23.1/metrics-server.yaml",
-    "addons/monitoring-1.23.1/monitoring-namespace.yaml",
     "addons/monitoring-1.23.1/prometheus-cluster-role.yaml",
     "addons/monitoring-1.23.1/prometheus-config-map.yaml",
     "addons/monitoring-1.23.1/prometheus-deployment.yaml",

@@ -16,7 +16,8 @@ import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
 import kr.co.strato.portal.cluster.v2.service.NodeService;
 import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
-import kr.co.strato.portal.ml.v2.model.MLClusterDto.Cluster;
+import kr.co.strato.portal.ml.v2.model.MLClusterDto.ClusterDetail;
+import kr.co.strato.portal.ml.v2.model.MLClusterDto.ClusterList;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,21 +36,35 @@ public class MLClusterService {
 	@Autowired
 	private MLClusterAPIAsyncService mlClusterAsyncService;
 
-	public List<Cluster> getClusterList() {
-		List<Cluster> result = new ArrayList<>();
-		List<ClusterEntity> clusterList = clusterDomainService.getListAll();
+	/**
+	 * 머신러닝을 위한 클러스터 리스트 조회
+	 * 머신러닝 클러스터는 임시로 생성된 projectIdx: 538번에 소속 되어있다.
+	 * @return
+	 */
+	public List<ClusterList> getClusterList() {
+		Long mlProjectIdx = 538L;
+		List<ClusterList> result = new ArrayList<>();
+		List<ClusterEntity> clusterList = clusterDomainService.getListByProjectIdx(mlProjectIdx);
 		for(ClusterEntity entity : clusterList) {
+			ClusterList cluster = new ClusterList();
+			setClusterDto(entity, cluster);
+			result.add(cluster);
+		}
+		return result;
+	}
+	
+	/**
+	 * 클러스터 상세 정보 조회
+	 * @param clusterIdx
+	 * @return
+	 */
+	public ClusterDetail getClusterDetail(Long clusterIdx) {		
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		if(entity != null) {
+			ClusterDetail cluster = new ClusterDetail();
+			setClusterDto(entity, cluster);
+			
 			Long kubeConfigId = entity.getClusterId();
-			Long clusterIdx = entity.getClusterIdx();
-			String name = entity.getClusterName();
-			String description = entity.getDescription();
-			String provider = entity.getProvider();
-			String region = entity.getRegion();
-			String version = entity.getProviderVersion();
-			String status = entity.getProvisioningStatus();
-			String createAt = entity.getCreatedAt();
-			
-			
 			ResourceListSearchInfo search = ResourceListSearchInfo.builder()
 					.kubeConfigId(kubeConfigId)
 					.build();		
@@ -64,23 +79,33 @@ public class MLClusterService {
 				List<NodeDto.ListDto> nodeList = nodeService.getList(kubeConfigId, podList);
 				String prometheusUrl = mlClusterAsyncService.getPrometheusUrl(entity);
 				
-				Cluster cluster = Cluster.builder()
-						.clusterIdx(clusterIdx)
-						.name(name)
-						.description(description)
-						.provider(provider)
-						.region(region)
-						.vision(version)
-						.status(status)
-						.createAt(createAt)
-						.prometheusUrl(prometheusUrl)
-						.nodes(nodeList)
-						.build();
-				result.add(cluster);
+				cluster.setPrometheusUrl(prometheusUrl);
+				cluster.setNodes(nodeList);
+				return cluster;
 			} catch (Exception e) {
 				log.error("", e);
 			}
-		}
-		return result;
+		}		
+		return null;
+	}
+	
+	public void setClusterDto(ClusterEntity entity, ClusterList dto) {
+		Long clusterIdx = entity.getClusterIdx();
+		String name = entity.getClusterName();
+		String description = entity.getDescription();
+		String provider = entity.getProvider();
+		String region = entity.getRegion();
+		String version = entity.getProviderVersion();
+		String status = entity.getProvisioningStatus();
+		String createAt = entity.getCreatedAt();
+		
+		dto.setClusterIdx(clusterIdx);
+		dto.setName(name);
+		dto.setDescription(description);
+		dto.setProvider(provider);
+		dto.setRegion(region);
+		dto.setVision(version);
+		dto.setStatus(status);
+		dto.setCreateAt(createAt);
 	}
 }

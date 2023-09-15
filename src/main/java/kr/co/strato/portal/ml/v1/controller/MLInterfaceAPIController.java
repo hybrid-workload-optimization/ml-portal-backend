@@ -15,12 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.v1.model.MLDto;
-import kr.co.strato.portal.ml.v1.model.MLScheduleDTO;
 import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.v1.service.MLInterfaceAPIAsyncService;
 
 @RequestMapping("/api/v1/ml")
-@Api(tags = {"ML 시작/종료/삭제 등. KETI에서 호출하는 API"})
+@Api(tags = {"ML Workload 관리"})
 @RestController
 public class MLInterfaceAPIController {
 	

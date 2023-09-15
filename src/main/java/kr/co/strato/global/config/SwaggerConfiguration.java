@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -18,12 +19,38 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 
-//@Configuration
+@Configuration
 public class SwaggerConfiguration {
 
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	public static final String AUTHORIZATION_KEY = "Authorization";
 
+	@Profile("ml")
+	@Bean
+	public Docket apiMl() {
+		Docket docket = new Docket(DocumentationType.OAS_30)
+				.apiInfo(apiInfo())
+				.securityContexts(Arrays.asList(securityContext()))
+				.securitySchemes(Arrays.asList(apiKey()))
+				.select()
+				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal.ml"))
+				.paths(PathSelectors.any())
+				.build();
+		
+		return docket;
+	}
+	
+	@Profile("!ml")
+	@Bean
+    public Docket api(){
+        return new Docket(DocumentationType.OAS_30)
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(PathSelectors.any())
+                .build();
+    }	
+	
+	
 	private ApiInfo apiInfo() {
 		return new ApiInfo("Machine learning REST API",
 				"Interface API - 하이브리드 클라우드 환경 에서 고부하 복합 머신러닝 워크로드의  수행 효율 극대화 를 위한 고집적 연산자원 배치", "v1.0", "",
@@ -31,18 +58,6 @@ public class SwaggerConfiguration {
 				"", 
 				"", 
 				Collections.emptyList());
-	}
-
-	@Bean
-	public Docket api() {
-		return new Docket(DocumentationType.OAS_30)
-				.apiInfo(apiInfo())
-				.securityContexts(Arrays.asList(securityContext()))
-				.securitySchemes(Arrays.asList(apiKey()))
-				.select()
-				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal"))
-				.paths(PathSelectors.any())
-				.build();
 	}
 
 	private ApiKey apiKey() {
@@ -59,5 +74,4 @@ public class SwaggerConfiguration {
 		authorizationScopes[0] = authorizationScope;
 		return Arrays.asList(new SecurityReference(AUTHORIZATION_KEY, authorizationScopes));
 	}
-
 }

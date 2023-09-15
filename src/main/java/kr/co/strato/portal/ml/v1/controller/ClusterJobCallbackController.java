@@ -10,7 +10,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.ml.v1.model.CallbackData;
 import kr.co.strato.portal.ml.v1.service.ClusterJobCallbackService;
 
-@RestController
+//@RestController
 @Api(tags = {"Cluster Job Callback API(Async 응답 전용)"})
 public class ClusterJobCallbackController {
 	

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comp-portal-backend
+  namespace: strato-product
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comp-portal-backend
+  template:
+    metadata:
+      name: comp-portal-backend
+      labels:
+        app: comp-portal-backend
+    spec:
+      hostAliases:
+      - ip: "172.16.10.174"
+        hostnames:
+        - "infra.db.ip"
+      containers:
+      - name: comp-portal-backend
+        image: {IMAGE_NAME}
+        ports:
+        - name: port
+          containerPort: 18080
+        env:
+        - name: ACTIVE_PROFILE
+          value: {ACTIVE_PROFILE}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comp-b-svc
+  namespace: strato-product
+spec:
+  selector:
+    app: comp-portal-backend
+  ports:
+    - port: 18080
+      targetPort: 18080
+      

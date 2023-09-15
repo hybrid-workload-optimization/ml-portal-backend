@@ -7,6 +7,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -41,12 +42,12 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 	
 	private String publicKey;
 	private String clientId;
-	private String apiToken;
+	private List<String> apiTokens;
 	
-	public JwtAuthenticationFilter(String publicKey, String clientId, String apiToken) {
+	public JwtAuthenticationFilter(String publicKey, String clientId, String[] apiTokens) {
 		this.publicKey = publicKey;
 		this.clientId = clientId;
-		this.apiToken = apiToken;
+		this.apiTokens = Arrays.asList(apiTokens);
 	}
 	
 	 @Override
@@ -61,7 +62,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 		if (jwtToken != null) {
 			
 			Authentication auth = null;
-			if(jwtToken.equals(apiToken)) {
+			if(apiTokens.contains(jwtToken)) {
 				//로그인 없는 싱크 요청인 경우
 				log.debug("Auth success. Sync Request !");
 				auth = getAPIUserAuthentication();

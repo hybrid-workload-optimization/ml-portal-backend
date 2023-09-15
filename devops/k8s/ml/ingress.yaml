@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: comp-ml-ingress
+  namespace: strato-product
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: "/interface(/|$)(.*)"
+        pathType: Prefix
+        backend:
+          service:
+            name: comp-b-svc
+            port:
+              number: 18080

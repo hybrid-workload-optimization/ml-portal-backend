@@ -17,7 +17,7 @@ import kr.co.strato.portal.cluster.v1.model.ScaleArgDto;
 import kr.co.strato.portal.ml.v1.service.MLClusterAPIAsyncService;
 
 @RequestMapping("/api/v1/ml/cluster")
-@Api(tags = {"ML Cluster 관련 API(생성/Scale 조정/삭제/상세 정보)"})
+@Api(tags = {"Cluster 관리 v1"})
 @RestController
 public class MLClusterAPIController {
 	

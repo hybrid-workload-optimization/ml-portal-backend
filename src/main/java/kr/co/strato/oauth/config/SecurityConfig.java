@@ -33,6 +33,9 @@ public class SecurityConfig {
 	
 	@Value("${auth.apiToken}")
 	private String apiToken;
+	
+	@Value("${ml.api.token}")
+	private String mlToken;
     
 
     public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler) {
@@ -110,7 +113,8 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public JwtAuthenticationFilter getJwtAuthenticationFilter() {
-		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(publicKey, clientId, apiToken);
+		String[] authTokens = {apiToken, mlToken};		
+		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(publicKey, clientId, authTokens);
 		return filter;
 	}
 }
