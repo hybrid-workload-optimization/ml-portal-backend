@@ -52,8 +52,8 @@ public class SwaggerConfiguration {
 	
 	
 	private ApiInfo apiInfo() {
-		return new ApiInfo("Machine learning REST API",
-				"Interface API - 하이브리드 클라우드 환경 에서 고부하 복합 머신러닝 워크로드의  수행 효율 극대화 를 위한 고집적 연산자원 배치", "v1.0", "",
+		return new ApiInfo("Machine learning 과제 Interface API",
+				"하이브리드 클라우드 환경 에서 고부하 복합 머신러닝 워크로드의  수행 효율 극대화 를 위한 고집적 연산자원 배치를 위한 Interface API", "v2.0", "",
 				new Contact("Lee, HoChul", "", "hclee@strato.co.kr"), 
 				"", 
 				"", 
