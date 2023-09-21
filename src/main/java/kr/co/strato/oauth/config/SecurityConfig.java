@@ -70,6 +70,7 @@ public class SecurityConfig {
 			    	.antMatchers("/error").permitAll()
 			    	.antMatchers("/favicon.ico").permitAll()
 			    	.antMatchers("/sse/v1/alert/receive").permitAll()
+			    	.antMatchers("/ws/**").permitAll()
 					.anyRequest().authenticated()
 			)
 			.oauth2Login(oauth2 -> {

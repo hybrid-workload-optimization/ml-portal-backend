@@ -23,6 +23,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(execHandler, "/ws/pod/exec/*/*/*").addInterceptors(auctionInterceptor()).setAllowedOrigins("*");
         registry.addHandler(logHandler, "/ws/pod/log/*/*/*").addInterceptors(auctionInterceptor()).setAllowedOrigins("*");
         registry.addHandler(logHandler, "/ws/cluster/log/*/*").addInterceptors(auctionInterceptor()).setAllowedOrigins("*");
+        registry.addHandler(execHandler, "/ws/kubectl/*").addInterceptors(auctionInterceptor()).setAllowedOrigins("*");
     }
 
     @Bean

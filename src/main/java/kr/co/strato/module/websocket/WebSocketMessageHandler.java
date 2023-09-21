@@ -2,7 +2,9 @@ package kr.co.strato.module.websocket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -24,6 +26,9 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
 
     @Value("${service.cloud-interface.wsUrl}")
     private String cloudUrl;
+    
+    @Autowired
+    private Environment environment;
 
 
     @Override
@@ -37,7 +42,13 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
 			if(!clientMap.containsKey(sessionId)) {
 				logger.info("new session started.");
 			    String wsPath = (String)session.getAttributes().get("path");
-			    String path = wsPath.replace("/ws", "");
+			    
+			    String contextPath = environment.getProperty("server.servlet.contextPath");
+			    if(contextPath == null) {
+			    	contextPath = "";
+			    }
+			    
+			    String path = wsPath.replace(contextPath + "/ws", "");
 			    if(path.startsWith("/")) {
 			        path = path.substring(1);
 			    }
@@ -122,6 +133,8 @@ public class WebSocketMessageHandler extends TextWebSocketHandler {
 
         String url = null;
         if(type.equals("pod")) {
+            url = k8sUrl;
+        } if(type.equals("kubectl")) {
             url = k8sUrl;
         } else if(type.equals("cluster")) {
             url = cloudUrl;
