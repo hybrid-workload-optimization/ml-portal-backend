@@ -87,6 +87,22 @@ public class NamespaceService {
 		
 	}
 	
+	/**
+	 * 삭제
+	 * @param param
+	 * @return
+	 */
+	public boolean delete(NamespaceDto.Delete param) {
+		Long clusterIdx = param.getClusterIdx();
+		String name = param.getName();
+		
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		
+		boolean isOk = namespaceAdapterService.deleteNamespace(kubeConfigId.intValue(), name);
+		return isOk;
+	}
+	
 	public NamespaceDto.ListDto getNamespaceDto(Long kubeConfigId, Namespace n, List<Pod> pods) throws Exception {
         String uid = n.getMetadata().getUid();
 		String name = n.getMetadata().getName();

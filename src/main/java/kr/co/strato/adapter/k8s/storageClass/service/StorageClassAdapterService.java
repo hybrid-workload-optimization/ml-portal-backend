@@ -52,6 +52,22 @@ public class StorageClassAdapterService {
 		}
 	}
     
+    public StorageClass getStorageClass(Long kubeConfigId, String name) {
+    	// 조회 요청
+		String results = nonNamespaceProxy.getResource(ResourceType.storageClass.get(), kubeConfigId, name);
+
+		try {
+			// json -> fabric8 k8s 오브젝트 파싱
+			ObjectMapper mapper = new ObjectMapper();
+			StorageClass storageClass = mapper.readValue(results, new TypeReference<StorageClass>() {});
+
+			return storageClass;
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("json 파싱 에러");
+		}
+	}
+    
     
     public List<StorageClass> registerStorageClass(Long kubeConfigId, String yaml) {
         YamlApplyParam param = YamlApplyParam.builder().kubeConfigId(kubeConfigId).yaml(yaml).build();

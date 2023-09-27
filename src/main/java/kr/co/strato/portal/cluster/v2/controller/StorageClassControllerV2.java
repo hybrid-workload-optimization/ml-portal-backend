@@ -15,41 +15,40 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.global.model.ResponseWrapper;
-import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
-import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
-import kr.co.strato.portal.cluster.v2.service.NamespaceService;
+import kr.co.strato.portal.cluster.v2.model.StorageClassDto;
+import kr.co.strato.portal.cluster.v2.service.StorageClassService;
 
-@Api(tags = {"Namespace API V2"})
-@RequestMapping("/api/v2/namespace")
+@Api(tags = {"StorageClass API V2"})
+@RequestMapping("/api/v2/storageClass")
 @RestController
-public class NamespaceControllerV2 {
+public class StorageClassControllerV2 {
 	
 	@Autowired
-	private NamespaceService namespaceService;
+	private StorageClassService storageService;
 
-	@Operation(summary = "Namespace 리스트 정보 조회", description = "Namespace 리스트를 조회한다.")
+	@Operation(summary = "StorageClass 리스트 정보 조회", description = "StorageClass 리스트를 조회한다.")
 	@GetMapping("/{clusterIdx}/list")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<List<NamespaceDto.ListDto>> getNamespaceList(@PathVariable(required = true) Long clusterIdx) {
-		List<NamespaceDto.ListDto> list = namespaceService.getList(clusterIdx);
+    public ResponseWrapper<List<StorageClassDto.ListDto>> getStorageClassList(@PathVariable(required = true) Long clusterIdx) {
+		List<StorageClassDto.ListDto> list = storageService.getList(clusterIdx);
         return new ResponseWrapper<>(list);
     }
 	
-	@Operation(summary = "Namespace 상세 정보 조회", description = "Namespace 상세 정보를 조회한다.")
+	@Operation(summary = "StorageClass 상세 정보 조회", description = "StorageClass 상세 정보를 조회한다.")
 	@GetMapping("/{clusterIdx}/{namespace}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseWrapper<NamespaceDto.ListDto> getNamespaceDetail(
+    public ResponseWrapper<StorageClassDto.ListDto> getStorageClassDetail(
     		@PathVariable(required = true) Long clusterIdx,
     		@PathVariable(required = true) String namespace) {
-		NamespaceDto.ListDto detail = namespaceService.getDetail(clusterIdx, namespace);
+		StorageClassDto.ListDto detail = storageService.getDetail(clusterIdx, namespace);
         return new ResponseWrapper<>(detail);
     }
 	
-	@Operation(summary = "Namespace 삭제", description = "Namespace를 삭제한다.")
+	@Operation(summary = "StorageClass 삭제", description = "StorageClass를 삭제한다.")
 	@DeleteMapping("")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseWrapper<Boolean> deleteNamespace(@RequestBody NamespaceDto.Delete param) {
-		boolean isDeleted = namespaceService.delete(param);
+	public ResponseWrapper<Boolean> deleteStorageClass(@RequestBody StorageClassDto.DeleteDto param) {
+		boolean isDeleted = storageService.delete(param);
 		return new ResponseWrapper<>(isDeleted);
 	}
 }

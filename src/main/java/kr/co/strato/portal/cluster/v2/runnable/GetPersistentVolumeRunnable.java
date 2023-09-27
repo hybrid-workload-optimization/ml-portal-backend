@@ -27,7 +27,7 @@ public class GetPersistentVolumeRunnable extends WorkloadRunnable {
 	public void run() {
 		List<PersistentVolumeDto.ListDto> pvList = new ArrayList<>();
 		try {
-			pvList = pvService.getList(kubeConfigId);
+			pvList = pvService.getListForKubeConfigId(kubeConfigId);
 		} catch (Exception e) {
 			log.error("PersistentVolume 리스트 조회 실패!");
 			log.error("", e);

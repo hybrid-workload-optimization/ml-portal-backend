@@ -27,4 +27,12 @@ public class PersistentVolumeDto {
     	private Map<String, String> labels;
     	private String createdAt;
 	}
+	
+	@Getter
+	@Setter
+	@Builder
+	public static class DeleteDto {
+		private Long clusterIdx;
+		private String name;
+	}
 }

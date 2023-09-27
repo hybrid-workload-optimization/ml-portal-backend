@@ -66,4 +66,12 @@ public class NodeDto {
     	private double memoryRequests;
     	private double memoryRequestsFraction;
     }
+	
+	@Getter
+	@Setter
+	@Builder
+	public static class DeleteDto {
+		private Long clusterIdx;
+		private String name;
+	}
 }

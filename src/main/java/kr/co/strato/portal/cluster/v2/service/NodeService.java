@@ -88,6 +88,20 @@ public class NodeService {
 		return list;
 	}
 	
+	/**
+	 * 삭제
+	 * @param param
+	 * @return
+	 */
+	public boolean delete(NodeDto.DeleteDto param) {
+		Long clusterIdx = param.getClusterIdx();
+		String name = param.getName();
+		
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);		
+		boolean isDeleted = nodeAdapterService.deleteNode(cluster.getClusterId().intValue(), name);
+		return isDeleted;
+	}
+	
 	public void getNodeDto(Node n, List<Pod> pods, NodeDto.ListDto dto) throws Exception {
         List<NodeCondition> conditions = n.getStatus().getConditions();
 		// k8s Object -> Entity

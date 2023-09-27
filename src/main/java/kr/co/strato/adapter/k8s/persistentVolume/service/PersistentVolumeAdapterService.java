@@ -33,9 +33,25 @@ public class PersistentVolumeAdapterService {
      * @throws JsonProcessingException
      */
     public List<PersistentVolume> getPersistentVolumeList(Long kubeConfigId) {
+		return getPersistentVolumeList(kubeConfigId, null);
+	}
+    
+    /**
+     * @param kubeConfigId
+     * @return
+     * @throws JsonProcessingException
+     */
+    public List<PersistentVolume> getPersistentVolumeList(Long kubeConfigId, String name) {
 		// 요청 파라미터 객체 생성
-		ResourceListSearchInfo param = ResourceListSearchInfo.builder().kubeConfigId(kubeConfigId).build();
-
+		ResourceListSearchInfo param = ResourceListSearchInfo
+				.builder()
+				.kubeConfigId(kubeConfigId)
+				.name(name)
+				.build();
+		return getPersistentVolumeList(param);
+	}
+    
+    public List<PersistentVolume> getPersistentVolumeList(ResourceListSearchInfo param) {
 		// 조회 요청
 		String results = nonNamespaceProxy.getResourceList(ResourceType.persistentVolume.get(), param);
 
@@ -46,6 +62,22 @@ public class PersistentVolumeAdapterService {
 			});
 
 			return clusterPersistentVolumes;
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+			throw new InternalServerException("json 파싱 에러");
+		}
+	}
+    
+    public PersistentVolume getPersistentVolume(Long kubeConfigId, String name) {
+    	// 조회 요청
+		String results = nonNamespaceProxy.getResource(ResourceType.persistentVolume.get(), kubeConfigId, name);
+
+		try {
+			// json -> fabric8 k8s 오브젝트 파싱
+			ObjectMapper mapper = new ObjectMapper();
+			PersistentVolume pv = mapper.readValue(results, new TypeReference<PersistentVolume>() {});
+
+			return pv;
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage(), e);
 			throw new InternalServerException("json 파싱 에러");
