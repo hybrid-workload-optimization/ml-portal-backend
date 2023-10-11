@@ -44,6 +44,7 @@ public class MLDto {
 	@Setter
 	public static class ApplyArg {
 		private String mlId;
+		private Long clusterIdx;
 		private String userId;
 		private String name;
 		private String description;
