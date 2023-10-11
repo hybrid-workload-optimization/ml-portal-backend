@@ -140,6 +140,10 @@ public class ServiceGroupService {
 			type = "AWS";
 		} else if(lowerProvider.equals("naver")) {
 			type = "NAVER";
+		} else if(lowerProvider.equals("nhn")) {
+			type = "NHN";
+		} else if(lowerProvider.equals("alibaba")) {
+			type = "ALIBABA";
 		}
     	return type;
     }
