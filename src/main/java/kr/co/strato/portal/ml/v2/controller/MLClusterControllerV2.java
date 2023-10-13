@@ -16,7 +16,7 @@ import kr.co.strato.portal.ml.v2.model.MLClusterDto.ClusterList;
 import kr.co.strato.portal.ml.v2.service.MLClusterService;
 
 @RequestMapping("/api/v2/ml/cluster")
-@Api(tags = {"Cluster 관리 v2"})
+@Api(tags = {"ML > Cluster v2"})
 @RestController
 public class MLClusterControllerV2 {
 	

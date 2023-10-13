@@ -18,7 +18,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.v2.model.StorageClassDto;
 import kr.co.strato.portal.cluster.v2.service.StorageClassService;
 
-@Api(tags = {"StorageClass API V2"})
+@Api(tags = {"Cluster > StorageClass V2"})
 @RequestMapping("/api/v2/storageClass")
 @RestController
 public class StorageClassControllerV2 {
@@ -35,12 +35,12 @@ public class StorageClassControllerV2 {
     }
 	
 	@Operation(summary = "StorageClass 상세 정보 조회", description = "StorageClass 상세 정보를 조회한다.")
-	@GetMapping("/{clusterIdx}/{namespace}")
+	@GetMapping("/{clusterIdx}/{name}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<StorageClassDto.ListDto> getStorageClassDetail(
     		@PathVariable(required = true) Long clusterIdx,
-    		@PathVariable(required = true) String namespace) {
-		StorageClassDto.ListDto detail = storageService.getDetail(clusterIdx, namespace);
+    		@PathVariable(required = true) String name) {
+		StorageClassDto.ListDto detail = storageService.getDetail(clusterIdx, name);
         return new ResponseWrapper<>(detail);
     }
 	

@@ -18,7 +18,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
 import kr.co.strato.portal.cluster.v2.service.PersistentVolumeService;
 
-@Api(tags = {"PersistentVolume API V2"})
+@Api(tags = {"Cluster > PersistentVolume V2"})
 @RequestMapping("/api/v2/pv")
 @RestController
 public class PersistentVolumeControllerV2 {

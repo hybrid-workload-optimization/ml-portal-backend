@@ -21,7 +21,7 @@ import kr.co.strato.portal.ml.v1.service.MLPortalService;
 import kr.co.strato.portal.setting.model.UserDto;
 
 @RequestMapping("/api/v1/ml/portal")
-@Api(tags = {"Portal UI API"})
+@Api(tags = {"ML > Portal V1"})
 @RestController
 public class MLPortalController extends CommonController {
 	

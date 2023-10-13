@@ -13,11 +13,11 @@ import kr.co.strato.portal.cluster.v2.model.ClusterOverviewDto;
 import kr.co.strato.portal.cluster.v2.service.ClusterServiceV2;
 import lombok.extern.slf4j.Slf4j;
 
-@Api(tags = {"Cluster API V2"})
+@Api(tags = {"Cluster > Overview V2"})
 @Slf4j
 @RequestMapping("/api/v1/cluster")
 @RestController
-public class ClusterControllerV2 {
+public class OverviewControllerV2 {
 
 	@Autowired
 	private ClusterServiceV2 clusterService;

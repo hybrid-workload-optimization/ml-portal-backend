@@ -19,7 +19,7 @@ import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
 import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
 import kr.co.strato.portal.cluster.v2.service.NamespaceService;
 
-@Api(tags = {"Namespace API V2"})
+@Api(tags = {"Cluster > Namespace V2"})
 @RequestMapping("/api/v2/namespace")
 @RestController
 public class NamespaceControllerV2 {
@@ -36,12 +36,12 @@ public class NamespaceControllerV2 {
     }
 	
 	@Operation(summary = "Namespace 상세 정보 조회", description = "Namespace 상세 정보를 조회한다.")
-	@GetMapping("/{clusterIdx}/{namespace}")
+	@GetMapping("/{clusterIdx}/{name}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<NamespaceDto.ListDto> getNamespaceDetail(
     		@PathVariable(required = true) Long clusterIdx,
-    		@PathVariable(required = true) String namespace) {
-		NamespaceDto.ListDto detail = namespaceService.getDetail(clusterIdx, namespace);
+    		@PathVariable(required = true) String name) {
+		NamespaceDto.ListDto detail = namespaceService.getDetail(clusterIdx, name);
         return new ResponseWrapper<>(detail);
     }
 	

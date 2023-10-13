@@ -18,7 +18,7 @@ import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.v2.model.NodeDto;
 import kr.co.strato.portal.cluster.v2.service.NodeService;
 
-@Api(tags = {"Node API V2"})
+@Api(tags = {"Cluster > Node V2"})
 @RequestMapping("/api/v2/node")
 @RestController
 public class NodeControllerV2 {
@@ -35,12 +35,12 @@ public class NodeControllerV2 {
     }
 	
 	@Operation(summary = "Node 상세 조회", description = "Node 상세 정보를 조회한다.")
-	@GetMapping("/{clusterIdx}/{nodeName}")
+	@GetMapping("/{clusterIdx}/{name}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseWrapper<NodeDto.DetailDto> getNodeDetail(
     		@PathVariable(required = true) Long clusterIdx,
-    		@PathVariable(required = true) String nodeName) {
-		NodeDto.DetailDto node = nodeService.getNode(clusterIdx, nodeName);
+    		@PathVariable(required = true) String name) {
+		NodeDto.DetailDto node = nodeService.getNode(clusterIdx, name);
         return new ResponseWrapper<>(node);
     }
 	

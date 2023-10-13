@@ -19,7 +19,7 @@ import kr.co.strato.portal.ml.v1.model.MLDto.ListArg;
 import kr.co.strato.portal.ml.v1.service.MLInterfaceAPIAsyncService;
 
 @RequestMapping("/api/v1/ml")
-@Api(tags = {"ML Workload 관리"})
+@Api(tags = {"ML > Workload V1"})
 @RestController
 public class MLInterfaceAPIController {
 	
