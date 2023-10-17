@@ -112,7 +112,19 @@ public class MLClusterAPIAsyncService {
 			log.error("External url is null.");
 			return null;
 		}
-		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
+		String clusterMonitoringUrl = String.format("http://%s/grafana/d/4b545447f/cluster-monitoring?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
+		return clusterMonitoringUrl;
+	}
+	
+	public String getGrafanaNodeExporterUrl(Long clusterIdx) {
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		String externalUrl = getExternalUrl(cluster);
+		if(externalUrl == null) {
+			log.error("Get Grafana url fail. clusterIdx: {}", clusterIdx);
+			log.error("External url is null.");
+			return null;
+		}
+		String clusterMonitoringUrl = String.format("http://%s/grafana/d/rYdddlPWj/node-exporter-full?orgId=1&refresh=30s&theme=light&kiosk=tvm", externalUrl);
 		return clusterMonitoringUrl;
 	}
 	
