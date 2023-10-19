@@ -616,14 +616,7 @@ public class PublicClusterService {
 					} catch (Exception e) {
 						log.error("", e);
 						
-					}
-					
-					String now = DateUtil.currentDateTime();
-					clusterEntity.setUpdatedAt(now);
-					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
-					clusterDomainService.update(clusterEntity);
-					log.info("Job cluster provisioning success.");
-					
+					}						
 					
 					//모니터링 패키지 설치(데모를 위해 기본 설치 한다.)
 					log.info("Install Monitoring Package started.");
@@ -642,7 +635,11 @@ public class PublicClusterService {
 					}
 					
 					
-					
+					String now = DateUtil.currentDateTime();
+					clusterEntity.setUpdatedAt(now);
+					clusterEntity.setProvisioningStatus(ClusterEntity.ProvisioningStatus.FINISHED.name());
+					clusterDomainService.update(clusterEntity);
+					log.info("Job cluster provisioning success.");
 					
 					
 					log.info("Cluster Synchronization finished.");
