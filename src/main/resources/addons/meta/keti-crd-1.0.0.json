@@ -3,8 +3,8 @@
   "addonType": "crd",
   "name": "KETI-CRD",
   "version": "v1.0.0",
-  "desc": "Provides ArgoCD Package.",
-  "iconPath": "/addons/icons/keti.png",
+  "desc": "하이브리드 멀티 클라우드 과제를 위한 KETI CRD",
+  "iconPath": "/addons/icons/keti.jpg",
   "profile": "ml",
   "requiredSpec": {
   	"minKubeletVersion": "1.22.0",
