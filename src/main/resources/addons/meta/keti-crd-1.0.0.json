@@ -4,7 +4,7 @@
   "name": "KETI-CRD",
   "version": "v1.0.0",
   "desc": "하이브리드 멀티 클라우드 과제를 위한 KETI CRD",
-  "iconPath": "/addons/icons/keti.jpg",
+  "iconPath": "/addons/icons/keti2.jpg",
   "profile": "ml",
   "requiredSpec": {
   	"minKubeletVersion": "1.22.0",
