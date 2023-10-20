@@ -247,6 +247,10 @@ public class PublicClusterService {
 			type = "Naver";
 		} else if(lowerProvider.equals("vmware")) {
 			type = "VMware";
+		} else if(lowerProvider.equals("nhn")) {
+			type = "NHN";
+		} else if(lowerProvider.equals("alibaba")) {
+			type = "Alibaba";
 		}
     	return type;
     }
