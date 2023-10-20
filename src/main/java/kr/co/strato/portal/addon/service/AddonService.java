@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -61,6 +62,9 @@ public class AddonService {
 	private CommonProxy commonProxy;
 
 	private static Map<String, Addon> addons;
+	
+	@Value("${spring.profiles.active:}") 
+	private String activeProfile;
 
 	/**
 	 * Kubelet 버전에 맞는 Addon 리스트 반환.
@@ -94,10 +98,20 @@ public class AddonService {
 			if (maxVersion != null) {
 				isSupported = kubeletVersion.compareTo(new Version(maxVersion)) != 1;
 			}
+			
+			if(addon.getProfile() != null) { 
+				String profile = activeProfile;
+				if(profile == null || profile.equals("")) {
+					profile = "default";
+				}
+				isSupported = profile.equals(addon.getProfile());
+			}
 
 			if (isSupported) {
 				list.add(addon);
 			}
+			
+			
 		}
 
 		if (list.size() > 0) {

@@ -1,0 +1,23 @@
+{
+  "addonId": "100",
+  "addonType": "crd",
+  "name": "KETI-CRD",
+  "version": "v1.0.0",
+  "desc": "Provides ArgoCD Package.",
+  "iconPath": "/addons/icons/keti.png",
+  "profile": "ml",
+  "requiredSpec": {
+  	"minKubeletVersion": "1.22.0",
+    "maxKubeletVersion": "1.30.20",
+    "hwSpec": "4Core 8GB 50GB 2Node"
+  },
+  "yamls": [
+	"addons/keti-crd-1.0.0/pipelines-namespace.yaml",
+	"addons/keti-crd-1.0.0/argo_install.yaml",
+    "addons/keti-crd-1.0.0/pipeline-runner-role.yaml",
+    "addons/keti-crd-1.0.0/pipeline-runner-rolebinding.yaml",
+    "addons/keti-crd-1.0.0/pipeline-runner-sa.yaml"
+  ],
+  "packages": [
+  ]
+}

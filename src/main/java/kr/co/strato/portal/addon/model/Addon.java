@@ -18,7 +18,8 @@ public class Addon{
 	private String addonType;
 	private String name;
 	private String version;	
-	private String desc;	
+	private String desc;
+	private String profile;
 	private List<Package> packages;
 	private List<Parameter> parameters;	
 	private String iconPath;
