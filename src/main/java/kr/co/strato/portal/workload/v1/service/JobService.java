@@ -186,7 +186,7 @@ public class JobService extends InNamespaceService implements MLServiceInterface
 		
 		if(jobIdx == null) {
 			//생성 시 이름 중복 채크
-			duplicateCheckResourceCreation(clusterIdx, yaml);			
+			//duplicateCheckResourceCreation(clusterIdx, yaml);			
 			clusterEntity = clusterDomainService.get(clusterIdx);
 			
 		} else {

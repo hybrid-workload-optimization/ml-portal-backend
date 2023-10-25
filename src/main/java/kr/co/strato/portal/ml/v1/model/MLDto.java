@@ -50,7 +50,6 @@ public class MLDto {
 		private String description;
 		private String mlStepCode;
 		private String yaml;
-		private String callbackUrl;
 		private String startCronSchedule;
 		private String endCronSchedule;
 	}

@@ -88,6 +88,14 @@ public class NodeService {
 		return list;
 	}
 	
+	public List<String> getNodeNemes(Long clusterIdx) {
+		ClusterEntity entity = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = entity.getClusterId();
+		List<Node> nodeList = nodeAdapterService.getNodeList(kubeConfigId);
+		List<String> names = nodeList.stream().map(n -> n.getMetadata().getName()).collect(Collectors.toList());
+		return names;
+	}
+	
 	/**
 	 * 삭제
 	 * @param param

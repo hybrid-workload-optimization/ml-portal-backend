@@ -4,9 +4,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -18,15 +15,13 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 
-import kr.co.strato.adapter.cloud.eks.model.NodeJobArg;
-import kr.co.strato.adapter.cloud.eks.model.NodeStatusRes;
-import kr.co.strato.adapter.cloud.eks.proxy.EKSInterfaceProxy;
+import kr.co.strato.adapter.cloud.sks.model.VSphereVMAction;
+import kr.co.strato.adapter.cloud.sks.model.VSphereVMPower;
+import kr.co.strato.adapter.cloud.sks.proxy.SKSInterfaceProxy;
 import kr.co.strato.domain.machineLearning.model.MLEntity;
 import kr.co.strato.domain.machineLearning.service.MLDomainService;
 import kr.co.strato.global.config.ApplicationContextProvider;
-import kr.co.strato.portal.cluster.v1.model.ClusterDto;
-import kr.co.strato.portal.cluster.v1.service.ClusterService;
-import kr.co.strato.portal.ml.model.MLCronDto;
+import kr.co.strato.portal.cluster.v2.service.NodeService;
 import kr.co.strato.portal.ml.v1.model.MLScheduleDTO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,12 +30,19 @@ import lombok.extern.slf4j.Slf4j;
 public class ScheduledTaskService {
 
     private ThreadPoolTaskScheduler taskScheduler;
-
-    private EKSInterfaceProxy eksInterfaceProxy;
+    
+    private SKSInterfaceProxy sksInterfaceProxy;
     
     private MLDomainService mlDomainService;
-    
-	private ClusterService clusterService;
+	
+	private ZonedDateTime sBeforeExecution; 
+	private ZonedDateTime sNextExecution; 
+	private ZonedDateTime eBeforeExecution; 
+	private ZonedDateTime eNextExecution;
+	
+	private NodeService nodeService;
+	
+	private ZonedDateTime startDate;
     
     public ScheduledTaskService() {
     	this.taskScheduler = new ThreadPoolTaskScheduler();
@@ -51,65 +53,80 @@ public class ScheduledTaskService {
     
     public void scheduleTask(MLScheduleDTO param) {
     	
-    	eksInterfaceProxy = ApplicationContextProvider.getBean(EKSInterfaceProxy.class);
+    	sksInterfaceProxy = ApplicationContextProvider.getBean(SKSInterfaceProxy.class);
+    	
+    	mlDomainService = ApplicationContextProvider.getBean(MLDomainService.class);
+    	
+    	nodeService = ApplicationContextProvider.getBean(NodeService.class);
     	
     	// 1분마다 실행
         taskScheduler.scheduleAtFixedRate(() -> processRequest(param), 60000);
+        
+        
     }
     
     public void stopScheduleTask() {
     	taskScheduler.shutdown();
     }
     
-    public void processRequest(MLScheduleDTO param) {
-    	
-    	clusterService = ApplicationContextProvider.getBean(ClusterService.class);
-
-    	Long clusterIdx = param.getClusterIdx();
-    	ClusterDto.Detail cluster = null;
-		try {
-			cluster = clusterService.getCluster(clusterIdx);
-		} catch (Exception e) {
-			log.error("", e);
-		}
-    	
-//		String clusterName = cluster.getClusterName();
-		String clusterName = "41-test";
-    	NodeJobArg arg = new NodeJobArg();
-    	arg.setClusterName(clusterName);
-
+    public void processRequest(MLScheduleDTO param) {   
+    	Long clusterIdx = param.getClusterIdx();   	
+    
+    	List<MLEntity> crons = mlDomainService.getCronsByClusterIdx(clusterIdx);
+    	if(crons == null || crons.size() == 0) {
+    		log.info("ML Size 0. stop Schedule Task");
+    		stopScheduleTask();
+    		return;
+    	}
+		
     	String threadName = Thread.currentThread().getName();
-        log.info("Executing task in thread: " + threadName + "	clusterName: " + clusterName);
+        log.info("Executing task in thread: {}, clusterIdx: {}", threadName, clusterIdx);
 
+        List<String> nodeNames = nodeService.getNodeNemes(clusterIdx);
+        
         try {
-	    	// 크론 워크타임일 경우 노드 start
-	    	if(workTimeCheck(clusterIdx)) {
-	    		NodeJobArg.Job jobArg = getJobArg(arg, "stopped");
-	    		List<String> instanceIds = jobArg.getInstanceIds();
-	    		
-	    		if(instanceIds.size() > 0) {
-	        		log.info("start node size: {}", instanceIds.size());
-	    			boolean result = eksInterfaceProxy.startNode(jobArg);
-	        		log.info("result: " + result);
-	            }
+        	String action = null;
+        	
+        	// 크론 워크타임일 경우 노드 start
+	    	if(workTimeCheck(crons, clusterIdx)) {
+	    		log.info("cluster start.---------------------------------");	    		
+	    		action = "start";
 	    	
 	    	// 워크타임이 아닐 경우 노드 stop
 	    	} else {
-	    		NodeJobArg.Job jobArg = getJobArg(arg, "running");
-	    		List<String> instanceIds = jobArg.getInstanceIds();
-	    		
-	    		if(instanceIds.size() > 0) {
-	    			log.info("stop node size: {}", instanceIds.size());
-	    			boolean result = eksInterfaceProxy.stopNode(jobArg);
-	    			log.info("result: " + result);
+	    		log.info("cluster stop.---------------------------------");	    		
+	    		action = "stop";
+	    	}
+	    	
+	    	List<String> vmNames = new ArrayList<>();
+	    	List<VSphereVMPower> powerState = sksInterfaceProxy.powerState(nodeNames);
+	    	if(powerState == null || powerState.size() == 0) {
+	    		log.info("VM Power 상태 확인 불가! VM Name:");
+	    		for(String s : vmNames) {
+	    			log.info(s);
+	    		}
+	    		return;
+	    	}
+	    	
+	    	for(VSphereVMPower p : powerState) {
+	    		if(!p.getPowerState().equals(action)) {
+	    			vmNames.add(p.getName());
 	    		}
 	    	}
 	    	
+	    	if(vmNames.size() > 0) {
+	    		log.info("Node Power {}", action);
+	    		for(String s : vmNames) {
+	    			log.info(s);
+	    		}
+	    		
+	    		VSphereVMAction vmAction = VSphereVMAction.builder().vmNames(vmNames).action(action).build();
+	    		boolean isOk = sksInterfaceProxy.powerAction(vmAction);
+	    	}
         } catch(Exception e) {
         	log.error("", e);
-        	stopScheduleTask();
+        	//stopScheduleTask();
         }
-        
     }
 
     // 최초 시작시 ML 조회하여 cron 스케줄링 실행
@@ -117,7 +134,6 @@ public class ScheduledTaskService {
     public void initScheduleStart() {
     	
     	mlDomainService = ApplicationContextProvider.getBean(MLDomainService.class);
-    	clusterService = ApplicationContextProvider.getBean(ClusterService.class);
     	
     	List<MLEntity> list = mlDomainService.getList();
 		log.info("init schedule size : {}", list.size());
@@ -140,12 +156,7 @@ public class ScheduledTaskService {
     }
     
     // 현재 datetime 과 cron datetime 비교해서 워크타임인지 체크
-    public boolean workTimeCheck(Long clusterIdx) {
-    	
-    	mlDomainService = ApplicationContextProvider.getBean(MLDomainService.class);
-    	
-    	List<MLEntity> crons = mlDomainService.getCronsByClusterIdx(clusterIdx);
-    	
+    public boolean workTimeCheck(List<MLEntity> crons, Long clusterIdx) {
     	for(MLEntity cron : crons) {
         	        	
     		String startCron = cron.getStartCronSchedule();
@@ -156,10 +167,19 @@ public class ScheduledTaskService {
     		
         	// 현재 시간
             ZonedDateTime now = ZonedDateTime.now();
-            ZonedDateTime sBeforeExecution = cronParser(startCron, "before"); 
-        	ZonedDateTime sNextExecution = cronParser(startCron, "next"); 
-        	ZonedDateTime eBeforeExecution = cronParser(endCron, "before"); 
-        	ZonedDateTime eNextExecution = cronParser(endCron, "next"); 
+            
+            if(startDate == null) {
+            	startDate = now;
+            }
+            
+            if(sBeforeExecution == null || now.getDayOfMonth() > startDate.getDayOfMonth()) {
+            	sBeforeExecution = cronParser(startCron, "before");
+            	sNextExecution = cronParser(startCron, "next"); 
+            	eBeforeExecution = cronParser(endCron, "before"); 
+            	eNextExecution = cronParser(endCron, "next"); 
+            }
+            
+        	
         	
             log.info("current time: " + now);
             
@@ -167,7 +187,7 @@ public class ScheduledTaskService {
             	log.info("before task execution start time: " + sBeforeExecution);
             	log.info("next task execution start time: " + sNextExecution);
             	log.info("before task execution end time: " + eBeforeExecution);
-            	log.info("next task execution start time: " + eNextExecution);
+            	log.info("next task execution end time: " + eNextExecution);
             } else {
             	log.info("There is no next run time.");
             	return false;
@@ -180,8 +200,9 @@ public class ScheduledTaskService {
              */
             if(now.getDayOfMonth() == sBeforeExecution.getDayOfMonth() || 
             	now.getDayOfWeek() == sBeforeExecution.getDayOfWeek()) {
-	            if(now.isEqual(sBeforeExecution) || now.isEqual(sNextExecution) ||  
-	            	now.isAfter(sBeforeExecution) && now.isBefore(eNextExecution)) {
+            	
+            	if(now.isEqual(sBeforeExecution) || now.isEqual(sNextExecution) 
+	            		|| now.isAfter(sBeforeExecution) && now.isBefore(eNextExecution)) {
 	            	log.info("node start !	" + now);
 	            	return true;
 	            } else {
@@ -249,6 +270,7 @@ public class ScheduledTaskService {
         return nextExecution;
     }
     
+    /*
     public NodeJobArg.Job getJobArg(NodeJobArg arg, String code) {
     	
     	String clusterName = arg.getClusterName();
@@ -277,8 +299,6 @@ public class ScheduledTaskService {
 		jobArg.setInstanceIds(instanceIds);
 		
 		return jobArg;
-    	
     }
-	
-    
+    */
 }

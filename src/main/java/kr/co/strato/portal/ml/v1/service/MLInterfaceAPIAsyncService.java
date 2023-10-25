@@ -87,10 +87,12 @@ public class MLInterfaceAPIAsyncService {
 		ClusterEntity clusterEntity = null;
 		
 		if(clusterIdx == null) {
-			clusterEntity = getCluster(mlName, stepCode, yamStr);
-		} else {
-			clusterEntity = clusterDomainService.get(clusterIdx);
+			//clusterEntity = getCluster(mlName, stepCode, yamStr);
+			//gpu 클러스터(박남규님 스케줄러 개발되지 않아 임시로 설정)
+			clusterIdx = 709L;
 		}
+		
+		clusterEntity = clusterDomainService.get(clusterIdx);
 		
 		
 		MLEntity entity = null;

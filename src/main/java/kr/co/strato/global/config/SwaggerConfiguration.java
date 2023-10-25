@@ -33,7 +33,7 @@ public class SwaggerConfiguration {
 				.securityContexts(Arrays.asList(securityContext()))
 				.securitySchemes(Arrays.asList(apiKey()))
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal.ml"))
+				//.apis(RequestHandlerSelectors.basePackage("kr.co.strato.portal.ml"))
 				.paths(PathSelectors.any())
 				.build();
 		
@@ -44,6 +44,8 @@ public class SwaggerConfiguration {
 	@Bean
     public Docket api(){
         return new Docket(DocumentationType.OAS_30)
+        		.securityContexts(Arrays.asList(securityContext()))
+				.securitySchemes(Arrays.asList(apiKey()))
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())

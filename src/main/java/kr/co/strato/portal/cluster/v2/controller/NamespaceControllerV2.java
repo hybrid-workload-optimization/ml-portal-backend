@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.cluster.v2.model.NamespaceDto;
-import kr.co.strato.portal.cluster.v2.model.PersistentVolumeDto;
 import kr.co.strato.portal.cluster.v2.service.NamespaceService;
 
 @Api(tags = {"Cluster > Namespace V2"})

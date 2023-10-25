@@ -109,9 +109,7 @@ public class AddonService {
 
 			if (isSupported) {
 				list.add(addon);
-			}
-			
-			
+			}			
 		}
 
 		if (list.size() > 0) {
