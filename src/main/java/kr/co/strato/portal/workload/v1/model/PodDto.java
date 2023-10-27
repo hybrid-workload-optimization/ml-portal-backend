@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.v1.model.PersistentVolumeClaimDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

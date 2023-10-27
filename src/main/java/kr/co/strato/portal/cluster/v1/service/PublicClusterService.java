@@ -41,7 +41,7 @@ import kr.co.strato.portal.cluster.v1.model.ModifyArgDto;
 import kr.co.strato.portal.cluster.v1.model.PublicClusterDto;
 import kr.co.strato.portal.cluster.v1.model.ScaleArgDto;
 import kr.co.strato.portal.ml.v1.model.MessageData;
-import kr.co.strato.portal.networking.service.IngressControllerService;
+import kr.co.strato.portal.networking.v1.service.IngressControllerService;
 import kr.co.strato.portal.plugin.service.KafkaProducerService;
 import kr.co.strato.portal.setting.model.UserDto;
 import kr.co.strato.portal.setting.service.MLSettingService;

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.co.strato.global.model.PageRequest;
 import kr.co.strato.global.model.ResponseWrapper;
 import kr.co.strato.portal.common.controller.CommonController;
-import kr.co.strato.portal.config.model.PersistentVolumeClaimDto;
+import kr.co.strato.portal.config.v1.model.PersistentVolumeClaimDto;
 import kr.co.strato.portal.workload.v1.model.PodDto;
 import kr.co.strato.portal.workload.v1.service.PodService;
 

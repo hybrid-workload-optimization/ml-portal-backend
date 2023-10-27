@@ -39,7 +39,7 @@ import kr.co.strato.domain.cluster.model.ClusterEntity;
 import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.util.DateUtil;
 import kr.co.strato.portal.cluster.v1.service.ClusterSyncService;
-import kr.co.strato.portal.networking.service.IngressControllerService;
+import kr.co.strato.portal.networking.v1.service.IngressControllerService;
 import kr.co.strato.portal.setting.service.MLSettingService;
 import lombok.extern.slf4j.Slf4j;
 

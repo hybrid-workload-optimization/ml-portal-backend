@@ -6,7 +6,7 @@ import java.util.List;
 
 import kr.co.strato.global.validation.annotation.K8sKind;
 import kr.co.strato.global.validation.model.K8sKindType;
-import kr.co.strato.portal.networking.model.IngressDto.RuleList;
+import kr.co.strato.portal.networking.v1.model.IngressDto.RuleList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

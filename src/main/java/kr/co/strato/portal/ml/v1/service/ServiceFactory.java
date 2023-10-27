@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.strato.portal.common.service.CommonService;
-import kr.co.strato.portal.networking.service.K8sServiceService;
+import kr.co.strato.portal.networking.v1.service.K8sServiceService;
 import kr.co.strato.portal.workload.v1.service.CronJobService;
 import kr.co.strato.portal.workload.v1.service.DaemonSetService;
 import kr.co.strato.portal.workload.v1.service.DeploymentService;

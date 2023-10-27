@@ -3,6 +3,7 @@ package kr.co.strato.portal.workload.v2.model;
 import java.util.HashMap;
 import java.util.List;
 
+import kr.co.strato.portal.config.v2.model.PersistentVolumeClaimDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
