@@ -35,7 +35,7 @@ spec:
       volumes:
       - name: localtime
         hostPath:
-          path: /etc/localtime
+          path: /usr/share/zoneinfo/Asia/Seoul
 
 
 ---
