@@ -28,10 +28,10 @@ spec:
         - name: ACTIVE_PROFILE
           value: {ACTIVE_PROFILE}
         - name: TZ
-            value: "Asia/Seoul"
-          volumeMounts:
-            - mountPath: /etc/localtime
-              name: tz-seoul
+          value: Asia/Seoul
+        volumeMounts:
+        - name: tz-seoul
+          mountPath: /etc/localtime
       volumes:
         - name: tz-seoul
           hostPath:
