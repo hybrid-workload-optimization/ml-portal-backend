@@ -27,8 +27,6 @@ spec:
         env:
         - name: ACTIVE_PROFILE
           value: {ACTIVE_PROFILE}
-        - name: TZ
-          value: Asia/Seoul
         volumeMounts:
         - name: tz-seoul
           mountPath: /etc/localtime

@@ -1,5 +1,7 @@
 FROM docker.io/openjdk:8u201-alpine
 
+ENV TZ=Asia/Seoul
+
 #인증서 관련 설정
 ADD cer/root.cer /root.cer
 ADD cer/ca.cer /ca.cer
