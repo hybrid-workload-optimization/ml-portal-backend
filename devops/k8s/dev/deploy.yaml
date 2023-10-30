@@ -27,8 +27,13 @@ spec:
         env:
         - name: ACTIVE_PROFILE
           value: {ACTIVE_PROFILE}
-
-
+        volumeMounts:
+          - name: localtime
+            mountPath: /etc/localtime
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Seoul
 ---
 apiVersion: v1
 kind: Service
