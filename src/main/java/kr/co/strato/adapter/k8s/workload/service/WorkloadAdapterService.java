@@ -12,13 +12,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.Node;
+import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.storage.StorageClass;
 import kr.co.strato.adapter.k8s.common.model.ApplyResult;
 import kr.co.strato.adapter.k8s.common.model.ResourceListSearchInfo;
 import kr.co.strato.adapter.k8s.common.model.ResourceType;
@@ -26,6 +34,7 @@ import kr.co.strato.adapter.k8s.common.model.WorkloadResourceInfo;
 import kr.co.strato.adapter.k8s.common.model.YamlApplyParam;
 import kr.co.strato.adapter.k8s.common.proxy.CommonProxy;
 import kr.co.strato.adapter.k8s.common.proxy.InNamespaceProxy;
+import kr.co.strato.adapter.k8s.common.proxy.NonNamespaceProxy;
 import kr.co.strato.adapter.k8s.common.proxy.WorkloadProxy;
 import kr.co.strato.global.error.exception.InternalServerException;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +48,9 @@ public class WorkloadAdapterService {
 	
 	@Autowired
     private InNamespaceProxy inNamespaceProxy;
+	
+	@Autowired
+    private NonNamespaceProxy nonNamespaceProxy;
 	
 	@Autowired
 	private CommonProxy commonProxy;
@@ -200,7 +212,12 @@ public class WorkloadAdapterService {
 	 */
 	public String resourceYaml(Long kubeConfigId, String kind, String namespace, String name) {
 		String resourceType = getResourceType(kind);
-		String yaml = inNamespaceProxy.getResourceYaml(resourceType, kubeConfigId, namespace, name);
+		String yaml = null;
+		if(namespace == null) {
+			yaml = nonNamespaceProxy.getResourceYaml(resourceType, kubeConfigId, name);
+		} else {
+			yaml = inNamespaceProxy.getResourceYaml(resourceType, kubeConfigId, namespace, name);
+		}
 		return yaml;
 	}
 	
@@ -222,7 +239,28 @@ public class WorkloadAdapterService {
 			t = new TypeReference<ReplicaSet>(){};
 		} else if(type.equals("daemonset")) {
 			t = new TypeReference<DaemonSet>(){};
-		} else {
+		} else if(type.equals("node")) {
+			t = new TypeReference<Node>(){};
+		} else if(type.equals("namespace")) {
+			t = new TypeReference<Namespace>(){};
+		} else if(type.equals("storageclass")) {
+			t = new TypeReference<StorageClass>(){};
+		} else if(type.equals("persistentvolume")) {
+			t = new TypeReference<PersistentVolume>(){};
+		} else if(type.equals("persistentvolumeclame")) {
+			t = new TypeReference<PersistentVolumeClaim>(){};
+		} else if(type.equals("secret")) {
+			t = new TypeReference<Secret>(){};
+		} else if(type.equals("configmap")) {
+			t = new TypeReference<ConfigMap>(){};
+		} else if(type.equals("service")) {
+			t = new TypeReference<io.fabric8.kubernetes.api.model.Service>(){};
+		} else if(type.equals("ingress")) {
+			t = new TypeReference<Ingress>(){};
+		}
+		
+		
+		else {
 			t = new TypeReference<HasMetadata>(){};
 		}		
 		return t;
@@ -244,7 +282,25 @@ public class WorkloadAdapterService {
 		} else if(lowerKind.equals("replicaset")) {
 			resType = ResourceType.replicaSet.get();
 		} else if(lowerKind.equals("daemonset")) {
-			resType = ResourceType.daemonSet.get();;
+			resType = ResourceType.daemonSet.get();
+		}else if(lowerKind.equals("node")) {
+			resType = ResourceType.node.get();
+		} else if(lowerKind.equals("namespace")) {
+			resType = ResourceType.namespace.get();
+		} else if(lowerKind.equals("storageclass")) {
+			resType = ResourceType.storageClass.get();
+		} else if(lowerKind.equals("persistentvolume")) {
+			resType = ResourceType.persistentVolume.get();
+		} else if(lowerKind.equals("persistentvolumeclame")) {
+			resType = ResourceType.pvc.get();
+		} else if(lowerKind.equals("secret")) {
+			resType = ResourceType.secret.get();
+		} else if(lowerKind.equals("configmap")) {
+			resType = ResourceType.configMap.get();
+		} else if(lowerKind.equals("service")) {
+			resType = ResourceType.service.get();
+		} else if(lowerKind.equals("ingress")) {
+			resType = ResourceType.ingress.get();
 		}
 		return resType;
 	}

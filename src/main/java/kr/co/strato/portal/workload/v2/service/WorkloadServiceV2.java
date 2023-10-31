@@ -32,10 +32,10 @@ import kr.co.strato.domain.cluster.service.ClusterDomainService;
 import kr.co.strato.global.error.exception.PortalException;
 import kr.co.strato.global.util.Base64Util;
 import kr.co.strato.global.util.DateUtil;
+import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto.ApplyResultDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadDto.ResourceParam;
-import kr.co.strato.portal.workload.v2.model.WorkloadCommonDto;
 import kr.co.strato.portal.workload.v2.model.WorkloadItem;
 import lombok.extern.slf4j.Slf4j;
 
@@ -339,9 +339,9 @@ public class WorkloadServiceV2 {
 		ClusterEntity entity = clusterDomainService.get(clusterIdx);
 		
 		Long kubeConfigId = entity.getClusterId();
-		String yaml = Base64Util.decode(param.getYaml());
+		String yamlStr = Base64Util.decode(param.getYaml());
 		
-		ApplyResult.Result result = workloadAdapterService.apply(kubeConfigId, yaml);
+		ApplyResult.Result result = workloadAdapterService.apply(kubeConfigId, yamlStr);
 		
 		List<WorkloadDto.ListDto> list = null;
 		if(result.isSuccess()) {
