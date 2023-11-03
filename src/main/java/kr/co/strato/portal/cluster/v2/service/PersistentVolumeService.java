@@ -58,7 +58,9 @@ public class PersistentVolumeService {
 	}
 	
 	public PersistentVolumeDto.ListDto getDetail(Long clusterIdx, String name) {
-		PersistentVolume pv = persistentVolumeAdapterService.getPersistentVolume(clusterIdx, name);
+		ClusterEntity cluster = clusterDomainService.get(clusterIdx);
+		Long kubeConfigId = cluster.getClusterId();
+		PersistentVolume pv = persistentVolumeAdapterService.getPersistentVolume(kubeConfigId, name);
 		if(pv != null) {
 			return getPersistentVolumeDto(pv);
 		}
